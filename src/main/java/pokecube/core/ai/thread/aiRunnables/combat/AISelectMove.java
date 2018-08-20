@@ -112,8 +112,9 @@ public class AISelectMove extends AIBase
         }
 
         // Tame pokemobs only run this if they are on guard, otherwise their
-        // owner is selecting moves for them.
-        if (pokemob.getGeneralState(GeneralStates.TAMED)) return;
+        // owner is selecting moves for them, staying pokemobs however behave
+        // wild, so this doesn't apply to them.
+        if (pokemob.getGeneralState(GeneralStates.TAMED) && !pokemob.getGeneralState(GeneralStates.STAYING)) return;
 
         // Select a random move to use.
         selectRandomMove();
