@@ -75,8 +75,8 @@ public class Move_AOE extends Move_Basic
                     {
                         changeAddition = move.change;
                     }
-                    MovePacket packet = new MovePacket(attacker, attacked, name, move.type, getPWR(attacker, attacked),
-                            move.crit, statusChange, changeAddition);
+                    MovePacket packet = new MovePacket(attacker, attacked, name, getType(attacker),
+                            getPWR(attacker, attacked), move.crit, statusChange, changeAddition);
                     onAttack(packet);
                 }
             }

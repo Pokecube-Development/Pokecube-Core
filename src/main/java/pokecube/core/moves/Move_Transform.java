@@ -54,7 +54,7 @@ public class Move_Transform extends Move_Basic
         @Override
         public void reallyInitRGBA()
         {
-            
+
         }
 
     }
@@ -108,7 +108,8 @@ public class Move_Transform extends Move_Basic
             {
                 if (MovesUtils.contactAttack(attacker, attacked))
                 {
-                    MovePacket packet = new MovePacket(attacker, attacked, name, move.type, 25, 1,
+                    // TODO see if this needs tweaking.
+                    MovePacket packet = new MovePacket(attacker, attacked, name, getType(attacker), 25, 1,
                             IMoveConstants.STATUS_NON, IMoveConstants.CHANGE_NONE);
                     onAttack(packet);
                 }

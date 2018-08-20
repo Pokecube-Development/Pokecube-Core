@@ -67,8 +67,8 @@ public class Move_Explode extends Move_Basic
             {
                 changeAddition = move.move.change;
             }
-            MovePacket packet = new MovePacket(user, e, move.name, move.move.type, move.getPWR(user, e), move.move.crit,
-                    statusChange, changeAddition);
+            MovePacket packet = new MovePacket(user, e, move.name, move.getType(user), move.getPWR(user, e),
+                    move.move.crit, statusChange, changeAddition);
             move.onAttack(packet);
         }
 
@@ -181,8 +181,8 @@ public class Move_Explode extends Move_Basic
                 if (e != null)
                 {
                     Entity attacked = e;
-                    MovePacket packet = new MovePacket(attacker, attacked, name, move.type, getPWR(attacker, attacked),
-                            move.crit, STATUS_NON, CHANGE_NONE);
+                    MovePacket packet = new MovePacket(attacker, attacked, name, getType(attacker),
+                            getPWR(attacker, attacked), move.crit, STATUS_NON, CHANGE_NONE);
                     packet.applyOngoing = false;
                     onAttack(packet);
                 }
