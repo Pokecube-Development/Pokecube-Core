@@ -381,8 +381,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
                     if (this.isPotionActive(MobEffects.LEVITATION))
                     {
-                        this.motionY += (0.05D
-                                * (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1)
+                        this.motionY += (0.05D * (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1)
                                 - this.motionY) * 0.2D;
                     }
                     else

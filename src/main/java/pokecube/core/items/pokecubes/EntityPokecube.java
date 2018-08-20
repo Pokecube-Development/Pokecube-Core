@@ -145,7 +145,7 @@ public class EntityPokecube extends EntityPokecubeBase
         if (e == shootingEntity || isReleasing() || getEntityWorld().isRemote || e instanceof EntityPokecube
                 || e.isDead)
         {
-            super.applyEntityCollision(e);
+            if (CapabilityPokemob.getPokemobFor(e) == null) super.applyEntityCollision(e);
             return;
         }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
