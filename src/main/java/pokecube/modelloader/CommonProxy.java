@@ -224,60 +224,80 @@ public class CommonProxy implements IGuiHandler
     {
         if (!resourceDir.exists() || files.length == 0) return;
         int n = 0;
-        if (resourceDir.isDirectory()) for (File folder : resourceDir.listFiles())
+        if (resourceDir.isDirectory())
         {
-            if (folder.isDirectory())
+            // Run a check here for deobfuscated environments, This fixes
+            // annoyances with development of pokecube mobs and similar addons.
+            if (PokecubeMod.isDeobfuscated()) for (n = 0; n < files.length; n++)
             {
-                File subDir = new File(folder, "assets" + File.separator + files[0].getResourceDomain());
-                if (!subDir.exists()) continue;
-                for (n = 0; n < files.length; n++)
+                ResourceLocation file = files[n];
+                File f = new File(resourceDir,
+                        "assets" + File.separator + file.getResourceDomain() + File.separator + file.getResourcePath());
+                if (f.exists())
                 {
-                    ResourceLocation file = files[n];
-                    if (file == null) continue;
-                    File f = new File(folder, "assets" + File.separator + file.getResourceDomain() + File.separator
-                            + file.getResourcePath());
-                    if (f.exists())
+                    if (file.getResourcePath().contains(".xml"))
                     {
-                        if (file.getResourcePath().contains(".xml"))
-                        {
-                            addXML(file, f);
-                        }
-                        ret[n] = true;
+                        addXML(file, f);
                     }
+                    ret[n] = true;
                 }
             }
-            else if (folder.getName().contains(".zip") || folder.getName().contains(".jar"))
+            for (File folder : resourceDir.listFiles())
             {
-                try
+                if (folder.isDirectory())
                 {
-                    fileNames.add(folder.toString());
-                    ZipFile zip = new ZipFile(folder);
-                    Enumeration<? extends ZipEntry> entries = zip.entries();
-                    while (entries.hasMoreElements())
+                    File subDir = new File(folder, "assets" + File.separator + files[0].getResourceDomain());
+                    if (!subDir.exists()) continue;
+                    for (n = 0; n < files.length; n++)
                     {
-                        ZipEntry entry = entries.nextElement();
-                        String s = entry.getName();
-                        if (!s.contains(files[0].getResourceDomain())) continue;
-                        for (n = 0; n < files.length; n++)
+                        if (ret[n]) continue;
+                        ResourceLocation file = files[n];
+                        if (file == null) continue;
+                        File f = new File(folder, "assets" + File.separator + file.getResourceDomain() + File.separator
+                                + file.getResourcePath());
+                        if (f.exists())
                         {
-                            ResourceLocation file = files[n];
-                            if (file == null) continue;
-                            if (s.contains(file.getResourceDomain()) && s.endsWith(file.getResourcePath()))
+                            if (file.getResourcePath().contains(".xml"))
                             {
-                                if (file.getResourcePath().contains(".xml"))
-                                {
-                                    ZippedLoc loc = new ZippedLoc(folder, entry.getName());
-                                    addXML(file, loc);
-                                }
-                                ret[n] = true;
+                                addXML(file, f);
                             }
+                            ret[n] = true;
                         }
                     }
-                    zip.close();
                 }
-                catch (Exception e)
+                else if (folder.getName().contains(".zip") || folder.getName().contains(".jar"))
                 {
-                    if (!folder.getName().contains(".jar")) e.printStackTrace();
+                    try
+                    {
+                        fileNames.add(folder.toString());
+                        ZipFile zip = new ZipFile(folder);
+                        Enumeration<? extends ZipEntry> entries = zip.entries();
+                        while (entries.hasMoreElements())
+                        {
+                            ZipEntry entry = entries.nextElement();
+                            String s = entry.getName();
+                            if (!s.contains(files[0].getResourceDomain())) continue;
+                            for (n = 0; n < files.length; n++)
+                            {
+                                ResourceLocation file = files[n];
+                                if (file == null) continue;
+                                if (s.contains(file.getResourceDomain()) && s.endsWith(file.getResourcePath()))
+                                {
+                                    if (file.getResourcePath().contains(".xml"))
+                                    {
+                                        ZippedLoc loc = new ZippedLoc(folder, entry.getName());
+                                        addXML(file, loc);
+                                    }
+                                    ret[n] = true;
+                                }
+                            }
+                        }
+                        zip.close();
+                    }
+                    catch (Exception e)
+                    {
+                        if (!folder.getName().contains(".jar")) e.printStackTrace();
+                    }
                 }
             }
         }
@@ -427,11 +447,6 @@ public class CommonProxy implements IGuiHandler
     {
         if (PokecubeMod.debug) PokecubeMod.log("Searching for Models...");
         ArrayList<String> toAdd = ModPokecubeML.addedPokemon;
-        if (toAdd == null)
-        {
-            Thread.dumpStack();
-            return;
-        }
         ArrayList<String> entries = Lists.newArrayList();
         for (PokedexEntry entry : Database.getSortedFormes())
         {
@@ -442,11 +457,6 @@ public class CommonProxy implements IGuiHandler
         boolean[] has = new boolean[entryArr.length];
         for (int i = 0; i < has.length; i++)
         {
-            if (entryArr[i] == null)
-            {
-                Thread.dumpStack();
-                continue;
-            }
             if (toAdd.contains(entryArr[i]))
             {
                 has[i] = true;
