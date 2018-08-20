@@ -20,10 +20,10 @@ import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.stats.CaptureStats;
 import pokecube.core.database.stats.EggStats;
 import pokecube.core.database.stats.KillStats;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
 
 public class WorldProviderSecretBase extends WorldProvider
@@ -141,7 +141,7 @@ public class WorldProviderSecretBase extends WorldProvider
                         parser.setVarValue("k", k);
                         parser.setVarValue("h", h);
                         size = (int) parser.getValue();
-                        size = Math.min(size, PokecubeCore.core.getConfig().baseMaxSize * 16);
+                        size = Math.min(size, PokecubeMod.core.getConfig().baseMaxSize * 16);
                     }
                     catch (Exception e)
                     {
@@ -184,7 +184,7 @@ public class WorldProviderSecretBase extends WorldProvider
                 parser.setVarValue("k", k);
                 parser.setVarValue("h", h);
                 size = (int) parser.getValue();
-                size = Math.min(size, PokecubeCore.core.getConfig().baseMaxSize * 16);
+                size = Math.min(size, PokecubeMod.core.getConfig().baseMaxSize * 16);
                 world.getWorldBorder().setSize(size);
             }
             catch (Exception e)
@@ -220,6 +220,6 @@ public class WorldProviderSecretBase extends WorldProvider
     @Override
     public boolean canDropChunk(int x, int z)
     {
-        return !PokecubeCore.core.getConfig().basesLoaded || (x * x + z * z) > 2;
+        return !PokecubeMod.core.getConfig().basesLoaded || (x * x + z * z) > 2;
     }
 }

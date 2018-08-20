@@ -64,7 +64,7 @@ public class Mod_Pokecube_Helper
 
     static void initLists()
     {
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
         if (!config.autoPopulateLists) return;
 
         Set<String> detectedLeaves = Sets.newHashSet();
@@ -151,7 +151,7 @@ public class Mod_Pokecube_Helper
         GUIPOKEMOBSTORE_ID = num++;
         GUIPOKEMOBROUTE_ID = num++;
 
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
 
         addToList(config.getTerrain(), config.blocksStones);
         addToList(config.getTerrain(), config.blocksTerrain);

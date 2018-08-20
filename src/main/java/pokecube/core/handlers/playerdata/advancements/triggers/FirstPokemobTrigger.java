@@ -66,7 +66,7 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
 
             for (ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((FirstPokemobTrigger.Instance) listener.getCriterionInstance()).test())
+                if (listener.getCriterionInstance().test())
                 {
                     if (list == null)
                     {

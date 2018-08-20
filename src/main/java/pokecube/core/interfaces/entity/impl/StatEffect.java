@@ -5,7 +5,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
-import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob.Stats;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.entity.IOngoingAffected;
@@ -72,7 +71,7 @@ public class StatEffect extends BaseEffect
         }
         boolean up = amount > 0;
         EntityLivingBase entity = target.getEntity();
-        int duration = PokecubeCore.core.getConfig().attackCooldown + 10;
+        int duration = PokecubeMod.core.getConfig().attackCooldown + 10;
         switch (stat)
         {
         case ACCURACY:

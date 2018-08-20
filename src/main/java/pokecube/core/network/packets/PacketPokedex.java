@@ -61,6 +61,7 @@ import thut.api.maths.Vector4;
 import thut.api.terrain.BiomeDatabase;
 import thut.api.terrain.BiomeType;
 import thut.api.terrain.TerrainManager;
+import thut.core.common.handlers.PlayerDataHandler;
 
 public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, IMessage>
 {
@@ -82,7 +83,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     public static void sendInspectPacket(IPokemob pokemob)
     {
         PacketPokedex packet = new PacketPokedex(PacketPokedex.INSPECTMOB);
-        PokecubePlayerDataHandler.getInstance().getPlayerData(PokecubeCore.getPlayer(null))
+        PlayerDataHandler.getInstance().getPlayerData(PokecubeCore.getPlayer(null))
                 .getData(PokecubePlayerStats.class).inspect(PokecubeCore.getPlayer(null), pokemob);
         packet.data.setInteger("V", pokemob.getEntity().getEntityId());
         PokecubePacketHandler.sendToServer(packet);
@@ -143,7 +144,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     public static void sendChangePagePacket(byte page, boolean mode, PokedexEntry selected)
     {
         PacketPokedex packet = new PacketPokedex();
-        packet.message = (byte) page;
+        packet.message = page;
         packet.data.setBoolean("M", mode);
         if (selected != null) packet.data.setString("F", selected.getName());
         PokecubePacketHandler.sendToServer(packet);
@@ -164,13 +165,13 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         BlockPos pos = player.getPosition();
         Coordinate here = new Coordinate(pos.getX(), pos.getY(), pos.getZ(), player.dimension);
         NBTTagList list = new NBTTagList();
-        for (Coordinate c : SecretBaseManager.getNearestBases(here, PokecubeCore.core.getConfig().baseRadarRange))
+        for (Coordinate c : SecretBaseManager.getNearestBases(here, PokecubeMod.core.getConfig().baseRadarRange))
         {
             list.appendTag(c.writeToNBT());
         }
         packet.data.setTag("B", list);
         packet.data.setBoolean("M", watch);
-        packet.data.setInteger("R", PokecubeCore.core.getConfig().baseRadarRange);
+        packet.data.setInteger("R", PokecubeMod.core.getConfig().baseRadarRange);
         List<Vector4> meteors = PokecubeSerializer.getInstance().meteors;
         if (!meteors.isEmpty())
         {
@@ -272,7 +273,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                 Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(),
                         message.data.getInteger("V"), true);
                 IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
-                if (pokemob != null) PokecubePlayerDataHandler.getInstance().getPlayerData(player)
+                if (pokemob != null) PlayerDataHandler.getInstance().getPlayerData(player)
                         .getData(PokecubePlayerStats.class).inspect(player, pokemob);
             }
             return;
@@ -583,7 +584,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         {
             int index1 = message.data.getInteger("1");
             int index2 = message.data.getInteger("2");
-            PokecubePlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+            PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             TeleportHandler.swapTeleports(PokecubeCore.getPlayer(null).getCachedUniqueIdString(), index1, index2);
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
@@ -594,7 +595,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             TeleDest loc = TeleportHandler.getTeleport(player.getCachedUniqueIdString(), index);
             TeleportHandler.unsetTeleport(index, player.getCachedUniqueIdString());
             player.sendMessage(new TextComponentString("Deleted " + loc.getName()));
-            PokecubePlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+            PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
         }
@@ -604,7 +605,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             int index = message.data.getInteger("I");
             TeleportHandler.renameTeleport(player.getCachedUniqueIdString(), index, name);
             player.sendMessage(new TextComponentString("Set teleport as " + name));
-            PokecubePlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+            PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
         }

@@ -10,8 +10,8 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
@@ -30,7 +30,7 @@ public class GuiInfoMessages
 
     public static void addMessage(ITextComponent message)
     {
-        if (PokecubeCore.core.getConfig().battleLogInChat)
+        if (PokecubeMod.core.getConfig().battleLogInChat)
         {
             if (PokecubeCore.getPlayer(null) != null) PokecubeCore.getPlayer(null).sendMessage(message);
             return;
@@ -69,19 +69,19 @@ public class GuiInfoMessages
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
     public void draw(RenderMoveMessages event)
     {
-        if (PokecubeCore.core.getConfig().battleLogInChat) { return; }
+        if (PokecubeMod.core.getConfig().battleLogInChat) { return; }
         Minecraft minecraft = Minecraft.getMinecraft();
         if (event.getType() == ElementType.CHAT && !(minecraft.currentScreen instanceof GuiChat)) return;
         if (event.getType() != ElementType.CHAT && (minecraft.currentScreen instanceof GuiChat)) return;
 
         int texH = minecraft.fontRenderer.FONT_HEIGHT;
-        int trim = PokecubeCore.core.getConfig().messageWidth;
-        int paddingXPos = PokecubeCore.core.getConfig().messagePadding[0];
-        int paddingXNeg = PokecubeCore.core.getConfig().messagePadding[1];
+        int trim = PokecubeMod.core.getConfig().messageWidth;
+        int paddingXPos = PokecubeMod.core.getConfig().messagePadding[0];
+        int paddingXNeg = PokecubeMod.core.getConfig().messagePadding[1];
         GL11.glPushMatrix();
 
         minecraft.entityRenderer.setupOverlayRendering();
-        int[] mess = GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.core.getConfig().messageRef,
+        int[] mess = GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().messageRef,
                 PokecubeMod.core.getConfig().messagePos,
                 new int[] { PokecubeMod.core.getConfig().messageWidth, 7 * minecraft.fontRenderer.FONT_HEIGHT },
                 PokecubeMod.core.getConfig().messageSize);
@@ -159,7 +159,7 @@ public class GuiInfoMessages
                 h = y + texH * (shift);
                 w = x - trim;
                 int ph = 6 * texH - h;
-                GuiScreen.drawRect(w - paddingXNeg, ph, w + trim + paddingXPos, ph + texH, 0x66000000);
+                Gui.drawRect(w - paddingXNeg, ph, w + trim + paddingXPos, ph + texH, 0x66000000);
                 minecraft.fontRenderer.drawString(mess1.get(j), x - trim, ph, 0xffffff, true);
                 if (j != 0) shift++;
             }

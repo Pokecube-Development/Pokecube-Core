@@ -73,7 +73,7 @@ public class KillPokemobTrigger implements ICriterionTrigger<KillPokemobTrigger.
 
             for (ICriterionTrigger.Listener<KillPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((KillPokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

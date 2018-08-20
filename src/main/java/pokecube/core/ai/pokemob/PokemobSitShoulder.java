@@ -24,6 +24,7 @@ public class PokemobSitShoulder extends EntityAIBase
     }
 
     /** Returns whether the EntityAIBase should begin execution. */
+    @Override
     public boolean shouldExecute()
     {
         EntityLivingBase entitylivingbase = (EntityLivingBase) this.pokemob.getOwner();
@@ -38,12 +39,14 @@ public class PokemobSitShoulder extends EntityAIBase
 
     /** Determine if this AI Task is interruptible by a higher (= lower value)
      * priority task. All vanilla AITask have this value set to true. */
+    @Override
     public boolean isInterruptible()
     {
         return !this.isSittingOnShoulder;
     }
 
     /** Execute a one shot task or start executing a continuous task */
+    @Override
     public void startExecuting()
     {
         this.owner = (EntityPlayer) this.pokemob.getOwner();
@@ -51,6 +54,7 @@ public class PokemobSitShoulder extends EntityAIBase
     }
 
     /** Keep ticking a continuous task that has already been started */
+    @Override
     public void updateTask()
     {
         if (!this.isSittingOnShoulder && !this.pokemob.getLogicState(LogicStates.SITTING) && !this.entity.getLeashed())

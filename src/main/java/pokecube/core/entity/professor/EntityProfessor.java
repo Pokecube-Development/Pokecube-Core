@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMoveIndoors;
 import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
@@ -17,7 +18,6 @@ import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
@@ -77,6 +77,7 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
         this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
         this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
         this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
+        this.tasks.addTask(5, new EntityAILookIdle(this));
         this.tasks.addTask(9, new EntityAIWatchClosest2(this, EntityPlayer.class, 5.0F, 1.0F));
         this.tasks.addTask(10, new EntityAIWatchClosest(this, EntityLivingBase.class, 8.0F, 1.0f));
         this.guardAI = new GuardAI(this, this.getCapability(EventsHandler.GUARDAI_CAP, null));
@@ -141,14 +142,8 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
         super.onUpdate();
     }
 
-    // 1.11
+    @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand)
-    {
-        return processInteract(player, hand, player.getHeldItem(hand));
-    }
-
-    // 1.10
-    public boolean processInteract(EntityPlayer player, EnumHand hand, ItemStack stack)
     {
         if (!getEntityWorld().isRemote && hand == EnumHand.MAIN_HAND)
         {

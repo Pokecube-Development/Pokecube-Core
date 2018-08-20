@@ -27,6 +27,7 @@ import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.client.models.ModelRing;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.megastuff.MegaCapability.RingChecker;
 import thut.core.client.render.model.IExtendedModelPart;
 import thut.core.client.render.x3d.X3dModel;
@@ -66,9 +67,9 @@ public class WearablesCompat
                 if (slot != EnumWearable.WRIST) return;
                 if (model == null)
                 {
-                    model = new X3dModel(new ResourceLocation(PokecubeCore.ID, "models/worn/pokewatch.x3d"));
-                    strap = new ResourceLocation(PokecubeCore.ID, "textures/worn/megabelt_2.png");
-                    watch = new ResourceLocation(PokecubeCore.ID, "textures/worn/watch.png");
+                    model = new X3dModel(new ResourceLocation(PokecubeMod.ID, "models/worn/pokewatch.x3d"));
+                    strap = new ResourceLocation(PokecubeMod.ID, "textures/worn/megabelt_2.png");
+                    watch = new ResourceLocation(PokecubeMod.ID, "textures/worn/watch.png");
                 }
                 int brightness = wearer.getBrightnessForRender();
                 int[] col = new int[] { 255, 255, 255, 255, brightness };
@@ -142,9 +143,9 @@ public class WearablesCompat
                 if (slot != EnumWearable.WAIST) return;
                 if (belt == null)
                 {
-                    belt = new X3dModel(new ResourceLocation(PokecubeCore.ID, "models/worn/megabelt.x3d"));
-                    keystone = new ResourceLocation(PokecubeCore.ID, "textures/worn/keystone.png");
-                    belt_2 = new ResourceLocation(PokecubeCore.ID, "textures/worn/megabelt_2.png");
+                    belt = new X3dModel(new ResourceLocation(PokecubeMod.ID, "models/worn/megabelt.x3d"));
+                    keystone = new ResourceLocation(PokecubeMod.ID, "textures/worn/keystone.png");
+                    belt_2 = new ResourceLocation(PokecubeMod.ID, "textures/worn/megabelt_2.png");
                 }
                 int brightness = wearer.getBrightnessForRender();
                 int[] col = new int[] { 255, 255, 255, 255, brightness };
@@ -203,7 +204,7 @@ public class WearablesCompat
 
                 if (hat == null)
                 {
-                    hat = new X3dModel(new ResourceLocation(PokecubeCore.ID, "models/worn/hat.x3d"));
+                    hat = new X3dModel(new ResourceLocation(PokecubeMod.ID, "models/worn/hat.x3d"));
                 }
 
                 Minecraft minecraft = Minecraft.getMinecraft();

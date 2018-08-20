@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
-import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class ContributorManager
@@ -69,9 +68,9 @@ public class ContributorManager
     public void loadContributors()
     {
         contributors.contributors.clear();
-        if (PokecubeCore.core.getConfig().default_contributors) loadContributors(DEFAULTS);
-        if (!PokecubeCore.core.getConfig().extra_contributors.isEmpty())
-            loadContributors(PokecubeCore.core.getConfig().extra_contributors);
+        if (PokecubeMod.core.getConfig().default_contributors) loadContributors(DEFAULTS);
+        if (!PokecubeMod.core.getConfig().extra_contributors.isEmpty())
+            loadContributors(PokecubeMod.core.getConfig().extra_contributors);
         contributors.init();
     }
 

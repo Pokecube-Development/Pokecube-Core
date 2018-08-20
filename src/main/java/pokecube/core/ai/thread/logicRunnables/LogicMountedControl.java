@@ -19,6 +19,7 @@ import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.utils.Permissions;
 
@@ -97,9 +98,9 @@ public class LogicMountedControl extends LogicBase
                 canDive = false;
             }
         }
-        if (canFly) shouldControl = verticalControl = PokecubeCore.core.getConfig().flyEnabled || shouldControl;
+        if (canFly) shouldControl = verticalControl = PokecubeMod.core.getConfig().flyEnabled || shouldControl;
         if ((canSurf || canDive) && (waterSpeed = entity.isInWater()))
-            shouldControl = verticalControl = PokecubeCore.core.getConfig().surfEnabled || shouldControl;
+            shouldControl = verticalControl = PokecubeMod.core.getConfig().surfEnabled || shouldControl;
 
         if (waterSpeed) airSpeed = false;
 

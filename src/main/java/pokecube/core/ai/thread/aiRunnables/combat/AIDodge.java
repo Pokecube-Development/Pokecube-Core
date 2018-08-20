@@ -8,7 +8,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.ai.utils.pathing.PokemobNavigator;
 import pokecube.core.interfaces.IMoveConstants;
@@ -42,8 +41,8 @@ public class AIDodge extends AIBase
      * config. */
     private SoundEvent getDodgeSound()
     {
-        if (PokecubeCore.core.getConfig().dodges.length == 1) return PokecubeCore.core.getConfig().dodges[0];
-        return PokecubeCore.core.getConfig().dodges[new Random().nextInt(PokecubeCore.core.getConfig().dodges.length)];
+        if (PokecubeMod.core.getConfig().dodges.length == 1) return PokecubeMod.core.getConfig().dodges[0];
+        return PokecubeMod.core.getConfig().dodges[new Random().nextInt(PokecubeMod.core.getConfig().dodges.length)];
     }
 
     @Override
@@ -60,7 +59,7 @@ public class AIDodge extends AIBase
     @Override
     public void run()
     {
-        if (PokecubeCore.debug)
+        if (PokecubeMod.debug)
         {
             PokecubeMod.log(Level.INFO, "Dodge: " + attacker);
         }
@@ -70,7 +69,7 @@ public class AIDodge extends AIBase
         if (!pokemob.getCombatState(CombatStates.DODGING))
         {
             pokemob.setCombatState(CombatStates.DODGING, true);
-            dodgeCooldown = PokecubeCore.core.getConfig().attackCooldown;
+            dodgeCooldown = PokecubeMod.core.getConfig().attackCooldown;
         }
         /*
          * Compute a random perpendicular direction.

@@ -5,12 +5,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.eventhandler.Event;
-import pokecube.core.PokecubeCore;
 import pokecube.core.events.MoveUse;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.MovePacket;
 import pokecube.core.interfaces.IPokemob.PokemobMoveStats;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityAffected;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.entity.IOngoingAffected;
@@ -290,7 +290,7 @@ public interface IHasMoves extends IHasStats
     {
         Event toPost = move.pre ? new MoveUse.DuringUse.Pre(move, move.attacker == getEntity())
                 : new MoveUse.DuringUse.Post(move, move.attacker == getEntity());
-        PokecubeCore.MOVE_BUS.post(toPost);
+        PokecubeMod.MOVE_BUS.post(toPost);
     }
 
     /** Sets all changes back to none. */

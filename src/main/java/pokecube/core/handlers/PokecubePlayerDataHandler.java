@@ -9,14 +9,14 @@ public class PokecubePlayerDataHandler extends PlayerDataHandler
 {
     public static NBTTagCompound getCustomDataTag(EntityPlayer player)
     {
-        PlayerDataManager manager = PokecubePlayerDataHandler.getInstance().getPlayerData(player);
+        PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
         PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
         return data.tag;
     }
 
     public static NBTTagCompound getCustomDataTag(String player)
     {
-        PlayerDataManager manager = PokecubePlayerDataHandler.getInstance().getPlayerData(player);
+        PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
         PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
         return data.tag;
     }

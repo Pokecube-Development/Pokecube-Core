@@ -171,17 +171,9 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
         return BerryManager.getBerryItem(tile.getBerryId());
     }
 
-    // 1.11
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
             EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
-    {
-        return onBlockActivated(worldIn, pos, state, playerIn, hand, playerIn.getHeldItem(hand), side, hitX, hitY,
-                hitZ);
-    }
-
-    // 1.10
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, ItemStack heldStack, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         this.onBlockHarvested(worldIn, pos, state, playerIn);
         worldIn.setBlockToAir(pos);

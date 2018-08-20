@@ -16,7 +16,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import pokecube.core.PokecubeCore;
 import pokecube.core.events.StatusEvent;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -263,7 +262,7 @@ public class PersistantStatusEffect extends BaseEffect
         if (effect != null)
         {
             StatusEvent event = new StatusEvent(target.getEntity(), status);
-            if (!PokecubeCore.MOVE_BUS.post(event))
+            if (!PokecubeMod.MOVE_BUS.post(event))
             {
                 effect.setTick(getDuration());
                 effect.affectTarget(target, this);

@@ -29,7 +29,7 @@ import thut.lib.CompatWrapper;
 
 public class BlockHealTable extends BlockRotatable implements ITileEntityProvider
 {
-    public static final PropertyBool      FIXED  = PropertyBool.create("fixed");
+    public static final PropertyBool FIXED = PropertyBool.create("fixed");
 
     public BlockHealTable()
     {
@@ -84,7 +84,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
                         new ItemStack(item.getItem(), item.getCount(), item.getItemDamage()));
                 if (item.hasTagCompound())
                 {
-                    entity_item.getItem().setTagCompound((NBTTagCompound) item.getTagCompound().copy());
+                    entity_item.getItem().setTagCompound(item.getTagCompound().copy());
                 }
                 float factor = 0.005F;
                 entity_item.motionX = rand.nextGaussian() * factor;
@@ -117,20 +117,11 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
         return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(FIXED, Boolean.valueOf(top));
     }
 
-    // 1.11
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
             EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        return onBlockActivated(worldIn, pos, state, playerIn, hand, playerIn.getHeldItem(hand), side, hitX, hitY,
-                hitZ);
-    }
-
-    // 1.10
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, ItemStack heldStack, EnumFacing side, float hitX, float hitY, float hitZ)
-    {
         TileEntity tile_entity = worldIn.getTileEntity(pos);
-
         if (tile_entity == null || playerIn.isSneaking())
         {
             if (playerIn.capabilities.isCreativeMode && !worldIn.isRemote && hand == EnumHand.MAIN_HAND)
@@ -149,8 +140,8 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     @Override
     /** Called when a block is placed using its ItemBlock. Args: World, X, Y, Z,
      * side, hitX, hitY, hitZ, block metadata */
-    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ,
-            int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+            float hitZ, int meta, EntityLivingBase placer)
     {
         if (!world.isRemote) PokecubeSerializer.getInstance().addChunks(world, pos, placer);
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite())

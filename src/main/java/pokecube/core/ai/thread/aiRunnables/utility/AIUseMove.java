@@ -6,11 +6,11 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.moves.MovesUtils;
 import thut.api.maths.Vector3;
@@ -125,7 +125,7 @@ public class AIUseMove extends AIBase
                 {
                     double dist = destination.distToEntity(entity);
                     // If in range, divert to main thread to see if visible.
-                    if (dist < PokecubeCore.core.getConfig().rangedAttackDistance)
+                    if (dist < PokecubeMod.core.getConfig().rangedAttackDistance)
                     {
                         checkRange = true;
                         return;
@@ -152,8 +152,8 @@ public class AIUseMove extends AIBase
         }
         if (!checkRange && (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0)
         {
-            var1 = PokecubeCore.core.getConfig().rangedAttackDistance
-                    * PokecubeCore.core.getConfig().rangedAttackDistance;
+            var1 = PokecubeMod.core.getConfig().rangedAttackDistance
+                    * PokecubeMod.core.getConfig().rangedAttackDistance;
             // Divert ranged moves to main thread for visiblity checks.
             checkRange = true;
         }

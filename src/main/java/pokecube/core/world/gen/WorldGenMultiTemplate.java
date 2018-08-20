@@ -177,7 +177,7 @@ public class WorldGenMultiTemplate implements IWorldGenerator
                             struct.placeSettings);
                     for (BlockPos blockpos : map.keySet())
                     {
-                        String s = (String) map.get(blockpos);
+                        String s = map.get(blockpos);
                         if (s.equals("Floor"))
                         {
                             struct.setOffset(-blockpos.getY() + 1);

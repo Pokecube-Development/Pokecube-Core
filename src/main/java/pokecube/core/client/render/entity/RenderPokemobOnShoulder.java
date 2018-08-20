@@ -56,6 +56,7 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
         this.parent = parent;
     }
 
+    @Override
     public void doRenderLayer(EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks,
             float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
@@ -193,11 +194,11 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
             texture = RenderPokemobs.getInstance().getEntityTexturePublic(entity);
             if (mobModelBase == null)
             {
-                IModelRenderer<?> model = (IModelRenderer<?>) RenderAdvancedPokemobModel
+                IModelRenderer<?> model = RenderAdvancedPokemobModel
                         .getRenderer(mob.getPokedexEntry().getTrimmedName(), (EntityLiving) entity);
                 if (model == null && mob.getPokedexEntry().getBaseForme() != null)
                 {
-                    model = (IModelRenderer<?>) RenderAdvancedPokemobModel
+                    model = RenderAdvancedPokemobModel
                             .getRenderer(mob.getPokedexEntry().getBaseForme().getTrimmedName(), (EntityLiving) entity);
                     AnimationLoader.modelMaps.put(mob.getPokedexEntry().getTrimmedName(), model);
                 }
@@ -241,6 +242,7 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
                 mob);
     }
 
+    @Override
     public boolean shouldCombineTextures()
     {
         return false;

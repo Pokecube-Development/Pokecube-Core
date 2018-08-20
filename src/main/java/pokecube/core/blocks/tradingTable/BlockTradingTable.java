@@ -12,7 +12,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -90,7 +89,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
                         new ItemStack(item.getItem(), item.getCount(), item.getItemDamage()));
                 if (item.hasTagCompound())
                 {
-                    entity_item.getItem().setTagCompound((NBTTagCompound) item.getTagCompound().copy());
+                    entity_item.getItem().setTagCompound(item.getTagCompound().copy());
                 }
                 if (PokecubeManager.isFilled(item))
                 {

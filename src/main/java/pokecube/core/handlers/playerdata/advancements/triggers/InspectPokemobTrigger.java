@@ -73,7 +73,7 @@ public class InspectPokemobTrigger implements ICriterionTrigger<InspectPokemobTr
 
             for (ICriterionTrigger.Listener<InspectPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((InspectPokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

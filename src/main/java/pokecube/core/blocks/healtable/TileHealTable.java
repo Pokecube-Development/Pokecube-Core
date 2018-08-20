@@ -244,7 +244,7 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
         return tagCompound;
     }
 
-    // 1.11
+    @Override
     public boolean isEmpty()
     {
         return true;

@@ -32,7 +32,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pokecube.core.PokecubeCore;
 import pokecube.core.entity.pokemobs.AnimalChest;
 import pokecube.core.entity.pokemobs.EntityPokemobPart;
 import pokecube.core.events.AttackEvent;
@@ -413,7 +412,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
             this.attackedStatModProb = move.move.attackedStatModProb;
             this.attackerStatModProb = move.move.attackerStatModProb;
 
-            PokecubeCore.MOVE_BUS.post(new AttackEvent(this));
+            PokecubeMod.MOVE_BUS.post(new AttackEvent(this));
         }
 
         public Move_Base getMove()
@@ -530,7 +529,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
      * @return whether this mob can be ridden with HMDive */
     default boolean canUseDive()
     {
-        return (getPokedexEntry().shouldDive && PokecubeCore.core.getConfig().diveEnabled && canUseSurf());
+        return (getPokedexEntry().shouldDive && PokecubeMod.core.getConfig().diveEnabled && canUseSurf());
     }
 
     /** Whether this mob can use the item HMFly to be ridden in the air.
@@ -550,6 +549,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
                 || isType(PokeType.getType("water"));
     }
 
+    @Override
     void eat(Entity eaten);
 
     /** See IMultiplePassengerEntity.getPitch() TODO remove this infavour of the
@@ -600,6 +600,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     /** {@link #MALE} or {@link #FEMALE} or {@link #NOSEXE}
      *
      * @return the byte sexe */
+    @Override
     byte getSexe();
 
     default SoundEvent getSound()
@@ -695,6 +696,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
      *
      * @param sexe
      *            the byte sexe */
+    @Override
     void setSexe(byte sexe);
 
     void setShiny(boolean shiny);
@@ -749,12 +751,15 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     NBTTagCompound writePokemobData();
 
     /** If this is larger than 0, the pokemob shouldn't be allowed to attack. */
+    @Override
     int getAttackCooldown();
 
     /** Sets the value obtained by getAttackCooldown() */
+    @Override
     void setAttackCooldown(int timer);
 
     /** Last attack used by this pokemob; */
+    @Override
     String getLastMoveUsed();
 
     default boolean moveToShoulder(EntityPlayer player)

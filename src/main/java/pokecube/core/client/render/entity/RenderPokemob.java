@@ -23,7 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pokecube.core.PokecubeCore;
 import pokecube.core.client.Resources;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IMoveConstants;
@@ -49,7 +48,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
     {
         if (pokemob.isEvolving())
         {
-            renderEffect(pokemob, partialTick, PokecubeCore.core.getConfig().evolutionTicks, true);
+            renderEffect(pokemob, partialTick, PokecubeMod.core.getConfig().evolutionTicks, true);
         }
     }
 
@@ -124,7 +123,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         RenderHelper.disableStandardItemLighting();
-        float time = 40 * ((float) ticks + partialTick) / duration;
+        float time = 40 * (ticks + partialTick) / duration;
         float f = time / (200f);
         float f1 = 0.0F;
         if (f > 0.8F)
@@ -147,7 +146,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
             scale = 0.1f * Math.max(dims.z * mobScale, Math.max(dims.y * mobScale, dims.x * mobScale));
             GL11.glTranslatef(0.0F, dims.y * pokemob.getSize() / 2, 0.0F);
         }
-        for (int i = 0; (float) i < (f + f * f) / 2.0F * 100.0F; ++i)
+        for (int i = 0; i < (f + f * f) / 2.0F * 100.0F; ++i)
         {
             GlStateManager.rotate(random.nextFloat() * 360.0F, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(random.nextFloat() * 360.0F, 0.0F, 1.0F, 0.0F);
@@ -160,13 +159,13 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
             bufferbuilder.begin(6, DefaultVertexFormats.POSITION_COLOR);
             bufferbuilder.pos(0.0D, 0.0D, 0.0D)
                     .color(col1.getRed(), col1.getGreen(), col1.getBlue(), (int) (255.0F * (1.0F - f1))).endVertex();
-            bufferbuilder.pos(-0.866D * (double) f3, (double) f2, (double) (-0.5F * f3))
+            bufferbuilder.pos(-0.866D * f3, f2, -0.5F * f3)
                     .color(col2.getRed(), col2.getGreen(), col2.getBlue(), 0).endVertex();
-            bufferbuilder.pos(0.866D * (double) f3, (double) f2, (double) (-0.5F * f3))
+            bufferbuilder.pos(0.866D * f3, f2, -0.5F * f3)
                     .color(col2.getRed(), col2.getGreen(), col2.getBlue(), 0).endVertex();
-            bufferbuilder.pos(0.0D, (double) f2, (double) (1.0F * f3))
+            bufferbuilder.pos(0.0D, f2, 1.0F * f3)
                     .color(col2.getRed(), col2.getGreen(), col2.getBlue(), 0).endVertex();
-            bufferbuilder.pos(-0.866D * (double) f3, (double) f2, (double) (-0.5F * f3))
+            bufferbuilder.pos(-0.866D * f3, f2, -0.5F * f3)
                     .color(col2.getRed(), col2.getGreen(), col2.getBlue(), 0).endVertex();
             tessellator.draw();
         }

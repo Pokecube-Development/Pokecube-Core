@@ -14,7 +14,6 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.events.EffectEvent;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -184,7 +183,7 @@ public class NonPersistantStatusEffect extends BaseEffect
         if (effect != null)
         {
             EffectEvent event = new EffectEvent(target.getEntity(), this.effect);
-            if (!PokecubeCore.MOVE_BUS.post(event))
+            if (!PokecubeMod.MOVE_BUS.post(event))
             {
                 effect.setTick(getDuration());
                 effect.affectTarget(target, this);

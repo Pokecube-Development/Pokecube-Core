@@ -6,9 +6,10 @@ import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
 
@@ -71,7 +72,7 @@ public class PokemobMoveHelper extends EntityMoveHelper
             }
         }
         if ((pokemob.getLogicState(LogicStates.SLEEPING)
-                || (pokemob.getStatus() & (IPokemob.STATUS_SLP + IPokemob.STATUS_FRZ)) > 0) && air)
+                || (pokemob.getStatus() & (IMoveConstants.STATUS_SLP + IMoveConstants.STATUS_FRZ)) > 0) && air)
             shouldGoDown = true;
         float length = pokemob.getPokedexEntry().length * pokemob.getSize();
         float dSize = Math.max(0.25f, entity.width * entity.width + length * length);
@@ -100,8 +101,8 @@ public class PokemobMoveHelper extends EntityMoveHelper
         this.entity.rotationYaw = newYaw;
         float v = (float) (this.speed
                 * this.entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
-        if ((air && !entity.onGround && !entity.isInWater())) v *= PokecubeCore.core.getConfig().flyPathingSpeedFactor;
-        else if (water) v *= PokecubeCore.core.getConfig().swimPathingSpeedFactor;
+        if ((air && !entity.onGround && !entity.isInWater())) v *= PokecubeMod.core.getConfig().flyPathingSpeedFactor;
+        else if (water) v *= PokecubeMod.core.getConfig().swimPathingSpeedFactor;
         this.entity.setAIMoveSpeed(v);
 
         if (shouldGoDown || shouldGoUp)

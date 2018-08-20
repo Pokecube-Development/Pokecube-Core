@@ -39,6 +39,7 @@ public class TemplateProcessor extends BlockRotationProcessor
         init = new Well(start, 0, worldIn.rand, x, z);
     }
 
+    @Override
     @Nullable
     public Template.BlockInfo processBlock(World world, BlockPos pos, Template.BlockInfo info)
     {

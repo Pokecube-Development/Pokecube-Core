@@ -47,6 +47,7 @@ public class ItemModelReloader extends Item
     }
 
     // 1.11
+    @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
         return onItemRightClick(player.getHeldItem(hand), world, player, hand);

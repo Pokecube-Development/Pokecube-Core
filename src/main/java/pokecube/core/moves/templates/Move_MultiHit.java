@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import pokecube.core.PokecubeCore;
 import pokecube.core.events.MoveUse;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.moves.animations.EntityMoveUse;
 import thut.api.maths.Vector3;
@@ -54,7 +55,7 @@ public class Move_MultiHit extends Move_Basic
         }
         for (int i = 0; i < count; i++)
         {
-            if (PokecubeCore.MOVE_BUS.post(new MoveUse.ActualMoveUse.Init(pokemob, this, target)))
+            if (PokecubeMod.MOVE_BUS.post(new MoveUse.ActualMoveUse.Init(pokemob, this, target)))
             {
                 // Move Failed message here?
                 break;

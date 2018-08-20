@@ -73,7 +73,7 @@ public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrig
 
             for (ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((EvolvePokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

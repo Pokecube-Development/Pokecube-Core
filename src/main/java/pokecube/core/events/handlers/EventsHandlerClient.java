@@ -192,7 +192,7 @@ public class EventsHandlerClient
         Vector3f dims = pokemob.getPokedexEntry().getModelSize();
         size = Math.max(dims.z * mobScale, Math.max(dims.y * mobScale, dims.x * mobScale));
         GL11.glPushMatrix();
-        float zoom = (float) (12f / size);
+        float zoom = 12f / size;
         GL11.glScalef(-zoom, zoom, zoom);
         GL11.glRotatef(180F, 0.0F, 0.0F, 1.0F);
         long time = Minecraft.getSystemTime();
@@ -578,10 +578,10 @@ public class EventsHandlerClient
             bottom = j1;
         }
         Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
-        float f3 = (float) (colour >> 24 & 255) / 255.0F;
-        float f = (float) (colour >> 16 & 255) / 255.0F;
-        float f1 = (float) (colour >> 8 & 255) / 255.0F;
-        float f2 = (float) (colour & 255) / 255.0F;
+        float f3 = (colour >> 24 & 255) / 255.0F;
+        float f = (colour >> 16 & 255) / 255.0F;
+        float f1 = (colour >> 8 & 255) / 255.0F;
+        float f2 = (colour & 255) / 255.0F;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         GlStateManager.enableBlend();
@@ -590,10 +590,10 @@ public class EventsHandlerClient
                 GlStateManager.DestFactor.ZERO);
         GlStateManager.color(f, f1, f2, f3);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos((double) left, (double) bottom, 0.0D).tex(0, 0).endVertex();
-        bufferbuilder.pos((double) right, (double) bottom, 0.0D).tex(1, 0).endVertex();
-        bufferbuilder.pos((double) right, (double) top, 0.0D).tex(1, 1).endVertex();
-        bufferbuilder.pos((double) left, (double) top, 0.0D).tex(0, 1).endVertex();
+        bufferbuilder.pos(left, bottom, 0.0D).tex(0, 0).endVertex();
+        bufferbuilder.pos(right, bottom, 0.0D).tex(1, 0).endVertex();
+        bufferbuilder.pos(right, top, 0.0D).tex(1, 1).endVertex();
+        bufferbuilder.pos(left, top, 0.0D).tex(0, 1).endVertex();
         tessellator.draw();
         GlStateManager.disableBlend();
     }

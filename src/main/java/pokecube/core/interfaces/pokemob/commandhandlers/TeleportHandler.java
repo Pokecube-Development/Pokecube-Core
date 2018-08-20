@@ -14,7 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import pokecube.core.events.handlers.EventsHandler;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.handlers.playerdata.PokecubePlayerData;
 import pokecube.core.interfaces.IMoveNames;
 import pokecube.core.interfaces.IPokemob;
@@ -26,6 +25,7 @@ import thut.api.entity.Transporter;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
 import thut.core.common.commands.CommandTools;
+import thut.core.common.handlers.PlayerDataHandler;
 import thut.lib.CompatWrapper;
 
 public class TeleportHandler extends DefaultHandler
@@ -83,7 +83,7 @@ public class TeleportHandler extends DefaultHandler
 
     public static int getTeleIndex(String uuid)
     {
-        return PokecubePlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
+        return PlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
                 .getTeleIndex();
     }
 
@@ -104,7 +104,7 @@ public class TeleportHandler extends DefaultHandler
 
     public static List<TeleDest> getTeleports(String uuid)
     {
-        return PokecubePlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
+        return PlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
                 .getTeleDests();
     }
 
@@ -113,7 +113,7 @@ public class TeleportHandler extends DefaultHandler
         List<?> list = getTeleports(uuid);
         if (index < 0) index = list.size() - 1;
         if (index < 0 || index > list.size() - 1) index = 0;
-        PokecubePlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
+        PlayerDataHandler.getInstance().getPlayerData(uuid).getData(PokecubePlayerData.class)
                 .setTeleIndex(index);
     }
 

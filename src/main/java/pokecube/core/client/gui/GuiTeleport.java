@@ -71,7 +71,7 @@ public class GuiTeleport extends Gui
         IPokemob pokemob = GuiDisplayPokecubeInfo.instance().getCurrentPokemob();
         if (pokemob == null) return;
         GlStateManager.pushMatrix();
-        GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.core.getConfig().teleRef,
+        GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().teleRef,
                 PokecubeMod.core.getConfig().telePos, GuiDisplayPokecubeInfo.teleDims,
                 PokecubeMod.core.getConfig().teleSize);
         GlStateManager.enableBlend();

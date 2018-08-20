@@ -195,8 +195,7 @@ public class EntityPokecube extends EntityPokecubeBase
         {
             if (e instanceof EntityPlayer)
             {
-                this.processInteract((EntityPlayer) e, EnumHand.MAIN_HAND,
-                        ((EntityPlayer) e).getHeldItem(EnumHand.MAIN_HAND));
+                this.processInteract((EntityPlayer) e, EnumHand.MAIN_HAND);
             }
         }
     }
@@ -236,7 +235,7 @@ public class EntityPokecube extends EntityPokecubeBase
     {
         if (isLoot)
         {
-            processInteract(entityplayer, EnumHand.MAIN_HAND, entityplayer.getHeldItemMainhand());
+            processInteract(entityplayer, EnumHand.MAIN_HAND);
         }
     }
 
@@ -434,15 +433,10 @@ public class EntityPokecube extends EntityPokecubeBase
         super.setDead();
     }
 
-    // 1.11
+    @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
-        return processInteract(player, hand, player.getHeldItem(hand));
-    }
-
-    // 1.10
-    public boolean processInteract(EntityPlayer player, EnumHand hand, ItemStack stack)
-    {
+        ItemStack stack = player.getHeldItem(hand);
         if (!player.getEntityWorld().isRemote)
         {
             if (player.isSneaking() && player.capabilities.isCreativeMode)

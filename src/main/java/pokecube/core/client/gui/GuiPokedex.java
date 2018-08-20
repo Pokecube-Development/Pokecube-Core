@@ -51,6 +51,7 @@ import pokecube.core.network.packets.PacketPokedex;
 import pokecube.core.utils.EntityTools;
 import pokecube.core.utils.PokeType;
 import thut.api.entity.IMobColourable;
+import thut.core.common.handlers.PlayerDataHandler;
 
 public class GuiPokedex extends GuiScreen
 {
@@ -439,7 +440,7 @@ public class GuiPokedex extends GuiScreen
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
             if (pokemob == null) { return; }
             PokedexEntry pokedexEntry = pokemob.getPokedexEntry();
-            PokecubePlayerStats stats = PokecubePlayerDataHandler.getInstance()
+            PokecubePlayerStats stats = PlayerDataHandler.getInstance()
                     .getPlayerData(Minecraft.getMinecraft().player).getData(PokecubePlayerStats.class);
             if ((StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
                     || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
@@ -466,7 +467,7 @@ public class GuiPokedex extends GuiScreen
 
             GL11.glPushMatrix();
             GL11.glTranslatef(j + 60, k + 100, 50F);
-            float zoom = (float) (25F / size) * scale;
+            float zoom = 25F / size * scale;
             GL11.glScalef(zoom, zoom, zoom);
             GL11.glRotatef(180F, 0.0F, 0.0F, 1.0F);
             float f5 = ((k + 75) - 50) - ySize;

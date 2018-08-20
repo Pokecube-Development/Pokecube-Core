@@ -32,7 +32,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.moves.MoveEntry;
 import pokecube.core.events.MoveUse;
 import pokecube.core.events.MoveUse.MoveWorldAction;
@@ -138,7 +137,7 @@ public class MoveEventsHandler
                         i1 -= k;
                         world.spawnEntity(new EntityXPOrb(world, location.x, location.y + 1.5D, location.z + 0.5D, k));
                     }
-                    int hunger = PokecubeCore.core.getConfig().baseSmeltingHunger * num;
+                    int hunger = PokecubeMod.core.getConfig().baseSmeltingHunger * num;
                     hunger = (int) Math.max(1, hunger / (float) attacker.getLevel());
                     if (f > 0) hunger *= f;
                     attacker.setHungerTime(attacker.getHungerTime() + hunger);
@@ -425,7 +424,7 @@ public class MoveEventsHandler
             register(action = new DefaultAction(move));
             action.init();
         }
-        if (PokecubeCore.core.getConfig().permsMoveAction && attacker.getOwner() instanceof EntityPlayer)
+        if (PokecubeMod.core.getConfig().permsMoveAction && attacker.getOwner() instanceof EntityPlayer)
         {
             EntityPlayer player = (EntityPlayer) attacker.getOwner();
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();

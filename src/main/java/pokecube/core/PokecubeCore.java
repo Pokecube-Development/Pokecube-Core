@@ -511,7 +511,7 @@ public class PokecubeCore extends PokecubeMod
                 {
                     Ticket ticket = next.next();
                     if (!ticket.getModId().equals(ID)) continue;
-                    if (!ticket.isPlayerTicket() || !PokecubeCore.core.getConfig().chunkLoadPokecenters)
+                    if (!ticket.isPlayerTicket() || !PokecubeMod.core.getConfig().chunkLoadPokecenters)
                     {
                         ForgeChunkManager.releaseTicket(ticket);
                         continue;

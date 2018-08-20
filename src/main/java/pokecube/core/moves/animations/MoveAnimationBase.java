@@ -93,6 +93,7 @@ public abstract class MoveAnimationBase implements IMoveAnimation
     {
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public void reallyInitRGBA()
     {

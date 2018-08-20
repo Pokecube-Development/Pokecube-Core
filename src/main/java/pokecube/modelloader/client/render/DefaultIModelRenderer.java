@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import thut.api.maths.Vector3;
 import thut.core.client.render.animation.ModelHolder;
 import thut.core.client.render.model.IExtendedModelPart;
+import thut.core.client.render.model.IModelRenderer;
 import thut.core.client.render.model.ModelFactory;
 import thut.core.client.render.tabula.components.Animation;
 import thut.core.client.render.wrappers.ModelWrapper;
@@ -128,7 +129,7 @@ public class DefaultIModelRenderer<T extends EntityLiving> extends AbstractModel
     @Override
     public boolean hasAnimation(String phase, Entity entity)
     {
-        return DefaultIModelRenderer.DEFAULTPHASE.equals(phase) || animations.containsKey(phase)
+        return IModelRenderer.DEFAULTPHASE.equals(phase) || animations.containsKey(phase)
                 || model.imodel.getBuiltInAnimations().contains(phase);
     }
 

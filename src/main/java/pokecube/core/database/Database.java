@@ -1011,7 +1011,7 @@ public class Database
 
         for (PokedexEntry entry : Database.getSortedFormes())
         {
-            Class<? extends Entity> clazz = PokecubeCore.pokedexmap.get(entry);
+            Class<? extends Entity> clazz = PokecubeMod.pokedexmap.get(entry);
             if (clazz != null)
             {
                 // Initialize the datamanager parameters for the added pokemob.

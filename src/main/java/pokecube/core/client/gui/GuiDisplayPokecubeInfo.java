@@ -257,7 +257,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         int confuseOffsetY = 1;
         GL11.glPushMatrix();
         GL11.glColor4f(1, 1, 1, 1);
-        applyTransform(PokecubeCore.core.getConfig().guiRef, PokecubeMod.core.getConfig().guiPos, guiDims,
+        applyTransform(PokecubeMod.core.getConfig().guiRef, PokecubeMod.core.getConfig().guiPos, guiDims,
                 PokecubeMod.core.getConfig().guiSize);
         int w = 0;// trans[0];
         int h = 0;// trans[1];
@@ -474,7 +474,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         int i, j;
         GL11.glPushMatrix();
         GL11.glColor4f(1, 1, 1, 1);
-        applyTransform(PokecubeCore.core.getConfig().targetRef, PokecubeMod.core.getConfig().targetPos, targetDims,
+        applyTransform(PokecubeMod.core.getConfig().targetRef, PokecubeMod.core.getConfig().targetPos, targetDims,
                 PokecubeMod.core.getConfig().targetSize);
         int w = 0;
         int h = 0;

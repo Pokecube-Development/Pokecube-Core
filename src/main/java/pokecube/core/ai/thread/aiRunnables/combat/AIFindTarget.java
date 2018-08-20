@@ -26,7 +26,6 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.handlers.TeamManager;
@@ -75,8 +74,8 @@ public class AIFindTarget extends AIBase implements IAICombat
         {
             boolean tame = input.getGeneralState(GeneralStates.TAMED);
             boolean wildAgress = !tame;
-            if (PokecubeCore.core.getConfig().mobAgroRate > 0)
-                wildAgress = wildAgress && new Random().nextInt(PokecubeCore.core.getConfig().mobAgroRate) == 0;
+            if (PokecubeMod.core.getConfig().mobAgroRate > 0)
+                wildAgress = wildAgress && new Random().nextInt(PokecubeMod.core.getConfig().mobAgroRate) == 0;
             else wildAgress = false;
             // Check if the mob should always be agressive.
             if (!tame && !wildAgress && input.getEntity().ticksExisted % 20 == 0)
@@ -99,11 +98,11 @@ public class AIFindTarget extends AIBase implements IAICombat
 
     public static void initIDs()
     {
-        for (String s : PokecubeCore.core.getConfig().guardBlacklistClass)
+        for (String s : PokecubeMod.core.getConfig().guardBlacklistClass)
         {
             try
             {
-                Class<?> c = Class.forName(s, false, PokecubeCore.core.getConfig().getClass().getClassLoader());
+                Class<?> c = Class.forName(s, false, PokecubeMod.core.getConfig().getClass().getClassLoader());
                 AIFindTarget.invalidClasses.add(c);
             }
             catch (ClassNotFoundException e)
@@ -111,7 +110,7 @@ public class AIFindTarget extends AIBase implements IAICombat
                 e.printStackTrace();
             }
         }
-        for (String s : PokecubeCore.core.getConfig().guardBlacklistId)
+        for (String s : PokecubeMod.core.getConfig().guardBlacklistId)
         {
             if (s.endsWith("*"))
             {
@@ -400,7 +399,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         {
             for (int j = 0; j < list.size(); j++)
             {
-                Entity entity = (Entity) list.get(j);
+                Entity entity = list.get(j);
 
                 if (entity instanceof EntityCreature && ((EntityCreature) entity).getAttackTarget() != null
                         && ((EntityCreature) entity).getAttackTarget().equals(pokemob.getPokemonOwner())

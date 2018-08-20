@@ -28,7 +28,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.ai.pokemob.PokemobAILookAt;
 import pokecube.core.ai.pokemob.PokemobAILookIdle;
@@ -291,7 +290,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     @Override
     protected void collideWithNearbyEntities()
     {
-        if (PokecubeCore.core.getConfig().pokemobCollisions)
+        if (PokecubeMod.core.getConfig().pokemobCollisions)
         {
             super.collideWithNearbyEntities();
         }
@@ -383,7 +382,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                     if (this.isPotionActive(MobEffects.LEVITATION))
                     {
                         this.motionY += (0.05D
-                                * (double) (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1)
+                                * (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1)
                                 - this.motionY) * 0.2D;
                     }
                     else
@@ -409,8 +408,8 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                     }
 
                     this.motionY *= isAbleToFly ? f6 : 0.9800000190734863D;
-                    this.motionX *= (double) f6;
-                    this.motionZ *= (double) f6;
+                    this.motionX *= f6;
+                    this.motionZ *= f6;
                     blockpos$pooledmutableblockpos.release();
                 }
                 else
@@ -439,7 +438,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                 double d0 = this.posY;
                 float f1 = this.getWaterSlowDown();
                 float f2 = 0.02F;
-                float f3 = (float) EnchantmentHelper.getDepthStriderModifier(this);
+                float f3 = EnchantmentHelper.getDepthStriderModifier(this);
                 if (isWaterMob) f3 *= 2.5;
 
                 if (f3 > 3.0F)
@@ -459,9 +458,9 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                 }
                 this.moveRelative(strafe, up, forward, f2);
                 this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-                this.motionX *= (double) f1;
+                this.motionX *= f1;
                 this.motionY *= 0.800000011920929D;
-                this.motionZ *= (double) f1;
+                this.motionZ *= f1;
 
                 if (!this.hasNoGravity() && !isWaterMob)
                 {

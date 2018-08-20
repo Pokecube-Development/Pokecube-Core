@@ -32,7 +32,6 @@ import pokecube.core.PokecubeItems;
 import pokecube.core.contributors.Contributor;
 import pokecube.core.contributors.ContributorManager;
 import pokecube.core.database.PokedexEntry;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.handlers.playerdata.PokecubePlayerData;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.IPokemob;
@@ -41,6 +40,7 @@ import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
+import thut.core.common.handlers.PlayerDataHandler;
 
 /** @author Manchou */
 public class PokecubeSerializer
@@ -205,7 +205,7 @@ public class PokecubeSerializer
 
     public void addChunks(World world, BlockPos location, EntityLivingBase placer)
     {
-        if (!PokecubeCore.core.getConfig().chunkLoadPokecenters) return;
+        if (!PokecubeMod.core.getConfig().chunkLoadPokecenters) return;
 
         Integer dimension = world.provider.getDimension();
 
@@ -287,7 +287,7 @@ public class PokecubeSerializer
 
     public boolean hasStarter(EntityPlayer player)
     {
-        return PokecubePlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
+        return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
                 .hasStarter();
     }
 
@@ -413,7 +413,7 @@ public class PokecubeSerializer
     {
         try
         {
-            PokecubePlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
+            PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
                     .setHasStarter(value);
         }
         catch (Exception e)
@@ -421,7 +421,7 @@ public class PokecubeSerializer
             PokecubeMod.log(Level.WARNING, "Error setting has starter state for " + player, e);
         }
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
-            PokecubePlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+            PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
     }
 
     public ItemStack starter(PokedexEntry entry, EntityPlayer owner)

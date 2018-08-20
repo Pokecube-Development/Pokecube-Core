@@ -295,7 +295,7 @@ public abstract class EntityPokemobBase extends EntityHungryPokemob implements I
         float min = Math.min(width, length);
         if (max / min < 2) normalSize = true;
         if (pokemobCap.mainBox == null)
-            pokemobCap.setSize((float) (pokemobCap.getSize() / PokecubeCore.core.getConfig().scalefactor));
+            pokemobCap.setSize((float) (pokemobCap.getSize() / PokecubeMod.core.getConfig().scalefactor));
         if (!multibox || normalSize || pokemobCap.mainBox == null)
         {
             this.noClip = false;

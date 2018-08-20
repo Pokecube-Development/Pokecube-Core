@@ -67,7 +67,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             Entity owner = this.getPokemonOwner();
             if (owner instanceof EntityPlayerMP && !getEntity().isDead)
             {
-                if (PokecubeCore.debug)
+                if (PokecubeMod.debug)
                 {
                     PokecubeMod.log(Level.INFO, message.getFormattedText());
                 }
@@ -202,6 +202,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     }
 
     // 1.11
+    @Override
     public void onInventoryChanged(IInventory inventory)
     {
     }

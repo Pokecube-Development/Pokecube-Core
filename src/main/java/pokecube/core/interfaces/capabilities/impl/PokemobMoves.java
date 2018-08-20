@@ -166,7 +166,7 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public int getMoveIndex()
     {
-        int ret = (int) dataManager.get(params.MOVEINDEXDW);
+        int ret = dataManager.get(params.MOVEINDEXDW);
         return Math.max(0, ret);
     }
 
@@ -191,7 +191,7 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public byte getStatus()
     {
-        return (byte) Math.max(0, (int) dataManager.get(params.STATUSDW));
+        return (byte) Math.max(0, dataManager.get(params.STATUSDW));
     }
 
     @Override

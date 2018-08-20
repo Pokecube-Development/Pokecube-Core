@@ -22,7 +22,7 @@ public class ActionFlash implements IMoveAction
         if (user.getCombatState(CombatStates.ANGRY)) return false;
         EntityLivingBase owner = user.getPokemonOwner();
         if (owner == null) return false;
-        IHungrymob mob = (IHungrymob) user;
+        IHungrymob mob = user;
         int count = 1;
         int level = user.getLevel();
         int hungerValue = PokecubeMod.core.getConfig().pokemobLifeSpan / 16;

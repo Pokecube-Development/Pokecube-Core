@@ -14,7 +14,6 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.events.handlers.MoveEventsHandler;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
@@ -78,7 +77,7 @@ public class ActionSmash implements IMoveAction
                         newstack = newstack.copy();
                         if (newstack.getItemDamage() == 32767) newstack.setItemDamage(stack.getItemDamage());
                         newstack.setCount(num);
-                        int hunger = PokecubeCore.core.getConfig().baseSmeltingHunger * num;
+                        int hunger = PokecubeMod.core.getConfig().baseSmeltingHunger * num;
                         hunger = (int) Math.max(1, hunger / (float) user.getLevel());
                         user.setHungerTime(user.getHungerTime() + hunger);
                         item.setItem(newstack);

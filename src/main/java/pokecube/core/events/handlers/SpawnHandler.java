@@ -34,7 +34,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
-import pokecube.core.PokecubeCore;
 import pokecube.core.commands.MakeCommand;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.PokedexEntry.SpawnData;
@@ -179,7 +178,7 @@ public final class SpawnHandler
         if (dimensionBlacklist.contains(world.provider.getDimension())
                 || world.provider instanceof WorldProviderSecretBase)
             return false;
-        if (PokecubeCore.core.getConfig().whiteListEnabled
+        if (PokecubeMod.core.getConfig().whiteListEnabled
                 && !dimensionWhitelist.contains(world.provider.getDimension()))
             return false;
         return true;
@@ -795,7 +794,7 @@ public final class SpawnHandler
 
     public static void refreshTerrain(Vector3 location, World world)
     {
-        if (!PokecubeCore.core.getConfig().autoDetectSubbiomes) return;
+        if (!PokecubeMod.core.getConfig().autoDetectSubbiomes) return;
         TerrainSegment t = TerrainManager.getInstance().getTerrian(world, location);
         Vector3 temp1 = Vector3.getNewVector();
         int x0 = t.chunkX * 16, y0 = t.chunkY * 16, z0 = t.chunkZ * 16;
@@ -857,7 +856,7 @@ public final class SpawnHandler
         if (!SpawnHandler.canSpawnInWorld(world)) return;
         try
         {
-            int rate = PokecubeCore.core.getConfig().spawnRate;
+            int rate = PokecubeMod.core.getConfig().spawnRate;
             if (world.getTotalWorldTime() % rate == 0)
             {
                 long time = System.nanoTime();
@@ -881,7 +880,7 @@ public final class SpawnHandler
         if (power > 0)
         {
             ExplosionCustom boom = new ExplosionCustom(world, null, location, power).setMeteor(true)
-                    .setMaxRadius(PokecubeCore.core.getConfig().meteorRadius);
+                    .setMaxRadius(PokecubeMod.core.getConfig().meteorRadius);
             if (PokecubeMod.debug)
             {
                 String message = "Meteor at " + location + " with energy of " + power;

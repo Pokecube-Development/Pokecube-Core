@@ -77,7 +77,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
 
             for (ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener : this.listeners)
             {
-                if (((UseMoveTrigger.Instance) listener.getCriterionInstance()).test(player, packet))
+                if (listener.getCriterionInstance().test(player, packet))
                 {
                     if (list == null)
                     {

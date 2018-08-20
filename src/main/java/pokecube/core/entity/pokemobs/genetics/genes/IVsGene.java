@@ -57,6 +57,7 @@ public class IVsGene extends GeneByteArr
         return newGene;
     }
 
+    @Override
     public Gene mutate(IMobGenetics parent1, IMobGenetics parent2)
     {
         Alleles evs1 = parent1.getAlleles().get(GeneticsManager.EVSGENE);

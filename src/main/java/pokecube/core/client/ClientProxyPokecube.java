@@ -566,6 +566,7 @@ public class ClientProxyPokecube extends CommonProxyPokecube
         }
     }
 
+    @Override
     public EntityPlayer getPlayer(UUID player)
     {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) return super.getPlayer(player);

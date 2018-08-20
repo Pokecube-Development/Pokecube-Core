@@ -60,6 +60,7 @@ public class TileEntityTickBerries extends TileEntityBerries implements ITickabl
         }
     }
 
+    @Override
     public void growCrop()
     {
         BlockPos up = pos.up();

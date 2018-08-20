@@ -36,7 +36,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.logicRunnables.LogicMiscUpdate;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.abilities.AbilityManager;
@@ -62,7 +61,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
 
     public static boolean canCaptureBasedOnConfigs(IPokemob pokemob)
     {
-        if (PokecubeCore.core
+        if (PokecubeMod.core
                 .getConfig().captureDelayTillAttack) { return !pokemob.getCombatState(CombatStates.NOITEMUSE); }
         long lastAttempt = pokemob.getEntity().getEntityData().getLong(CUBETIMETAG);
         boolean capture = lastAttempt <= pokemob.getEntity().getEntityWorld().getTotalWorldTime();
@@ -73,7 +72,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     public static void setNoCaptureBasedOnConfigs(IPokemob pokemob)
     {
 
-        if (PokecubeCore.core.getConfig().captureDelayTillAttack)
+        if (PokecubeMod.core.getConfig().captureDelayTillAttack)
             pokemob.setCombatState(CombatStates.NOITEMUSE, true);
         else pokemob.getEntity().getEntityData().setLong(CUBETIMETAG,
                 pokemob.getEntity().getEntityWorld().getTotalWorldTime()
@@ -402,7 +401,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     {
         if (getEntityWorld().isRemote || isReleasing()) { return null; }
         IPokemob entity1 = PokecubeManager.itemToPokemob(getItem(), getEntityWorld());
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (config.permsSendOut && shootingEntity instanceof EntityPlayer)
         {

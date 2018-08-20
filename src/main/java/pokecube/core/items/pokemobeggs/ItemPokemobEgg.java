@@ -36,7 +36,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -177,7 +176,7 @@ public class ItemPokemobEgg extends Item
             GeneticsManager.initFromGenes(eggs, mob);
         }
         EntityLivingBase owner = imprintOwner(mob);
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (owner instanceof EntityPlayer && (config.permsHatch || config.permsHatchSpecific))
         {

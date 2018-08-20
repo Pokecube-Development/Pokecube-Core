@@ -80,7 +80,7 @@ public class GuiPokemob extends GuiContainer
             if (!s.isEmpty())
             {
                 String s1 = flag ? s.substring(0, j) : s;
-                j1 = this.fontRendererInstance.drawString(s1, (float) l, (float) i1, i, false);
+                j1 = this.fontRendererInstance.drawString(s1, l, i1, i, false);
             }
 
             boolean flag2 = this.getCursorPosition() < this.getText().length()
@@ -99,7 +99,7 @@ public class GuiPokemob extends GuiContainer
 
             if (!s.isEmpty() && flag && j < s.length())
             {
-                j1 = this.fontRendererInstance.drawString(s.substring(j), (float) j1, (float) i1, i, false);
+                j1 = this.fontRendererInstance.drawString(s.substring(j), j1, i1, i, false);
             }
 
             if (flag1)
@@ -110,7 +110,7 @@ public class GuiPokemob extends GuiContainer
                 }
                 else
                 {
-                    this.fontRendererInstance.drawString("_", (float) k1, (float) i1, i, false);
+                    this.fontRendererInstance.drawString("_", k1, i1, i, false);
                 }
             }
 
@@ -155,10 +155,10 @@ public class GuiPokemob extends GuiContainer
             GlStateManager.enableColorLogic();
             GlStateManager.colorLogicOp(GlStateManager.LogicOp.OR_REVERSE);
             tessellator.getBuffer().begin(7, DefaultVertexFormats.POSITION);
-            tessellator.getBuffer().pos((double) startX, (double) endY, 0.0D).endVertex();
-            tessellator.getBuffer().pos((double) endX, (double) endY, 0.0D).endVertex();
-            tessellator.getBuffer().pos((double) endX, (double) startY, 0.0D).endVertex();
-            tessellator.getBuffer().pos((double) startX, (double) startY, 0.0D).endVertex();
+            tessellator.getBuffer().pos(startX, endY, 0.0D).endVertex();
+            tessellator.getBuffer().pos(endX, endY, 0.0D).endVertex();
+            tessellator.getBuffer().pos(endX, startY, 0.0D).endVertex();
+            tessellator.getBuffer().pos(startX, startY, 0.0D).endVertex();
             tessellator.draw();
             GlStateManager.disableColorLogic();
             GlStateManager.enableTexture2D();
@@ -451,7 +451,7 @@ public class GuiPokemob extends GuiContainer
     {
         this.fontRenderer.drawString(this.playerInventory.hasCustomName() ? this.playerInventory.getName()
                 : I18n.format(this.playerInventory.getName(), new Object[0]), 8, this.ySize - 96 + 2, 4210752);
-        IHungrymob mob = (IHungrymob) pokemob;
+        IHungrymob mob = pokemob;
         float full = PokecubeMod.core.getConfig().pokemobLifeSpan / 4 + PokecubeMod.core.getConfig().pokemobLifeSpan;
         float current = -(mob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan);
         float scale = 100f / full;

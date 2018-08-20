@@ -44,7 +44,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
 import pokecube.core.Mod_Pokecube_Helper;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.ItemBlockGeneric;
 import pokecube.core.blocks.berries.BlockBerryCrop;
@@ -125,7 +124,7 @@ public class ItemHandler extends Mod_Pokecube_Helper
 
     private static void addFossilItems(Object registry)
     {
-        for (String s : PokecubeCore.core.getConfig().customFossils)
+        for (String s : PokecubeMod.core.getConfig().customFossils)
         {
             if (!ItemGenerator.fossilVariants.contains(s.toLowerCase(Locale.ENGLISH)))
                 ItemGenerator.fossilVariants.add(s.toLowerCase(Locale.ENGLISH));
@@ -226,7 +225,7 @@ public class ItemHandler extends Mod_Pokecube_Helper
                     new ModelResourceLocation(pokewatch.getRegistryName().toString(), "inventory"));
         }
 
-        for (String s : PokecubeCore.core.getConfig().customHeldItems)
+        for (String s : PokecubeMod.core.getConfig().customHeldItems)
         {
             if (!ItemGenerator.variants.contains(s.toLowerCase(Locale.ENGLISH)))
                 ItemGenerator.variants.add(s.toLowerCase(Locale.ENGLISH));

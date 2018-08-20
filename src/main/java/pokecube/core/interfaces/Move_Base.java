@@ -335,7 +335,7 @@ public abstract class Move_Base
     {
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(user);
         if (pokemob == null) return;
-        if (PokecubeCore.MOVE_BUS.post(new MoveUse.ActualMoveUse.Init(pokemob, this, target)))
+        if (PokecubeMod.MOVE_BUS.post(new MoveUse.ActualMoveUse.Init(pokemob, this, target)))
         {
             // Move Failed message here?
             return;

@@ -26,7 +26,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.database.moves.MoveEntry;
 import pokecube.core.events.MoveUse;
@@ -226,26 +225,26 @@ public class Move_Basic extends Move_Base implements IMoveConstants
     @Override
     public void doWorldAction(IPokemob attacker, Vector3 location)
     {
-        for (String s : PokecubeCore.core.getConfig().damageBlocksBlacklist)
+        for (String s : PokecubeMod.core.getConfig().damageBlocksBlacklist)
         {
             if (s.equals(name)) return;
         }
         deny:
         if (!PokecubeMod.core.getConfig().pokemobsDamageBlocks)
         {
-            for (String s : PokecubeCore.core.getConfig().damageBlocksWhitelist)
+            for (String s : PokecubeMod.core.getConfig().damageBlocksWhitelist)
             {
                 if (s.equals(name)) break deny;
             }
             return;
         }
         MoveWorldAction.PreAction preEvent = new MoveWorldAction.PreAction(this, attacker, location);
-        if (!PokecubeCore.MOVE_BUS.post(preEvent))
+        if (!PokecubeMod.MOVE_BUS.post(preEvent))
         {
             MoveWorldAction.OnAction onEvent = new MoveWorldAction.OnAction(this, attacker, location);
-            PokecubeCore.MOVE_BUS.post(onEvent);
+            PokecubeMod.MOVE_BUS.post(onEvent);
             MoveWorldAction.PostAction postEvent = new MoveWorldAction.PostAction(this, attacker, location);
-            PokecubeCore.MOVE_BUS.post(postEvent);
+            PokecubeMod.MOVE_BUS.post(postEvent);
         }
     }
 
@@ -274,13 +273,13 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         {
             attacked.onMoveUse(packet);
         }
-        PokecubeCore.MOVE_BUS.post(new MoveUse.ActualMoveUse.Post(packet.attacker, this, packet.attacked));
+        PokecubeMod.MOVE_BUS.post(new MoveUse.ActualMoveUse.Post(packet.attacker, this, packet.attacked));
     }
 
     @Override
     public void preAttack(MovePacket packet)
     {
-        PokecubeCore.MOVE_BUS.post(new MoveUse.ActualMoveUse.Pre(packet.attacker, this, packet.attacked));
+        PokecubeMod.MOVE_BUS.post(new MoveUse.ActualMoveUse.Pre(packet.attacker, this, packet.attacked));
         IPokemob attacker = packet.attacker;
         attacker.onMoveUse(packet);
         IPokemob attacked = CapabilityPokemob.getPokemobFor(packet.attacked);

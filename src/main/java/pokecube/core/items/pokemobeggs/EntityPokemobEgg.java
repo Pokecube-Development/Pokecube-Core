@@ -138,6 +138,7 @@ public class EntityPokemobEgg extends EntityLiving
         eggCache = stack;
     }
 
+    @Override
     public ItemStack getHeldItemMainhand()
     {
         if (getEntityWorld().isRemote) return super.getHeldItemMainhand();

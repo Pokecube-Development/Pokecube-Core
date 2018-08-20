@@ -39,13 +39,13 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pokecube.core.database.stats.StatsCollector;
 import pokecube.core.handlers.Config;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.handlers.playerdata.PokecubePlayerStats;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.utils.Tools;
+import thut.core.common.handlers.PlayerDataHandler;
 import thut.lib.CompatWrapper;
 
 /** This health renderer is directly based on Neat vy Vaziki, which can be found
@@ -227,7 +227,7 @@ public class RenderHealth
                 GlStateManager.translate(0F, pastTranslate, 0F);
                 ITextComponent nameComp = pokemob.getPokemonDisplayName();
                 boolean nametag = pokemob.getGeneralState(GeneralStates.TAMED);
-                PokecubePlayerStats stats = PokecubePlayerDataHandler.getInstance()
+                PokecubePlayerStats stats = PlayerDataHandler.getInstance()
                         .getPlayerData(Minecraft.getMinecraft().player).getData(PokecubePlayerStats.class);
                 boolean captureOrHatch = StatsCollector.getCaptured(pokemob.getPokedexEntry(),
                         Minecraft.getMinecraft().player) > 0

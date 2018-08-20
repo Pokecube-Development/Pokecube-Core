@@ -43,6 +43,7 @@ public class WorldGenTemplates implements IWorldGenerator
                 this.offset = offset;
             }
 
+            @Override
             public TemplateSet clone()
             {
                 return new TemplateSet(template, offset);
@@ -226,6 +227,7 @@ public class WorldGenTemplates implements IWorldGenerator
             super(PokecubeTemplates.POKECENTER, matcher(), 1, -2);
         }
 
+        @Override
         public void setTemplate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
                 IChunkProvider chunkProvider)
         {

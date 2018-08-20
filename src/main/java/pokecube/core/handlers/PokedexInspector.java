@@ -19,6 +19,7 @@ import pokecube.core.events.PokedexInspectEvent;
 import pokecube.core.handlers.playerdata.PokecubePlayerCustomData;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.utils.Tools;
+import thut.core.common.handlers.PlayerDataHandler;
 
 public class PokedexInspector
 {
@@ -103,7 +104,7 @@ public class PokedexInspector
         if (evt.isCanceled())
         {
             String uuid = evt.getEntity().getCachedUniqueIdString();
-            PokecubePlayerDataHandler.getInstance().save(uuid);
+            PlayerDataHandler.getInstance().save(uuid);
         }
         return evt.isCanceled();
     }
@@ -126,7 +127,7 @@ public class PokedexInspector
     public void inspectEvent(PokedexInspectEvent evt)
     {
         String uuid = evt.getEntity().getCachedUniqueIdString();
-        PokecubePlayerCustomData data = PokecubePlayerDataHandler.getInstance().getPlayerData(uuid)
+        PokecubePlayerCustomData data = PlayerDataHandler.getInstance().getPlayerData(uuid)
                 .getData(PokecubePlayerCustomData.class);
         boolean done = false;
         for (IInspectReward reward : rewards)

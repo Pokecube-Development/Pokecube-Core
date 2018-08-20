@@ -23,7 +23,6 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
 import pokecube.core.contributors.Contributor;
@@ -670,7 +669,7 @@ public class Config extends ConfigBase
     @Override
     public void applySettings()
     {
-        if (PokecubeCore.core.getConfig() == this) initDefaultStarts();
+        if (PokecubeMod.core.getConfig() == this) initDefaultStarts();
 
         boolean toSave = false;
         if (version != VERSION)
@@ -854,7 +853,7 @@ public class Config extends ConfigBase
                 }
                 catch (Exception e)
                 {
-                    PokecubeCore.log(Level.WARNING, "No Sound for " + s, e);
+                    PokecubeMod.log(Level.WARNING, "No Sound for " + s, e);
                     failed = true;
                     break;
                 }
@@ -881,7 +880,7 @@ public class Config extends ConfigBase
                 }
                 catch (Exception e)
                 {
-                    PokecubeCore.log("No Sound for " + s);
+                    PokecubeMod.log("No Sound for " + s);
                     failed = true;
                     break;
                 }
@@ -1060,7 +1059,7 @@ public class Config extends ConfigBase
 
     private static SoundEvent getRegisteredSoundEvent(String id)
     {
-        SoundEvent soundevent = (SoundEvent) SoundEvent.REGISTRY.getObject(new ResourceLocation(id));
+        SoundEvent soundevent = SoundEvent.REGISTRY.getObject(new ResourceLocation(id));
         if (soundevent == null)
         {
             throw new IllegalStateException("Invalid Sound requested: " + id);

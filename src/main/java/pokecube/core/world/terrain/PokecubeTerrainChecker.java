@@ -20,7 +20,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.BiomeDictionary.Type;
-import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.PokecubeMod;
 import thut.api.maths.Vector3;
 import thut.api.terrain.BiomeDatabase;
@@ -150,7 +149,7 @@ public class PokecubeTerrainChecker implements ISubBiomeChecker
                 }
             }
             if (world.provider.doesWaterVaporize() || chunk.canSeeSky(v.getPos())
-                    || !PokecubeCore.core.getConfig().autoDetectSubbiomes)
+                    || !PokecubeMod.core.getConfig().autoDetectSubbiomes)
                 return -1;
             boolean sky = false;
             Vector3 temp1 = Vector3.getNewVector();
@@ -189,7 +188,7 @@ public class PokecubeTerrainChecker implements ISubBiomeChecker
         }
         int biome = -1;
         Biome b = v.getBiome(chunk, world.getBiomeProvider());
-        if (!PokecubeCore.core.getConfig().autoDetectSubbiomes) return biome;
+        if (!PokecubeMod.core.getConfig().autoDetectSubbiomes) return biome;
         boolean notLake = BiomeDatabase.contains(b, Type.OCEAN) || BiomeDatabase.contains(b, Type.SWAMP)
                 || BiomeDatabase.contains(b, Type.RIVER) || BiomeDatabase.contains(b, Type.WATER)
                 || BiomeDatabase.contains(b, Type.BEACH);

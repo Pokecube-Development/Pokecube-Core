@@ -20,7 +20,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.moves.MoveEntry;
 import pokecube.core.events.handlers.MoveEventsHandler;
@@ -124,7 +123,7 @@ public class Move_Explode extends Move_Basic
             mob.setHealth(0);// kill the mob.
             if (PokecubeMod.core.getConfig().explosions && MoveEventsHandler.canEffectBlock(pokemob, v.set(mob)))
             {
-                ((ExplosionCustom) boom).doExplosion();
+                boom.doExplosion();
             }
             else
             {
@@ -219,7 +218,7 @@ public class Move_Explode extends Move_Basic
             {
                 // voltorb's enemy wins XP and EVs even if it didn't
                 // attack
-                target.setExp(target.getExp() + Tools.getExp(PokecubeCore.core.getConfig().expScaleFactor,
+                target.setExp(target.getExp() + Tools.getExp(PokecubeMod.core.getConfig().expScaleFactor,
                         pokemob.getBaseXP(), pokemob.getLevel()), true);
                 byte[] evsToAdd = Pokedex.getInstance().getEntry(pokemob.getPokedexNb()).getEVs();
                 target.addEVs(evsToAdd);

@@ -851,7 +851,7 @@ public class EventsHandler
             EntityPlayer player = (EntityPlayer) rider;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
-            Config config = PokecubeCore.core.getConfig();
+            Config config = PokecubeMod.core.getConfig();
             if (config.permsRide && !handler.hasPermission(player.getGameProfile(), Permissions.RIDEPOKEMOB, context))
                 return false;
             if (config.permsRideSpecific
@@ -932,7 +932,7 @@ public class EventsHandler
             ItemStack stack = killer.getHeldItem();
             if (Tools.isStack(stack, "luckyegg"))
             {
-                int exp = killer.getExp() + Tools.getExp(PokecubeCore.core.getConfig().expScaleFactor,
+                int exp = killer.getExp() + Tools.getExp(PokecubeMod.core.getConfig().expScaleFactor,
                         killed.getBaseXP(), killed.getLevel());
                 killer.setExp(exp, true);
             }
@@ -946,7 +946,7 @@ public class EventsHandler
                         IPokemob poke = mob;
                         if (Tools.isStack(mob.getHeldItem(), "exp_share"))
                         {
-                            int exp = poke.getExp() + Tools.getExp(PokecubeCore.core.getConfig().expScaleFactor,
+                            int exp = poke.getExp() + Tools.getExp(PokecubeMod.core.getConfig().expScaleFactor,
                                     killed.getBaseXP(), killed.getLevel());
                             poke.setExp(exp, true);
                         }
@@ -1186,7 +1186,7 @@ public class EventsHandler
     private void handleExp(EntityLiving pokemob, IPokemob attacker, EntityLivingBase attacked)
     {
         IPokemob attackedMob = CapabilityPokemob.getPokemobFor(attacked);
-        if (PokecubeCore.core.getConfig().nonPokemobExp && attackedMob == null)
+        if (PokecubeMod.core.getConfig().nonPokemobExp && attackedMob == null)
         {
             JEP parser = new JEP();
             parser.initFunTab(); // clear the contents of the function table
@@ -1196,7 +1196,7 @@ public class EventsHandler
             parser.addComplex();
             parser.addVariable("h", 0);
             parser.addVariable("a", 0);
-            parser.parseExpression(PokecubeCore.core.getConfig().nonPokemobExpFunction);
+            parser.parseExpression(PokecubeMod.core.getConfig().nonPokemobExpFunction);
             parser.setVarValue("h", attacked.getMaxHealth());
             parser.setVarValue("a", attacked.getTotalArmorValue());
             int exp = (int) parser.getValue();
@@ -1228,7 +1228,7 @@ public class EventsHandler
             {
                 attacker.setExp(attacker.getExp() + Tools.getExp(
                         (float) (pvp ? PokecubeMod.core.getConfig().pvpExpMultiplier
-                                : PokecubeCore.core.getConfig().expScaleFactor),
+                                : PokecubeMod.core.getConfig().expScaleFactor),
                         attackedMob.getBaseXP(), attackedMob.getLevel()), true);
                 byte[] evsToAdd = Pokedex.getInstance().getEntry(attackedMob.getPokedexNb()).getEVs();
                 attacker.addEVs(evsToAdd);

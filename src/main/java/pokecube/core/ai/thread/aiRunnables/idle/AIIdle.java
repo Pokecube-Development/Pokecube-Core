@@ -12,6 +12,7 @@ import net.minecraft.pathfinding.Path;
 import net.minecraft.world.IBlockAccess;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
@@ -191,7 +192,7 @@ public class AIIdle extends AIBase
                 && !mob.getGeneralState(GeneralStates.STAYING))
             return false;
         int idleTimer = IDLETIMER;
-        if (mob.getLogicState(LogicStates.SLEEPING) || (mob.getStatus() & IPokemob.STATUS_SLP) > 0) return false;
+        if (mob.getLogicState(LogicStates.SLEEPING) || (mob.getStatus() & IMoveConstants.STATUS_SLP) > 0) return false;
         else if (mob.getGeneralState(GeneralStates.CONTROLLED) || current != null)
         {
             return false;

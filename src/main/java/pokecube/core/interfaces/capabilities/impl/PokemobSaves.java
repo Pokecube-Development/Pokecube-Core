@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.OldAI;
 import pokecube.core.interfaces.PokecubeMod;
@@ -188,7 +187,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         if (!visualsTag.hasNoTags())
         {
             dataManager.set(params.SPECIALINFO, visualsTag.getInteger(SPECIALTAG));
-            setSize((float) (getSize() / PokecubeCore.core.getConfig().scalefactor));
+            setSize((float) (getSize() / PokecubeMod.core.getConfig().scalefactor));
             int[] flavourAmounts = visualsTag.getIntArray(FLAVOURSTAG);
             if (flavourAmounts.length == 5) for (int i = 0; i < flavourAmounts.length; i++)
             {

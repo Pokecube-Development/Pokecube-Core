@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import pokecube.core.ai.utils.pathing.node.WalkNodeLadderProcessor;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -115,8 +116,8 @@ public class PokemobNavigator extends PathNavigate2
     public boolean canNavigate()
     {
         if (wrapped == null) checkValues();
-        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IPokemob.STATUS_SLP) > 0
-                || (pokemob.getStatus() & IPokemob.STATUS_FRZ) > 0
+        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IMoveConstants.STATUS_SLP) > 0
+                || (pokemob.getStatus() & IMoveConstants.STATUS_FRZ) > 0
                 || pokemob.getGeneralState(GeneralStates.CONTROLLED)
                 || pokemob.getLogicState(LogicStates.NOPATHING))
             return false;

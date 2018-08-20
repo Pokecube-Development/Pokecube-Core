@@ -21,9 +21,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.Config;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.utils.Permissions;
 import thut.api.entity.IMultiplePassengerEntity;
 
@@ -117,7 +117,7 @@ public abstract class EntityMountablePokemob extends EntityEvolvablePokemob impl
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             PokedexEntry entry = pokemobCap.getPokedexEntry();
-            Config config = PokecubeCore.core.getConfig();
+            Config config = PokecubeMod.core.getConfig();
             if (config.permsDive && canDive
                     && !handler.hasPermission(player.getGameProfile(), Permissions.DIVEPOKEMOB, context))
             {
@@ -145,6 +145,7 @@ public abstract class EntityMountablePokemob extends EntityEvolvablePokemob impl
         return ret;
     }
 
+    @Override
     public boolean canPassengerSteer()
     {
         // We return false here, as we handle our own steering/control.

@@ -22,7 +22,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.blocks.berries.BerryGenManager;
 import pokecube.core.events.handlers.SpawnHandler;
@@ -187,7 +186,7 @@ public class AIHungry extends AIBase
                 {
                     long time = entity.getEntityData().getLong("lastInteract");
                     long diff = entity.getEntityWorld().getTotalWorldTime() - time;
-                    if (diff < PokecubeCore.core.getConfig().pokemobLifeSpan) tameCheck = false;
+                    if (diff < PokecubeMod.core.getConfig().pokemobLifeSpan) tameCheck = false;
                 }
                 if (tameCheck)
                 {
@@ -603,7 +602,7 @@ public class AIHungry extends AIBase
             if (!block && pokemob.isHerbivore())
             {
                 Vector3 temp = v.findClosestVisibleObject(world, true, (int) distance,
-                        PokecubeCore.core.getConfig().getPlantTypes());
+                        PokecubeMod.core.getConfig().getPlantTypes());
                 if (temp != null)
                 {
                     block = true;

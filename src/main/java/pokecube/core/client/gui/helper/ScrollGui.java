@@ -142,21 +142,21 @@ public class ScrollGui extends GuiListExtended
                     l1 = this.top;
                 }
                 vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                vertexbuffer.pos((double) i, (double) (l1 + k1), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255)
+                vertexbuffer.pos(i, l1 + k1, 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255)
                         .endVertex();
-                vertexbuffer.pos((double) j, (double) (l1 + k1), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255)
+                vertexbuffer.pos(j, l1 + k1, 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255)
                         .endVertex();
-                vertexbuffer.pos((double) j, (double) l1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
-                vertexbuffer.pos((double) i, (double) l1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                vertexbuffer.pos(j, l1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                vertexbuffer.pos(i, l1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
                 tessellator.draw();
                 vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                vertexbuffer.pos((double) i, (double) (l1 + k1 - 1), 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255)
+                vertexbuffer.pos(i, l1 + k1 - 1, 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255)
                         .endVertex();
-                vertexbuffer.pos((double) (j - 1), (double) (l1 + k1 - 1), 0.0D).tex(1.0D, 1.0D)
+                vertexbuffer.pos(j - 1, l1 + k1 - 1, 0.0D).tex(1.0D, 1.0D)
                         .color(192, 192, 192, 255).endVertex();
-                vertexbuffer.pos((double) (j - 1), (double) l1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255)
+                vertexbuffer.pos(j - 1, l1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255)
                         .endVertex();
-                vertexbuffer.pos((double) i, (double) l1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                vertexbuffer.pos(i, l1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
                 tessellator.draw();
             }
             this.renderDecorations(mouseXIn, mouseYIn);
@@ -258,7 +258,7 @@ public class ScrollGui extends GuiListExtended
                 }
                 else if (this.initialClickY >= 0)
                 {
-                    this.amountScrolled -= (float) (this.mouseY - this.initialClickY) * this.scrollMultiplier;
+                    this.amountScrolled -= (this.mouseY - this.initialClickY) * this.scrollMultiplier;
                     this.initialClickY = this.mouseY;
                 }
             }
@@ -280,7 +280,7 @@ public class ScrollGui extends GuiListExtended
                     i2 = scrollBar ? 1 : slotHeight;
                 }
 
-                this.amountScrolled += (float) (i2 * (this.slotHeight));
+                this.amountScrolled += i2 * (this.slotHeight);
             }
         }
     }

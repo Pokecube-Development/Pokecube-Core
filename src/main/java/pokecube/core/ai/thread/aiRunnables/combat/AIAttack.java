@@ -16,7 +16,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.FakePlayer;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -211,7 +210,7 @@ public class AIAttack extends AIBase implements IAICombat
             setCombatState(pokemob, CombatStates.ANGRY, false);
             addEntityPath(attacker, null, movementSpeed);
             chaseTime = 0;
-            if (PokecubeCore.debug)
+            if (PokecubeMod.debug)
             {
                 PokecubeMod.log(Level.INFO, "Too Long Chase, Forgetting Target: " + attacker + " " + entityTarget);
             }
@@ -424,7 +423,7 @@ public class AIAttack extends AIBase implements IAICombat
         {
             setCombatState(pokemob, CombatStates.EXECUTINGMOVE, true);
             setCombatState(pokemob, CombatStates.LEAPING, true);
-            if (PokecubeCore.debug)
+            if (PokecubeMod.debug)
             {
                 PokecubeMod.log(Level.INFO, "Set To Leap: " + attacker);
             }

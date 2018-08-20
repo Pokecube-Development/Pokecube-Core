@@ -299,6 +299,7 @@ public abstract class PokemobGenes extends PokemobBase implements IMobColourable
         return genesNature.getExpressed().getValue();
     }
 
+    @Override
     public void setMoves(String[] moves)
     {
         // do not blanket set moves on client, or when transformed.

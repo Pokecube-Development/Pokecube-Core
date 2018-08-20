@@ -23,7 +23,6 @@ import pokecube.core.blocks.healtable.BlockHealTable;
 import pokecube.core.database.Database;
 import pokecube.core.database.Pokedex;
 import pokecube.core.events.handlers.SpawnHandler;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.handlers.playerdata.PokecubePlayerStats;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -36,6 +35,7 @@ import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
 import thut.api.network.PacketHandler;
 import thut.core.common.commands.CommandTools;
+import thut.core.common.handlers.PlayerDataHandler;
 
 /** @author Manchou */
 public class ItemPokedex extends Item
@@ -67,7 +67,7 @@ public class ItemPokedex extends Item
             PacketPokedex.sendSecretBaseInfoPacket(playerIn, watch);
             Entity entityHit = target;
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entityHit);
-            if (pokemob != null) PokecubePlayerDataHandler.getInstance().getPlayerData(playerIn)
+            if (pokemob != null) PlayerDataHandler.getInstance().getPlayerData(playerIn)
                     .getData(PokecubePlayerStats.class).inspect(playerIn, pokemob);
             return true;
         }
@@ -152,7 +152,7 @@ public class ItemPokedex extends Item
             PacketPokedex.sendSecretBaseInfoPacket(player, watch);
             Entity entityHit = Tools.getPointedEntity(player, 16);
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entityHit);
-            if (pokemob != null) PokecubePlayerDataHandler.getInstance().getPlayerData(player)
+            if (pokemob != null) PlayerDataHandler.getInstance().getPlayerData(player)
                     .getData(PokecubePlayerStats.class).inspect(player, pokemob);
         }
     }

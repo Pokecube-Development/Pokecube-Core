@@ -73,7 +73,7 @@ public class MegaEvolvePokemobTrigger implements ICriterionTrigger<MegaEvolvePok
 
             for (ICriterionTrigger.Listener<MegaEvolvePokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((MegaEvolvePokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

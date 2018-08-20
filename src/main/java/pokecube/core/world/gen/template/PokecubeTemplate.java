@@ -65,7 +65,7 @@ public class PokecubeTemplate extends Template
             {
                 NBTTagCompound nbttagcompound = template$entityinfo.entityData;
                 Vec3d vec3d = transformedVec3d(template$entityinfo.pos, mirrorIn, rotationIn);
-                Vec3d vec3d1 = vec3d.addVector((double) pos.getX(), (double) pos.getY(), (double) pos.getZ());
+                Vec3d vec3d1 = vec3d.addVector(pos.getX(), pos.getY(), pos.getZ());
                 NBTTagList nbttaglist = new NBTTagList();
                 nbttaglist.appendTag(new NBTTagDouble(vec3d1.x));
                 nbttaglist.appendTag(new NBTTagDouble(vec3d1.y));

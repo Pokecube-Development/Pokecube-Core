@@ -73,7 +73,7 @@ public class HatchPokemobTrigger implements ICriterionTrigger<HatchPokemobTrigge
 
             for (ICriterionTrigger.Listener<HatchPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((HatchPokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

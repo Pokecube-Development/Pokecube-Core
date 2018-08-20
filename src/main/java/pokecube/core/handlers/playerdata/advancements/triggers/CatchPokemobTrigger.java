@@ -102,7 +102,7 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
 
             for (ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((CatchPokemobTrigger.Instance) listener.getCriterionInstance()).test(player, pokemob))
+                if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
                     {

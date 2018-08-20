@@ -37,7 +37,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.Database;
 import pokecube.core.database.Database.EnumDatabase;
@@ -121,7 +120,7 @@ public class ModPokecubeML implements IMobProvider
         registerDatabase(evt);
         MinecraftForge.EVENT_BUS.post(new RegisterPokemobsEvent.Pre());
         MinecraftForge.EVENT_BUS.post(new RegisterPokemobsEvent.Register());
-        PokecubeMod.log("Registered " + PokecubeCore.pokedexmap.size());
+        PokecubeMod.log("Registered " + PokecubeMod.pokedexmap.size());
         MinecraftForge.EVENT_BUS.post(new RegisterPokemobsEvent.Post());
         postInitPokemobs();
     }
@@ -133,7 +132,7 @@ public class ModPokecubeML implements IMobProvider
         // Apply configs after all other addons apply their changes.
         for (int i = 0; i < EnumDatabase.values().length; i++)
         {
-            String[] args = PokecubeCore.core.getConfig().configDatabases[i].split(",");
+            String[] args = PokecubeMod.core.getConfig().configDatabases[i].split(",");
             for (String s : args)
             {
                 if (s.isEmpty()) continue;

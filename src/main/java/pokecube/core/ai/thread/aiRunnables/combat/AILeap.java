@@ -8,7 +8,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -36,8 +35,8 @@ public class AILeap extends AIBase
      * config. */
     private SoundEvent getLeapSound()
     {
-        if (PokecubeCore.core.getConfig().leaps.length == 1) return PokecubeCore.core.getConfig().leaps[0];
-        return PokecubeCore.core.getConfig().leaps[new Random().nextInt(PokecubeCore.core.getConfig().leaps.length)];
+        if (PokecubeMod.core.getConfig().leaps.length == 1) return PokecubeMod.core.getConfig().leaps[0];
+        return PokecubeMod.core.getConfig().leaps[new Random().nextInt(PokecubeMod.core.getConfig().leaps.length)];
     }
 
     @Override
@@ -69,7 +68,7 @@ public class AILeap extends AIBase
         }
         pokemob.setCombatState(CombatStates.LEAPING, false);
 
-        leapCooldown = PokecubeCore.core.getConfig().attackCooldown / 2;
+        leapCooldown = PokecubeMod.core.getConfig().attackCooldown / 2;
 
         // Target loc could just be a position
         Vector3 targetLoc = target != null ? Vector3.getNewVector().set(target) : pokemob.getTargetPos();
@@ -89,7 +88,7 @@ public class AILeap extends AIBase
             new Exception().printStackTrace();
             dir.clear();
         }
-        if (PokecubeCore.debug)
+        if (PokecubeMod.debug)
         {
             PokecubeMod.log(Level.INFO, "Leap: " + attacker + " " + dir);
         }

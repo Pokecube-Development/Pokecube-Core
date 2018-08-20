@@ -23,7 +23,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
@@ -74,7 +73,7 @@ public class AIGatherStuff extends AIBase
             if (!CompatWrapper.isValid(seeds)) return true;
             if (seeds.getItem() instanceof IPlantable)
             {
-                EntityPlayer player = PokecubeCore.getFakePlayer(world);
+                EntityPlayer player = PokecubeMod.getFakePlayer(world);
                 player.setHeldItem(EnumHand.MAIN_HAND, seeds);
                 seeds.getItem().onItemUse(player, world, pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0.5f, 1, 0.5f);
                 Entity mob = world.getEntityByID(entityID);

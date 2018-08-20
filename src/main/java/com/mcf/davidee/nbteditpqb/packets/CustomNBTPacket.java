@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
+import thut.core.common.handlers.PlayerDataHandler;
 import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 
 public class CustomNBTPacket implements IMessage
@@ -75,7 +75,7 @@ public class CustomNBTPacket implements IMessage
                             try
                             {
                                 NBTTagCompound tag = packet.tag;
-                                PlayerData data = PokecubePlayerDataHandler.getInstance()
+                                PlayerData data = PlayerDataHandler.getInstance()
                                         .getPlayerData(entity.getCachedUniqueIdString()).getData(packet.customName);
                                 data.readFromNBT(tag);
                                 NBTEdit.log(Level.TRACE,

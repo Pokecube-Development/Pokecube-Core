@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
+import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
@@ -49,7 +50,7 @@ public class PokemobAILookAt extends EntityAIBase
     @Override
     public boolean shouldContinueExecuting()
     {
-        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IPokemob.STATUS_SLP) > 0)
+        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IMoveConstants.STATUS_SLP) > 0)
             return false;
         if (idle) return this.idleTime >= 0;
         return !this.closestEntity.isEntityAlive() ? false
@@ -77,7 +78,7 @@ public class PokemobAILookAt extends EntityAIBase
     @Override
     public boolean shouldExecute()
     {
-        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IPokemob.STATUS_SLP) > 0)
+        if (pokemob.getLogicState(LogicStates.SLEEPING) || (pokemob.getStatus() & IMoveConstants.STATUS_SLP) > 0)
             return false;
         if (this.theWatcher.getRNG().nextFloat() >= this.chance)
         {

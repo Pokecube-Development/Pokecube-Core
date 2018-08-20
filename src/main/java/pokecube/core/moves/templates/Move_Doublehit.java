@@ -13,6 +13,7 @@ public class Move_Doublehit extends Move_MultiHit
         super(name);
     }
 
+    @Override
     public int getCount(@Nonnull IPokemob user, @Nullable Entity target)
     {
         return 2;

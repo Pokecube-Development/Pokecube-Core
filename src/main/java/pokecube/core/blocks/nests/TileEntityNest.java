@@ -304,7 +304,7 @@ public class TileEntityNest extends TileEntity implements ITickable, IInventory
         return nbt;
     }
 
-    // 1.11
+    @Override
     public boolean isEmpty()
     {
         return true;

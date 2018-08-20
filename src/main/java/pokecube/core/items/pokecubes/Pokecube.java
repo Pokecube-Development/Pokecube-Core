@@ -32,7 +32,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.Config;
@@ -256,11 +255,11 @@ public class Pokecube extends Item implements IPokecube
             if (!filled && targetMob == null) target = null;
             boolean used = false;
             boolean filledOrSneak = filled || player.isSneaking();
-            if (target != null && EntityPokecube.SEEKING)
+            if (target != null && EntityPokecubeBase.SEEKING)
             {
                 used = throwPokecubeAt(worldIn, player, stack, targetLocation, target);
             }
-            else if (filledOrSneak || !EntityPokecube.SEEKING)
+            else if (filledOrSneak || !EntityPokecubeBase.SEEKING)
             {
                 float power = (getMaxItemUseDuration(stack) - timeLeft) / (float) 100;
                 power = Math.min(1, power);
@@ -304,7 +303,7 @@ public class Pokecube extends Item implements IPokecube
         if (id == null || !IPokecube.BEHAVIORS.containsKey(id)) return false;
         ItemStack stack = cube.copy();
         boolean hasMob = PokecubeManager.hasMob(stack);
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (hasMob && (config.permsSendOut || config.permsSendOutSpecific) && thrower instanceof EntityPlayer)
         {

@@ -38,6 +38,7 @@ public class SpeciesGene implements Gene
             entry = Database.getEntry(tag.getString("E"));
         }
 
+        @Override
         public SpeciesInfo clone()
         {
             SpeciesInfo info = new SpeciesInfo();

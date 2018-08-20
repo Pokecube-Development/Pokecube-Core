@@ -448,7 +448,7 @@ public abstract class AIBase implements IAIRunnable
                 }
                 if (correctClass)
                 {
-                    if (source.getDistanceSq((Entity) o) < dsq)
+                    if (source.getDistanceSq(o) < dsq)
                     {
                         list.add(o);
                     }

@@ -87,6 +87,7 @@ public abstract class TemplateStructureBase extends Village
     }
 
     /** (abstract) Helper method to write subclass data to NBT */
+    @Override
     protected void writeStructureToNBT(NBTTagCompound tagCompound)
     {
         if (templatePosition == null)
@@ -177,6 +178,7 @@ public abstract class TemplateStructureBase extends Village
 
     /** second Part of Structure generating, this for example places Spiderwebs,
      * Mob Spawners, it closes Mineshafts at the end, it adds Fences... */
+    @Override
     public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox boxIn)
     {
         if (template == null) return false;
@@ -190,7 +192,7 @@ public abstract class TemplateStructureBase extends Village
                 Map<BlockPos, String> map = this.template.getDataBlocks(new BlockPos(0, 0, 0), this.placeSettings);
                 for (BlockPos blockpos : map.keySet())
                 {
-                    String s = (String) map.get(blockpos);
+                    String s = map.get(blockpos);
                     if (s.toLowerCase(Locale.ENGLISH).startsWith("floor"))
                     {
                         setOffset(-blockpos.getY());
@@ -214,7 +216,7 @@ public abstract class TemplateStructureBase extends Village
             Map<BlockPos, String> map = this.template.getDataBlocks(this.templatePosition, this.placeSettings);
             for (BlockPos blockpos : map.keySet())
             {
-                String s = (String) map.get(blockpos);
+                String s = map.get(blockpos);
                 this.handleDataMarker(s, blockpos, worldIn, randomIn, buildBox);
             }
         }

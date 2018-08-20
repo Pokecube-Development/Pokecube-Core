@@ -11,7 +11,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import net.minecraftforge.server.permission.context.PlayerContext;
-import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.stats.ISpecialCaptureCondition;
@@ -24,6 +23,7 @@ import pokecube.core.events.TradeEvent;
 import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.items.pokecubes.EntityPokecube;
 import pokecube.core.items.pokecubes.EntityPokecubeBase;
@@ -49,7 +49,7 @@ public class StatsHandler
             evt.pokecube.setDead();
             return;
         }
-        Config config = PokecubeCore.core.getConfig();
+        Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (catcher instanceof EntityPlayer && (config.permsCapture || config.permsCaptureSpecific))
         {

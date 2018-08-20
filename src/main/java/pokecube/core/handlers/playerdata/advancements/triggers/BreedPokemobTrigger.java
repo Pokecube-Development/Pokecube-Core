@@ -93,7 +93,7 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
 
             for (ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener : this.listeners)
             {
-                if (((BreedPokemobTrigger.Instance) listener.getCriterionInstance()).test(player, first, second))
+                if (listener.getCriterionInstance().test(player, first, second))
                 {
                     if (list == null)
                     {

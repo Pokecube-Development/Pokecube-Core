@@ -18,7 +18,6 @@ import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class GuiArranger
@@ -81,7 +80,7 @@ public class GuiArranger
                 int texH = minecraft.fontRenderer.FONT_HEIGHT;
                 minecraft.entityRenderer.setupOverlayRendering();
                 int[] mess = GuiDisplayPokecubeInfo.applyTransform(
-                        PokecubeCore.core.getConfig().messageRef, PokecubeMod.core.getConfig().messagePos, new int[] {
+                        PokecubeMod.core.getConfig().messageRef, PokecubeMod.core.getConfig().messagePos, new int[] {
                                 PokecubeMod.core.getConfig().messageWidth, 7 * minecraft.fontRenderer.FONT_HEIGHT },
                         PokecubeMod.core.getConfig().messageSize);
                 int x = 0, y = 0;
@@ -98,7 +97,7 @@ public class GuiArranger
 
                 // Draw a box for the Info
                 GL11.glPushMatrix();
-                int[] guiS = GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.core.getConfig().guiRef,
+                int[] guiS = GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().guiRef,
                         PokecubeMod.core.getConfig().guiPos, GuiDisplayPokecubeInfo.guiDims,
                         PokecubeMod.core.getConfig().guiSize);
                 x = 0;
@@ -117,7 +116,7 @@ public class GuiArranger
 
                 // Draw a box for the Target
                 GL11.glPushMatrix();
-                int[] targ = GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.core.getConfig().targetRef,
+                int[] targ = GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().targetRef,
                         PokecubeMod.core.getConfig().targetPos, GuiDisplayPokecubeInfo.targetDims,
                         PokecubeMod.core.getConfig().targetSize);
                 x = 0;
@@ -136,7 +135,7 @@ public class GuiArranger
 
                 // Draw a box for Teleports
                 GL11.glPushMatrix();
-                int[] teles = GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.core.getConfig().teleRef,
+                int[] teles = GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().teleRef,
                         PokecubeMod.core.getConfig().telePos, GuiDisplayPokecubeInfo.teleDims,
                         PokecubeMod.core.getConfig().teleSize);
                 x = 0;

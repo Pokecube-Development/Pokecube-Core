@@ -28,11 +28,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.GuiInfoMessages;
 import pokecube.core.handlers.Config;
-import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.handlers.SyncConfig;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.utils.PokecubeSerializer;
 import thut.core.common.config.Configure;
+import thut.core.common.handlers.PlayerDataHandler;
 import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 import thut.core.common.handlers.PlayerDataHandler.PlayerDataManager;
 
@@ -42,7 +42,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
 
     public static void sendInitPacket(EntityPlayer player, String dataType)
     {
-        PlayerDataManager manager = PokecubePlayerDataHandler.getInstance().getPlayerData(player);
+        PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
         PlayerData data = manager.getData(dataType);
         PacketDataSync packet = new PacketDataSync();
         packet.data.setString("type", dataType);
@@ -50,7 +50,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         data.writeToNBT(tag1);
         packet.data.setTag("data", tag1);
         PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
-        PokecubePlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+        PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
     }
 
     public static void sendInitHandshake(EntityPlayer player)
@@ -217,7 +217,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
             }
             else
             {
-                PlayerDataManager manager = PokecubePlayerDataHandler.getInstance().getPlayerData(player);
+                PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
                 manager.getData(message.data.getString("type")).readFromNBT(message.data.getCompoundTag("data"));
             }
         }
