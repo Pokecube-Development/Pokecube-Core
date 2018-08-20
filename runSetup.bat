@@ -1,1 +1,1 @@
-cmd /k gradlew --stacktrace setupDecompWorkspace eclipse
+cmd /k gradlew setupDecompWorkspace eclipse
