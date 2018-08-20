@@ -1,1 +1,1 @@
-cmd /k gradlew --refresh-dependencies setupDecompWorkspace eclipse
+cmd /k gradlew --stacktrace setupDecompWorkspace eclipse

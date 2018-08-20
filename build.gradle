@@ -47,13 +47,6 @@ repositories {
 }
 
 dependencies {
-
-    //compile against the JEI api
-    //compile "mezz.jei:jei_${version_minecraft}:${version_jei}:api"
-
-    // at runtime, use the full JEI jar
-    deobfCompile "mezz.jei:jei_${version_minecraft}:${version_jei}"
-
     //Thut Core
     deobfCompile "thutcore:thutcore:${version_minecraft}:${version_thutcore}"
     //Thut Wearables
