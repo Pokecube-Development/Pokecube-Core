@@ -148,6 +148,7 @@ public class AIMate extends AIBase
 
     public Entity findLover()
     {
+        if (!pokemob.isRoutineEnabled(AIRoutine.MATE)) return null;
         if (pokemob.getLover() != null) { return pokemob.getLover(); }
         boolean transforms = false;
         for (String s : pokemob.getMoves())
@@ -194,8 +195,10 @@ public class AIMate extends AIBase
             IPokemob otherPokemob = CapabilityPokemob.getPokemobFor(targetMates.get(i));
             EntityAnimal animal = (EntityAnimal) targetMates.get(i);
             if (gendered && !transforms && otherPokemob.getSexe() == pokemob.getSexe()) continue;
-            if (otherPokemob == this.pokemob || otherPokemob.getGeneralState(GeneralStates.TAMED) != pokemob
-                    .getGeneralState(GeneralStates.TAMED) || !otherPokemob.getPokedexEntry().breeds)
+            if (!otherPokemob.isRoutineEnabled(AIRoutine.MATE)) continue;
+            if (otherPokemob == this.pokemob
+                    || otherPokemob.getGeneralState(GeneralStates.TAMED) != pokemob.getGeneralState(GeneralStates.TAMED)
+                    || !otherPokemob.getPokedexEntry().breeds)
                 continue;
             boolean otherTransforms = false;
             for (String s : otherPokemob.getMoves())
@@ -254,6 +257,11 @@ public class AIMate extends AIBase
     public void tryFindMate()
     {
         if (pokemob.getLover() == null) return;
+        if (!pokemob.isRoutineEnabled(AIRoutine.MATE))
+        {
+            pokemob.resetLoveStatus();
+            return;
+        }
         if (pokemob.getLogicState(LogicStates.SITTING)) pokemob.setLogicState(LogicStates.SITTING, false);
 
         double dist = entity.width * entity.width + pokemob.getLover().width * pokemob.getLover().width;
