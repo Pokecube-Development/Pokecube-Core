@@ -28,9 +28,18 @@ public class ActionTeleport implements IMoveAction
         double var1;
         double var3;
         double var5;
-        Vector3 v = SpawnHandler.getRandomSpawningPointNearEntity(toTeleport.getEntityWorld(), toTeleport, 32, 0);
+        Vector3 v = SpawnHandler.getRandomPointNear(toTeleport, 32);
+        if (v == null)
+        {
+            // Try a few more times to get a point.
+            for (int i = 0; i < 32; i++)
+            {
+                v = SpawnHandler.getRandomPointNear(toTeleport, 32);
+                if (v != null) break;
+            }
+        }
         if (v == null) return false;
-        v = Vector3.getNextSurfacePoint(toTeleport.getEntityWorld(), v, Vector3.secondAxisNeg, Math.max(v.y, 10));
+        v = Vector3.getNextSurfacePoint(toTeleport.getEntityWorld(), v, Vector3.secondAxisNeg, 20);
         if (v == null) return false;
         var1 = v.x;
         var3 = v.y + 1;

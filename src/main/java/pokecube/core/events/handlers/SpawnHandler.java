@@ -30,7 +30,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -310,68 +309,43 @@ public final class SpawnHandler
         return null;
     }
 
-    public static Vector3 getRandomPointNear(IBlockAccess world, Vector3 v, int distance)
+    public static Vector3 getRandomPointNear(Entity player, int range)
     {
-        Vector3 ret = v;
-        Vector3 temp = ret.copy();
-        int rand = Math.abs(new Random().nextInt());
-        if (distance % 2 == 0) distance++;
-        int num = distance * distance * distance;
-        for (int i = 0; i < num; i++)
+        if (player == null) return null;
+        World world = player.getEntityWorld();
+        Vector3 v = vec1.set(player);
+
+        Random rand = new Random();
+        // SElect random gaussians from here.
+        double x = rand.nextGaussian() * range;
+        double z = rand.nextGaussian() * range;
+
+        // Cap x and z to distance.
+        if (Math.abs(x) > range) x = Math.signum(x) * range;
+        if (Math.abs(z) > range) z = Math.signum(z) * range;
+
+        // Don't select distances too far up/down from current.
+        double y = Math.min(Math.max(5, rand.nextGaussian() * 10), 10);
+        v.addTo(x, y, z);
+
+        // Find surface
+        Vector3 temp1 = Vector3.getNextSurfacePoint2(world, vec1, vec2.set(EnumFacing.DOWN), 10);
+
+        if (temp1 != null)
         {
-            int j = (i + rand) % num;
-            int x = j % (distance) - distance / 2;
-            int y = (j / distance) % (distance) - distance / 2;
-            int z = (j / (distance * distance)) % (distance) - distance / 2;
-            y = Math.max(1, y);
-            temp.set(ret).addTo(x, y, z);
-            if (temp.isClearOfBlocks(world)) { return temp; }
+            // Increment up as getNextSurfacePoint2 returns the ground block
+            temp1.y++;
+            return temp1;
         }
         return null;
     }
 
-    /** Given a player, find a random position near it. */
+    @Deprecated
+    /** Given a player, find a random position near it. Use
+     * getRandomPointNear(Entity mob, int range) instead. */
     public static Vector3 getRandomSpawningPointNearEntity(World world, Entity player, int maxRange, int maxTries)
     {
-        if (player == null) return null;
-
-        Vector3 temp;
-        Vector3 temp1 = vec1.set(player);
-
-        Vector3 ret = temp1;
-        temp = ret.copy();
-        int rand = Math.abs(new Random().nextInt());
-        int distance = maxRange;
-        if (distance % 2 == 0) distance++;
-        int num = distance * distance;
-        if (maxTries > 0) num = Math.min(num, maxTries);
-        for (int i = 0; i < num; i++)
-        {
-            for (int k = 0; k <= 20; k++)
-            {
-                int j = (i + rand) % num;
-                int x = j % (distance) - distance / 2;
-                int z = (j / distance) % (distance) - distance / 2;
-                int y = 10 - world.rand.nextInt(20);
-                temp.set(ret).addTo(x, y, z);
-                if (temp.isClearOfBlocks(world)) { return temp; }
-            }
-
-        }
-
-        if (temp == null) temp = Vector3.getNewVector().set(player);
-
-        double maxTempY = temp.y - player.posY - 10;
-        if (maxTempY <= 0) return null;
-
-        temp1 = Vector3.getNextSurfacePoint2(world, temp, vec2.set(EnumFacing.DOWN), maxTempY);
-
-        if (temp1 != null)
-        {
-            temp1.y++;
-            return temp1;
-        }
-        return temp;
+        return getRandomPointNear(player, maxRange);
     }
 
     private static int parse(World world, Vector3 location)
@@ -764,8 +738,7 @@ public final class SpawnHandler
             if (players.get(i).dimension != world.provider.getDimension()) continue;
 
             long time = System.nanoTime();
-            Vector3 v = getRandomSpawningPointNearEntity(world, players.get(i),
-                    PokecubeMod.core.getConfig().maxSpawnRadius, 0);
+            Vector3 v = getRandomPointNear(players.get(i), PokecubeMod.core.getConfig().maxSpawnRadius);
             double dt = (System.nanoTime() - time) / 1000d;
             if (PokecubeMod.debug && dt > 100)
             {
