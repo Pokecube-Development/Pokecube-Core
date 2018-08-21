@@ -6,6 +6,7 @@ import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import pokecube.core.client.gui.watch.GuiPokeWatch;
 import pokecube.core.interfaces.PokecubeMod;
@@ -125,6 +126,7 @@ public abstract class PageWithSubPages extends WatchPage
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
+        if (this.fontRenderer == null) this.fontRenderer = Minecraft.getMinecraft().fontRenderer;
         prePageDraw(mouseX, mouseY, partialTicks);
         pages.get(index).drawScreen(mouseX, mouseY, partialTicks);
         postPageDraw(mouseX, mouseY, partialTicks);

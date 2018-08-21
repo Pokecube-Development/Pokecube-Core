@@ -210,11 +210,9 @@ public class AIHungry extends AIBase
         {
             if (!isGoodSleepingSpot(c))
             {
-                pokemob.setGeneralState(GeneralStates.IDLE, true);
                 Path path = this.entity.getNavigator().getPathToPos(pokemob.getHome());
                 if (path != null && path.getCurrentPathLength() > 32) path = null;
                 addEntityPath(entity, path, moveSpeed);
-                pokemob.setGeneralState(GeneralStates.IDLE, false);
             }
             else if (entity.getAttackTarget() == null && entity.getNavigator().noPath())
             {

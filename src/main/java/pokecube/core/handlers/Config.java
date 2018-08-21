@@ -25,6 +25,7 @@ import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pokecube.core.PokecubeItems;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
+import pokecube.core.ai.thread.aiRunnables.idle.AIIdle;
 import pokecube.core.contributors.Contributor;
 import pokecube.core.contributors.ContributorManager;
 import pokecube.core.database.Database;
@@ -335,6 +336,8 @@ public class Config extends ConfigBase
     public int                           captureDelayTicks            = 0;
     @Configure(category = mobAI)
     public boolean                       captureDelayTillAttack       = true;
+    @Configure(category = mobAI)
+    public int                           idleTickRate                 = 20;
 
     public SoundEvent[]                  dodges                       = {};
     public SoundEvent[]                  leaps                        = {};
@@ -672,6 +675,7 @@ public class Config extends ConfigBase
         if (PokecubeMod.core.getConfig() == this) initDefaultStarts();
 
         boolean toSave = false;
+        // Check version stuff.
         if (version != VERSION)
         {
             toSave = true;
@@ -694,14 +698,21 @@ public class Config extends ConfigBase
             }
         }
 
+        // Ensure these values are in bounds.
+        if (attackCooldown <= 0) attackCooldown = 1;
+        if (spawnRate <= 0) spawnRate = 1;
+        if (idleTickRate <= 0) idleTickRate = 1;
+
+        // Update idle tick rate.
+        AIIdle.IDLETIMER = idleTickRate;
+
+        // Init secret bases.
         WorldProviderSecretBase.init(baseSizeFunction);
         for (String s : structureSubiomes)
         {
             String[] args = s.split(":");
             PokecubeTerrainChecker.structureSubbiomeMap.put(args[0], args[1]);
         }
-        if (attackCooldown <= 0) attackCooldown = 1;
-        if (spawnRate <= 0) spawnRate = 0;
 
         SpawnHandler.MAX_DENSITY = mobDensityMultiplier;
         SpawnHandler.MAXNUM = mobSpawnNumber;
@@ -812,7 +823,7 @@ public class Config extends ConfigBase
             }
             catch (Exception e)
             {
-                System.err.println("Error with mutation rate for " + s);
+                PokecubeMod.log(Level.WARNING, "Error with mutation rate for " + s, e);
             }
         }
 
