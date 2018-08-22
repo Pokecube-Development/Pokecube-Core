@@ -15,6 +15,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -80,11 +81,12 @@ public class RestoreCommand extends CommandBase
         if (args[0].equals("check") || args[0].equals("give"))
         {
             ITextComponent message = new TextComponentString("Pokemobs: ");
+            sender.sendMessage(message);
+            message = new TextComponentString("");
             for (Entry<UUID, ItemStack> entry : cache.entrySet())
             {
                 UUID id = entry.getKey();
                 ItemStack stack = entry.getValue();
-                ITextComponent sub = stack.getTextComponent();
                 NBTTagList nbttaglist = stack.getTagCompound().getCompoundTag(TagNames.POKEMOB).getTagList("Pos", 6);
                 double posX = nbttaglist.getDoubleAt(0);
                 double posY = nbttaglist.getDoubleAt(1);
@@ -97,12 +99,23 @@ public class RestoreCommand extends CommandBase
                 else
                 {
                     command = "/pokerestore restore " + args[1] + " " + id;
-
                 }
+                NBTTagCompound tag = stack.getTagCompound().copy();
+                tag.removeTag(TagNames.POKEMOB);
+                ItemStack copy = stack.copy();
+                copy.setTagCompound(tag);
+                tag = copy.writeToNBT(new NBTTagCompound());
                 ClickEvent click = new ClickEvent(Action.RUN_COMMAND, command);
+                ITextComponent sub = stack.getTextComponent();
                 sub.getStyle().setClickEvent(click);
                 sub.appendText(" ");
                 message.appendSibling(sub);
+                int size = message.toString().getBytes().length;
+                if (size > 32000)
+                {
+                    sender.sendMessage(message);
+                    message = new TextComponentString("");
+                }
             }
             sender.sendMessage(message);
         }
