@@ -71,6 +71,7 @@ import pokecube.core.commands.MakeCommand;
 import pokecube.core.commands.MeteorCommand;
 import pokecube.core.commands.RecallCommand;
 import pokecube.core.commands.ResetCommand;
+import pokecube.core.commands.RestoreCommand;
 import pokecube.core.commands.SecretBaseCommand;
 import pokecube.core.commands.StructureCommand;
 import pokecube.core.commands.TMCommand;
@@ -91,6 +92,7 @@ import pokecube.core.events.handlers.PCEventsHandler;
 import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.handlers.Config;
 import pokecube.core.handlers.PokedexInspector;
+import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.handlers.playerdata.PokecubePlayerCustomData;
 import pokecube.core.handlers.playerdata.PokecubePlayerData;
 import pokecube.core.handlers.playerdata.PokecubePlayerStats;
@@ -398,6 +400,7 @@ public class PokecubeCore extends PokecubeMod
         PlayerDataHandler.dataMap.add(PokecubePlayerData.class);
         PlayerDataHandler.dataMap.add(PokecubePlayerStats.class);
         PlayerDataHandler.dataMap.add(PokecubePlayerCustomData.class);
+        PlayerDataHandler.dataMap.add(PlayerPokemobCache.class);
 
         // Register the village stuff.
         if (config.villagePokecenters)
@@ -787,6 +790,7 @@ public class PokecubeCore extends PokecubeMod
         event.registerServerCommand(new MeteorCommand());
         event.registerServerCommand(new ResetCommand());
         event.registerServerCommand(new StructureCommand());
+        event.registerServerCommand(new RestoreCommand());
         PokecubeTemplates.serverInit(event.getServer());
         registerSpawns();
         try

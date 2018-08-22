@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
@@ -24,6 +25,7 @@ import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import pokecube.core.utils.PokecubeSerializer;
 import thut.api.maths.Matrix3;
 import thut.api.maths.Vector3;
+import thut.core.common.handlers.PlayerDataHandler;
 
 public abstract class PokemobAI extends PokemobEvolves
 {
@@ -321,6 +323,13 @@ public abstract class PokemobAI extends PokemobEvolves
         }
         // Update genes settings.
         onGenesChanged();
+
+        // Update/add cache.
+        if (this.isPlayerOwned())
+        {
+            PlayerDataHandler.getInstance().getPlayerData(getOwnerId()).getData(PlayerPokemobCache.class)
+                    .addPokemob(this);
+        }
     }
 
     @Override

@@ -214,9 +214,9 @@ public class MakeCommand extends CommandBase
                     return o1.compareToIgnoreCase(o2);
                 }
             });
-            ret = getListOfStringsMatchingLastWord(args, ret);
+            return getListOfStringsMatchingLastWord(args, ret);
         }
-        return ret;
+        return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
     }
 
     public static String setToArgs(String[] args, IPokemob mob, int index, Vector3 offset)
