@@ -328,6 +328,9 @@ public final class SpawnHandler
         double y = Math.min(Math.max(5, rand.nextGaussian() * 10), 10);
         v.addTo(x, y, z);
 
+        // Don't select unloaded areas.
+        if (!world.isAreaLoaded(v.getPos(), 8)) return null;
+
         // Find surface
         Vector3 temp1 = Vector3.getNextSurfacePoint2(world, vec1, vec2.set(EnumFacing.DOWN), 10);
 
