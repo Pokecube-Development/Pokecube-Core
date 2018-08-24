@@ -39,7 +39,7 @@ public class EVsGene extends GeneByteArr
     @Override
     public float getEpigeneticRate()
     {
-        return 1;
+        return 0.75f;
     }
 
 }

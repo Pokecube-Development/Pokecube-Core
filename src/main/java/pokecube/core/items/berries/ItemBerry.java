@@ -81,7 +81,7 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
                 info = I18n.format("item.berry.favourite.desc", pokemob.getPokemonDisplayName().getFormattedText());
                 tooltip.add(info);
             }
-            int weight = Nature.getBerryWeight(stack.getItemDamage(), nature);
+            int weight = Nature.getBerryWeight(index, nature);
             if (weight == 0)
             {
                 info = I18n.format("item.berry.nomind.desc", pokemob.getPokemonDisplayName().getFormattedText());

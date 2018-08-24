@@ -124,7 +124,7 @@ public class MovesGene implements Gene
     @Override
     public float getEpigeneticRate()
     {
-        return 1;
+        return 0.75f;
     }
 
     @Override
