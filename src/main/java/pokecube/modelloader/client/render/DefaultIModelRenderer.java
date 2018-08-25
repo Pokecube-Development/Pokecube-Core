@@ -50,12 +50,6 @@ public class DefaultIModelRenderer<T extends EntityLiving> extends AbstractModel
         this.global = global;
     }
 
-    @Override
-    public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
-
     private HashMap<String, PartInfo> getChildren(IExtendedModelPart part)
     {
         HashMap<String, PartInfo> partsList = new HashMap<String, PartInfo>();

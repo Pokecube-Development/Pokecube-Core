@@ -343,26 +343,43 @@ public class LogicMiscUpdate extends LogicBase
             pokemob.setRoutineState(AIRoutine.AIRBORNE, true);
         }
 
+        // Reset tamed state for things with no owner.
         if (pokemob.getGeneralState(GeneralStates.TAMED) && (pokemob.getPokemonOwnerID() == null))
         {
             pokemob.setGeneralState(GeneralStates.TAMED, false);
         }
+
+        // Ensure cap on love timer.
         if (pokemob.getLoveTimer() > 600)
         {
             pokemob.resetLoveStatus();
         }
+
+        // Check exit cube state.
         if (entity.ticksExisted > EXITCUBEDURATION && pokemob.getGeneralState(GeneralStates.EXITINGCUBE))
         {
             pokemob.setGeneralState(GeneralStates.EXITINGCUBE, false);
         }
+
+        // Ensure sitting things don't have a path.
         if (pokemob.getLogicState(LogicStates.SITTING) && !entity.getNavigator().noPath())
         {
             entity.getNavigator().clearPath();
         }
+
+        // Check pathing states.
         if (pokemob.getLogicState(LogicStates.PATHING) && entity.getNavigator().noPath() && pathTimer++ > 10)
         {
             pokemob.setLogicState(LogicStates.PATHING, false);
             pathTimer = 0;
+        }
+
+        // Check if we shouldn't just randomly go to sleep.
+        boolean ownedSleepCheck = pokemob.getGeneralState(GeneralStates.TAMED)
+                && !(pokemob.getGeneralState(GeneralStates.STAYING));
+        if (ownedSleepCheck)
+        {
+            pokemob.setLogicState(LogicStates.SLEEPING, false);
         }
     }
 

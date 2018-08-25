@@ -68,17 +68,20 @@ public class AIHungry extends AIBase
 
     }
 
+    public static int  TICKRATE = 20;
+
     final EntityLiving entity;
     // final World world;
     final EntityItem   berry;
     final double       distance;
     IPokemob           pokemob;
-    Vector3            foodLoc = Vector3.getNewVector();
-    boolean            block   = false;
-    boolean            sleepy  = false;
+    Vector3            foodLoc  = null;
+    boolean            block    = false;
+    boolean            sleepy   = false;
+    int                hungerTime;
     double             moveSpeed;
-    Vector3            v       = Vector3.getNewVector();
-    Vector3            v1      = Vector3.getNewVector();
+    Vector3            v        = Vector3.getNewVector();
+    Vector3            v1       = Vector3.getNewVector();
     Random             rand;
 
     public AIHungry(final IPokemob pokemob, final EntityItem berry_, double distance)
@@ -90,120 +93,77 @@ public class AIHungry extends AIBase
         this.moveSpeed = entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 0.75;
     }
 
-    @Override
-    public void doMainThreadTick(World world)
+    /** Checks its own inventory for berries to eat, returns true if it finds
+     * some.
+     * 
+     * @return found any berries to eat in inventory. */
+    protected boolean checkInventory()
     {
-        super.doMainThreadTick(world);
+        for (int i = 2; i < 7; i++)
+        {
+            ItemStack stack = pokemob.getPokemobInventory().getStackInSlot(i);
+            if (stack != null && stack.getItem() instanceof ItemBerry)
+            {
+                setCombatState(pokemob, CombatStates.HUNTING, false);
+                pokemob.eat(berry);
+                stack.shrink(1);
+                if (stack.isEmpty()) pokemob.getPokemobInventory().setInventorySlotContents(i, ItemStack.EMPTY);
+                return true;
+            }
+        }
+        return false;
+    }
 
-        int hungerTicks = 20;
+    /** Swimming things look for fish hooks to try to go eat.
+     * 
+     * @return found a hook. */
+    protected boolean checkBait()
+    {
+        if (pokemob.getPokedexEntry().swims())
+        {
+            AxisAlignedBB bb = v.set(entity).addTo(0, entity.getEyeHeight(), 0).getAABB()
+                    .grow(PokecubeMod.core.getConfig().fishHookBaitRange);
+            List<EntityFishHook> hooks = entity.getEntityWorld().getEntitiesWithinAABB(EntityFishHook.class, bb);
+            pokemob.setCombatState(CombatStates.HUNTING, true);
+            if (!hooks.isEmpty())
+            {
+                Collections.shuffle(hooks);
+                EntityFishHook hook = hooks.get(0);
+                if (v.isVisible(world, v1.set(hook)))
+                {
+                    Path path = entity.getNavigator().getPathToEntityLiving(hook);
+                    addEntityPath(entity, path, moveSpeed);
+                    addTargetInfo(entity, hook);
+                    if (entity.getDistanceSq(hook) < 2)
+                    {
+                        hook.caughtEntity = entity;
+                        pokemob.eat(hook);
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-        // TODO condsider speed up ticks for checking own inventory for berries
-        // to eat.
-
-        if (entity.ticksExisted % hungerTicks != 0) return;
-
-        int hungerTime = pokemob.getHungerTime();
-        v.set(entity);
-        sleepy = !pokemob.getCombatState(CombatStates.ANGRY);
-        if (sleepy) for (TimePeriod p : pokemob.getPokedexEntry().activeTimes())
+    /** Check for places and times to sleep, this sets path to sleeping place
+     * and returns false if it finds somewhere, but doesn't set sleep.
+     * 
+     * @return went to sleep. */
+    protected boolean checkSleep()
+    {
+        sleepy = true;
+        for (TimePeriod p : pokemob.getPokedexEntry().activeTimes())
         {// TODO find some way to determine actual length of day for things like
          // AR support.
             if (p != null && p.contains(entity.getEntityWorld().getWorldTime(), 24000)) ;
             {
                 sleepy = false;
+                pokemob.setLogicState(LogicStates.SLEEPING, false);
                 break;
             }
-        } // Don't run hunger AI stuff when in combat.
-        else
-        {
-            pokemob.setLogicState(LogicStates.SLEEPING, false);
-            return;
         }
         ChunkCoordinate c = new ChunkCoordinate(v, entity.dimension);
-        int deathTime = PokecubeMod.core.getConfig().pokemobLifeSpan;
-        if (!pokemob.neverHungry() && pokemob.getHungerCooldown() < 0)
-        {
-            if (hungerTime > 0 && !pokemob.getCombatState(CombatStates.HUNTING))
-            {
-                pokemob.setCombatState(CombatStates.HUNTING, true);
-            }
-        }
-
-        if (shouldRun() || Math.random() > 0.99)
-        {
-            if (pokemob.getPokedexEntry().swims())
-            {// grow in 1.12
-                AxisAlignedBB bb = v.set(entity).addTo(0, entity.getEyeHeight(), 0).getAABB()
-                        .grow(PokecubeMod.core.getConfig().fishHookBaitRange);
-                List<EntityFishHook> hooks = entity.getEntityWorld().getEntitiesWithinAABB(EntityFishHook.class, bb);
-                pokemob.setCombatState(CombatStates.HUNTING, true);
-                if (!hooks.isEmpty())
-                {
-                    Collections.shuffle(hooks);
-                    EntityFishHook hook = hooks.get(0);
-                    if (v.isVisible(world, v1.set(hook)))
-                    {
-                        Path path = entity.getNavigator().getPathToEntityLiving(hook);
-                        addEntityPath(entity, path, moveSpeed);
-                        addTargetInfo(entity, hook);
-                        if (entity.getDistanceSq(hook) < 2)
-                        {
-                            hook.caughtEntity = entity;
-                            pokemob.eat(hook);
-                        }
-                    }
-                }
-            }
-        }
-
-        double hurtTime = deathTime / 2d;
-        Random rand = new Random(pokemob.getRNGValue());
-        int cur = (entity.ticksExisted / hungerTicks);
-        int tick = rand.nextInt(10);
-        if (hungerTime > hurtTime && !entity.getEntityWorld().isRemote && !pokemob.getCombatState(CombatStates.ANGRY)
-                && !pokemob.neverHungry() && cur % 10 == tick)
-        {
-            boolean ate = false;
-            for (int i = 2; i < 7; i++)
-            {
-                ItemStack stack = pokemob.getPokemobInventory().getStackInSlot(i);
-                if (stack != null && stack.getItem() instanceof ItemBerry)
-                {
-                    setCombatState(pokemob, CombatStates.HUNTING, false);
-                    pokemob.eat(berry);
-                    stack.shrink(1);
-                    if (!CompatWrapper.isValid(stack))
-                    {
-                        pokemob.getPokemobInventory().setInventorySlotContents(i, ItemStack.EMPTY);
-                    }
-                    ate = true;
-                }
-            }
-            if (!ate)
-            {
-                boolean tameCheck = !pokemob.isPlayerOwned() || pokemob.getGeneralState(GeneralStates.STAYING);
-                if (entity.getEntityData().hasKey("lastInteract"))
-                {
-                    long time = entity.getEntityData().getLong("lastInteract");
-                    long diff = entity.getEntityWorld().getTotalWorldTime() - time;
-                    if (diff < PokecubeMod.core.getConfig().pokemobLifeSpan) tameCheck = false;
-                }
-                if (tameCheck)
-                {
-                    toRun.add(new GenBerries(pokemob));
-                }
-                else
-                {
-                    float ratio = (float) ((hungerTime - hurtTime) / deathTime);
-                    boolean dead = entity.getMaxHealth() * ratio > entity.getHealth();
-                    entity.attackEntityFrom(DamageSource.STARVE, entity.getMaxHealth() * ratio);
-                    if (!dead) pokemob.displayMessageToOwner(
-                            new TextComponentTranslation("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
-                    else pokemob.displayMessageToOwner(
-                            new TextComponentTranslation("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
-                }
-            }
-        }
         boolean ownedSleepCheck = pokemob.getGeneralState(GeneralStates.TAMED)
                 && !(pokemob.getGeneralState(GeneralStates.STAYING));
         if (sleepy && hungerTime < 0 && !ownedSleepCheck)
@@ -214,12 +174,13 @@ public class AIHungry extends AIBase
                 if (path != null && path.getCurrentPathLength() > 32) path = null;
                 addEntityPath(entity, path, moveSpeed);
             }
-            else if (entity.getAttackTarget() == null && entity.getNavigator().noPath())
+            else if (entity.getNavigator().noPath())
             {
                 pokemob.setLogicState(LogicStates.SLEEPING, true);
                 pokemob.setCombatState(CombatStates.HUNTING, false);
+                return true;
             }
-            else if (!entity.getNavigator().noPath() || entity.getAttackTarget() != null)
+            else if (!entity.getNavigator().noPath())
             {
                 pokemob.setLogicState(LogicStates.SLEEPING, false);
             }
@@ -232,76 +193,184 @@ public class AIHungry extends AIBase
         {
             pokemob.setLogicState(LogicStates.SLEEPING, false);
         }
+        return false;
+    }
 
-        // Run these on the main thread, so the world access stuff isn't
-        // problematic.
-        eat:
-        if (pokemob.getCombatState(CombatStates.HUNTING))
+    /** Checks for light to eat.
+     * 
+     * @return found light */
+    protected boolean checkPhotoeat()
+    {
+        if (entity.getEntityWorld().provider.isDaytime() && v.canSeeSky(world))
         {
-            if (pokemob.isPhototroph())
-            {
-                if (entity.getEntityWorld().provider.isDaytime() && v.canSeeSky(world))
-                {
-                    pokemob.setHungerTime(pokemob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
-                    setCombatState(pokemob, CombatStates.HUNTING, false);
-                    break eat;
-                }
-            }
-            if (pokemob.isLithotroph())
-            {
-                IBlockState state = v.offset(EnumFacing.DOWN).getBlockState(world);
-                Block b = state.getBlock();
-                if (!PokecubeTerrainChecker.isRock(state))
-                {
-                    Vector3 temp = v.findClosestVisibleObject(world, true, (int) distance,
-                            PokecubeMod.core.getConfig().getRocks());
-                    if (temp != null)
-                    {
-                        block = true;
-                        foodLoc.set(temp);
-                    }
-                    if (!foodLoc.isEmpty()) break eat;
-                }
-                else
-                {
-                    if (PokecubeMod.core.getConfig().pokemobsEatRocks && Math.random() > 0.0075)
-                    {
-                        v.set(entity).offsetBy(EnumFacing.DOWN);
-                        if (SpawnHandler.checkNoSpawnerInArea(world, v.intX(), v.intY(), v.intZ()))
-                            if (b == Blocks.COBBLESTONE)
-                            {
-                            TickHandler.addBlockChange(v, entity.dimension, Blocks.GRAVEL);
-                            }
-                            else if (b == Blocks.GRAVEL && PokecubeMod.core.getConfig().pokemobsEatGravel)
-                            {
-                            TickHandler.addBlockChange(v, entity.dimension, Blocks.AIR);
-                            }
-                            else if (state.getMaterial() == Material.ROCK)
-                            {
-                            TickHandler.addBlockChange(v, entity.dimension, Blocks.COBBLESTONE);
-                            }
-                    }
-                    berry.setItem(new ItemStack(b));
-                    setCombatState(pokemob, CombatStates.HUNTING, false);
-                    pokemob.eat(berry);
-                    break eat;
-                }
-            }
-            if (pokemob.isElectrotroph())
-            {
-                int num = v.blockCount(world, Blocks.REDSTONE_BLOCK, 8);
-                if (num < 1)
-                {
+            pokemob.setHungerTime(pokemob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
+            setCombatState(pokemob, CombatStates.HUNTING, false);
+            return true;
+        }
+        return false;
+    }
 
-                }
-                else
+    /** Checks for redstone blocks nearby.
+     * 
+     * @return found redstone block. */
+    protected boolean checkElectricEat()
+    {
+        int num = v.blockCount(world, Blocks.REDSTONE_BLOCK, 8);
+        if (num >= 1)
+        {
+            pokemob.setHungerTime(pokemob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
+            setCombatState(pokemob, CombatStates.HUNTING, false);
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks for rocks nearby to eat
+     * 
+     * @return found and ate rocks. */
+    protected boolean checkRockEat()
+    {
+        IBlockState state = v.offset(EnumFacing.DOWN).getBlockState(world);
+        Block b = state.getBlock();
+        // Look for nearby rocks.
+        if (!PokecubeTerrainChecker.isRock(state))
+        {
+            Vector3 temp = v.findClosestVisibleObject(world, true, (int) distance,
+                    PokecubeMod.core.getConfig().getRocks());
+            if (temp != null)
+            {
+                block = true;
+                foodLoc = temp.copy();
+            }
+            if (foodLoc != null) return true;
+        }
+        else
+        {
+            // Check configs, and if so, actually eat the rocks
+            if (PokecubeMod.core.getConfig().pokemobsEatRocks)
+            {
+                v.set(entity).offsetBy(EnumFacing.DOWN);
+                if (SpawnHandler.checkNoSpawnerInArea(entity.getEntityWorld(), v.intX(), v.intY(), v.intZ()))
                 {
-                    pokemob.setHungerTime(pokemob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
-                    setCombatState(pokemob, CombatStates.HUNTING, false);
-                    break eat;
+                    if (b == Blocks.COBBLESTONE)
+                    {
+                        TickHandler.addBlockChange(v, entity.dimension, Blocks.GRAVEL);
+                    }
+                    else if (b == Blocks.GRAVEL && PokecubeMod.core.getConfig().pokemobsEatGravel)
+                    {
+                        TickHandler.addBlockChange(v, entity.dimension, Blocks.AIR);
+                    }
+                    else if (state.getMaterial() == Material.ROCK)
+                    {
+                        TickHandler.addBlockChange(v, entity.dimension, Blocks.COBBLESTONE);
+                    }
                 }
+            }
+            // Apply the eating of the item.
+            berry.setItem(new ItemStack(b));
+            setCombatState(pokemob, CombatStates.HUNTING, false);
+            pokemob.eat(berry);
+            foodLoc = null;
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks for a variety of nearby food supplies, returns true if it finds
+     * food.
+     * 
+     * @return found food */
+    protected boolean checkHunt()
+    {
+        if (pokemob.isPhototroph())
+        {
+            if (checkPhotoeat()) return true;
+        }
+        if (pokemob.isLithotroph())
+        {
+            if (checkRockEat()) return true;
+        }
+        if (pokemob.isElectrotroph())
+        {
+            if (checkElectricEat()) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void doMainThreadTick(World world)
+    {
+        super.doMainThreadTick(world);
+
+        // Configs can set this to -1 to disable ticking.
+        if (TICKRATE < 0) return;
+
+        int deathTime = PokecubeMod.core.getConfig().pokemobLifeSpan;
+        double hurtTime = deathTime / 2d;
+        hungerTime = pokemob.getHungerTime();
+        int hungerTicks = TICKRATE;
+
+        // Check own inventory for berries to eat, and then if the mob is
+        // allowed to, collect berries if none to eat.
+        if (hungerTime > 0 && !checkInventory())
+        {
+            // Pokemobs set to stay can collect berries, or wild ones,
+            boolean tameCheck = !pokemob.isPlayerOwned() || pokemob.getGeneralState(GeneralStates.STAYING);
+            if (entity.getEntityData().hasKey("lastInteract"))
+            {
+                long time = entity.getEntityData().getLong("lastInteract");
+                long diff = entity.getEntityWorld().getTotalWorldTime() - time;
+                if (diff < PokecubeMod.core.getConfig().pokemobLifeSpan) tameCheck = false;
+            }
+            // If they are allowed to, find the berries.
+            if (tameCheck)
+            {
+                // Only run this if we are getting close to hurt damage, mostly
+                // to allow trying other food sources first.
+                if (hungerTime > deathTime / 4) toRun.add(new GenBerries(pokemob));
+            }
+            // Otherwise take damage.
+            else if (entity.ticksExisted % hungerTicks == 0)
+            {
+                float ratio = (float) ((hungerTime - hurtTime) / deathTime);
+                boolean dead = entity.getMaxHealth() * ratio > entity.getHealth();
+                entity.attackEntityFrom(DamageSource.STARVE, entity.getMaxHealth() * ratio);
+                if (!dead) pokemob.displayMessageToOwner(
+                        new TextComponentTranslation("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
+                else pokemob.displayMessageToOwner(
+                        new TextComponentTranslation("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
             }
         }
+
+        // Everything after here only applies about once per second.
+        if (entity.ticksExisted % hungerTicks != 0) return;
+
+        v.set(entity);
+
+        // Reset hunting status if we are not actually hungry
+        if (!pokemob.neverHungry() && pokemob.getHungerCooldown() < 0)
+        {
+            if (hungerTime > 0 && !pokemob.getCombatState(CombatStates.HUNTING))
+            {
+                pokemob.setCombatState(CombatStates.HUNTING, true);
+            }
+        }
+
+        // Check if we should go after bait. The Math.random() > 0.99 is to
+        // allow non-hungry fish to also try to get bait.
+        if (shouldRun() || Math.random() > 0.99) checkBait();
+
+        // Check if we should go to sleep instead.
+        checkSleep();
+
+        Random rand = new Random(pokemob.getRNGValue());
+        int cur = (entity.ticksExisted / hungerTicks);
+        int tick = rand.nextInt(10);
+
+        /*
+         * Check the various hunger types if it is hunting.
+         */
+        if (pokemob.getCombatState(CombatStates.HUNTING)) checkHunt();
 
         // cap hunger.
         hungerTime = pokemob.getHungerTime();
@@ -319,13 +388,19 @@ public class AIHungry extends AIBase
         }
     }
 
+    /** Eats a berry
+     * 
+     * @param b
+     *            the berry
+     * @param distance
+     *            to the berry */
     protected void eatBerry(IBlockState b, double distance)
     {
         ItemStack fruit = ((IBerryFruitBlock) b.getBlock()).getBerryStack(world, foodLoc.getPos());
 
         if (!CompatWrapper.isValid(fruit))
         {
-            foodLoc.clear();
+            foodLoc = null;
             pokemob.noEat(null);
             return;
         }
@@ -337,7 +412,7 @@ public class AIHungry extends AIBase
             pokemob.eat(berry);
             toRun.addElement(new InventoryChange(entity, 2, fruit, true));
             TickHandler.addBlockChange(foodLoc, entity.dimension, Blocks.AIR);
-            foodLoc.clear();
+            foodLoc = null;
         }
         else if (entity.ticksExisted % 20 == rand.nextInt(20))
         {
@@ -362,9 +437,17 @@ public class AIHungry extends AIBase
         }
     }
 
+    /** Eats a plant.
+     * 
+     * @param b
+     *            the plant
+     * @param location
+     *            where the plant is
+     * @param dist
+     *            distance to the plant */
     protected void eatPlant(IBlockState b, Vector3 location, double dist)
     {
-        double diff = 2;
+        double diff = 1;
         diff = Math.max(diff, entity.width);
         if (dist < diff)
         {
@@ -383,63 +466,53 @@ public class AIHungry extends AIBase
                         toRun.addElement(new InventoryChange(entity, 2, stack, true));
                 }
             }
-            foodLoc.clear();
+            foodLoc = null;
             addEntityPath(entity, null, moveSpeed);
         }
-        else if (entity.ticksExisted % 20 == rand.nextInt(20))
+        else
         {
             boolean shouldChangePath = true;
             block = false;
             v.set(entity).add(0, entity.height, 0);
-            Vector3 p, m;
-            if (pokemob.isHerbivore())
-            {
-                Vector3 temp = v.findClosestVisibleObject(world, true, (int) distance,
-                        PokecubeMod.core.getConfig().getPlantTypes());
-                if (temp != null)
-                {
-                    block = true;
-                    foodLoc.set(temp);
-                }
-            }
-
-            if (!block && pokemob.eatsBerries())
-            {
-                Vector3 temp = v.findClosestVisibleObject(world, true, (int) distance, IBerryFruitBlock.class);
-                if (temp != null)
-                {
-                    block = true;
-                    foodLoc.set(temp);
-                }
-            }
-
             if (!this.entity.getNavigator().noPath())
             {
-                p = v.set(this.entity.getNavigator().getPath().getFinalPathPoint());
-                m = v1.set(foodLoc);
-                if (p.distToSq(m) <= 16) shouldChangePath = true;
+                Vector3 pathEnd, destination;
+                pathEnd = v.set(this.entity.getNavigator().getPath().getFinalPathPoint());
+                destination = v1.set(foodLoc);
+                if (pathEnd.distToSq(destination) < 1) shouldChangePath = false;
             }
             Path path = null;
-            if (shouldChangePath
-                    && (path = entity.getNavigator().getPathToXYZ(foodLoc.x, foodLoc.y, foodLoc.z)) == null)
+            if (shouldChangePath)
             {
-                setCombatState(pokemob, CombatStates.HUNTING, false);
-                berry.setItem(new ItemStack(b.getBlock()));
-                pokemob.noEat(berry);
-                foodLoc.clear();
-                addEntityPath(entity, null, moveSpeed);
+                path = entity.getNavigator().getPathToXYZ(foodLoc.x, foodLoc.y, foodLoc.z);
+                if (path == null)
+                {
+                    setCombatState(pokemob, CombatStates.HUNTING, false);
+                    berry.setItem(new ItemStack(b.getBlock()));
+                    pokemob.noEat(berry);
+                    foodLoc = null;
+                    addEntityPath(entity, null, moveSpeed);
+                }
+                else addEntityPath(entity, path, moveSpeed);
             }
-            else addEntityPath(entity, path, moveSpeed);
         }
     }
 
+    /** Eats a rock.
+     * 
+     * @param b
+     *            the rock
+     * @param location
+     *            where the rock is
+     * @param dist
+     *            distance to the rock */
     protected void eatRocks(IBlockState b, Vector3 location, double dist)
     {
         double diff = 2;
         diff = Math.max(diff, entity.width);
         if (dist < diff)
         {
-            if (PokecubeMod.core.getConfig().pokemobsEatRocks && Math.random() > 0.0075)
+            if (PokecubeMod.core.getConfig().pokemobsEatRocks)
             {
                 if (b.getBlock() == Blocks.COBBLESTONE)
                 {
@@ -457,7 +530,7 @@ public class AIHungry extends AIBase
             setCombatState(pokemob, CombatStates.HUNTING, false);
             berry.setItem(new ItemStack(b.getBlock()));
             pokemob.eat(berry);
-            foodLoc.clear();
+            foodLoc = null;
             addEntityPath(entity, null, moveSpeed);
         }
         else if (entity.ticksExisted % 20 == rand.nextInt(20))
@@ -471,7 +544,7 @@ public class AIHungry extends AIBase
             if (temp != null)
             {
                 block = true;
-                foodLoc.set(temp);
+                foodLoc = temp.copy();
             }
 
             Vector3 p, m;
@@ -494,7 +567,7 @@ public class AIHungry extends AIBase
                 setCombatState(pokemob, CombatStates.HUNTING, false);
                 berry.setItem(new ItemStack(b.getBlock()));
                 pokemob.noEat(berry);
-                foodLoc.clear();
+                foodLoc = null;
                 if (pokemob.hasHomeArea())
                 {
                     path = entity.getNavigator().getPathToXYZ(pokemob.getHome().getX(), pokemob.getHome().getY(),
@@ -512,44 +585,11 @@ public class AIHungry extends AIBase
     protected void findFood()
     {
         v.set(entity).addTo(0, entity.getEyeHeight(), 0);
-        if (pokemob.getPokedexEntry().swims())
-        {// grow in 1.12
-            AxisAlignedBB bb = v.set(entity).addTo(0, entity.getEyeHeight(), 0).getAABB()
-                    .grow(PokecubeMod.core.getConfig().fishHookBaitRange);
-            List<EntityFishHook> hooks = entity.getEntityWorld().getEntitiesWithinAABB(EntityFishHook.class, bb);
-            if (!hooks.isEmpty())
-            {
-                Collections.shuffle(hooks);
-                EntityFishHook hook = hooks.get(0);
-                if (v.isVisible(world, v1.set(hook)))
-                {// We return here, as main thread tick will deal with the
-                 // eating of this fish hook as to prevent concurrency issues
-                 // with trying to get it.
-                    return;
-                }
-            }
-        }
 
-        // check inventory for berries
-        for (int i = 2; i < 7; i++)
-        {
-            ItemStack stack = pokemob.getPokemobInventory().getStackInSlot(i);
-            if (!stack.isEmpty() && stack.getItem() instanceof ItemBerry)
-            {
-                stack.shrink(1);
-                if (stack.isEmpty())
-                {
-                    pokemob.getPokemobInventory().setInventorySlotContents(i, ItemStack.EMPTY);
-                }
-                setCombatState(pokemob, CombatStates.HUNTING, false);
-                berry.setItem(stack.copy());
-                pokemob.eat(berry);
-                return;
-            }
-        }
-        // Tame pokemon can eat berries out of trapped chests, so check for
-        // one
-        // of those here.
+        /*
+         * Tame pokemon can eat berries out of trapped chests, so check for one
+         * of those here.
+         */
         if (pokemob.getGeneralState(GeneralStates.TAMED))
         {
             IInventory container = null;
@@ -561,7 +601,7 @@ public class AIHungry extends AIBase
             {
                 container = (IInventory) temp.getTileEntity(world);
 
-                for (int i1 = 0; i1 < 27; i1++)
+                for (int i1 = 0; i1 < container.getSizeInventory(); i1++)
                 {
                     ItemStack stack = container.getStackInSlot(i1);
                     if (!stack.isEmpty() && stack.getItem() instanceof ItemBerry)
@@ -572,7 +612,6 @@ public class AIHungry extends AIBase
                             container.setInventorySlotContents(i1, ItemStack.EMPTY);
                         }
                         setCombatState(pokemob, CombatStates.HUNTING, false);
-
                         Path path = entity.getNavigator().getPathToXYZ(temp.x, temp.y, temp.z);
                         addEntityPath(entity, path, moveSpeed);
                         pokemob.eat(berry);
@@ -595,7 +634,7 @@ public class AIHungry extends AIBase
         block = false;
         v.set(entity).add(0, entity.height, 0);
 
-        if (foodLoc.isEmpty())
+        if (foodLoc == null)
         {
             if (!block && pokemob.isHerbivore())
             {
@@ -604,7 +643,7 @@ public class AIHungry extends AIBase
                 if (temp != null)
                 {
                     block = true;
-                    foodLoc.set(temp);
+                    foodLoc = temp.copy();
                 }
             }
             if (!block && pokemob.filterFeeder())
@@ -619,7 +658,7 @@ public class AIHungry extends AIBase
                 if (temp != null)
                 {
                     block = true;
-                    foodLoc.set(temp);
+                    foodLoc = temp.copy();
                 }
             }
             if (!block && pokemob.eatsBerries())
@@ -630,22 +669,15 @@ public class AIHungry extends AIBase
                     if (temp != null)
                     {
                         block = true;
-                        foodLoc.set(temp);
+                        foodLoc = temp.copy();
                     }
-                }
-                else
-                {
-                    pokemob.setHungerCooldown(10);
-                    toRun.add(new GenBerries(pokemob));
-                    setCombatState(pokemob, CombatStates.HUNTING, false);
                 }
             }
         }
 
-        if (foodLoc.isEmpty())
+        if (foodLoc == null)
         {
             pokemob.setHungerCooldown(10);
-            setCombatState(pokemob, CombatStates.HUNTING, false);
         }
     }
 
@@ -665,13 +697,13 @@ public class AIHungry extends AIBase
     @Override
     public void reset()
     {
-        foodLoc.clear();
+        foodLoc = null;
     }
 
     @Override
     public void run()
     {
-        if (foodLoc.isEmpty())
+        if (foodLoc == null)
         {
             findFood();
         }
@@ -684,14 +716,14 @@ public class AIHungry extends AIBase
             IBlockState b = foodLoc.getBlockState(world);
             if (b == null)
             {
-                foodLoc.clear();
+                foodLoc = null;
                 return;
             }
             if (b.getBlock() instanceof IBerryFruitBlock)
             {
                 eatBerry(b, d);
             }
-            if (PokecubeTerrainChecker.isPlant(b))
+            else if (PokecubeTerrainChecker.isPlant(b))
             {
                 eatPlant(b, foodLoc, d);
             }
@@ -706,19 +738,28 @@ public class AIHungry extends AIBase
     public boolean shouldRun()
     {
         world = entity.getEntityWorld();
+        if (world == null) return false;
 
-        int hungerTicks = 20;
+        int hungerTicks = TICKRATE;
+        // This can be set in configs to disable.
+        if (hungerTicks < 0) return false;
+
+        // Only run this every few ticks.
         if (entity.ticksExisted % hungerTicks != 0) return false;
 
-        boolean ownedSleepCheck = pokemob.getGeneralState(GeneralStates.TAMED)
-                && !(pokemob.getGeneralState(GeneralStates.STAYING));
-        if (ownedSleepCheck)
-        {
-            pokemob.setLogicState(LogicStates.SLEEPING, false);
-        }
-        if (world == null || entity.getAttackTarget() != null) return false;
+        // Do not run if the mob is in battle.
+        if (pokemob.getCombatState(CombatStates.ANGRY)) return false;
+
+        // Apply cooldowns and increment hunger.
         pokemob.setHungerCooldown(pokemob.getHungerCooldown() - hungerTicks);
         pokemob.setHungerTime(pokemob.getHungerTime() + hungerTicks);
+
+        // Do not run this if on cooldown
+        if (pokemob.getHungerCooldown() > 0) return false;
+
+        // Do not run this if not really hungry
+        if (pokemob.getHungerTime() < 0) return false;
+
         boolean hunting = pokemob.getCombatState(CombatStates.HUNTING);
         if (pokemob.getLogicState(LogicStates.SLEEPING) || !hunting || pokemob.neverHungry())
         {
@@ -726,9 +767,11 @@ public class AIHungry extends AIBase
             if (hunting) setCombatState(pokemob, CombatStates.HUNTING, false);
             return false;
         }
-        if (foodLoc.distToEntity(entity) > 32) foodLoc.clear();
-        if (pokemob.getHungerCooldown() > 0) return false;
-        if (!foodLoc.isEmpty()) return true;
+        // Ensure food location is not too far away.
+        if (foodLoc != null && foodLoc.distToEntity(entity) > 32) foodLoc = null;
+        // We have a location, so can run.
+        if (foodLoc != null) return true;
+        // We are hunting for food, so can run.
         return hunting;
     }
 }

@@ -25,6 +25,7 @@ import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pokecube.core.PokecubeItems;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
+import pokecube.core.ai.thread.aiRunnables.idle.AIHungry;
 import pokecube.core.ai.thread.aiRunnables.idle.AIIdle;
 import pokecube.core.contributors.Contributor;
 import pokecube.core.contributors.ContributorManager;
@@ -338,6 +339,8 @@ public class Config extends ConfigBase
     public boolean                       captureDelayTillAttack       = true;
     @Configure(category = mobAI)
     public int                           idleTickRate                 = 20;
+    @Configure(category = mobAI)
+    public int                           hungerTickRate               = 20;
 
     public SoundEvent[]                  dodges                       = {};
     public SoundEvent[]                  leaps                        = {};
@@ -701,10 +704,12 @@ public class Config extends ConfigBase
         // Ensure these values are in bounds.
         if (attackCooldown <= 0) attackCooldown = 1;
         if (spawnRate <= 0) spawnRate = 1;
-        if (idleTickRate <= 0) idleTickRate = 1;
+        if (idleTickRate == 0) idleTickRate = 1;
+        if (hungerTickRate == 0) hungerTickRate = 1;
 
         // Update idle tick rate.
         AIIdle.IDLETIMER = idleTickRate;
+        AIHungry.TICKRATE = hungerTickRate;
 
         // Init secret bases.
         WorldProviderSecretBase.init(baseSizeFunction);

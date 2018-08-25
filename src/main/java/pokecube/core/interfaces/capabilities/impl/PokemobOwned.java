@@ -170,7 +170,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     @Override
     public boolean hasHomeArea()
     {
-        return guardCap.getPrimaryTask().getRoamDistance() > 0;
+        return getHome() != null && getHomeDistance() > 0;
     }
 
     protected void initInventory()

@@ -205,6 +205,9 @@ public class AIIdle extends AIBase
     @Override
     public boolean shouldRun()
     {
+        // Configs can set this to -1 to disable idle movement entirely.
+        if (IDLETIMER < 0) return false;
+
         // Wander disabled, so don't run.
         if (!mob.isRoutineEnabled(AIRoutine.WANDER)) return false;
 
@@ -241,20 +244,8 @@ public class AIIdle extends AIBase
         }
 
         // Have path, no need to idle
-        if (current != null)
-        {
-            v.set(current.getFinalPathPoint());
-            v1.set(entity);
-            double diff = 4 * entity.width;
-            diff = Math.max(2, diff);
-            // Path is near end, so we can clear it.
-            if (v.distToSq(v1) < diff)
-            {
-                addEntityPath(entity, null, speed);
-                return false;
-            }
-            return false;
-        }
+        if (current != null) return false;
+
         // Check random number
         if (new Random().nextInt(IDLETIMER) == 0) return true;
         return false;
