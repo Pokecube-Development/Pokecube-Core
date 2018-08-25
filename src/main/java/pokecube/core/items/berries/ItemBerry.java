@@ -76,7 +76,7 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
             IPokemob pokemob = container.getPokemob();
             Nature nature = pokemob.getNature();
             int fav = Nature.getFavouriteBerryIndex(nature);
-            if (fav == stack.getItemDamage())
+            if (fav == index)
             {
                 info = I18n.format("item.berry.favourite.desc", pokemob.getPokemonDisplayName().getFormattedText());
                 tooltip.add(info);

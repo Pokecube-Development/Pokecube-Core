@@ -729,7 +729,8 @@ public class EventsHandler
                 int fav = Nature.getFavouriteBerryIndex(pokemob.getNature());
                 if (PokecubeCore.instance.getConfig().berryBreeding
                         && (player.isSneaking() || player instanceof FakePlayer) && entity.getAttackTarget() == null
-                        && held.getItem() instanceof ItemBerry && (fav == -1 || fav == held.getItemDamage()))
+                        && held.getItem() instanceof ItemBerry
+                        && (fav == -1 || fav == ((ItemBerry) held.getItem()).index))
                 {
                     if (!player.capabilities.isCreativeMode)
                     {
