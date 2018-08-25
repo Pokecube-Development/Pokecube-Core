@@ -127,6 +127,7 @@ import pokecube.core.items.megastuff.MegaCapability;
 import pokecube.core.items.pokecubes.EntityPokecube;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import pokecube.core.moves.PokemobDamageSource;
+import pokecube.core.moves.TerrainDamageSource;
 import pokecube.core.network.PokecubePacketHandler;
 import pokecube.core.network.packets.PacketChoose;
 import pokecube.core.network.packets.PacketDataSync;
@@ -960,8 +961,12 @@ public class EventsHandler
     @SubscribeEvent
     public void livingHurtEvent(LivingHurtEvent evt)
     {
-        // No harming invalid targets.
-        if (!AIFindTarget.validTargets.apply(evt.getEntity()))
+        /*
+         * No harming invalid targets, only apply this to pokemob related damage
+         * sources
+         */
+        if ((evt.getSource() instanceof PokemobDamageSource || evt.getSource() instanceof TerrainDamageSource)
+                && !AIFindTarget.validTargets.apply(evt.getEntity()))
         {
             evt.setCanceled(true);
             return;
