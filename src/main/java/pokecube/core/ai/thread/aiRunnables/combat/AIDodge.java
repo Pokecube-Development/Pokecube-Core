@@ -88,14 +88,10 @@ public class AIDodge extends AIBase
 
         double evasionMod = pokemob.getFloatStat(Stats.EVASION, true);
         /*
-         * Scale dodge by pokemob's size
-         */
-        perp.scalarMultBy(pokemob.getPokedexEntry().width * pokemob.getSize());
-        /*
          * Scale by evasion modifier
          */
         perp.scalarMultBy(evasionMod);
-        if (perp.magSq() > 4) perp.norm().scalarMultBy(2);
+        if (perp.magSq() > 1) perp.norm();
 
         /*
          * Only flying or floating things can dodge properly in the air.

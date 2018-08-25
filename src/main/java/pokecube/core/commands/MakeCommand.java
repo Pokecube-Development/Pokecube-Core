@@ -232,6 +232,7 @@ public class MakeCommand extends CommandBase
     public static String setToArgs(String[] args, IPokemob mob, int index, Vector3 offset, boolean initLevel)
     {
         List<String> cleaned = Lists.newArrayList();
+        mob.setHungerTime(-PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
         for (int i = 0; i < index; i++)
             cleaned.add(args[i]);
         for (int i = index; i < args.length; i++)

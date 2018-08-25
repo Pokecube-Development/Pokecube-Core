@@ -74,15 +74,8 @@ public class AILeap extends AIBase
         Vector3 targetLoc = target != null ? Vector3.getNewVector().set(target) : pokemob.getTargetPos();
         Vector3 leaperLoc = Vector3.getNewVector().set(attacker);
         Vector3 dir = targetLoc.subtract(leaperLoc);
-        /*
-         * Scale by 0.2 to make it take roughly half a second for leap to reach
-         * target. Note that this doesn't factor in gravity, so leaps up take a
-         * bit longer than that.
-         */
-        double d = dir.mag() * 0.2;
-        dir.norm();
-        if (d > 5) dir.scalarMultBy(d * 0.2f);
-        if (dir.magSq() < 1) dir.norm();
+
+        if (dir.magSq() < 1 || dir.magSq() > 4) dir.norm();
         if (dir.isNaN())
         {
             new Exception().printStackTrace();
@@ -90,13 +83,13 @@ public class AILeap extends AIBase
         }
         if (PokecubeMod.debug)
         {
-            PokecubeMod.log(Level.INFO, "Leap: " + attacker + " " + dir);
+            PokecubeMod.log(Level.INFO, "Leap: " + attacker + " " + dir.mag());
         }
         double dy = Math.abs(dir.y);
         /*
          * Make adjustments so mobs can hit flying things more easily.
          */
-        if (!attacker.onGround && dy > pokemob.getSize() * pokemob.getPokedexEntry().height && dy < 3) dir.y *= 2;
+        if (!(!attacker.onGround && dy > pokemob.getSize() * pokemob.getPokedexEntry().height && dy < 3)) dir.y *= 2;
         /*
          * Apply the leap
          */
