@@ -1,6 +1,5 @@
 package pokecube.core.interfaces.capabilities.impl;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -8,8 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import pokecube.core.interfaces.IMoveConstants;
-import pokecube.core.interfaces.OldAI;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
@@ -20,61 +17,6 @@ import thut.lib.CompatWrapper;
 public abstract class PokemobSaves extends PokemobOwned implements TagNames
 {
     private NBTTagCompound extraData = new NBTTagCompound();
-
-    private void handleOldAIStates(int value)
-    {
-        // Split value to bits, determine which field in IMoveConstants
-        // with @OldAI correspond to that bit, then find the corresponding field
-        // in generalStates, CombatStates or LogicStates, and apply that to the
-        // new system.
-        fields:
-        for (Field f : IMoveConstants.class.getFields())
-        {
-            OldAI annot = f.getAnnotation(OldAI.class);
-            if (annot != null)
-            {
-                try
-                {
-                    int state = f.getInt(null);
-
-                    if ((value & state) != 0)
-                    {
-                        // Check if it is a logic state.
-                        for (LogicStates f1 : LogicStates.values())
-                        {
-                            if (f1.name().equals(f.getName()))
-                            {
-                                this.setLogicState(f1, true);
-                                continue fields;
-                            }
-                        }
-                        // Check if it is a General state.
-                        for (GeneralStates f1 : GeneralStates.values())
-                        {
-                            if (f1.name().equals(f.getName()))
-                            {
-                                this.setGeneralState(f1, true);
-                                continue fields;
-                            }
-                        }
-                        // Check if it is a Combat state.
-                        for (CombatStates f1 : CombatStates.values())
-                        {
-                            if (f1.name().equals(f.getName()))
-                            {
-                                this.setCombatState(f1, true);
-                                continue fields;
-                            }
-                        }
-                    }
-                }
-                catch (IllegalArgumentException | IllegalAccessException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
 
     private void cleanLoadedAIStates()
     {
@@ -203,11 +145,6 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read AI
         if (!aiTag.hasNoTags())
         {
-            // TODO clean this up.
-            if (aiTag.hasKey(AISTATE))
-            {
-                handleOldAIStates(aiTag.getInteger(AISTATE));
-            }
             setTotalCombatState(aiTag.getInteger(COMBATSTATE));
             setTotalGeneralState(aiTag.getInteger(GENERALSTATE));
             setTotalLogicState(aiTag.getInteger(LOGICSTATE));
