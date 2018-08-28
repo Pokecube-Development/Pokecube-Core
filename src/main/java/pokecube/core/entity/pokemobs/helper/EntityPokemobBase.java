@@ -5,7 +5,6 @@ package pokecube.core.entity.pokemobs.helper;
 
 import java.util.List;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -51,11 +50,8 @@ public abstract class EntityPokemobBase extends EntityHungryPokemob implements I
 {
     public static boolean       multibox           = true;
     public static double        averagePokemobTick = 0;
-
     private int                 despawntimer       = 0;
-
     private EntityPokemobPart[] partsArray;
-
     private float               nextStepDistance;
 
     public EntityPokemobBase(World world)
@@ -547,13 +543,6 @@ public abstract class EntityPokemobBase extends EntityHungryPokemob implements I
     {
         GeneticsManager.handleEpigenetics(pokemobCap);
         return super.writeToNBT(nbttagcompound);
-    }
-
-    /** Use this for anything that does not change or need to be updated. */
-    @Override
-    public void writeSpawnData(ByteBuf data)
-    {
-        super.writeSpawnData(data);
     }
 
     @Override
