@@ -162,7 +162,6 @@ public final class SpawnHandler
                                                                                };
 
     private static Vector3                             vec1                    = Vector3.getNewVector();
-    private static Vector3                             vec2                    = Vector3.getNewVector();
     private static Vector3                             temp                    = Vector3.getNewVector();
     public static double                               MAX_DENSITY             = 1;
     public static int                                  MAXNUM                  = 10;
@@ -309,6 +308,23 @@ public final class SpawnHandler
         return null;
     }
 
+    public static Vector3 getSpawnSurface(World world, Vector3 loc, int range)
+    {
+        boolean setToSurface = false;
+        if (!setToSurface) return loc.copy();
+        int tries = 0;
+        IBlockState state;
+        while (tries++ <= range)
+        {
+            state = loc.getBlockState(world);
+            if (state.getMaterial() == Material.WATER) return loc;
+            boolean clear = loc.isClearOfBlocks(world);
+            if (clear && !loc.isClearOfBlocks(world)) { return loc.offset(EnumFacing.UP); }
+            loc.offsetBy(EnumFacing.DOWN);
+        }
+        return loc.copy();
+    }
+
     public static Vector3 getRandomPointNear(Entity player, int range)
     {
         if (player == null) return null;
@@ -325,22 +341,15 @@ public final class SpawnHandler
         if (Math.abs(z) > range) z = Math.signum(z) * range;
 
         // Don't select distances too far up/down from current.
-        double y = Math.min(Math.max(5, rand.nextGaussian() * 10), 10);
+        double y = Math.min(Math.max(-5, rand.nextGaussian() * 10), 10);
         v.addTo(x, y, z);
 
         // Don't select unloaded areas.
         if (!world.isAreaLoaded(v.getPos(), 8)) return null;
 
         // Find surface
-        Vector3 temp1 = Vector3.getNextSurfacePoint2(world, vec1, vec2.set(EnumFacing.DOWN), 10);
-
-        if (temp1 != null)
-        {
-            // Increment up as getNextSurfacePoint2 returns the ground block
-            temp1.y++;
-            return temp1;
-        }
-        return null;
+        Vector3 temp1 = getSpawnSurface(world, vec1, 10);
+        return temp1;
     }
 
     @Deprecated
@@ -596,7 +605,7 @@ public final class SpawnHandler
             if (CapabilityPokemob.getPokemobFor(o) != null) num++;
         }
         if (num > MAX_DENSITY * MAXNUM) return ret;
-        if (v.y < 0 || !checkNoSpawnerInArea(world, v.intX(), v.intY(), v.intZ())) return ret;
+        if (!checkNoSpawnerInArea(world, v.intX(), v.intY(), v.intZ())) return ret;
         refreshTerrain(v, world);
         TerrainSegment t = TerrainManager.getInstance().getTerrian(world, v);
         if (onlySubbiomes && t.getBiome(v) < 0) { return ret; }
