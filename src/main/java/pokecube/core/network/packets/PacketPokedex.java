@@ -585,7 +585,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             int index1 = message.data.getInteger("1");
             int index2 = message.data.getInteger("2");
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
-            TeleportHandler.swapTeleports(PokecubeCore.getPlayer(null).getCachedUniqueIdString(), index1, index2);
+            TeleportHandler.swapTeleports(player.getCachedUniqueIdString(), index1, index2);
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
         }
