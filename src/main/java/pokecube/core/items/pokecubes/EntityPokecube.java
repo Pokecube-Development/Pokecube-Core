@@ -243,6 +243,7 @@ public class EntityPokecube extends EntityPokecubeBase
     @Override
     public void onUpdate()
     {
+        this.portalCounter = 0;
         if (isLoot) motionX = motionZ = 0;
         super.onUpdate();
         if (isLoot) return;

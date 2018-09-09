@@ -479,6 +479,7 @@ public abstract class EntityPokemobBase extends EntityHungryPokemob implements I
     public void onUpdate()
     {
         if (!Pokedex.getInstance().isRegistered(pokemobCap.getPokedexEntry())) return;
+        this.portalCounter = 0;
         long time = System.nanoTime();
         here.set(posX, posY, posZ);
         BlockPos pos = new BlockPos(posX, 1, posZ);
