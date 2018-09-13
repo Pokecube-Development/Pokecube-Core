@@ -240,7 +240,6 @@ public class PokecubeSerializer
         {
             PokecubeMod.log(Level.WARNING, "Error adding chunks to load.", new Exception(e));
         }
-        saveData();
     }
 
     public void addMeteorLocation(Vector4 v)
