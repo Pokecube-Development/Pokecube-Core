@@ -105,6 +105,7 @@ public class ContainerHealTable extends Container implements IHealer
     {
         super.onContainerClosed(player);
 
+        //TODO test what happens if server crashes while this is open.
         if (!player.getEntityWorld().isRemote)
         {
             for (int var2 = 0; var2 < this.inventoryHealTable.getSizeInventory(); ++var2)
