@@ -325,7 +325,7 @@ public abstract class PokemobAI extends PokemobEvolves
         onGenesChanged();
 
         // Update/add cache.
-        if (this.isPlayerOwned())
+        if (this.isPlayerOwned() && getOwnerId() != null)
         {
             PlayerDataHandler.getInstance().getPlayerData(getOwnerId()).getData(PlayerPokemobCache.class)
                     .addPokemob(this);
