@@ -286,8 +286,7 @@ public class PokecubeSerializer
 
     public boolean hasStarter(EntityPlayer player)
     {
-        return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
-                .hasStarter();
+        return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class).hasStarter();
     }
 
     public void loadData()
@@ -440,6 +439,7 @@ public class PokecubeSerializer
             }
             else entity.setPokecube(new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE)));
             ItemStack item = PokecubeManager.pokemobToItem(entity);
+            PokecubeManager.heal(item);
             entity.getEntity().isDead = true;
             return item;
         }

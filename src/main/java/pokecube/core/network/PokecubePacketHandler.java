@@ -370,6 +370,7 @@ public class PokecubePacketHandler
                     pokemob.setExp(Tools.levelToXp(pokemob.getExperienceMode(), 5), true);
                     pokemob.getEntity().setHealth(pokemob.getEntity().getMaxHealth());
                     ItemStack item = PokecubeManager.pokemobToItem(pokemob);
+                    PokecubeManager.heal(item);
                     pokemob.getEntity().isDead = true;
                     return item;
                 }
