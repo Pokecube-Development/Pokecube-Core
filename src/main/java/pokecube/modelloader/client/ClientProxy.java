@@ -12,18 +12,12 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.IResource;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.common.ProgressManager;
 import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
-import pokecube.core.PokecubeCore;
-import pokecube.core.client.render.entity.RenderAdvancedPokemobModel;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.PokecubeMod;
@@ -336,33 +330,16 @@ public class ClientProxy extends CommonProxy
     {
         for (String modid : modelProviders.keySet())
         {
-            Object mod = modelProviders.get(modid);
             if (modModels.containsKey(modid))
             {
                 for (final String s : modModels.get(modid))
                 {
                     PokedexEntry entry = Database.getEntry(s);
-                    if (entry == null) continue;
+                    if (entry == null || !entry.getModId().equals(modid)) continue;
                     if (AnimationLoader.models.containsKey(entry.getTrimmedName())
                             || TabulaPackLoader.modelMap.containsKey(entry))
                     {
-                        PokecubeCore.proxy.registerPokemobRenderer(s, new IRenderFactory<EntityLiving>()
-                        {
-                            @SuppressWarnings({ "rawtypes", "unchecked" })
-                            @Override
-                            public Render<? super EntityLiving> createRenderFor(RenderManager manager)
-                            {
-                                RenderAdvancedPokemobModel<?> renderer = new RenderAdvancedPokemobModel(
-                                        entry.getTrimmedName(), manager, 1);
-                                if (entry != null
-                                        && (ModPokecubeML.preload || Config.instance.toPreload.contains(entry.getName())
-                                                || Config.instance.toPreload.contains(entry.getTrimmedName())))
-                                {
-                                    renderer.preload();
-                                }
-                                return (Render<? super EntityLiving>) renderer;
-                            }
-                        }, mod);
+                        mobProviders.get(modid).registerModel(entry);
                     }
                 }
             }

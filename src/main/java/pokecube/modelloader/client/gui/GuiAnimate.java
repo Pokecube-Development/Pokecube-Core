@@ -34,7 +34,7 @@ public class GuiAnimate extends GuiScreen
 {
     static String          mob              = "";
 
-    int                    pokedexNb        = 0;
+    PokedexEntry           pokeentry;
     protected GuiTextField anim;
     protected GuiTextField state;
     protected GuiTextField forme;
@@ -62,8 +62,8 @@ public class GuiAnimate extends GuiScreen
      * pressed for buttons) */
     protected void actionPerformed(GuiButton button) throws IOException
     {
-        PokedexEntry entry = null;
-        if ((entry = Database.getEntry(pokedexNb)) == null) entry = Pokedex.getInstance().getFirstEntry();
+        PokedexEntry entry = pokeentry;
+        if (entry == null) entry = Pokedex.getInstance().getFirstEntry();
         String[] gender = buttonList.get(12).displayString.split(":");
         byte sexe = IPokemob.NOSEXE;
         if (gender[1].equalsIgnoreCase("m"))
@@ -77,17 +77,19 @@ public class GuiAnimate extends GuiScreen
         }
         if (button.id == 2)
         {
-            int num = (entry = Pokedex.getInstance().getNext(entry, 1)).getPokedexNb();
-            if (num != pokedexNb) pokedexNb = num;
-            else pokedexNb = (entry = Pokedex.getInstance().getFirstEntry()).getPokedexNb();
+            PokedexEntry num = (entry = Pokedex.getInstance().getNext(entry, 1));
+            if (num != pokeentry) pokeentry = num;
+            else pokeentry = (entry = Pokedex.getInstance().getFirstEntry());
             mob = entry.getForGender(sexe).getName();
+            PacketPokedex.updateWatchEntry(pokeentry);
         }
         else if (button.id == 1)
         {
-            int num = (entry = Pokedex.getInstance().getPrevious(entry, 1)).getPokedexNb();
-            if (num != pokedexNb) pokedexNb = num;
-            else pokedexNb = (entry = Pokedex.getInstance().getLastEntry()).getPokedexNb();
+            PokedexEntry num = (entry = Pokedex.getInstance().getPrevious(entry, 1));
+            if (num != pokeentry) pokeentry = num;
+            else pokeentry = (entry = Pokedex.getInstance().getLastEntry());
             mob = entry.getForGender(sexe).getName();
+            PacketPokedex.updateWatchEntry(pokeentry);
         }
         else if (button.id == 3)
         {
@@ -147,7 +149,7 @@ public class GuiAnimate extends GuiScreen
         }
         else if (button.id == 13)
         {
-            entry = Database.getEntry(pokedexNb);
+            entry = pokeentry;
         }
         else if (button.id == 14)
         {
@@ -224,7 +226,7 @@ public class GuiAnimate extends GuiScreen
             }
             forme.setText(entry.getName());
             info.setText("" + pokemob.getSpecialInfo());
-
+            this.pokeentry = entry;
         }
     }
 
@@ -252,8 +254,8 @@ public class GuiAnimate extends GuiScreen
         state.drawTextBox();
         forme.drawTextBox();
         info.drawTextBox();
-        PokedexEntry entry = null;
-        if ((entry = Database.getEntry(pokedexNb)) == null) entry = Pokedex.getInstance().getFirstEntry();
+        PokedexEntry entry = pokeentry;
+        if (entry == null) entry = Pokedex.getInstance().getFirstEntry();
         IPokemob pokemob = EventsHandlerClient.getRenderMob(entry, PokecubeCore.proxy.getWorld());
         if (pokemob != null)
         {
@@ -278,7 +280,6 @@ public class GuiAnimate extends GuiScreen
         else if (e1 != null && e1 != entry)
         {
             entry = e1;
-            pokedexNb = entry.getPokedexNb();
             pokemob = EventsHandlerClient.getRenderMob(entry, PokecubeCore.proxy.getWorld());
             if (pokemob == null) return;
         }
@@ -402,7 +403,10 @@ public class GuiAnimate extends GuiScreen
         super.initGui();
         int yOffset = height / 2;
         int xOffset = width / 2;
-        pokedexNb = Pokedex.getInstance().getFirstEntry().getPokedexNb();
+
+        String name = PokecubePlayerDataHandler.getCustomDataTag(Minecraft.getMinecraft().player).getString("WEntry");
+        pokeentry = Database.getEntry(name);
+        if (pokeentry == null) pokeentry = Pokedex.getInstance().getFirstEntry();
         anim = new GuiTextField(0, fontRenderer, width - 101, yOffset + 13 - yOffset / 2, 100, 10);
         anim.setText("idle");
         state = new GuiTextField(0, fontRenderer, width - 101, yOffset + 43 - yOffset / 2, 100, 10);
@@ -446,10 +450,10 @@ public class GuiAnimate extends GuiScreen
 
         if (!hit && keyCode == 205)
         {
-            PokedexEntry entry = null;
-            if ((entry = Database.getEntry(pokedexNb)) == null) entry = Pokedex.getInstance().getFirstEntry();
-            int num = (entry = Pokedex.getInstance().getNext(entry, 1)).getPokedexNb();
-            if (num != pokedexNb) pokedexNb = num;
+            PokedexEntry entry = pokeentry;
+            if (entry == null) entry = Pokedex.getInstance().getFirstEntry();
+            PokedexEntry num = (entry = Pokedex.getInstance().getNext(entry, 1));
+            if (num != pokeentry) pokeentry = num;
             IPokemob pokemob = EventsHandlerClient.getRenderMob(entry, PokecubeCore.proxy.getWorld());
             if (pokemob == null) return;
             forme.setText(pokemob.getPokedexEntry().getName());
@@ -461,7 +465,7 @@ public class GuiAnimate extends GuiScreen
             PokedexEntry entry = Database.getEntry(forme.getText());
             if (entry == null)
             {
-                entry = Database.getEntry(pokedexNb);
+                entry = pokeentry;
             }
             if (entry != null)
             {

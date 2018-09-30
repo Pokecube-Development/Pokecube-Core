@@ -440,14 +440,12 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     {
         if (Database.getEntry(name) == null)
         {
-            Mod annotation = mod.getClass().getAnnotation(Mod.class);
-            RenderPokemobs.addModel(name.toLowerCase(Locale.ENGLISH) + annotation.modid(), model);
+            RenderPokemobs.addModel(name.toLowerCase(Locale.ENGLISH), model);
         }
         else
         {
             Mod annotation = mod.getClass().getAnnotation(Mod.class);
-            RenderPokemobs.addModel(Database.getEntry(name).getName().toLowerCase(Locale.ENGLISH) + annotation.modid(),
-                    model);
+            RenderPokemobs.addModel(Database.getEntry(name).getTranslatedName(), model);
             int number = Database.getEntry(name).getPokedexNb();
             if (models.get(number))
             {

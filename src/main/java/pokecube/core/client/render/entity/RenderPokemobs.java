@@ -73,7 +73,7 @@ public class RenderPokemobs extends RenderPokemob
 
     public static ModelBase[] getModels(PokedexEntry entry)
     {
-        String nbm = entry.getName().toLowerCase(Locale.ENGLISH) + entry.getModId();
+        String nbm = entry.getTrimmedName();
         ModelBase[] ret = new ModelBase[2];
         ret[0] = models.get(nbm);
         if (statusModels.get(nbm) == null)
@@ -157,7 +157,7 @@ public class RenderPokemobs extends RenderPokemob
             Render render = getRenderer(mob.getPokedexEntry());
             if (render == instance)
             {
-                String nbm = entry.getTrimmedName().toLowerCase(Locale.ENGLISH) + entry.getModId();
+                String nbm = entry.getTrimmedName();
                 setModel(nbm);
                 if (this.mainModel == null)
                 {
@@ -194,11 +194,11 @@ public class RenderPokemobs extends RenderPokemob
 
     public Render getRenderer(PokedexEntry entry)
     {
-        String nbm = entry.getTrimmedName().toLowerCase(Locale.ENGLISH) + entry.getModId();
+        String nbm = entry.getTrimmedName();
         Render ret;
         if ((ret = renderMap.get(nbm)) == null)
         {
-            String nbm2 = entry.getBaseName().toLowerCase(Locale.ENGLISH) + entry.getModId();
+            String nbm2 = entry.getBaseName();
             if ((ret = renderMap.get(nbm2)) == null)
             {
                 renderMap.put(nbm2, getInstance());

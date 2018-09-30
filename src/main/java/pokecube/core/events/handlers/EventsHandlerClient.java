@@ -170,7 +170,8 @@ public class EventsHandlerClient
         if (pokemob != null) pokemob = pokemob.setPokedexEntry(entry);
         if (pokemob == null || pokemob != renderMobs.get(entry))
         {
-            pokemob = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, world));
+            if (pokemob == null)
+                pokemob = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, world));
             if (pokemob == null) return null;
             pokemob.specificSpawnInit();
             renderMobs.put(entry, pokemob);
@@ -240,8 +241,8 @@ public class EventsHandlerClient
         if (PokecubeMod.core.getConfig().autoRecallPokemobs)
         {
             IPokemob mob = GuiDisplayPokecubeInfo.instance().getCurrentPokemob();
-            if (mob != null && !(mob.getEntity().isDead) && mob.getEntity().addedToChunk && event.player
-                    .getDistance(mob.getEntity()) > PokecubeMod.core.getConfig().autoRecallDistance)
+            if (mob != null && !(mob.getEntity().isDead) && mob.getEntity().addedToChunk
+                    && event.player.getDistance(mob.getEntity()) > PokecubeMod.core.getConfig().autoRecallDistance)
             {
                 mob.returnToPokecube();
             }
