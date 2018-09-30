@@ -50,25 +50,6 @@ public class PokemobPacketHandler
                             {
                                 pokemob.returnToPokecube();
                             }
-                            else if (channel == MOVEINDEX)
-                            {
-                                byte moveIndex = buffer.readByte();
-                                pokemob.setMoveIndex(moveIndex);
-                            }
-                            else if (channel == COME)
-                            {
-                                pokemob.getEntity().getNavigator().tryMoveToEntityLiving(player, 0.6);
-                                pokemob.getEntity().setAttackTarget(null);
-                                return;
-                            }
-                            else if (channel == MOVESWAP)
-                            {
-                                byte moveIndex0 = buffer.readByte();
-                                byte moveIndex1 = buffer.readByte();
-                                int num = buffer.readInt();
-                                pokemob.setLeaningMoveIndex(num);
-                                pokemob.exchangeMoves(moveIndex0, moveIndex1);
-                            }
                             else if (channel == CANCELEVOLVE)
                             {
                                 pokemob.cancelEvolve();
@@ -89,10 +70,6 @@ public class PokemobPacketHandler
         }
 
         public static final byte RETURN       = 0;
-        public static final byte MOVESWAP     = 4;
-        public static final byte MOVEINDEX    = 5;
-        public static final byte ALIVECHECK   = 7;
-        public static final byte COME         = 10;
         public static final byte CANCELEVOLVE = 12;
 
         PacketBuffer             buffer;;

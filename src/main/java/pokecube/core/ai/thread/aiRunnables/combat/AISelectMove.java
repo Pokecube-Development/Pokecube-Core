@@ -1,6 +1,7 @@
 package pokecube.core.ai.thread.aiRunnables.combat;
 
 import java.util.Random;
+import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -8,6 +9,7 @@ import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.moves.MovesUtils;
@@ -54,6 +56,13 @@ public class AISelectMove extends AIBase
             moveIndexCounter = 0;
             if (index != pokemob.getMoveIndex())
             {
+                if (PokecubeMod.debug)
+                {
+                    PokecubeMod.log(Level.FINER,
+                            "Move Swap to Random Move, " + pokemob.getEntity() + " g:"
+                                    + pokemob.getCombatState(CombatStates.GUARDING) + " h:"
+                                    + pokemob.getCombatState(CombatStates.HUNTING));
+                }
                 pokemob.setMoveIndex(index);
                 return true;
             }
@@ -94,6 +103,13 @@ public class AISelectMove extends AIBase
         // Update index if it changed.
         if (index != pokemob.getMoveIndex())
         {
+            if (PokecubeMod.debug)
+            {
+                PokecubeMod.log(Level.FINER,
+                        "Move Swap to Highest Damage, " + pokemob.getEntity() + " g:"
+                                + pokemob.getCombatState(CombatStates.GUARDING) + " h:"
+                                + pokemob.getCombatState(CombatStates.HUNTING));
+            }
             pokemob.setMoveIndex(index);
             return true;
         }
