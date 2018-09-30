@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.render.entity.RenderAdvancedPokemobModel;
 import pokecube.core.database.PokedexEntry;
@@ -25,6 +27,7 @@ public interface IMobProvider
      * locating the modid */
     Object getMod();
 
+    @SideOnly(Side.CLIENT)
     default void registerModel(PokedexEntry entry)
     {
         PokecubeCore.proxy.registerPokemobRenderer(entry.getTrimmedName(), new IRenderFactory<EntityLiving>()

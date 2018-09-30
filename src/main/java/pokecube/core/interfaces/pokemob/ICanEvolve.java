@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.common.collect.Lists;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -341,14 +339,12 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             {
                 evolution.getEntityWorld().spawnEntity(evolution);
 
-                if (!thisEntity.riddenByEntities.isEmpty())
+                // Remount riders on the new mob.
+                List<Entity> riders = thisEntity.getPassengers();
+                for (Entity e : riders)
                 {
-                    List<Entity> riders = Lists.newArrayList(thisEntity.riddenByEntities);
-                    for (Entity e : riders)
-                    {
-                        e.dismountRidingEntity();
-                        e.startRiding(evolution);
-                    }
+                    e.dismountRidingEntity();
+                    e.startRiding(evolution);
                 }
 
                 new EvoTicker(evolution, thisEntity.getUniqueID());

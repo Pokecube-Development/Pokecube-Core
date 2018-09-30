@@ -335,7 +335,7 @@ public class ClientProxy extends CommonProxy
                 for (final String s : modModels.get(modid))
                 {
                     PokedexEntry entry = Database.getEntry(s);
-                    if (entry == null || !entry.getModId().equals(modid)) continue;
+                    if (entry == null || (!entry.getModId().equals(modid) && !modid.equals("pokecube_mno"))) continue;
                     if (AnimationLoader.models.containsKey(entry.getTrimmedName())
                             || TabulaPackLoader.modelMap.containsKey(entry))
                     {
