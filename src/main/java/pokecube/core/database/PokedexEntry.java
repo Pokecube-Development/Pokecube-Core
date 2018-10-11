@@ -1178,9 +1178,9 @@ public class PokedexEntry
         {
             if (getBaseForme() != null && getBaseForme() != this)
             {
-                baseName = getBaseForme().getBaseName();
+                baseName = getBaseForme().getTrimmedName();
             }
-            else baseName = name;
+            else baseName = getTrimmedName();
             if (getBaseForme() == this) PokecubeMod.log(Level.WARNING, "Error with " + this);
         }
         return baseName;
@@ -1538,7 +1538,7 @@ public class PokedexEntry
     /** @return the name to be fed to the language formatter */
     public String getUnlocalizedName()
     {
-        String name = this.name;
+        String name = this.getTrimmedName();
         if (this.isFemaleForme || this.isMaleForme) name = this.getBaseName();
         String translated = "pkmn." + name + ".name";
         return translated;

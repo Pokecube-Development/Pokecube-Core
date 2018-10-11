@@ -193,7 +193,7 @@ public class ModPokecubeML implements IMobProvider
             {
                 PokedexEntry base = e.getBaseForme();
                 if (base == null) base = e;
-                builder.append("\npkmn.").append(e.getName()).append(".name=").append(base.getName());
+                builder.append("\npkmn.").append(e.getTrimmedName()).append(".name=").append(base.getName());
             }
             PokecubeMod.log(builder.toString());
         }

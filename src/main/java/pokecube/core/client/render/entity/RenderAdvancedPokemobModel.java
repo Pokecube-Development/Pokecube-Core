@@ -117,7 +117,10 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
         GL11.glPopMatrix();
         GL11.glPushMatrix();
         if (model.getTexturer() == null)
-            FMLClientHandler.instance().getClient().renderEngine.bindTexture(getEntityTexture(entity));
+        {
+            ResourceLocation texture = getEntityTexture(entity);
+            FMLClientHandler.instance().getClient().renderEngine.bindTexture(texture);
+        }
         String phase;
         if (overrideAnim) phase = anim;
         else if (entity instanceof IEntityAnimator)
