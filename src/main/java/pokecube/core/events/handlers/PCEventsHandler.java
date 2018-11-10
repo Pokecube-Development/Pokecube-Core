@@ -109,7 +109,7 @@ public class PCEventsHandler
             else if (o instanceof EntityPokecube)
             {
                 EntityPokecube cube = (EntityPokecube) o;
-                if (cube.getItem() != null)
+                if (cube.getItem() != null && !cube.getEntityWorld().isRemote)
                 {
                     String name = PokecubeManager.getOwner(cube.getItem());
                     if (name != null && (name.equalsIgnoreCase(player.getName())
