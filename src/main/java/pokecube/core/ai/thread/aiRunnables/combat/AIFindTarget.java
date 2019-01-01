@@ -548,7 +548,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (!pokemob.getPokedexEntry().isSocial) return false;
 
         // Random factor for this ai to apply
-        if (Math.random() < 0.99) return false;
+        if (Math.random() > 0.01 * PokecubeMod.core.getConfig().hordeRateFactor) return false;
 
         List<EntityLiving> ret = new ArrayList<EntityLiving>();
         List<Object> pokemobs = new ArrayList<Object>();

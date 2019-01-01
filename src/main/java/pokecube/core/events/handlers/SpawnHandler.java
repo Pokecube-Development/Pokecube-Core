@@ -170,6 +170,20 @@ public final class SpawnHandler
     public static int                                  capLevel                = 50;
     public static final HashMap<Integer, JEP>          parsers                 = new HashMap<Integer, JEP>();
 
+    public static PokedexEntry getSpawnForLoc(World world, Vector3 pos)
+    {
+        SpawnEvent.Pick event = new SpawnEvent.Pick.Pre(null, pos, world);
+        MinecraftForge.EVENT_BUS.post(event);
+        PokedexEntry dbe = event.getPicked();
+        if (dbe == null) return null;
+        event = new SpawnEvent.Pick.Post(dbe, pos, world);
+        MinecraftForge.EVENT_BUS.post(event);
+        dbe = event.getPicked();
+        if (event.getLocation() == null) pos.set(0, Double.NaN);
+        else pos.set(event.getLocation());
+        return dbe;
+    }
+
     public static boolean canSpawnInWorld(World world)
     {
         if (world == null) return true;
@@ -610,15 +624,9 @@ public final class SpawnHandler
         TerrainSegment t = TerrainManager.getInstance().getTerrian(world, v);
         if (onlySubbiomes && t.getBiome(v) < 0) { return ret; }
         long time = System.nanoTime();
-        SpawnEvent.Pick event = new SpawnEvent.Pick.Pre(null, v, world);
-        MinecraftForge.EVENT_BUS.post(event);
-        PokedexEntry dbe = event.getPicked();
+        PokedexEntry dbe = getSpawnForLoc(world, v);
         if (dbe == null) return ret;
-        event = new SpawnEvent.Pick.Post(dbe, v, world);
-        MinecraftForge.EVENT_BUS.post(event);
-        dbe = event.getPicked();
-        v = event.getLocation();
-        if (v == null) { return ret; }
+        if (v.isNaN()) { return ret; }
         if (!isPointValidForSpawn(world, v, dbe)) return ret;
         double dt = (System.nanoTime() - time) / 10e3D;
         if (PokecubeMod.debug && dt > 500)

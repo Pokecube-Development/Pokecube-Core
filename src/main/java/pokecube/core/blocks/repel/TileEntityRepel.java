@@ -2,16 +2,18 @@ package pokecube.core.blocks.repel;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import pokecube.core.PokecubeCore;
 import pokecube.core.events.handlers.SpawnHandler;
 
 /** @author Manchou */
 public class TileEntityRepel extends TileEntity
 {
-    public byte distance = 10;
+    public byte distance;
     boolean     enabled  = true;
 
     public TileEntityRepel()
     {
+        distance = PokecubeCore.core.getConfig().repelRadius;
     }
 
     public boolean addForbiddenSpawningCoord()

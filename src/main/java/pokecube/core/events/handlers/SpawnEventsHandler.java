@@ -69,6 +69,13 @@ public class SpawnEventsHandler
         PokedexEntry dbe = entries.get(index);
         SpawnCheck checker = new SpawnCheck(v, world);
         float weight = dbe.getSpawnData().getWeight(dbe.getSpawnData().getMatcher(checker));
+
+        /** TODO instead of completely random spawns: <br>
+         * <br>
+         * Have the spawn picked based on exact subchunk and server tick. This
+         * will then allow possibly later adding advanced scanning blocks which
+         * can help predict what will spawn where. */
+
         double random = Math.random();
         int max = entries.size();
         Vector3 vbak = v.copy();

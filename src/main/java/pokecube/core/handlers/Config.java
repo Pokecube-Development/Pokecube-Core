@@ -160,6 +160,10 @@ public class Config extends ConfigBase
     @Configure(category = moves)
     public double                        rangedAttackDistance         = 16;
     @Configure(category = moves)
+    public double                        contactAttackDamageScale     = 1;
+    @Configure(category = moves)
+    public double                        rangedAttackDamageScale      = 1;
+    @Configure(category = moves)
     /** Scaling factor for pokemob explosions */
     public double                        blastStrength                = 100;
     @Configure(category = moves)
@@ -341,6 +345,8 @@ public class Config extends ConfigBase
     public int                           idleTickRate                 = 20;
     @Configure(category = mobAI)
     public int                           hungerTickRate               = 20;
+    @Configure(category = mobAI)
+    public float                         hordeRateFactor              = 1;
 
     public SoundEvent[]                  dodges                       = {};
     public SoundEvent[]                  leaps                        = {};
@@ -483,6 +489,9 @@ public class Config extends ConfigBase
     @Configure(category = spawning)
     /** Spawns run once every this many ticks.. */
     public int                           spawnRate                    = 20;
+    @Configure(category = spawning)
+    /** Default radius for repel blocks */
+    public byte                          repelRadius                  = 10;
 
     // Gui/client settings
     @Configure(category = client)
