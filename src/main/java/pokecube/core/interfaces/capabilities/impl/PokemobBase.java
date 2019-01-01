@@ -13,6 +13,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
@@ -52,38 +53,78 @@ public abstract class PokemobBase implements IPokemob
         }
         return params;
     }
+    
+
+    //This method is used as Forge decided to add 29k lines of spam to my logs.
+    private static <T> DataParameter<T> createKey(Class <? extends Entity > clazz, DataSerializer<T> serializer)
+    {
+        int j;
+
+        if (EntityDataManager.NEXT_ID_MAP.containsKey(clazz))
+        {
+            j = ((Integer)EntityDataManager.NEXT_ID_MAP.get(clazz)).intValue() + 1;
+        }
+        else
+        {
+            int i = 0;
+            Class<?> oclass1 = clazz;
+
+            while (oclass1 != Entity.class)
+            {
+                oclass1 = oclass1.getSuperclass();
+
+                if (EntityDataManager.NEXT_ID_MAP.containsKey(oclass1))
+                {
+                    i = ((Integer)EntityDataManager.NEXT_ID_MAP.get(oclass1)).intValue() + 1;
+                    break;
+                }
+            }
+
+            j = i;
+        }
+
+        if (j > 254)
+        {
+            throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
+        }
+        else
+        {
+            EntityDataManager.NEXT_ID_MAP.put(clazz, Integer.valueOf(j));
+            return serializer.createKey(j);
+        }
+    }
 
     private static DataParameters createParams(Class<? extends Entity> clazz)
     {
         DataParameters params = new DataParameters();
         for (int i = 0; i < 5; i++)
         {
-            params.FLAVOURS[i] = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
+            params.FLAVOURS[i] = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
         }
         for (int i = 0; i < 4; i++)
         {
-            params.DISABLE[i] = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
+            params.DISABLE[i] = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
         }
-        params.GENERALSTATESDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.LOGICSTATESDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.COMBATSTATESDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.ATTACKTARGETIDDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HUNGERDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.STATUSDW = EntityDataManager.<Byte> createKey(clazz, DataSerializers.BYTE);
-        params.STATUSTIMERDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.MOVEINDEXDW = EntityDataManager.<Byte> createKey(clazz, DataSerializers.BYTE);
-        params.SPECIALINFO = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.EVOLTICKDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HAPPYDW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.ATTACKCOOLDOWN = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.NICKNAMEDW = EntityDataManager.<String> createKey(clazz, DataSerializers.STRING);
-        params.ZMOVECD = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HEADINGDW = EntityDataManager.<Float> createKey(clazz, DataSerializers.FLOAT);
-        params.DIRECTIONPITCHDW = EntityDataManager.<Float> createKey(clazz, DataSerializers.FLOAT);
-        params.TRANSFORMEDTODW = EntityDataManager.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HELDITEM = EntityDataManager.<ItemStack> createKey(clazz, DataSerializers.ITEM_STACK);
-        params.TYPE1DW = EntityDataManager.<String> createKey(clazz, DataSerializers.STRING);
-        params.TYPE2DW = EntityDataManager.<String> createKey(clazz, DataSerializers.STRING);
+        params.GENERALSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.LOGICSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.COMBATSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.ATTACKTARGETIDDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.HUNGERDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.STATUSDW = PokemobBase.<Byte> createKey(clazz, DataSerializers.BYTE);
+        params.STATUSTIMERDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.MOVEINDEXDW = PokemobBase.<Byte> createKey(clazz, DataSerializers.BYTE);
+        params.SPECIALINFO = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.EVOLTICKDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.HAPPYDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.ATTACKCOOLDOWN = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.NICKNAMEDW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
+        params.ZMOVECD = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.HEADINGDW = PokemobBase.<Float> createKey(clazz, DataSerializers.FLOAT);
+        params.DIRECTIONPITCHDW = PokemobBase.<Float> createKey(clazz, DataSerializers.FLOAT);
+        params.TRANSFORMEDTODW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
+        params.HELDITEM = PokemobBase.<ItemStack> createKey(clazz, DataSerializers.ITEM_STACK);
+        params.TYPE1DW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
+        params.TYPE2DW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
         return params;
     }
 

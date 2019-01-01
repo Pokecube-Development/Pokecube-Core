@@ -81,11 +81,11 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
 
     public static SoundEvent                      POKECUBESOUND;
     static final DataParameter<Integer>           ENTITYID       = EntityDataManager
-            .<Integer> createKey(EntityPokecube.class, DataSerializers.VARINT);
+            .<Integer> createKey(EntityPokecubeBase.class, DataSerializers.VARINT);
     private static final DataParameter<ItemStack> ITEM           = EntityDataManager
-            .<ItemStack> createKey(EntityPokecube.class, DataSerializers.ITEM_STACK);
+            .<ItemStack> createKey(EntityPokecubeBase.class, DataSerializers.ITEM_STACK);
     static final DataParameter<Boolean>           RELEASING      = EntityDataManager
-            .<Boolean> createKey(EntityPokecube.class, DataSerializers.BOOLEAN);
+            .<Boolean> createKey(EntityPokecubeBase.class, DataSerializers.BOOLEAN);
 
     public static boolean                         SEEKING        = true;
 
