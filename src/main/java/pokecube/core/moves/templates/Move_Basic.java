@@ -437,7 +437,6 @@ public class Move_Basic extends Move_Base implements IMoveConstants
                 {
                     efficiency = -1;
                 }
-
             }
             if (moveAcc == -3)
             {

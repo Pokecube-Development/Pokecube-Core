@@ -122,8 +122,7 @@ public class MovesParser
         if (entry.effectRate == null) entry.effectRate = "100";
         if (entry.secondaryEffect != null)
         {
-            parseNoMove(entry.secondaryEffect, move);
-            parseCrit(entry.secondaryEffect.toLowerCase(Locale.ENGLISH), move);
+            parseSecondaryEffects(entry, move);
         }
         parseCategory(entry.category, move);
         parseTarget(entry, move);
@@ -133,6 +132,18 @@ public class MovesParser
         parseHealing(entry, move);
         parseSelfDamage(entry, move);
         parsePreset(entry);
+    }
+
+    static void parseSecondaryEffects(MoveJsonEntry entry,MoveEntry move)
+    {
+        parseNoMove(entry.secondaryEffect, move);
+        parseCrit(entry.secondaryEffect.toLowerCase(Locale.ENGLISH), move);
+        if(entry.secondaryEffect.contains("Cannot miss.")
+                || (entry.battleEffect!=null && 
+                entry.battleEffect.contains("never misses")))
+        {
+            entry.interceptable = false;
+        }
     }
 
     static void parseNoMove(String secondaryEffect, MoveEntry move)
@@ -395,6 +406,15 @@ public class MovesParser
         if (self.equals(target) && (move.attackCategory & IMoveConstants.CATEGORY_SELF) == 0)
         {
             move.attackCategory += IMoveConstants.CATEGORY_SELF;
+        }
+        if(target!=null && target.contains("All Adjacent"))
+        {
+            entry.multiTarget = true;
+        }
+        if(target!=null && target.equals("All"))
+        {
+            entry.multiTarget = true;
+            entry.wideArea = "Yes";
         }
     }
 

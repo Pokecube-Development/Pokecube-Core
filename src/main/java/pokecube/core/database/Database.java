@@ -756,18 +756,9 @@ public class Database
             if (e.type2 == null) e.type2 = PokeType.unknown;
             if (e.interactionLogic.actions.isEmpty())
             {
-                if (e.getBaseForme() != null)
-                {
-                    if (e.getBaseForme().interactionLogic.actions.isEmpty())
-                    {
-                        InteractionLogic.initForEntry(e);
-                    }
-                    e.interactionLogic.actions = e.getBaseForme().interactionLogic.actions;
-                }
-                else
-                {
-                    InteractionLogic.initForEntry(e);
-                }
+                InteractionLogic.initForEntry(e);
+                if (e.interactionLogic.actions.isEmpty() && !base.interactionLogic.actions.isEmpty())
+                    e.interactionLogic.actions = base.interactionLogic.actions;
             }
         }
     }

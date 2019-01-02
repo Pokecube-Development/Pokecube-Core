@@ -449,7 +449,6 @@ public class PokedexEntry
         boolean interact(EntityPlayer player, IPokemob pokemob, boolean doInteract)
         {
             EntityLiving entity = pokemob.getEntity();
-            NBTTagCompound data = entity.getEntityData();
             ItemStack held = player.getHeldItemMainhand();
             ItemStack stack = getStackKey(held);
             if (!CompatWrapper.isValid(stack))
@@ -459,9 +458,10 @@ public class PokedexEntry
                 if (!doInteract) return true;
                 Interaction action = actions.get(stack);
                 PokedexEntry forme = action.forme;
-                pokemob.setPokedexEntry(forme);
+                pokemob.megaEvolve(forme);
                 return true;
             }
+            NBTTagCompound data = entity.getEntityData();
             Interaction action = actions.get(stack);
             if (data.hasKey("lastInteract"))
             {
@@ -938,7 +938,6 @@ public class PokedexEntry
         {
             activeTimes.add(TimePeriod.fullDay);
         }
-
         return activeTimes;
     }
 
