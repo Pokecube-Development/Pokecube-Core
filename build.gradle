@@ -35,15 +35,6 @@ group= ""
 archivesBaseName = "${compile_name}"
 
 repositories {
-    maven {
-        //JEI files
-        url = "http://dvs1.progwml6.com/files/maven"
-    }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = "http://modmaven.k-4u.nl"
-    }
 }
 
 dependencies {
@@ -51,8 +42,6 @@ dependencies {
     deobfCompile "thutcore:thutcore:${version_minecraft}:${version_thutcore}"
     //Thut Wearables
     deobfCompile "thut-wearables:thut-wearables:release:deobf"
-    //Open Computers API
-    deobfCompile "li.cil.oc:OpenComputers:MC1.12.+:api"
     
     //Pokecube Revival
     deobfCompile "pokecube-revival:pokecube-revival:release:deobf"

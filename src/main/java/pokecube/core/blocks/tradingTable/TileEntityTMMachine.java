@@ -9,10 +9,6 @@ import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Callback;
-import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -24,8 +20,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.common.Optional;
-import net.minecraftforge.fml.common.Optional.Interface;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.blocks.TileEntityOwnable;
@@ -45,8 +39,7 @@ import thut.api.maths.Vector3;
 import thut.core.common.blocks.DefaultInventory;
 import thut.lib.CompatWrapper;
 
-@Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInventory, SimpleComponent
+public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInventory
 {
     private List<ItemStack>                   inventory = NonNullList.<ItemStack> withSize(1, ItemStack.EMPTY);
 
@@ -72,53 +65,10 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
         }
     }
 
-    @Callback
-    @Optional.Method(modid = "opencomputers")
-    public Object[] getMovesList(Context context, Arguments args) throws Exception
-    {
-        if (hasPC() && pc.isBound())
-        {
-            InventoryPC inv = pc.getPC();
-            ArrayList<String> moves = getMoves(inv);
-            return moves.toArray();
-        }
-        if (!hasPC()) throw new Exception("no connected PC");
-        throw new Exception("connected PC is not bound to a player");
-    }
-
-    @Callback
-    @Optional.Method(modid = "opencomputers")
-    public Object[] applyMove(Context context, Arguments args) throws Exception
-    {
-        if (hasPC() && pc.isBound())
-        {
-            InventoryPC inv = pc.getPC();
-            ArrayList<String> moves = getMoves(inv);
-            String move = args.checkString(0);
-            for (String s : moves)
-            {
-                if (s.equalsIgnoreCase(move))
-                {
-                    addMoveToTM(s);
-                    return new Object[] {};
-                }
-            }
-            throw new Exception("requested move not found");
-        }
-        if (!hasPC()) throw new Exception("no connected PC");
-        throw new Exception("connected PC is not bound to a player");
-    }
-
     @Override
     public void closeInventory(EntityPlayer player)
     {
 
-    }
-
-    @Override
-    public String getComponentName()
-    {
-        return "tm_machine";
     }
 
     @Override
@@ -251,7 +201,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
         return true;
     }
 
-    protected boolean hasPC()
+    public boolean hasPC()
     {
         boolean pc = false;
         this.pc = null;
@@ -267,6 +217,11 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
             }
         }
         return pc;
+    }
+    
+    public TileEntityPC getPC()
+    {
+        return this.pc;
     }
 
     @Override

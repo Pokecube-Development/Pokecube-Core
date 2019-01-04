@@ -4,12 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.common.collect.Lists;
-
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Callback;
-import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -18,15 +12,12 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.common.Optional;
-import net.minecraftforge.fml.common.Optional.Interface;
 import pokecube.core.blocks.TileEntityOwnable;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.network.packets.PacketPC;
 import thut.api.network.PacketHandler;
 
-@Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public class TileEntityPC extends TileEntityOwnable implements IInventory, SimpleComponent
+public class TileEntityPC extends TileEntityOwnable implements IInventory
 {
     private boolean     bound     = false;
     private UUID        boundId   = null;
@@ -56,12 +47,6 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory, Simpl
     }
 
     @Override
-    public String getComponentName()
-    {
-        return "pokecubepc";
-    }
-
-    @Override
     public ITextComponent getDisplayName()
     {
         return null;
@@ -84,24 +69,6 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory, Simpl
     {
         if (getPC() != null) return getPC().getInventoryStackLimit();
         return 0;
-    }
-
-    @Callback(doc = "Returns the items in the PC")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] getItemList(Context context, Arguments args) throws Exception
-    {
-        if (isBound())
-        {
-            InventoryPC inv = getPC();
-            ArrayList<Object> items = Lists.newArrayList();
-            for (int i = 0; i < inv.getSizeInventory(); i++)
-            {
-                ItemStack stack = inv.getStackInSlot(i);
-                if (stack != ItemStack.EMPTY) items.add(stack.getDisplayName());
-            }
-            return items.toArray();
-        }
-        throw new Exception("PC not bound");
     }
 
     @Override
