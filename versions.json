@@ -1,7 +1,11 @@
 {
   "homepage": "http://www.curse.com/mc-mods/minecraft/238253-pokecube-core",
   "promos": {
-    "1.12.2-latest": "6.41.21",
-    "1.12.2-recommended": "6.41.21"
+    "1.12.2-latest": "6.41.22",
+    "1.12.2-recommended": "6.41.22"
+  },
+  "1.12.2": {
+    "6.41.21": "Reogranized some OC support to move it over to revival/compat",
+    "6.41.22": "Tweaks to leaping and dodging AI, Also fixes issue #14"
   }
 }

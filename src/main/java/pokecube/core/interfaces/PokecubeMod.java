@@ -65,11 +65,13 @@ public abstract class PokecubeMod
 
     public final static String                               DEPSTRING                  = ";required-after:thutcore@@THUTCORE";
     public final static String                               GIST                       = "https://gist.githubusercontent.com/Thutmose/4d7320c36696cd39b336/raw/";
-    public final static String                               UPDATEURL                  = GIST + "core.json";
+    public final static String                               UPDATEURL                  = "https://raw.githubusercontent.com/Pokecube-Development/Pokecube-Core/master/versions.json";
 
     public final static String                               GIFTURL                    = GIST + "gift";
+    
+    //This is the item damage value used for max damage.
     public static final int                                  MAX_DAMAGE                 = 0x7FFF;
-
+    //This is the item damage value used for a healed pokemob.
     public static final int                                  FULL_HEALTH                = MAX_DAMAGE - 1;
     private static HashMap<Integer, FakePlayer>              fakePlayers                = new HashMap<Integer, FakePlayer>();
 
