@@ -116,7 +116,6 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
         {
             e.printStackTrace();
         }
-
     }
 
     @Override

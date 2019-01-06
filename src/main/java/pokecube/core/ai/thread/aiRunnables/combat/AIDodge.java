@@ -26,7 +26,8 @@ public class AIDodge extends AIBase
     final IPokemob     pokemob;
     Entity             target;
     double             movementSpeed;
-    int                dodgeCooldown = 10;
+    double             dodgeSpeedFactor = 0.25f;
+    int                dodgeCooldown    = 10;
 
     public AIDodge(IPokemob entity)
     {
@@ -90,7 +91,7 @@ public class AIDodge extends AIBase
         /*
          * Scale by evasion modifier
          */
-        perp.scalarMultBy(evasionMod);
+        perp.scalarMultBy(evasionMod * dodgeSpeedFactor * PokecubeMod.core.getConfig().dodgeSpeedFactor);
         if (perp.magSq() > 1) perp.norm();
 
         /*

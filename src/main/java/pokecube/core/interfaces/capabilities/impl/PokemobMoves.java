@@ -209,6 +209,9 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public void healStatus()
     {
+        // Ensure max health, etc are correct.
+        updateHealth();
+        //Clear off any persistant effects.
         IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
         if (affected != null)
         {

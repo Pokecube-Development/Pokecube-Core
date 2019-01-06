@@ -279,7 +279,7 @@ public class Config extends ConfigBase
     @Configure(category = mobAI)
     public int                           chaseDistance                = 32;
     @Configure(category = mobAI)
-    public int                           combatDistance               = 8;
+    public int                           combatDistance               = 4;
     @Configure(category = mobAI)
     public int                           aiDisableDistance            = 32;
     @Configure(category = mobAI)
@@ -347,6 +347,10 @@ public class Config extends ConfigBase
     public int                           hungerTickRate               = 20;
     @Configure(category = mobAI)
     public float                         hordeRateFactor              = 1;
+    @Configure(category = mobAI)
+    public float                         leapSpeedFactor              = 1;
+    @Configure(category = mobAI)
+    public float                         dodgeSpeedFactor             = 1;
 
     public SoundEvent[]                  dodges                       = {};
     public SoundEvent[]                  leaps                        = {};

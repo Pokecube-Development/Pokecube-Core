@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
@@ -364,7 +365,9 @@ public abstract class PokemobBase implements IPokemob
 
     protected void setMaxHealth(float maxHealth)
     {
-        getEntity().getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(maxHealth);
+        IAttributeInstance health = getEntity().getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+        health.removeAllModifiers();
+        health.setBaseValue(maxHealth);
     }
 
     /** Handles health update.
@@ -386,7 +389,6 @@ public abstract class PokemobBase implements IPokemob
                 health = maxHealth;
             }
         }
-
         setMaxHealth(maxHealth);
         getEntity().setHealth(health);
     }

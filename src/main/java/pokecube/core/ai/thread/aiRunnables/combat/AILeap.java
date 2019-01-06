@@ -20,7 +20,10 @@ public class AILeap extends AIBase
     final IPokemob     pokemob;
     Entity             target;
     int                leapCooldown = 10;
+    double             leapSpeed    = 0.25;
     double             movementSpeed;
+    Vector3            leapTarget   = null;
+    Vector3            leapOrigin   = null;
 
     public AILeap(IPokemob entity)
     {
@@ -43,53 +46,48 @@ public class AILeap extends AIBase
     public void reset()
     {
         this.target = null;
+        leapTarget = null;
+        leapOrigin = null;
     }
 
     @Override
     public void run()
     {
-        // This case is where target is the attack target.
-        if (target != null)
-        {
-            // Use horizontal distance to allow floating things to leap
-            // downwards.
-            double d0 = this.attacker.posX - this.target.posX;
-            double d2 = this.attacker.posZ - this.target.posZ;
-            double d3 = this.attacker.posY - this.target.posY;
-            /* Don't leap up if too far. */
-            if (d3 < -5) return;
-
-            double dist = d0 * d0 + d2 * d2;
-            float diff = attacker.width + target.width;
-            diff = diff * diff;
-
-            // Wait till it is a bit closer than this...
-            if (dist >= 16.0D) { return; }
-        }
-        pokemob.setCombatState(CombatStates.LEAPING, false);
-
-        leapCooldown = PokecubeMod.core.getConfig().attackCooldown / 2;
 
         // Target loc could just be a position
-        Vector3 targetLoc = target != null ? Vector3.getNewVector().set(target) : pokemob.getTargetPos();
-        Vector3 leaperLoc = Vector3.getNewVector().set(attacker);
-        Vector3 dir = targetLoc.subtract(leaperLoc);
+        leapTarget = target != null ? Vector3.getNewVector().set(target) : pokemob.getTargetPos();
+        Vector3 location = Vector3.getNewVector().set(attacker);
+        Vector3 dir = leapTarget.subtract(location);
 
-        if (dir.magSq() < 1 || dir.magSq() > 4) dir.norm();
+        /* Don't leap up if too far. */
+        if (dir.y > 5) return;
+
+        double dist = dir.x * dir.x + dir.z * dir.z;
+        float diff = attacker.width + (target == null ? 0 : target.width);
+        diff = diff * diff;
+
+        // Wait till it is a bit closer than this...
+        if (dist >= 16.0D) { return; }
+        if (dist <= diff)
+        {
+            pokemob.setCombatState(CombatStates.LEAPING, false);
+            leapCooldown = PokecubeMod.core.getConfig().attackCooldown / 2;
+            return;
+        }
+
+        dir.norm();
+        dir.scalarMultBy(leapSpeed * PokecubeMod.core.getConfig().leapSpeedFactor);
         if (dir.isNaN())
         {
             new Exception().printStackTrace();
             dir.clear();
         }
+
         if (PokecubeMod.debug)
         {
             PokecubeMod.log(Level.INFO, "Leap: " + attacker + " " + dir.mag());
         }
-        double dy = Math.abs(dir.y);
-        /*
-         * Make adjustments so mobs can hit flying things more easily.
-         */
-        if (!(!attacker.onGround && dy > pokemob.getSize() * pokemob.getPokedexEntry().height && dy < 3)) dir.y *= 2;
+
         /*
          * Apply the leap
          */
