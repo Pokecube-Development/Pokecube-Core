@@ -6,11 +6,13 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
@@ -54,16 +56,15 @@ public abstract class PokemobBase implements IPokemob
         }
         return params;
     }
-    
 
-    //This method is used as Forge decided to add 29k lines of spam to my logs.
-    private static <T> DataParameter<T> createKey(Class <? extends Entity > clazz, DataSerializer<T> serializer)
+    // This method is used as Forge decided to add 29k lines of spam to my logs.
+    private static <T> DataParameter<T> createKey(Class<? extends Entity> clazz, DataSerializer<T> serializer)
     {
         int j;
 
         if (EntityDataManager.NEXT_ID_MAP.containsKey(clazz))
         {
-            j = ((Integer)EntityDataManager.NEXT_ID_MAP.get(clazz)).intValue() + 1;
+            j = ((Integer) EntityDataManager.NEXT_ID_MAP.get(clazz)).intValue() + 1;
         }
         else
         {
@@ -76,7 +77,7 @@ public abstract class PokemobBase implements IPokemob
 
                 if (EntityDataManager.NEXT_ID_MAP.containsKey(oclass1))
                 {
-                    i = ((Integer)EntityDataManager.NEXT_ID_MAP.get(oclass1)).intValue() + 1;
+                    i = ((Integer) EntityDataManager.NEXT_ID_MAP.get(oclass1)).intValue() + 1;
                     break;
                 }
             }
@@ -366,7 +367,11 @@ public abstract class PokemobBase implements IPokemob
     protected void setMaxHealth(float maxHealth)
     {
         IAttributeInstance health = getEntity().getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-        health.removeAllModifiers();
+        List<AttributeModifier> mods = Lists.newArrayList(health.getModifiers());
+        for (AttributeModifier modifier : mods)
+        {
+            health.removeModifier(modifier);
+        }
         health.setBaseValue(maxHealth);
     }
 

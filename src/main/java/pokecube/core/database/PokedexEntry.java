@@ -62,6 +62,7 @@ import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.events.handlers.SpawnHandler.Variance;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.interfaces.pokemob.ICanEvolve;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.moves.PokemobTerrainEffects;
 import pokecube.core.utils.PokeType;
@@ -1685,38 +1686,38 @@ public class PokedexEntry
      * @param pokemob */
     public void onHeldItemChange(ItemStack oldStack, ItemStack newStack, IPokemob pokemob)
     {
-        if (newStack == ItemStack.EMPTY && oldStack == ItemStack.EMPTY) return;
+        if (newStack.isEmpty() && oldStack.isEmpty()) return;
         PokedexEntry newForme = null;
-        if (newStack != ItemStack.EMPTY)
+        if (this.formeItems.isEmpty() && getBaseForme() != null)
         {
-            for (ItemStack stack : formeItems.keySet())
-                if (Tools.isSameStack(stack, newStack))
-                {
-                    newForme = formeItems.get(stack);
-                    break;
-                }
-            if (newForme == null && getBaseForme() != null)
+            for (PokedexEntry entry : getBaseForme().formeItems.values())
             {
-                for (ItemStack stack : getBaseForme().formeItems.keySet())
-                    if (Tools.isSameStack(stack, newStack))
-                    {
-                        newForme = getBaseForme().formeItems.get(stack);
-                        break;
-                    }
+                if (entry == this)
+                {
+                    getBaseForme().onHeldItemChange(oldStack, newStack, pokemob);
+                    return;
+                }
             }
         }
-        else if (oldStack != ItemStack.EMPTY && getBaseForme() != null)
+        for (ItemStack key : this.formeItems.keySet())
         {
-            for (ItemStack stack : getBaseForme().formeItems.keySet())
-                if (Tools.isSameStack(stack, newStack))
-                {
-                    newForme = getBaseForme().formeItems.get(stack);
-                    break;
-                }
+            if (Tools.isSameStack(oldStack, key, true))
+            {
+                newForme = this;
+                break;
+            }
         }
-        if (newForme != null)
+        for (ItemStack key : this.formeItems.keySet())
         {
-            pokemob.setPokedexEntry(newForme);
+            if (Tools.isSameStack(newStack, key, true))
+            {
+                newForme = formeItems.get(key);
+                break;
+            }
+        }
+        if (newForme != null && newForme != pokemob.getPokedexEntry())
+        {
+            ICanEvolve.setDelayedMegaEvolve(pokemob, newForme, null);
         }
     }
 
