@@ -2,6 +2,7 @@ package pokecube.core.ai.thread.aiRunnables.utility;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,7 +11,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.InvWrapper;
@@ -67,6 +70,13 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
     private IItemHandlerModifiable getInventory(IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         if (pos == null) return null;
+        if (pokemob.getOwner() instanceof EntityPlayer)
+        {
+            EntityPlayer player = (EntityPlayer) pokemob.getOwner();
+            BreakEvent evt = new BreakEvent(player.getEntityWorld(), pos, world.getBlockState(pos), player);
+            MinecraftForge.EVENT_BUS.post(evt);
+            if (evt.isCanceled()) { return null; }
+        }
         TileEntity tile = world.getTileEntity(pos);
         if (tile == null) return null;
         if (tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side) instanceof IItemHandlerModifiable)

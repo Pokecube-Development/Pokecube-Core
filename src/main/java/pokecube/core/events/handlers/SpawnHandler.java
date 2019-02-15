@@ -140,8 +140,7 @@ public final class SpawnHandler
                                                                                    @Override
                                                                                    public boolean apply(Integer input)
                                                                                    {
-                                                                                       if (input == -1) return false;
-                                                                                       if (input < 256
+                                                                                       if (input == -1
                                                                                                || refreshSubbiomes)
                                                                                            return true;
                                                                                        return input == BiomeType.SKY

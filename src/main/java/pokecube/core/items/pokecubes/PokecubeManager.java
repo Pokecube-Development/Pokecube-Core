@@ -314,4 +314,11 @@ public class PokecubeManager
         long max = pokeTag.getLong("UUIDMost");
         return new UUID(max, min);
     }
+
+    public static Integer getUID(ItemStack stack)
+    {
+        if (!isFilled(stack)) return null;
+        NBTTagCompound poketag = TagNames.getPokecubePokemobTag(stack.getTagCompound());
+        return poketag.getCompoundTag(TagNames.MISCTAG).getInteger(TagNames.UID);
+    }
 }

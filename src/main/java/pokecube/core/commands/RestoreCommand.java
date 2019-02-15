@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -75,7 +74,7 @@ public class RestoreCommand extends CommandBase
         GameProfile profile = MakeCommand.getProfile(server, args[1]);
         if (profile == null)
             throw new PlayerNotFoundException("commands.generic.player.notFound", new Object[] { args[1] });
-        Map<UUID, ItemStack> cache = PlayerDataHandler.getInstance().getPlayerData(profile.getId())
+        Map<Integer, ItemStack> cache = PlayerDataHandler.getInstance().getPlayerData(profile.getId())
                 .getData(PlayerPokemobCache.class).cache;
 
         if (args[0].equals("check") || args[0].equals("give"))
@@ -83,9 +82,9 @@ public class RestoreCommand extends CommandBase
             ITextComponent message = new TextComponentString("Pokemobs: ");
             sender.sendMessage(message);
             message = new TextComponentString("");
-            for (Entry<UUID, ItemStack> entry : cache.entrySet())
+            for (Entry<Integer, ItemStack> entry : cache.entrySet())
             {
-                UUID id = entry.getKey();
+                Integer id = entry.getKey();
                 ItemStack stack = entry.getValue();
                 NBTTagList nbttaglist = stack.getTagCompound().getCompoundTag(TagNames.POKEMOB).getTagList("Pos", 6);
                 double posX = nbttaglist.getDoubleAt(0);
@@ -121,7 +120,7 @@ public class RestoreCommand extends CommandBase
         }
         else if (args[0].equals("restore"))
         {
-            UUID id = UUID.fromString(args[2]);
+            Integer id = Integer.parseInt(args[2]);
             Tools.giveItem(MakeCommand.getPlayerBySender(sender), cache.get(id).copy());
         }
     }

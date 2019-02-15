@@ -1,7 +1,6 @@
 package pokecube.core.handlers.playerdata;
 
 import java.util.Map;
-import java.util.UUID;
 
 import com.google.common.collect.Maps;
 
@@ -16,7 +15,7 @@ import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 /** This is a backup cache of the pokemobs owned by the player. */
 public class PlayerPokemobCache extends PlayerData
 {
-    public Map<UUID, ItemStack> cache = Maps.newHashMap();
+    public Map<Integer, ItemStack> cache = Maps.newHashMap();
 
     public PlayerPokemobCache()
     {
@@ -27,7 +26,7 @@ public class PlayerPokemobCache extends PlayerData
     {
         if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
         ItemStack stack = PokecubeManager.pokemobToItem(mob);
-        cache.put(mob.getEntity().getUniqueID(), stack);
+        cache.put(mob.getPokemonUID(), stack);
         PlayerDataHandler.getInstance().save(mob.getOwnerId().toString(), getIdentifier());
     }
 
@@ -35,10 +34,10 @@ public class PlayerPokemobCache extends PlayerData
     public void writeToNBT(NBTTagCompound tag)
     {
         NBTTagList list = new NBTTagList();
-        for (UUID id : cache.keySet())
+        for (Integer id : cache.keySet())
         {
             NBTTagCompound var = new NBTTagCompound();
-            var.setUniqueId("I", id);
+            var.setInteger("uid", id);
             ItemStack stack = cache.get(id);
             stack.writeToNBT(var);
             list.appendTag(var);
@@ -56,8 +55,17 @@ public class PlayerPokemobCache extends PlayerData
             for (int i = 0; i < list.tagCount(); i++)
             {
                 NBTTagCompound var = list.getCompoundTagAt(i);
-                UUID id = var.getUniqueId("I");
-                cache.put(id, new ItemStack(var));
+                Integer id = -1;
+                ItemStack stack = new ItemStack(var);
+                if (var.hasKey("uid"))
+                {
+                    id = var.getInteger("uid");
+                }
+                else
+                {
+                    id = PokecubeManager.getUID(stack);
+                }
+                if (id != -1) cache.put(id, stack);
             }
         }
     }

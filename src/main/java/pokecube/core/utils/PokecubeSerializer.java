@@ -185,7 +185,7 @@ public class PokecubeSerializer
     public ArrayList<Vector4>                          meteors;
 
     public HashMap<Integer, HashMap<BlockPos, Ticket>> chunks;
-    private int                                        lastId = 0;
+    private int                                        lastId = 1;
 
     public World                                       myWorld;
 
