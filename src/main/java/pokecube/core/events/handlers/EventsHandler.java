@@ -637,7 +637,7 @@ public class EventsHandler
                 {
                     if (player.isSneaking())
                     {
-                        pokemob.moveToShoulder(player);
+                        if (!pokemob.getEntity().isDead) pokemob.moveToShoulder(player);
                         return;
                     }
                     Vector3 look = Vector3.getNewVector().set(player.getLookVec()).scalarMultBy(1);
