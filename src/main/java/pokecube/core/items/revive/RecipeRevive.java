@@ -46,7 +46,7 @@ public class RecipeRevive implements IDefaultRecipe
             if (CompatWrapper.isValid(stack))
             {
                 n++;
-                if (stack.hasTagCompound() && PokecubeManager.isFilled(stack)) other = stack;
+                if (PokecubeManager.isFilled(stack)) other = stack;
                 if (stack.isItemEqual(PokecubeItems.getStack("Revive"))) revive = true;
                 if (stack.getItem() == PokecubeItems.getEmptyCube(PokecubeBehavior.POKESEAL)) seal = stack;
             }
@@ -70,7 +70,7 @@ public class RecipeRevive implements IDefaultRecipe
         else if (revive)
         {
             ItemStack stack = other;
-            if (CompatWrapper.isValid(stack) && stack.hasTagCompound() && PokecubeManager.isFilled(stack))
+            if (PokecubeManager.isFilled(stack))
             {
                 if (stack.getItemDamage() != 32767) return false;
                 healed = stack.copy();
