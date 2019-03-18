@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import pokecube.core.database.Database;
@@ -102,6 +103,7 @@ public class RenderPokemobs extends RenderPokemob
             System.err.println("attempting to render an un-registed pokemon " + entity);
             return false;
         }
+        if(mob.getOwner() instanceof EntityPlayer)
         if (mob.getTransformedTo() != null && mob.getTransformedTo() instanceof EntityLivingBase)
         {
             EntityLivingBase from = (EntityLivingBase) mob.getTransformedTo();
@@ -109,10 +111,10 @@ public class RenderPokemobs extends RenderPokemob
             {
                 Class<? extends EntityLivingBase> claz = from.getClass();
                 EntityLivingBase to;
-                if (claz == EntityPlayerSP.class)
+                if (claz == EntityPlayerSP.class || claz == EntityOtherPlayerMP.class )
                 {
                     claz = EntityOtherPlayerMP.class;
-                    to = new EntityOtherPlayerMP(entity.getEntityWorld(), (((EntityPlayerSP) from).getGameProfile()));
+                    to = new EntityOtherPlayerMP(entity.getEntityWorld(), (((EntityPlayer) from).getGameProfile()));
                 }
                 else
                 {
