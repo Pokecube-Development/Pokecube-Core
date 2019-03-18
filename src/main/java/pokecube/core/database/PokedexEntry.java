@@ -1281,7 +1281,7 @@ public class PokedexEntry
         if (pokedexNb < 494) return 4;
         if (pokedexNb < 650) return 5;
         if (pokedexNb < 722) return 6;
-        if (pokedexNb < 808) return 7;
+        if (pokedexNb < 810) return 7;
         return 0;
     }
 

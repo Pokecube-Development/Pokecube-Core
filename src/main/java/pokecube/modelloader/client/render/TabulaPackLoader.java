@@ -251,11 +251,18 @@ public class TabulaPackLoader extends AnimationLoader
                                 offset = getOffset(part, offset);
                                 scale = getScale(part, scale);
                                 rotation = getRotation(part, rotation);
+                                if (offset != null)
+                                {
+                                    this.shift.set(offset);
+                                }
+                                if (scale != null)
+                                {
+                                    this.scale.set(scale);
+                                }
                                 headAxis = getIntValue(part, "headAxis", headAxis);
                                 headDir = getIntValue(part, "headDir", headDir);
                                 headDir = Math.min(1, headDir);
                                 headDir = Math.max(-1, headDir);
-
                                 setHeadCaps(part, headCap, headCap1);
                             }
                             catch (Exception e)
@@ -331,14 +338,6 @@ public class TabulaPackLoader extends AnimationLoader
                         }
                     }
                 }
-            }
-            if (offset != null)
-            {
-                this.shift.set(offset);
-            }
-            if (scale != null)
-            {
-                this.scale.set(scale);
             }
             if (rotation != null)
             {

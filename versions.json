@@ -1,12 +1,13 @@
 {
   "homepage": "https://github.com/Pokecube-Development/Pokecube-Issues-and-Wiki",
   "promos": {
-    "1.12.2-latest": "6.41.23",
-    "1.12.2-recommended": "6.41.23"
+    "1.12.2-latest": "6.41.24",
+    "1.12.2-recommended": "6.41.24"
   },
   "1.12.2": {
     "6.41.21": "Reogranized some OC support to move it over to revival/compat",
     "6.41.22": "Tweaks to leaping and dodging AI, Also fixes issue #14",
-    "6.41.23": "Fixes some issues with models of forme changed pokemobs"
+    "6.41.23": "Fixes some issues with models of forme changed pokemobs",
+    "6.41.24": "Fixes industrial biome creation not working."
   }
 }
