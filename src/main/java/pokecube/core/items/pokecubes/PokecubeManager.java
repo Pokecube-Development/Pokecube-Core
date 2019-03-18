@@ -78,6 +78,7 @@ public class PokecubeManager
         if (!CompatWrapper.isValid(itemStack) || !itemStack.hasTagCompound()) return null;
         NBTTagCompound poketag = TagNames.getPokecubePokemobTag(itemStack.getTagCompound());
         int number = poketag.getCompoundTag(TagNames.OWNERSHIPTAG).getInteger(TagNames.POKEDEXNB);
+        if (!poketag.hasKey(TagNames.OWNERSHIPTAG)) return null;
         if (poketag.hasNoTags() || number == 0) return Database.getEntry(getPokedexNb(itemStack));
         String forme = poketag.getCompoundTag(TagNames.VISUALSTAG).getString(TagNames.FORME);
         PokedexEntry entry = Database.getEntry(forme);
@@ -118,7 +119,7 @@ public class PokecubeManager
 
     public static boolean isFilled(ItemStack stack)
     {
-        return (getPokedexNb(stack) != 0);
+        return (getPokedexNb(stack) != 0) || (stack.hasTagCompound() && stack.getTagCompound().hasKey("Othermob"));
     }
 
     public static boolean hasMob(ItemStack stack)

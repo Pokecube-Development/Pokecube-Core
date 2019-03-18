@@ -252,7 +252,9 @@ public class Pokecube extends Item implements IPokecube
             }
 
             boolean filled = PokecubeManager.isFilled(stack);
-            if (!filled && targetMob == null) target = null;
+            if (!filled && target instanceof EntityLivingBase
+                    && getCaptureModifier((EntityLivingBase) target, PokecubeItems.getCubeId(this)) == 0)
+                target = null;
             boolean used = false;
             boolean filledOrSneak = filled || player.isSneaking();
             if (target != null && EntityPokecubeBase.SEEKING)
