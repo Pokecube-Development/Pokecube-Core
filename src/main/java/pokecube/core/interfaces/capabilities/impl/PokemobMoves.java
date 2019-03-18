@@ -24,6 +24,7 @@ import pokecube.core.interfaces.entity.impl.PersistantStatusEffect.Status;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.moves.animations.EntityMoveUse;
+import pokecube.core.network.pokemobs.PacketSyncMoveUse;
 import pokecube.core.utils.PokeType;
 import thut.api.maths.Vector3;
 import thut.core.common.commands.CommandTools;
@@ -68,6 +69,8 @@ public abstract class PokemobMoves extends PokemobSexed
         // Check ranged vs contact and set cooldown accordinly.
         boolean distanced = (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0;
         this.setAttackCooldown(MovesUtils.getAttackDelay(this, attack, distanced, target instanceof EntityPlayer));
+        // Syncs that the move has at least been attempted, this is used for the graphical indicator of move cooldowns
+        PacketSyncMoveUse.sendUpdate(this);
 
         if (target != getEntity())
         {
