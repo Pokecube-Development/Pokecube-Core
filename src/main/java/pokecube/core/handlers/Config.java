@@ -495,7 +495,7 @@ public class Config extends ConfigBase
     public int                           spawnRate                    = 20;
     @Configure(category = spawning)
     /** Default radius for repel blocks */
-    public byte                          repelRadius                  = 10;
+    public int                           repelRadius                  = 10;
 
     // Gui/client settings
     @Configure(category = client)

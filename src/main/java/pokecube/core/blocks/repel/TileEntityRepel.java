@@ -13,7 +13,7 @@ public class TileEntityRepel extends TileEntity
 
     public TileEntityRepel()
     {
-        distance = PokecubeCore.core.getConfig().repelRadius;
+        distance = (byte) PokecubeCore.core.getConfig().repelRadius;
     }
 
     public boolean addForbiddenSpawningCoord()
