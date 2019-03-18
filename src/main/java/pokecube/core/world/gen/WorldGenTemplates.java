@@ -18,6 +18,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import pokecube.core.database.PokedexEntryLoader.SpawnRule;
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.SpawnBiomeMatcher;
 import pokecube.core.database.SpawnBiomeMatcher.SpawnCheck;
 import pokecube.core.events.handlers.SpawnHandler;
@@ -231,12 +232,12 @@ public class WorldGenTemplates implements IWorldGenerator
         public void setTemplate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
                 IChunkProvider chunkProvider)
         {
-            if (start != null && start.done)
+            if ((start != null && start.done) || !PokecubeCore.core.getConfig().doSpawnBuilding)
             {
                 done = true;
                 start = null;
                 templates.clear();
-                PokecubeMod.log("Built Start Building.");
+                if (PokecubeCore.core.getConfig().doSpawnBuilding) PokecubeMod.log("Built Start Building.");
             }
             BlockPos spawn = world.getSpawnPoint();
             if (done || start != null || spawn.equals(BlockPos.ORIGIN)) return;
