@@ -37,6 +37,7 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,6 +53,8 @@ import pokecube.core.database.PokedexEntry.SpawnData;
 import pokecube.core.database.PokedexEntryLoader.Drop;
 import pokecube.core.database.PokedexEntryLoader.SpawnRule;
 import pokecube.core.database.moves.json.JsonMoves;
+import pokecube.core.database.moves.json.JsonMoves.MoveJsonEntry;
+import pokecube.core.database.moves.json.JsonMoves.MovesJson;
 import pokecube.core.database.recipes.XMLRecipeHandler;
 import pokecube.core.database.recipes.XMLRecipeHandler.XMLRecipe;
 import pokecube.core.database.recipes.XMLRecipeHandler.XMLRecipes;
@@ -529,6 +532,7 @@ public class Database
 
     public static void initSounds(Object registry)
     {
+        // Register sounds for the pokemobs
         List<PokedexEntry> toProcess = Lists.newArrayList(Pokedex.getInstance().getRegisteredEntries());
         toProcess.sort(COMPARATOR);
         for (PokedexEntry e : toProcess)
@@ -557,6 +561,75 @@ public class Database
             Loader.instance().setActiveModContainer(mc);
             if (SoundEvent.REGISTRY.containsKey(e.sound)) continue;
             if (!SoundEvent.REGISTRY.containsKey(e.sound)) GameData.register_impl(e.event);
+        }
+
+        // Register sounds for the moves
+
+        // null as it should have been populated already
+        MovesJson moves = JsonMoves.getMoves(null);
+        for (MoveJsonEntry entry : moves.moves)
+        {
+            ModContainer mc = Loader.instance().activeModContainer();
+            if (entry.soundEffectSource != null)
+            {
+                ResourceLocation sound = new ResourceLocation(entry.soundEffectSource);
+                SoundEvent event = new SoundEvent(sound);
+                if (!sound.getResourceDomain().equals(mc.getModId()))
+                {
+                    for (ModContainer cont : Loader.instance().getActiveModList())
+                    {
+                        if (cont.getModId().equals(sound.getResourceDomain()))
+                        {
+                            Loader.instance().setActiveModContainer(cont);
+                            break;
+                        }
+                    }
+                }
+                event.setRegistryName(sound);
+                if (!SoundEvent.REGISTRY.containsKey(sound)) GameData.register_impl(event);
+                Loader.instance().setActiveModContainer(mc);
+            }
+            if (entry.soundEffectTarget != null)
+            {
+                ResourceLocation sound = new ResourceLocation(entry.soundEffectTarget);
+                SoundEvent event = new SoundEvent(sound);
+                if (!sound.getResourceDomain().equals(mc.getModId()))
+                {
+                    for (ModContainer cont : Loader.instance().getActiveModList())
+                    {
+                        if (cont.getModId().equals(sound.getResourceDomain()))
+                        {
+                            Loader.instance().setActiveModContainer(cont);
+                            break;
+                        }
+                    }
+                }
+                event.setRegistryName(sound);
+                if (!SoundEvent.REGISTRY.containsKey(sound)) GameData.register_impl(event);
+                Loader.instance().setActiveModContainer(mc);
+            }
+        }
+
+        // Register sound events from config.
+        for (String var : PokecubeCore.core.getConfig().customSounds)
+        {
+            ModContainer mc = Loader.instance().activeModContainer();
+            ResourceLocation sound = new ResourceLocation(var);
+            SoundEvent event = new SoundEvent(sound);
+            if (!sound.getResourceDomain().equals(mc.getModId()))
+            {
+                for (ModContainer cont : Loader.instance().getActiveModList())
+                {
+                    if (cont.getModId().equals(sound.getResourceDomain()))
+                    {
+                        Loader.instance().setActiveModContainer(cont);
+                        break;
+                    }
+                }
+            }
+            event.setRegistryName(sound);
+            if (!SoundEvent.REGISTRY.containsKey(sound)) GameData.register_impl(event);
+            Loader.instance().setActiveModContainer(mc);
         }
     }
 

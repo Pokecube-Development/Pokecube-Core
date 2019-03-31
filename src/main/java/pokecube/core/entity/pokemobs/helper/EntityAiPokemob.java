@@ -533,6 +533,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
         {
             onGround = true;
         }
+        if (this.ticksExisted > 100) forceSpawn = false;
         super.onLivingUpdate();
         if (isServerWorld() && isPokemonShaking && !isPokemonWet && !hasPath() && onGround)
         {
@@ -541,6 +542,13 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
             prevTimePokemonIsShaking = 0.0F;
             getEntityWorld().setEntityState(this, (byte) 8);
         }
+    }
+
+    /** Returns whether the entity is in a server world */
+    @Override
+    public boolean isServerWorld()
+    {
+        return getEntityWorld() != null && super.isServerWorld();
     }
 
     //////////////// Jumping related//////////////////////////

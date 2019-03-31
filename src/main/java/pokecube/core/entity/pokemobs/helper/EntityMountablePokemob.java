@@ -30,7 +30,7 @@ import thut.api.entity.IMultiplePassengerEntity;
 /** Handles the HM behaviour.
  * 
  * @author Manchou */
-public abstract class EntityMountablePokemob extends EntityEvolvablePokemob implements IMultiplePassengerEntity
+public abstract class EntityMountablePokemob extends EntityDropPokemob implements IMultiplePassengerEntity
 {
     @SuppressWarnings("unchecked")
     static final DataParameter<Seat>[] SEAT = new DataParameter[10];

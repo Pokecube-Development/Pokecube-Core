@@ -46,7 +46,7 @@ import thut.api.maths.Matrix3;
 import thut.api.maths.Vector3;
 
 /** @author Manchou, Thutmose */
-public abstract class EntityPokemobBase extends EntityHungryPokemob implements IEntityMultiPart, TagNames
+public abstract class EntityPokemobBase extends EntityAiPokemob implements IEntityMultiPart, TagNames
 {
     public static boolean       multibox           = true;
     public static double        averagePokemobTick = 0;

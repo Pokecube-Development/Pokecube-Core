@@ -122,6 +122,9 @@ public class Config extends ConfigBase
     public boolean                       defaultInteractions          = true;
     @Configure(category = misc)
     public boolean                       berryBreeding                = true;
+    @Configure(category = misc)
+    public String[]                      customSounds                = {};
+    
 
     @Configure(category = perms)
     public boolean                       permsCapture                 = false;

@@ -65,6 +65,7 @@ import pokecube.core.blocks.pc.InventoryPC;
 import pokecube.core.commands.Commands;
 import pokecube.core.commands.CountCommand;
 import pokecube.core.commands.CullCommand;
+import pokecube.core.commands.EggCommand;
 import pokecube.core.commands.GiftCommand;
 import pokecube.core.commands.KillCommand;
 import pokecube.core.commands.MakeCommand;
@@ -780,6 +781,7 @@ public class PokecubeCore extends PokecubeMod
         event.registerServerCommand(new Commands());
         event.registerServerCommand(new CommandConfig("pokesettings", getConfig()));
         event.registerServerCommand(new MakeCommand());
+        event.registerServerCommand(new EggCommand());
         event.registerServerCommand(new GiftCommand());
         event.registerServerCommand(new TMCommand());
         event.registerServerCommand(new RecallCommand());
