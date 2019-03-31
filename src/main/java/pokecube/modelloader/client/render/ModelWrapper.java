@@ -52,7 +52,7 @@ public class ModelWrapper extends ModelBase
 
     private void checkWrapped()
     {
-        if (wrapped == null)
+        if (wrapped == null || model == null)
         {
             model = AnimationLoader.getModel(name);
             if (model != null && model instanceof RenderLivingBase)
@@ -76,19 +76,22 @@ public class ModelWrapper extends ModelBase
             float partialTickTime)
     {
         checkWrapped();
-        String phase = "idle";
-        IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
-        if (overrideAnim) phase = anim;
-        else if (entity instanceof IEntityAnimator)
+        if (model != null)
         {
-            phase = ((IEntityAnimator) entity).getAnimation(partialTickTime);
+            String phase = "idle";
+            IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
+            if (overrideAnim) phase = anim;
+            else if (entity instanceof IEntityAnimator)
+            {
+                phase = ((IEntityAnimator) entity).getAnimation(partialTickTime);
+            }
+            else if (mob != null)
+            {
+                phase = getPhase(mob.getEntity(), mob, partialTickTime);
+            }
+            if (!model.hasAnimation(phase, entity)) phase = "idle";
+            model.setAnimation(phase, entity);
         }
-        else if (mob != null)
-        {
-            phase = getPhase(mob.getEntity(), mob, partialTickTime);
-        }
-        if (!model.hasAnimation(phase, entity)) phase = "idle";
-        model.setAnimation(phase, entity);
         wrapped.setLivingAnimations(entity, limbSwing, limbSwingAmount, partialTickTime);
     }
 
@@ -124,6 +127,7 @@ public class ModelWrapper extends ModelBase
     private String getPhase(EntityLiving entity, IPokemob pokemob, float partialTick)
     {
         String phase = "idle";
+        if (model == null) return phase;
         float walkspeed = entity.prevLimbSwingAmount
                 + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTick;
 

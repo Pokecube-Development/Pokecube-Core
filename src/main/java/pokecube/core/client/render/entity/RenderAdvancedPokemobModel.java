@@ -104,6 +104,7 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
             ResourceLocation texture = getEntityTexture(entity);
             FMLClientHandler.instance().getClient().renderEngine.bindTexture(texture);
         }
+        doAnimations(entity, partialTick);
         model.doRender(toRender, x, y, z, yaw, partialTick);
         model.renderStatus(toRender, x, y, z, yaw, partialTick);
         MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post(entity, this, partialTick, x, y, z));
@@ -139,6 +140,28 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
         if (ret == null) ret = RenderPokemobs.getInstance().getEntityTexturePublic(entity);
         else if (pokemob != null) ret = pokemob.modifyTexture(ret);
         return ret;
+    }
+
+    protected void doAnimations(EntityLiving entity, float partialTick)
+    {
+        float f5 = 0.0F;
+        float f6 = 0.0F;
+        if (!entity.isRiding())
+        {
+            f5 = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTick;
+            f6 = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTick);
+
+            if (entity.isChild())
+            {
+                f6 *= 3.0F;
+            }
+
+            if (f5 > 1.0F)
+            {
+                f5 = 1.0F;
+            }
+        }
+        this.mainModel.setLivingAnimations(entity, f6, f5, partialTick);
     }
 
     protected void postRenderCallback()
