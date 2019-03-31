@@ -238,7 +238,7 @@ public class GuiAnimate extends GuiScreen
         return false;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     /** Draws the screen and all the components in it. Args : mouseX, mouseY,
      * renderPartialTicks */
@@ -348,15 +348,15 @@ public class GuiAnimate extends GuiScreen
         if (rend instanceof RenderAdvancedPokemobModel)
         {
             RenderAdvancedPokemobModel render = (RenderAdvancedPokemobModel) rend;
-            render.anim = anim.getText();
-            render.overrideAnim = true;
+            render.wrapper.anim = anim.getText();
+            render.wrapper.overrideAnim = true;
         }
         EventsHandlerClient.renderMob(pokemob, partialTicks, false);
         if (rend instanceof RenderAdvancedPokemobModel)
         {
             RenderAdvancedPokemobModel render = (RenderAdvancedPokemobModel) rend;
-            render.anim = "";
-            render.overrideAnim = false;
+            render.wrapper.anim = "";
+            render.wrapper.overrideAnim = false;
         }
         GL11.glPopMatrix();
     }

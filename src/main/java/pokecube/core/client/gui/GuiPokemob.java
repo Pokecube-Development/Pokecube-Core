@@ -253,23 +253,23 @@ public class GuiPokemob extends GuiContainer
                     {
                         if (pokemob.getLogicState(LogicStates.SITTING))
                         {
-                            render.anim = "sitting";
+                            render.wrapper.anim = "sitting";
                         }
-                        else render.anim = "idle";
+                        else render.wrapper.anim = "idle";
                     }
                     else
                     {
-                        if (pokemob.getGeneralState(GeneralStates.STAYING)) render.anim = "idle";
-                        else render.anim = "walking";
+                        if (pokemob.getGeneralState(GeneralStates.STAYING)) render.wrapper.anim = "idle";
+                        else render.wrapper.anim = "walking";
                     }
-                    render.overrideAnim = true;
+                    render.wrapper.overrideAnim = true;
                 }
                 EventsHandlerClient.renderMob(renderMob, mc.getRenderPartialTicks(), false);
                 if (o instanceof RenderAdvancedPokemobModel)
                 {
                     RenderAdvancedPokemobModel<?> render = (RenderAdvancedPokemobModel<?>) o;
-                    render.anim = "";
-                    render.overrideAnim = false;
+                    render.wrapper.anim = "";
+                    render.wrapper.overrideAnim = false;
                 }
                 GL11.glPopMatrix();
             }

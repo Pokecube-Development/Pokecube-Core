@@ -8,15 +8,36 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.TextureOffset;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import pokecube.core.interfaces.IMoveConstants;
+import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.Move_Base;
+import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import pokecube.core.interfaces.pokemob.ai.CombatStates;
+import pokecube.core.interfaces.pokemob.ai.LogicStates;
+import pokecube.core.moves.MovesUtils;
 import pokecube.modelloader.ModPokecubeML;
 import pokecube.modelloader.common.Config;
+import pokecube.modelloader.common.IEntityAnimator;
 import thut.core.client.render.model.IModelRenderer;
 
 public class ModelWrapper extends ModelBase
 {
-    final String      name;
-    private ModelBase wrapped;
+    final String              name;
+    private ModelBase         wrapped;
+    private IModelRenderer<?> model;
+
+    // Used to check if it has a custom sleeping animation.
+    private boolean           checkedForContactAttack   = false;
+    private boolean           hasContactAttackAnimation = false;
+
+    // Used to check if it has a custom sleeping animation.
+    private boolean           checkedForRangedAttack    = false;
+    private boolean           hasRangedAttackAnimation  = false;
+
+    public boolean            overrideAnim              = false;
+    public String             anim                      = "";
 
     public ModelWrapper(String name)
     {
@@ -33,7 +54,7 @@ public class ModelWrapper extends ModelBase
     {
         if (wrapped == null)
         {
-            IModelRenderer<?> model = AnimationLoader.getModel(name);
+            model = AnimationLoader.getModel(name);
             if (model != null && model instanceof RenderLivingBase)
             {
                 wrapped = ((RenderLivingBase<?>) model).getMainModel();
@@ -51,11 +72,24 @@ public class ModelWrapper extends ModelBase
     }
 
     @Override
-    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount,
+    public void setLivingAnimations(EntityLivingBase entity, float limbSwing, float limbSwingAmount,
             float partialTickTime)
     {
         checkWrapped();
-        wrapped.setLivingAnimations(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTickTime);
+        String phase = "idle";
+        IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
+        if (overrideAnim) phase = anim;
+        else if (entity instanceof IEntityAnimator)
+        {
+            phase = ((IEntityAnimator) entity).getAnimation(partialTickTime);
+        }
+        else if (mob != null)
+        {
+            phase = getPhase(mob.getEntity(), mob, partialTickTime);
+        }
+        if (!model.hasAnimation(phase, entity)) phase = "idle";
+        model.setAnimation(phase, entity);
+        wrapped.setLivingAnimations(entity, limbSwing, limbSwingAmount, partialTickTime);
     }
 
     @Override
@@ -85,5 +119,86 @@ public class ModelWrapper extends ModelBase
     {
         checkWrapped();
         wrapped.setModelAttributes(model);
+    }
+
+    private String getPhase(EntityLiving entity, IPokemob pokemob, float partialTick)
+    {
+        String phase = "idle";
+        float walkspeed = entity.prevLimbSwingAmount
+                + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTick;
+
+        boolean asleep = pokemob.getStatus() == IMoveConstants.STATUS_SLP
+                || pokemob.getLogicState(LogicStates.SLEEPING);
+
+        if (!checkedForContactAttack)
+        {
+            hasContactAttackAnimation = model.hasAnimation("attack_contact", entity);
+            checkedForContactAttack = true;
+        }
+        if (!checkedForRangedAttack)
+        {
+            hasRangedAttackAnimation = model.hasAnimation("attack_ranged", entity);
+            checkedForRangedAttack = true;
+        }
+        if (pokemob.getCombatState(CombatStates.EXECUTINGMOVE))
+        {
+            int index = pokemob.getMoveIndex();
+            Move_Base move;
+            if (index < 4 && (move = MovesUtils.getMoveFromName(pokemob.getMove(index))) != null)
+            {
+                if (hasContactAttackAnimation && (move.getAttackCategory() & IMoveConstants.CATEGORY_CONTACT) > 0)
+                {
+                    phase = "attack_contact";
+                    return phase;
+                }
+                if (hasRangedAttackAnimation && (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0)
+                {
+                    phase = "attack_ranged";
+                    return phase;
+                }
+            }
+        }
+
+        if (asleep && model.hasAnimation("sleeping", entity))
+        {
+            phase = "sleeping";
+            return phase;
+        }
+        if (asleep && model.hasAnimation("asleep", entity))
+        {
+            phase = "asleep";
+            return phase;
+        }
+        if (pokemob.getLogicState(LogicStates.SITTING) && model.hasAnimation("sitting", entity))
+        {
+            phase = "sitting";
+            return phase;
+        }
+        if (!entity.onGround && model.hasAnimation("flight", entity))
+        {
+            phase = "flight";
+            return phase;
+        }
+        if (!entity.onGround && model.hasAnimation("flying", entity))
+        {
+            phase = "flying";
+            return phase;
+        }
+        if (entity.isInWater() && model.hasAnimation("swimming", entity))
+        {
+            phase = "swimming";
+            return phase;
+        }
+        if (entity.onGround && walkspeed > 0.1 && model.hasAnimation("walking", entity))
+        {
+            phase = "walking";
+            return phase;
+        }
+        if (entity.onGround && walkspeed > 0.1 && model.hasAnimation("walk", entity))
+        {
+            phase = "walk";
+            return phase;
+        }
+        return phase;
     }
 }
