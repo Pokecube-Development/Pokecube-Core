@@ -309,6 +309,7 @@ public class AIHungry extends AIBase
         double hurtTime = deathTime / 2d;
         hungerTime = pokemob.getHungerTime();
         int hungerTicks = TICKRATE;
+        float ratio = (float) ((hungerTime - hurtTime) / deathTime);
 
         // Check own inventory for berries to eat, and then if the mob is
         // allowed to, collect berries if none to eat.
@@ -330,15 +331,18 @@ public class AIHungry extends AIBase
                 if (hungerTime > deathTime / 4) toRun.add(new GenBerries(pokemob));
             }
             // Otherwise take damage.
-            else if (entity.ticksExisted % hungerTicks == 0)
+            else if (entity.ticksExisted % hungerTicks == 0 && ratio > 0)
             {
-                float ratio = (float) ((hungerTime - hurtTime) / deathTime);
                 boolean dead = entity.getMaxHealth() * ratio > entity.getHealth();
-                entity.attackEntityFrom(DamageSource.STARVE, entity.getMaxHealth() * ratio);
-                if (!dead) pokemob.displayMessageToOwner(
-                        new TextComponentTranslation("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
-                else pokemob.displayMessageToOwner(
-                        new TextComponentTranslation("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
+                float damage = entity.getMaxHealth() * ratio;
+                if (damage >= 1 && ratio >= 0.0625)
+                {
+                    entity.attackEntityFrom(DamageSource.STARVE, damage);
+                    if (!dead) pokemob.displayMessageToOwner(
+                            new TextComponentTranslation("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
+                    else pokemob.displayMessageToOwner(
+                            new TextComponentTranslation("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
+                }
             }
         }
 
