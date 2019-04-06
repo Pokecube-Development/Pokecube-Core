@@ -297,6 +297,12 @@ public class PCEventsHandler
     @SubscribeEvent
     public void sendPokemobToPCPlayerFull(CaptureEvent.Post evt)
     {
+        //Case for things like snag cubes
+        if(evt.caught == null)
+        {
+            evt.pokecube.entityDropItem(evt.filledCube, 0.5f);
+            return;
+        }
         Entity catcher = evt.caught.getPokemonOwner();
         if (evt.caught.isShadow()) return;
         if (catcher instanceof EntityPlayer && PokecubeManager.isFilled(evt.filledCube))
