@@ -358,6 +358,10 @@ public class AIHungry extends AIBase
             {
                 pokemob.setCombatState(CombatStates.HUNTING, true);
             }
+            else if (hungerTime < 0 && pokemob.getCombatState(CombatStates.HUNTING))
+            {
+                pokemob.setCombatState(CombatStates.HUNTING, false);
+            }
         }
 
         // Check if we should go after bait. The Math.random() > 0.99 is to

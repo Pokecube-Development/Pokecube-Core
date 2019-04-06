@@ -511,11 +511,6 @@ public class AIFindTarget extends AIBase implements IAICombat
             {
                 addTargetInfo(this.entity, null);
             }
-            // Target is too far away, lets forget it.
-            if (entity.getDistance(entity.getAttackTarget()) > PokecubeCore.core.getConfig().chaseDistance)
-            {
-                addTargetInfo(this.entity, null);
-            }
             return;
         }
         // Check if the pokemob is set to follow, and if so, look for mobs
@@ -622,6 +617,15 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Don't look for targets if you are sitting.
         boolean ret = target == null && !pokemob.getLogicState(LogicStates.SITTING);
         boolean tame = pokemob.getGeneralState(GeneralStates.TAMED);
+
+        // Target is too far away, lets forget it.
+        if (target != null && entity.getDistance(target) > PokecubeCore.core.getConfig().chaseDistance)
+        {
+            addTargetInfo(this.entity, null);
+            agroTimer = -1;
+            entityTarget = null;
+            return false;
+        }
 
         /*
          * Check for others to try to help you.
