@@ -26,6 +26,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.handlers.TeamManager;
@@ -507,6 +508,11 @@ public class AIFindTarget extends AIBase implements IAICombat
         {
             // If target is dead, lets forget about it.
             if (entity.getAttackTarget().isDead || entity.getAttackTarget().getHealth() <= 0)
+            {
+                addTargetInfo(this.entity, null);
+            }
+            // Target is too far away, lets forget it.
+            if (entity.getDistance(entity.getAttackTarget()) > PokecubeCore.core.getConfig().chaseDistance)
             {
                 addTargetInfo(this.entity, null);
             }
