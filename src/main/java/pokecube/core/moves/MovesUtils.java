@@ -391,12 +391,12 @@ public class MovesUtils implements IMoveConstants
         if (type == Category.SPECIAL)
         {
             ATT = (int) (attacker.getStat(Stats.SPATTACK, true) * movePacket.statMults[Stats.SPATTACK.ordinal()]);
-            DEF = attacker.getStat(Stats.SPDEFENSE, true);
+            DEF = attacked.getStat(Stats.SPDEFENSE, true);
         }
         else
         {
             ATT = (int) (attacker.getStat(Stats.ATTACK, true) * movePacket.statMults[Stats.ATTACK.ordinal()]);
-            DEF = attacker.getStat(Stats.DEFENSE, true);
+            DEF = attacked.getStat(Stats.DEFENSE, true);
         }
 
         ATT = (int) (statusMultiplier * ATT);
