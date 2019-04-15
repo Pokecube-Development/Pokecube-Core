@@ -1,8 +1,8 @@
 {
   "homepage": "https://github.com/Pokecube-Development/Pokecube-Issues-and-Wiki",
   "promos": {
-    "1.12.2-latest": "6.42.4",
-    "1.12.2-recommended": "6.42.4"
+    "1.12.2-latest": "6.42.5",
+    "1.12.2-recommended": "6.42.5"
   },
   "1.12.2": {
     "6.41.21": "Reogranized some OC support to move it over to revival/compat",
@@ -11,6 +11,7 @@
     "6.41.24": "Fixes industrial biome creation not working.",
     "6.42.2": "Fixes stuff related to customnpcs animations.",
     "6.42.3": "Tweaks to some pokemob AI.",
-    "6.42.4": "Fixes issues with defense raising moves."
+    "6.42.4": "Fixes issues with defense raising moves.",
+    "6.42.5": "Fixes some dupe bugs."
   }
 }
