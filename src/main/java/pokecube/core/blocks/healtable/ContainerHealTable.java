@@ -1,5 +1,6 @@
 package pokecube.core.blocks.healtable;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -10,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import pokecube.core.interfaces.IHealer;
@@ -61,7 +63,7 @@ public class ContainerHealTable extends Container implements IHealer
             addSlotToContainer(new Slot(player_inventory, i, 8 + i * 18, 142));
         }
 
-        //Player Inventory
+        // Player Inventory
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 9; j++)
@@ -104,46 +106,39 @@ public class ContainerHealTable extends Container implements IHealer
     public void onContainerClosed(EntityPlayer player)
     {
         super.onContainerClosed(player);
-
-        //TODO test what happens if server crashes while this is open.
+        // TODO test what happens if server crashes while this is open.
         if (!player.getEntityWorld().isRemote)
         {
             for (int var2 = 0; var2 < this.inventoryHealTable.getSizeInventory(); ++var2)
             {
                 ItemStack var3 = this.inventoryHealTable.removeStackFromSlot(var2);
+                dropCube(var3, player);
+            }
+        }
+    }
 
-                if (var3 != ItemStack.EMPTY)
-                {
-                    if (player.isDead || player.getHealth() <= 0 || player.inventory.getFirstEmptyStack() == -1)
-                    {
-                        ItemTossEvent toss = new ItemTossEvent(player.entityDropItem(var3, 0F), null);
-                        boolean err = false;
-                        try
-                        {
-                            MinecraftForge.EVENT_BUS.post(toss);
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                            err = true;
-                        }
-                        if (err || !toss.isCanceled())
-                        {
-                            player.dropItem(var3, true);
-                        }
-                    }
-                    else if (var3.getItem() != null
-                            && (player.isDead || !player.inventory.addItemStackToInventory(var3)))
-                    {
-                        ItemTossEvent toss = new ItemTossEvent(player.entityDropItem(var3, 0F), null);
-                        MinecraftForge.EVENT_BUS.post(toss);
-                    }
-                    else player.dropItem(var3, true);
-                    if (player instanceof EntityPlayerMP)
-                    {
-                        ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
-                    }
-                }
+    private void dropCube(ItemStack cube, EntityPlayer player)
+    {
+        if (!cube.isEmpty())
+        {
+            EntityItem item = null;
+            if (player.isDead || player.getHealth() <= 0 || player.inventory.getFirstEmptyStack() == -1)
+            {
+                ForgeHooks.onPlayerTossEvent(player, cube, true);
+            }
+            else if (!cube.isEmpty() && (player.isDead || !player.inventory.addItemStackToInventory(cube)))
+            {
+                item = player.entityDropItem(cube, 0F);
+                ItemTossEvent toss = new ItemTossEvent(item, player);
+                MinecraftForge.EVENT_BUS.post(toss);
+            }
+            else
+            {
+                player.dropItem(cube, true);
+            }
+            if (player instanceof EntityPlayerMP)
+            {
+                ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             }
         }
     }
@@ -179,8 +174,7 @@ public class ContainerHealTable extends Container implements IHealer
             itemstack = itemstack1.copy();
             if (index < 6)
             {
-                if (!this.mergeItemStack(itemstack1, 6, this.inventorySlots.size(),
-                        false)) { return ItemStack.EMPTY; }
+                if (!this.mergeItemStack(itemstack1, 6, this.inventorySlots.size(), false)) { return ItemStack.EMPTY; }
             }
             else if (!this.mergeItemStack(itemstack1, 0, 6, false)) { return ItemStack.EMPTY; }
             if (!CompatWrapper.isValid(itemstack1))
