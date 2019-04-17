@@ -33,6 +33,8 @@ public class JsonMoves
     {
         public String              name;
         public String              defaultanimation;
+        public String              soundEffectSource;
+        public String              soundEffectTarget;
         public List<AnimationJson> animations = new ArrayList<>();
     }
 
@@ -255,6 +257,8 @@ public class JsonMoves
                     {
                         entry.defaultanimation = anims.defaultanimation;
                         entry.animations = anims.animations;
+                        entry.soundEffectSource = anims.soundEffectSource;
+                        entry.soundEffectTarget = anims.soundEffectTarget;
                         anims.name = entry.name;
                         break;
                     }
