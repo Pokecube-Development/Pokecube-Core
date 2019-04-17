@@ -58,6 +58,9 @@ public class MovesAdder implements IMoveConstants
             }
             String anim = move.move.animDefault;
             if (anim == null || anim.equals("none")) continue;
+            if (!move.move.animDefault.endsWith(":~" + move.name))
+                move.move.animDefault = move.move.animDefault + ":~" + move.name;
+            anim = move.move.animDefault;
             if (PokecubeMod.debug) PokecubeMod.log(move.move.name + ": preset animation: " + move.move.animDefault);
             IMoveAnimation animation = MoveAnimationHelper.getAnimationPreset(anim);
             if (animation != null) move.setAnimation(animation);
