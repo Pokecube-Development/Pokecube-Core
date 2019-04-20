@@ -122,7 +122,6 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read Breeding tag
         if (!breedingTag.hasNoTags())
         {
-            this.setSexe(breedingTag.getByte(SEXE));
             this.loveTimer = breedingTag.getInteger(SEXETIME);
         }
         // Read visuals tag
@@ -242,7 +241,6 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
 
         // Write Breeding tag
         NBTTagCompound breedingTag = new NBTTagCompound();
-        breedingTag.setByte(SEXE, getSexe());
         breedingTag.setInteger(SEXETIME, loveTimer);
 
         // Write visuals tag
