@@ -13,9 +13,11 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemWrittenBook;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.ItemPokedex;
 import pokecube.core.items.megastuff.MegaCapability;
@@ -178,6 +180,12 @@ public class ContainerPC extends Container
             packet.data.setInteger("P", page);
             PokecubeMod.packetPipeline.sendToServer(packet);
             inv.clear();
+        }
+        else
+        {
+            BlockPos pos = pcTile != null ? pcTile.getPos() : invPlayer.player.getPosition();
+            invPlayer.player.openGui(PokecubeMod.core, Config.GUIPC_ID, invPlayer.player.getEntityWorld(), pos.getX(),
+                    pos.getY(), pos.getZ());
         }
         bindInventories();
     }
