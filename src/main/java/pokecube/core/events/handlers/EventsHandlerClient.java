@@ -102,7 +102,7 @@ public class EventsHandlerClient
         private ITextComponent getIssuesMessage(CheckResult result)
         {
             String linkName = "[" + TextFormatting.GREEN + "Clicking Here." + TextFormatting.WHITE;
-            String link = "https://github.com/Thutmose/Pokecube/issues";
+            String link = "https://github.com/Pokecube-Development/Pokecube-Issues-and-Wiki/issues";
             String linkComponent = "{\"text\":\"" + linkName + "\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\""
                     + link + "\"}}";
             String info = "\"" + TextFormatting.GOLD
@@ -115,6 +115,11 @@ public class EventsHandlerClient
         @SubscribeEvent
         public void onPlayerJoin(TickEvent.PlayerTickEvent event)
         {
+            if (!"".equals(Loader.instance().activeModContainer().getMetadata().parent))
+            {
+                MinecraftForge.EVENT_BUS.unregister(this);
+                return;
+            }
             if (event.player.getEntityWorld().isRemote
                     && event.player == FMLClientHandler.instance().getClientPlayerEntity())
             {
