@@ -34,6 +34,7 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.IPokemob.MovePacket;
 import pokecube.core.interfaces.Move_Base;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -409,6 +410,8 @@ public class Tools
         if (mob != null)
         {
             pwr *= PokeType.getAttackEfficiency(attack.getType(user), mob.getType1(), mob.getType2());
+            if (mob.getAbility() != null)
+                pwr = mob.getAbility().beforeDamage(mob, new MovePacket(user, target, attack), pwr);
         }
         return pwr;
     }
