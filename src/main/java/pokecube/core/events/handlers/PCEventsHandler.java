@@ -161,7 +161,7 @@ public class PCEventsHandler
                         InventoryPC pc = InventoryPC.getPC(p);
                         pc.seenOwner = true;
                         if (evt.getWorld().isRemote) continue;
-                        PacketPC packet = new PacketPC(PacketPC.ONOPEN);
+                        PacketPC packet = new PacketPC(PacketPC.PCINIT);
                         packet.data.setBoolean("O", pc.seenOwner);
                         packet.data.setBoolean("A", pc.autoToPC);
                         PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) p);

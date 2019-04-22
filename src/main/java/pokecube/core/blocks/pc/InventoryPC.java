@@ -3,7 +3,6 @@ package pokecube.core.blocks.pc;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
@@ -15,13 +14,14 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.INBTSerializable;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import pokecube.core.utils.PCSaveHandler;
 import thut.lib.CompatWrapper;
 
-public class InventoryPC implements IInventory
+public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
 {
     public static HashMap<UUID, InventoryPC> map       = new HashMap<UUID, InventoryPC>();
     // blank PC for client use.
@@ -105,92 +105,34 @@ public class InventoryPC implements IInventory
         for (i = 0; i < nbt.tagCount(); i++)
         {
             NBTTagCompound items = nbt.getCompoundTagAt(i);
-            NBTTagCompound boxes = items.getCompoundTag("boxes");
-            String id = boxes.getString("UUID");
-            if ((id == "" || id == null))
-            {
-                continue;
-            }
-            UUID uuid;
-            try
-            {
-                uuid = UUID.fromString(id);
-            }
-            catch (Exception e)
-            {
-                PokecubeMod.log(Level.WARNING, "Error with " + id, e);
-                continue;
-            }
-            if (!replace && map.containsKey(uuid)) continue;
-            if (PokecubeMod.debug) PokecubeMod.log("Loading PC for " + uuid);
+            InventoryPC loaded = new InventoryPC();
+            loaded.deserializeNBT(items);
+            if (!replace && map.containsKey(loaded.owner)) continue;
+            if (PokecubeMod.debug) PokecubeMod.log("Loading PC for " + loaded.owner);
             InventoryPC load = null;
-            for (int k = 0; k < PAGECOUNT; k++)
+            load = replace ? loaded : getPC(loaded.owner);
+            if (load == null)
             {
-                if (k == 0)
-                {
-                    load = replace ? new InventoryPC(uuid) : getPC(uuid);
-                    if (load == null)
-                    {
-                        if (PokecubeMod.debug) PokecubeMod.log("Skipping " + uuid);
-                        continue tags;
-                    }
-                    load.autoToPC = boxes.getBoolean("autoSend");
-                    load.seenOwner = boxes.getBoolean("seenOwner");
-                    load.setPage(boxes.getInteger("page"));
-                }
-                if (boxes.getString("name" + k) != null)
-                {
-                    load.boxes[k] = boxes.getString("name" + k);
-                }
+                if (PokecubeMod.debug) PokecubeMod.log("Skipping " + loaded.owner);
+                continue tags;
             }
-            load.contents.clear();
-            // TODO change this to a tag list instead of compound...
-            for (int k = 0; k < load.getSizeInventory(); k++)
+            load.autoToPC = loaded.autoToPC;
+            load.seenOwner = loaded.seenOwner;
+            load.setPage(loaded.getPage());
+            if (load != loaded)
             {
-                if (!items.hasKey("item" + k)) continue;
-                NBTTagCompound nbttagcompound = items.getCompoundTag("item" + k);
-                int j = nbttagcompound.getShort("Slot");
-                if (j >= 0 && j < load.getSizeInventory())
-                {
-                    if (load.contents.containsKey(j)) continue;
-                    ItemStack itemstack = new ItemStack(nbttagcompound);
-                    load.setInventorySlotContents(j, itemstack);
-                }
+                load.contents.clear();
+                load.contents.putAll(loaded.contents);
             }
-            if (!defaultId.equals(uuid)) map.put(uuid, load);
+            if (!defaultId.equals(loaded.owner)) map.put(loaded.owner, load);
         }
     }
 
     public static NBTTagList saveToNBT(UUID uuid)
     {
         if (PokecubeMod.debug) PokecubeMod.log("Saving PC for " + uuid);
-
         NBTTagList nbttag = new NBTTagList();
-        NBTTagCompound items = new NBTTagCompound();
-        NBTTagCompound boxes = new NBTTagCompound();
-        boxes.setString("UUID", uuid.toString());
-        boxes.setBoolean("seenOwner", map.get(uuid).seenOwner);
-        boxes.setBoolean("autoSend", map.get(uuid).autoToPC);
-        boxes.setInteger("page", map.get(uuid).page);
-        for (int i = 0; i < PAGECOUNT; i++)
-        {
-            boxes.setString("name" + i, map.get(uuid).boxes[i]);
-        }
-        items.setInteger("page", map.get(uuid).getPage());
-        for (int i = 0; i < map.get(uuid).getSizeInventory(); i++)
-        {
-            ItemStack itemstack = map.get(uuid).getStackInSlot(i);
-            // TODO change this to a tag list instead of compound...
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-            if (itemstack != ItemStack.EMPTY)
-            {
-                nbttagcompound.setShort("Slot", (short) i);
-                itemstack.writeToNBT(nbttagcompound);
-                items.setTag("item" + i, nbttagcompound);
-            }
-        }
-        items.setTag("boxes", boxes);
+        NBTTagCompound items = map.get(uuid).serializeNBT();
         nbttag.appendTag(items);
         return nbttag;
     }
@@ -204,9 +146,19 @@ public class InventoryPC implements IInventory
     public String[]                          boxes     = new String[PAGECOUNT];
     private Int2ObjectOpenHashMap<ItemStack> contents  = new Int2ObjectOpenHashMap<>();
 
-    public final UUID                        owner;
+    public UUID                              owner;
 
     public boolean                           seenOwner = false;
+
+    public InventoryPC()
+    {
+        opened = new boolean[PAGECOUNT];
+        boxes = new String[PAGECOUNT];
+        for (int i = 0; i < PAGECOUNT; i++)
+        {
+            boxes[i] = "Box " + String.valueOf(i + 1);
+        }
+    }
 
     public InventoryPC(UUID player)
     {
@@ -419,6 +371,104 @@ public class InventoryPC implements IInventory
     public boolean isEmpty()
     {
         return true;
+    }
+
+    public NBTTagCompound serializeBox(int box)
+    {
+        NBTTagCompound items = new NBTTagCompound();
+        items.setInteger("box", box);
+        int start = box * 54;
+        for (int i = start; i < start + 54; i++)
+        {
+            ItemStack itemstack = map.get(owner).getStackInSlot(i);
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            if (!itemstack.isEmpty())
+            {
+                nbttagcompound.setShort("Slot", (short) i);
+                itemstack.writeToNBT(nbttagcompound);
+                items.setTag("item" + i, nbttagcompound);
+            }
+        }
+        return items;
+    }
+
+    public void deserializeBox(NBTTagCompound nbt)
+    {
+        int start = nbt.getInteger("box") * 54;
+        for (int i = start; i < start + 54; i++)
+        {
+            if (!nbt.hasKey("item" + i)) continue;
+            NBTTagCompound nbttagcompound = nbt.getCompoundTag("item" + i);
+            int j = nbttagcompound.getShort("Slot");
+            if (j >= start && j < start + 54)
+            {
+                ItemStack itemstack = new ItemStack(nbttagcompound);
+                this.setInventorySlotContents(j, itemstack);
+            }
+        }
+    }
+
+    @Override
+    public NBTTagCompound serializeNBT()
+    {
+        NBTTagCompound items = new NBTTagCompound();
+        NBTTagCompound boxes = new NBTTagCompound();
+        boxes.setString("UUID", owner.toString());
+        boxes.setBoolean("seenOwner", map.get(owner).seenOwner);
+        boxes.setBoolean("autoSend", map.get(owner).autoToPC);
+        boxes.setInteger("page", map.get(owner).page);
+        for (int i = 0; i < PAGECOUNT; i++)
+        {
+            boxes.setString("name" + i, this.boxes[i]);
+        }
+        items.setInteger("page", getPage());
+        for (int i = 0; i < getSizeInventory(); i++)
+        {
+            ItemStack itemstack = map.get(owner).getStackInSlot(i);
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            if (!itemstack.isEmpty())
+            {
+                nbttagcompound.setShort("Slot", (short) i);
+                itemstack.writeToNBT(nbttagcompound);
+                items.setTag("item" + i, nbttagcompound);
+            }
+        }
+        items.setTag("boxes", boxes);
+        return items;
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt)
+    {
+        NBTTagCompound boxes = nbt.getCompoundTag("boxes");
+        String id = boxes.getString("UUID");
+        this.owner = UUID.fromString(id);
+        for (int k = 0; k < PAGECOUNT; k++)
+        {
+            if (k == 0)
+            {
+                this.autoToPC = boxes.getBoolean("autoSend");
+                this.seenOwner = boxes.getBoolean("seenOwner");
+                this.setPage(boxes.getInteger("page"));
+            }
+            if (boxes.getString("name" + k) != null)
+            {
+                this.boxes[k] = boxes.getString("name" + k);
+            }
+        }
+        contents.clear();
+        for (int k = 0; k < this.getSizeInventory(); k++)
+        {
+            if (!nbt.hasKey("item" + k)) continue;
+            NBTTagCompound nbttagcompound = nbt.getCompoundTag("item" + k);
+            int j = nbttagcompound.getShort("Slot");
+            if (j >= 0 && j < this.getSizeInventory())
+            {
+                if (this.contents.containsKey(j)) continue;
+                ItemStack itemstack = new ItemStack(nbttagcompound);
+                this.setInventorySlotContents(j, itemstack);
+            }
+        }
     }
 
 }

@@ -15,8 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pokecube.core.blocks.TileEntityOwnable;
-import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.network.packets.PacketPC;
 import thut.core.common.blocks.BlockRotatable;
 
 public class BlockPC extends BlockRotatable implements ITileEntityProvider
@@ -102,7 +102,7 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
         if (inventoryPC != null)
         {
             if (worldIn.isRemote) { return true; }
-            playerIn.openGui(PokecubeMod.core, Config.GUIPC_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            PacketPC.sendOpenPacket(playerIn, pos);
             return true;
         }
         return true;

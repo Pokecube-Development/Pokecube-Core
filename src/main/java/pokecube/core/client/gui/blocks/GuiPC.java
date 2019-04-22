@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -37,8 +36,6 @@ public class GuiPC extends GuiContainer
 
     boolean         bound    = false;
     boolean         release  = false;
-
-    private Slot    theSlot;
 
     public GuiPC(ContainerPC cont)
     {
@@ -167,8 +164,8 @@ public class GuiPC extends GuiContainer
 
         String name = (cont.pcTile != null) ? cont.pcTile.getName() : "";
         String pcTitle = bound ? name : I18n.format("tile.pc.title", cont.inv.seenOwner ? "Thutmose" : "Someone");
-        fontRenderer.drawString(cont.getPage(), xSize / 2 - fontRenderer.getStringWidth(cont.getPage()) / 3 - 60,
-                13, 4210752);
+        fontRenderer.drawString(cont.getPage(), xSize / 2 - fontRenderer.getStringWidth(cont.getPage()) / 3 - 60, 13,
+                4210752);
         fontRenderer.drawString(pcTitle, xSize / 2 - fontRenderer.getStringWidth(pcTitle) / 3 - 60, 4, 4210752);
         GL11.glPopMatrix();
 
@@ -283,12 +280,12 @@ public class GuiPC extends GuiContainer
 
         }
 
-        textFieldSelectedBox = new GuiTextField(0, fontRenderer, width / 2 - xOffset - 13, height / 2 - yOffset + 5,
-                25, 10);
+        textFieldSelectedBox = new GuiTextField(0, fontRenderer, width / 2 - xOffset - 13, height / 2 - yOffset + 5, 25,
+                10);
         textFieldSelectedBox.setText(page);
 
-        textFieldBoxName = new GuiTextField(0, fontRenderer, width / 2 - xOffset - 190, height / 2 - yOffset - 40,
-                100, 10);
+        textFieldBoxName = new GuiTextField(0, fontRenderer, width / 2 - xOffset - 190, height / 2 - yOffset - 40, 100,
+                10);
         textFieldBoxName.setText(boxName);
 
         textFieldSearch = new GuiTextField(0, fontRenderer, width / 2 - xOffset - 10, height / 2 - yOffset - 121, 90,
@@ -297,14 +294,28 @@ public class GuiPC extends GuiContainer
     }
 
     @Override
-    protected void keyTyped(char par1, int par2)
+    protected void keyTyped(char par1, int par2) throws IOException
     {
-        keyTyped2(par1, par2);
+        //This replaces the super call, which also forces closed when "e" is pressed:
         if (par2 == 1)
         {
-            mc.player.closeScreen();
-            return;
+            this.mc.player.closeScreen();
         }
+
+        this.checkHotbarKeys(par2);
+
+        if (this.hoveredSlot != null && this.hoveredSlot.getHasStack())
+        {
+            if (this.mc.gameSettings.keyBindPickBlock.isActiveAndMatches(par2))
+            {
+                this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, 0, ClickType.CLONE);
+            }
+            else if (this.mc.gameSettings.keyBindDrop.isActiveAndMatches(par2))
+            {
+                this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, isCtrlKeyDown() ? 1 : 0, ClickType.THROW);
+            }
+        }
+        //End super call
 
         textFieldSearch.textboxKeyTyped(par1, par2);
 
@@ -343,25 +354,6 @@ public class GuiPC extends GuiContainer
             }
         }
 
-    }
-
-    /** Fired when a key is typed. This is the equivalent of
-     * KeyListener.keyTyped(KeyEvent e). */
-    protected void keyTyped2(char par1, int par2)
-    {
-        this.checkHotbarKeys(par2);
-
-        if (this.theSlot != null && this.theSlot.getHasStack())
-        {
-            if (par2 == this.mc.gameSettings.keyBindPickBlock.getKeyCode())
-            {
-                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, 0, ClickType.CLONE);
-            }
-            else if (par2 == this.mc.gameSettings.keyBindDrop.getKeyCode())
-            {
-                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, isCtrlKeyDown() ? 1 : 0, ClickType.THROW);
-            }
-        }
     }
 
     @Override
