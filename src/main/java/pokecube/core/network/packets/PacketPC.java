@@ -191,8 +191,11 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             pc.autoToPC = message.data.getBoolean("A");
             break;
         case PCOPEN:
-            pc = InventoryPC.getPC(player);
-            pc.deserializeBox(message.data);
+            if (ctx.side == Side.CLIENT)
+            {
+                pc = InventoryPC.getPC(player);
+                pc.deserializeBox(message.data);
+            }
             break;
         default:
             break;
