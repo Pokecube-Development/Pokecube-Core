@@ -20,7 +20,7 @@ public class AILeap extends AIBase
     final IPokemob     pokemob;
     Entity             target;
     int                leapCooldown = 10;
-    double             leapSpeed    = 0.25;
+    double             leapSpeed    = 1;
     double             movementSpeed;
     Vector3            leapTarget   = null;
     Vector3            leapOrigin   = null;
@@ -88,12 +88,21 @@ public class AILeap extends AIBase
             PokecubeMod.log(Level.INFO, "Leap: " + attacker + " " + dir.mag());
         }
 
+        //Compute differences in velocities, and then account for that during the leap.
+        Vector3 v_a = Vector3.getNewVector().setToVelocity(attacker);
+        Vector3 v_t = Vector3.getNewVector();
+        if (target != null) v_t.setToVelocity(target);
+        //Compute velocity differential.
+        Vector3 dv = v_a.subtractFrom(v_t);
+        //Adjust for existing velocity differential.
+        dir.subtractFrom(dv);
         /*
          * Apply the leap
          */
         dir.addVelocities(attacker);
-        toRun.add(new PlaySound(attacker.dimension, Vector3.getNewVector().set(attacker), getLeapSound(),
-                SoundCategory.HOSTILE, 1, 1));
+        // Only play sound once.
+        if (leapCooldown == -1) toRun.add(new PlaySound(attacker.dimension, Vector3.getNewVector().set(attacker),
+                getLeapSound(), SoundCategory.HOSTILE, 1, 1));
     }
 
     @Override

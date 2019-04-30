@@ -102,8 +102,9 @@ public class AIDodge extends AIBase
          * Apply the dodge
          */
         perp.addVelocities(attacker);
-        toRun.add(new PlaySound(attacker.dimension, Vector3.getNewVector().set(attacker), getDodgeSound(),
-                SoundCategory.HOSTILE, 1, 1));
+        // Only play sound once.
+        if (dodgeCooldown == -1) toRun.add(new PlaySound(attacker.dimension, Vector3.getNewVector().set(attacker),
+                getDodgeSound(), SoundCategory.HOSTILE, 1, 1));
     }
 
     /** Check if the mob should dodge. It checks that the mob can dodge (ie is
