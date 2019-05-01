@@ -21,7 +21,6 @@ import net.minecraftforge.common.MinecraftForge;
 import pokecube.core.events.SpawnEvent;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.Move_Base;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.moves.PokemobDamageSource;
@@ -218,13 +217,9 @@ public abstract class EntityStatsPokemob extends EntityGeneticsPokemob
     @Override
     public boolean isEntityInvulnerable(DamageSource source)
     {
-        if (source instanceof PokemobDamageSource)
-        {
-            Move_Base move = ((PokemobDamageSource) source).move;
-            return PokeType.getAttackEfficiency(move.getType(((PokemobDamageSource) source).user),
-                    pokemobCap.getType1(), pokemobCap.getType2()) <= 0;
-        }
-
+        // Check type effectiveness for damage sources.
+        if (source instanceof PokemobDamageSource) { return ((PokemobDamageSource) source)
+                .getEffectiveness(pokemobCap) <= 0; }
         return super.isEntityInvulnerable(source);
     }
 

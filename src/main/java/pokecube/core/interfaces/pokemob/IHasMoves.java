@@ -288,8 +288,8 @@ public interface IHasMoves extends IHasStats
      * @param move */
     default void onMoveUse(MovePacket move)
     {
-        Event toPost = move.pre ? new MoveUse.DuringUse.Pre(move, move.attacker == getEntity())
-                : new MoveUse.DuringUse.Post(move, move.attacker == getEntity());
+        Event toPost = move.pre ? new MoveUse.DuringUse.Pre(move, move.attacker == this)
+                : new MoveUse.DuringUse.Post(move, move.attacker == this);
         PokecubeMod.MOVE_BUS.post(toPost);
     }
 

@@ -295,7 +295,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
     {
         preAttack(packet);
         if (packet.denied) return;
-        MovePacket backup = packet;
+
         IPokemob attacker = packet.attacker;
         EntityLivingBase attackerMob = attacker.getEntity();
         Entity attacked = packet.attacked;
@@ -311,7 +311,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         float stabFactor = packet.stabFactor;
         if (!packet.stab)
         {
-            packet.stab = packet.attacker.isType(packet.attackType);
+            packet.stab = packet.attacker.isType(type);
         }
         if (!packet.stab)
         {
@@ -347,18 +347,6 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         {
             attacker.getMoveStats().infatuateTarget = attacked;
         }
-
-        attacker = packet.attacker;
-        attacked = packet.attacked;
-        attack = packet.attack;
-        type = packet.attackType;
-        PWR = packet.PWR;
-        criticalLevel = packet.criticalLevel;
-        criticalFactor = packet.critFactor;
-        statusChange = packet.statusChange;
-        changeAddition = packet.changeAddition;
-        boolean toSurvive = packet.noFaint;
-
         if (attacked == null)
         {
             packet = new MovePacket(attacker, attacked, attack, type, PWR, criticalLevel, statusChange, changeAddition,
@@ -482,7 +470,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         int finalAttackStrength = Math.max(0, Math.round(attackStrength * efficiency * criticalRatio
                 * terrainDamageModifier * stabFactor * packet.superEffectMult));
 
-        //Apply configs for scaling attack damage by category.
+        // Apply configs for scaling attack damage by category.
         if (finalAttackStrength > 0)
         {
             double damageRatio = (packet.getMove().getAttackCategory() & CATEGORY_CONTACT) > 0
@@ -501,6 +489,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
             finalAttackStrength = beforeHealth;
         }
 
+        boolean toSurvive = packet.noFaint;
         if (toSurvive)
         {
             finalAttackStrength = Math.min(finalAttackStrength, beforeHealth - 1);
@@ -552,11 +541,13 @@ public class Move_Basic extends Move_Base implements IMoveConstants
 
         if (!((move.attackCategory & CATEGORY_SELF) > 0 && PWR == 0) && finalAttackStrength > 0)
         {
-            // Appy attack damage to players.
+            // Apply attack damage to players.
             if (attacked instanceof EntityPlayer)
             {
-                DamageSource source1 = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack));
-                DamageSource source2 = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack));
+                DamageSource source1 = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack))
+                        .setType(type);
+                DamageSource source2 = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack))
+                        .setType(type);
                 source2.setDamageBypassesArmor();
                 source2.setMagicDamage();
                 float d1, d2;
@@ -584,7 +575,8 @@ public class Move_Basic extends Move_Base implements IMoveConstants
             // Apply attack damage to a pokemob
             else if (targetPokemob != null)
             {
-                DamageSource source = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack));
+                DamageSource source = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack))
+                        .setType(type);
                 source.setDamageIsAbsolute();
                 source.setDamageBypassesArmor();
                 if (PokecubeMod.debug)
@@ -597,7 +589,8 @@ public class Move_Basic extends Move_Base implements IMoveConstants
             // Apply attack damage to another mob type.
             else
             {
-                DamageSource source = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack));
+                DamageSource source = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack))
+                        .setType(type);
                 attacked.attackEntityFrom(source, finalAttackStrength);
                 if (PokecubeMod.debug)
                 {
@@ -623,7 +616,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         }
         if (efficiency > 0 && changeAddition != CHANGE_NONE) MovesUtils.addChange(attacked, attacker, changeAddition);
 
-        if (packet.getMove().getPWR(attacker, attacked) > 0)
+        if (finalAttackStrength > 0)
             MovesUtils.displayEfficiencyMessages(attacker, attacked, efficiency, criticalRatio);
 
         int afterHealth = (int) Math.max(0, ((EntityLivingBase) attacked).getHealth());
@@ -678,7 +671,6 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         packet.hit = efficiency >= 0;
         packet.didCrit = criticalRatio > 1;
         packet.damageDealt = beforeHealth - afterHealth;
-        backup.damageDealt = packet.damageDealt;
         handleStatsChanges(packet);
         postAttack(packet);
     }

@@ -18,6 +18,7 @@ import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
+import pokecube.core.utils.PokeType;
 
 /** This class extends {@link EntityDamageSource} and only modifies the death
  * message.
@@ -29,6 +30,9 @@ public class PokemobDamageSource extends DamageSource
     private EntityLivingBase damageSourceEntity;
     // TODO use this for damage stuff
     public Move_Base         move;
+    /** This is the type of the used move, can be different from
+     * move.getType() */
+    private PokeType         moveType = null;
     public IPokemob          user;
 
     /** @param par1Str
@@ -39,6 +43,17 @@ public class PokemobDamageSource extends DamageSource
         damageSourceEntity = par2Entity;
         user = CapabilityPokemob.getPokemobFor(par2Entity);
         move = type;
+    }
+
+    public PokemobDamageSource setType(PokeType type)
+    {
+        this.moveType = type;
+        return this;
+    }
+
+    public PokeType getType()
+    {
+        return moveType == null ? move.getType(user) : moveType;
     }
 
     @Override
@@ -93,5 +108,10 @@ public class PokemobDamageSource extends DamageSource
     public boolean isProjectile()
     {
         return (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) != 0;
+    }
+
+    public float getEffectiveness(IPokemob pokemobCap)
+    {
+        return PokeType.getAttackEfficiency(getType(), pokemobCap.getType1(), pokemobCap.getType2());
     }
 }
