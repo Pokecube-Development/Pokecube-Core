@@ -62,7 +62,10 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
     public EntityTameablePokemob(World world)
     {
         super(world);
-        pokemobCap = (DefaultPokemob) getCapability(CapabilityPokemob.POKEMOB_CAP, null);
+        // Here we do this, incase someone has constructed this mob before
+        // capabilities are initialized.
+        DefaultPokemob cap = (DefaultPokemob) getCapability(CapabilityPokemob.POKEMOB_CAP, null);
+        pokemobCap = cap == null ? new DefaultPokemob(this) : cap;
     }
 
     public boolean canBeHeld(ItemStack itemStack)

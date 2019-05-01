@@ -61,7 +61,7 @@ public class MoveQueue
                 MoveQueue queue = queues.get(evt.world);
                 if (queue == null)
                 {
-                    PokecubeMod.log(Level.SEVERE,
+                    if (PokecubeMod.debug) PokecubeMod.log(Level.SEVERE,
                             "Critical Error with world for dimension " + evt.world.provider.getDimension()
                                     + " It is somehow ticking when not loaded, this should not happen.",
                             new Exception());

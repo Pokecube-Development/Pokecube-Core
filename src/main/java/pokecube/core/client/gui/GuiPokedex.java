@@ -314,7 +314,7 @@ public class GuiPokedex extends GuiScreen
         int offsetY = (height - 160) / 2 + 15;
         int height = 140;
         ITextComponent line;
-        ITextComponent page = pokedexEntry.getDescription();// ITextComponent.Serializer.jsonToComponent(bookPages.getStringTagAt(i));
+        ITextComponent page = pokedexEntry.getDescription();
         List<ITextComponent> list = GuiUtilRenderComponents.splitText(page, 100, fontRenderer, true, true);
         for (int j = 0; j < list.size(); j++)
         {

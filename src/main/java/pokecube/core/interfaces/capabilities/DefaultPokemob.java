@@ -44,6 +44,11 @@ import thut.api.entity.ai.AIThreadManager.AIStuff;
 
 public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializable<NBTTagCompound>, IPokemob
 {
+    public DefaultPokemob(EntityLiving mob)
+    {
+        this.setEntity(mob);
+    }
+
     public DefaultPokemob()
     {
         for (AIRoutine routine : AIRoutine.values())
