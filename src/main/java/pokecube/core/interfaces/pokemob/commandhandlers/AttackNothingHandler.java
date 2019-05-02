@@ -2,7 +2,7 @@ package pokecube.core.interfaces.pokemob.commandhandlers;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.common.MinecraftForge;
-import pokecube.core.events.CommandAttackEvent;
+import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.network.pokemobs.PacketCommand.DefaultHandler;
 

@@ -34,7 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.entity.pokemobs.AnimalChest;
 import pokecube.core.entity.pokemobs.EntityPokemobPart;
-import pokecube.core.events.AttackEvent;
+import pokecube.core.events.pokemob.combat.AttackEvent;
 import pokecube.core.interfaces.pokemob.ICanEvolve;
 import pokecube.core.interfaces.pokemob.IHasCommands;
 import pokecube.core.interfaces.pokemob.IHasMobAIStates;

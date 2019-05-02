@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
 import pokecube.core.PokecubeCore;
-import pokecube.core.events.MoveUse;
+import pokecube.core.events.pokemob.combat.MoveUse;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;

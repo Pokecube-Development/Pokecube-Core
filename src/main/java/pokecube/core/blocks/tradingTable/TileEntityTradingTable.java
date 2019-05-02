@@ -26,7 +26,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.TileEntityOwnable;
 import pokecube.core.blocks.pc.InventoryPC;
-import pokecube.core.events.TradeEvent;
+import pokecube.core.events.pokemob.TradeEvent;
 import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokemob;

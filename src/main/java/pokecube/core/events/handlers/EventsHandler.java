@@ -74,6 +74,7 @@ import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
@@ -104,7 +105,8 @@ import pokecube.core.entity.pokemobs.genetics.GeneticsManager.GeneticsProvider;
 import pokecube.core.entity.pokemobs.helper.EntityMountablePokemob;
 import pokecube.core.entity.pokemobs.helper.EntityPokemobBase;
 import pokecube.core.entity.professor.EntityProfessor;
-import pokecube.core.events.KillEvent;
+import pokecube.core.events.pokemob.InteractEvent;
+import pokecube.core.events.pokemob.combat.KillEvent;
 import pokecube.core.handlers.Config;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemobUseable;
@@ -143,7 +145,6 @@ import thut.api.maths.Vector3;
 import thut.api.terrain.BiomeType;
 import thut.api.terrain.TerrainManager;
 import thut.lib.CompatWrapper;
-import thut.wearables.ThutWearables;
 
 public class EventsHandler
 {
@@ -568,13 +569,6 @@ public class EventsHandler
 
     public void processInteract(PlayerInteractEvent evt, Entity target)
     {
-        if (evt.getItemStack().getDisplayName().equals("wearables") && !target.world.isRemote)
-        {
-            evt.getEntityPlayer().openGui(ThutWearables.instance, target.entityId, target.getEntityWorld(), 0, 0, 0);
-            evt.setCanceled(true);
-            evt.setCancellationResult(EnumActionResult.SUCCESS);
-            return;
-        }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(target);
         if (pokemob != null && !evt.getWorld().isRemote)
         {
@@ -582,6 +576,15 @@ public class EventsHandler
             EnumHand hand = evt.getHand();
             ItemStack held = player.getHeldItem(hand);
             EntityLiving entity = pokemob.getEntity();
+
+            InteractEvent event = new InteractEvent(pokemob, player);
+            MinecraftForge.EVENT_BUS.post(event);
+            if (event.getResult() != Result.DEFAULT)
+            {
+                evt.setCanceled(true);
+                evt.setCancellationResult(EnumActionResult.SUCCESS);
+                return;
+            }
 
             // Item has custom entity interaction, let that run instead.
             if (held.getItem().itemInteractionForEntity(held, player, entity, hand))
@@ -902,7 +905,7 @@ public class EventsHandler
     }
 
     @SubscribeEvent
-    public void KillEvent(pokecube.core.events.KillEvent evt)
+    public void KillEvent(pokecube.core.events.pokemob.combat.KillEvent evt)
     {
         IPokemob killer = evt.killer;
         IPokemob killed = evt.killed;

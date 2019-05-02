@@ -32,6 +32,7 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.modelloader.IMobProvider;
 import pokecube.modelloader.ModPokecubeML;
+import pokecube.modelloader.client.render.PokemobAnimationChanger.WornOffsets;
 import pokecube.modelloader.common.Config;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
@@ -164,6 +165,23 @@ public class AnimationLoader
             if (r.length == 3)
                 vect.set(Float.parseFloat(r[0].trim()), Float.parseFloat(r[1].trim()), Float.parseFloat(r[2].trim()));
             else vect.set(Float.parseFloat(r[0].trim()), Float.parseFloat(r[0].trim()), Float.parseFloat(r[0].trim()));
+            return vect;
+        }
+        return default_;
+    }
+
+    public static Vector3 getAngles(Node node, Vector3 default_)
+    {
+        if (node.getAttributes() == null) return default_;
+        Vector3 vect = null;
+        if (node.getAttributes().getNamedItem("angles") != null)
+        {
+            vect = Vector3.getNewVector();
+            String shift;
+            String[] r;
+            shift = node.getAttributes().getNamedItem("angles").getNodeValue();
+            r = shift.split(",");
+            vect.set(Float.parseFloat(r[0].trim()), Float.parseFloat(r[1].trim()), Float.parseFloat(r[2].trim()));
             return vect;
         }
         return default_;
@@ -332,6 +350,7 @@ public class AnimationLoader
             // Loaded animations
             List<Animation> tblAnims = Lists.newArrayList();
             HashMap<String, String> mergedAnimations = Maps.newHashMap();
+            Map<String, WornOffsets> wornOffsets = Maps.newHashMap();
             for (int i = 0; i < modelList.getLength(); i++)
             {
                 Node modelNode = modelList.item(i);
@@ -361,6 +380,15 @@ public class AnimationLoader
                         {
                             e.printStackTrace();
                         }
+                    }
+                    else if (part.getNodeName().equals("worn"))
+                    {
+                        Vector3 w_offset = getOffset(part, null);
+                        Vector3 w_angles = getAngles(part, null);
+                        Vector3 w_scale = getScale(part, null);
+                        String w_parent = part.getAttributes().getNamedItem("parent").getNodeValue();
+                        String w_ident = part.getAttributes().getNamedItem("id").getNodeValue();
+                        wornOffsets.put(w_ident, new WornOffsets(w_parent, w_offset, w_scale, w_angles));
                     }
                     else if (part.getNodeName().equals("phase"))
                     {
@@ -561,6 +589,9 @@ public class AnimationLoader
                 Set<Animation> anims = Sets.newHashSet();
                 // TODO actually initialize animations if needed.
                 animator.init(anims);
+
+                // Add the worn offsets
+                animator.wornOffsets.putAll(wornOffsets);
 
                 loaded.setTexturer(texturer);
                 loaded.setAnimationChanger(animator);

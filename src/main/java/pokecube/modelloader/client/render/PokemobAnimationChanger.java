@@ -15,12 +15,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.IShearable;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import thut.api.maths.Vector3;
 import thut.core.client.render.animation.AnimationRandomizer;
 import thut.core.client.render.model.IAnimationChanger;
 import thut.core.client.render.tabula.components.Animation;
 
 public class PokemobAnimationChanger implements IAnimationChanger
 {
+    public static class WornOffsets
+    {
+        public final String  parent;
+        public final Vector3 offset;
+        public final Vector3 scale;
+        public final Vector3 angles;
+
+        public WornOffsets(String parent, Vector3 offset, Vector3 scale, Vector3 angles)
+        {
+            this.scale = scale;
+            this.angles = angles;
+            this.offset = offset;
+            this.parent = parent;
+        }
+    }
+
     final IAnimationChanger                              parent;
     /** These parts can be sheared off. */
     public final Set<String>                             shearables    = Sets.newHashSet();
@@ -29,6 +46,8 @@ public class PokemobAnimationChanger implements IAnimationChanger
     /** These parts get a specific colour offset from the default colour of the
      * specialInfo. */
     public final Map<String, Function<Integer, Integer>> colourOffsets = Maps.newHashMap();
+    /** This is a set of valid offsets for worn items on the pokemob. */
+    public final Map<String, WornOffsets>                wornOffsets   = Maps.newHashMap();
     /** This is a cache of which parts have been checked for being a
      * wildcard. */
     private final Set<String>                            checkWildCard = Sets.newHashSet();

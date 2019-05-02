@@ -22,7 +22,7 @@ import pokecube.core.database.PokedexEntry.EvolutionData;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.database.abilities.AbilityManager;
 import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
-import pokecube.core.events.EvolveEvent;
+import pokecube.core.events.pokemob.EvolveEvent;
 import pokecube.core.handlers.playerdata.advancements.triggers.Triggers;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.HappinessType;
