@@ -24,20 +24,20 @@ import thut.core.client.render.model.IModelRenderer;
 
 public class ModelWrapper extends ModelBase
 {
-    final String              name;
-    private ModelBase         wrapped;
-    private IModelRenderer<?> model;
+    final String             name;
+    public ModelBase         wrapped;
+    public IModelRenderer<?> model;
 
     // Used to check if it has a custom sleeping animation.
-    private boolean           checkedForContactAttack   = false;
-    private boolean           hasContactAttackAnimation = false;
+    private boolean          checkedForContactAttack   = false;
+    private boolean          hasContactAttackAnimation = false;
 
     // Used to check if it has a custom sleeping animation.
-    private boolean           checkedForRangedAttack    = false;
-    private boolean           hasRangedAttackAnimation  = false;
+    private boolean          checkedForRangedAttack    = false;
+    private boolean          hasRangedAttackAnimation  = false;
 
-    public boolean            overrideAnim              = false;
-    public String             anim                      = "";
+    public boolean           overrideAnim              = false;
+    public String            anim                      = "";
 
     public ModelWrapper(String name)
     {

@@ -41,6 +41,7 @@ import thut.core.client.render.animation.AnimationRegistry;
 import thut.core.client.render.animation.ModelHolder;
 import thut.core.client.render.model.IModelRenderer;
 import thut.core.client.render.model.IModelRenderer.Vector5;
+import thut.core.client.render.model.IPartTexturer;
 import thut.core.client.render.model.ModelFactory;
 import thut.core.client.render.tabula.components.Animation;
 
@@ -305,20 +306,30 @@ public class AnimationLoader
             res.close();
             doc.getDocumentElement().normalize();
             NodeList modelList = doc.getElementsByTagName("model");
+
+            // Variables for the head rotation info
             int headDir = 2;
             int headDir2 = 2;
             int headAxis = 2;
             int headAxis2 = 1;
             float[] headCaps = { -180, 180 };
             float[] headCaps1 = { -30, 70 };
+
+            // Global model transforms
             Vector3 offset = null;
             Vector5 rotation = null;
             Vector3 scale = null;
-            TextureHelper texturer = null;
-            PokemobAnimationChanger animator = null;
+
+            // Objects for modifying textures/animations
+            IPartTexturer texturer = new TextureHelper(null);
+            PokemobAnimationChanger animator = new PokemobAnimationChanger();
+
+            // Custom tagged parts.
             Set<String> headNames = Sets.newHashSet();
             Set<String> shear = Sets.newHashSet();
             Set<String> dye = Sets.newHashSet();
+
+            // Loaded animations
             List<Animation> tblAnims = Lists.newArrayList();
             HashMap<String, String> mergedAnimations = Maps.newHashMap();
             for (int i = 0; i < modelList.getLength(); i++)
@@ -437,10 +448,15 @@ public class AnimationLoader
                 }
                 loaded.model_holder = model;
                 loaded.updateModel(phaseList, model);
+
+                // Set the global transforms
                 loaded.offset.set(offset);
                 loaded.scale.set(scale);
                 loaded.rotations = rotation;
+
                 loaded.model.getHeadParts().addAll(headNames);
+
+                // Cleanup the animation stuff.
                 for (Animation anim : tblAnims)
                 {
                     List<Animation> anims = loaded.animations.get(anim.name);
@@ -470,14 +486,14 @@ public class AnimationLoader
                     }
                     toSet.addAll(fromSet);
                 }
+
+                // Process the animations
                 for (List<Animation> anims : loaded.animations.values())
                 {
                     AnimationBuilder.processAnimations(anims);
                 }
-                if (animator == null)
-                {
-                    animator = new PokemobAnimationChanger();
-                }
+
+                // Process Dyeable parts.
                 for (String s : dye)
                 {
                     String[] args = s.split("#");
@@ -537,14 +553,19 @@ public class AnimationLoader
                         }
                     }
                 }
+
+                // Deal with shearable parts.
                 animator.shearables.addAll(shear);
+
+                // Finalize animation initialization
                 Set<Animation> anims = Sets.newHashSet();
-                // TODO init animations here.
+                // TODO actually initialize animations if needed.
                 animator.init(anims);
 
                 loaded.setTexturer(texturer);
                 loaded.setAnimationChanger(animator);
 
+                // Process the head rotation information.
                 if (loaded.model.imodel.getHeadInfo() != null)
                 {
                     if (headDir != 2) loaded.model.imodel.getHeadInfo().yawDirection = headDir;
@@ -557,7 +578,10 @@ public class AnimationLoader
                     loaded.model.imodel.getHeadInfo().pitchCapMax = headCaps1[1];
                 }
 
+                // Pre-process the animations via the model
                 loaded.model.preProcessAnimations(loaded.animations.values());
+
+                // Add to the various maps.
                 models.put(modelName, model);
                 modelMaps.put(modelName, loaded);
             }

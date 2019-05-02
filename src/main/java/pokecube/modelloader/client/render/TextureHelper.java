@@ -288,6 +288,7 @@ public class TextureHelper implements IPartTexturer
 
     public TextureHelper(Node node)
     {
+        if (node == null) return;
         if (node.getAttributes().getNamedItem("default") != null)
         {
             default_path = node.getAttributes().getNamedItem("default").getNodeValue();
