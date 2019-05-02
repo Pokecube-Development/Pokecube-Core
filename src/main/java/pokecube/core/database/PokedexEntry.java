@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -273,6 +274,122 @@ public class PokedexEntry
                 ret = ret && isInBiome(mob);
             }
             return ret;
+        }
+
+        @SideOnly(Side.CLIENT)
+        public String getEvoString()
+        {
+            /*
+             * //@formatter:off
+             * 
+             *  It should work as follows:
+             *  
+             *  X evolves into Y under the following circumstances:
+             *  - Upon reaching level L
+             *  - When sufficiently Happy
+             *  - When Raining
+             *  - Etc
+             *  
+             *  
+             */
+            // @formatter:on
+            PokedexEntry entry = preEvolution;
+            PokedexEntry nex = this.evolution;
+            String subEvo = I18n.format("pokemob.description.evolve.to", entry.getTranslatedName(),
+                    nex.getTranslatedName());
+            if (this.level > 0)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.level", this.level);
+            }
+            if (this.traded)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.traded");
+            }
+            if (this.gender == 1)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.male");
+            }
+            if (this.gender == 2)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.female");
+            }
+            if (!this.item.isEmpty())
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.item", this.item.getDisplayName());
+            }
+            if (happy)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.happy");
+            }
+            if (dawnOnly)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.dawn");
+            }
+            if (duskOnly)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.dusk");
+            }
+            if (dayOnly)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.day");
+            }
+            if (nightOnly)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.night");
+            }
+            if (rainOnly)
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.rain");
+            }
+            if (this.randomFactor != 1)
+            {
+                String var = ((int) (100 * randomFactor)) + "%";
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.chance", var);
+            }
+            if (this.move != null && !this.move.isEmpty())
+            {
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.move",
+                        MovesUtils.getMoveName(this.move).getUnformattedText());
+            }
+            if (this.matcher != null)
+            {
+                matcher.reset();
+                matcher.parse();
+                List<String> biomeNames = Lists.newArrayList();
+                Iterator<Biome> it = Biome.REGISTRY.iterator();
+                for (BiomeType t : matcher.validSubBiomes)
+                {
+                    biomeNames.add(t.readableName);
+                }
+                while (it.hasNext())
+                {
+                    Biome test = it.next();
+                    boolean valid = matcher.validBiomes.contains(test);
+                    if (valid)
+                    {
+                        biomeNames.add(test.getBiomeName());
+                    }
+                }
+                for (SpawnBiomeMatcher matcher : matcher.children)
+                {
+                    it = Biome.REGISTRY.iterator();
+                    for (BiomeType t : matcher.validSubBiomes)
+                    {
+                        biomeNames.add(t.readableName);
+                    }
+                    while (it.hasNext())
+                    {
+                        Biome test = it.next();
+                        boolean valid = matcher.validBiomes.contains(test);
+                        if (valid)
+                        {
+                            biomeNames.add(test.getBiomeName());
+                        }
+                    }
+                }
+                subEvo = subEvo + "\n" + I18n.format("pokemob.description.evolve.locations", biomeNames);
+            }
+            return subEvo;
         }
     }
 
@@ -1928,55 +2045,8 @@ public class PokedexEntry
                 for (EvolutionData d : entry.evolutions)
                 {
                     if (d.evolution == null) continue;
-                    PokedexEntry nex = d.evolution;
-                    String subEvo = "";
-                    if (d.level > 0)
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.level", entry.getTranslatedName(),
-                                nex.getTranslatedName(), d.level);
-                    }
-                    else if (!d.item.isEmpty() && d.gender == 0)
-                    {
-                        if (d.traded)
-                        {
-                            subEvo = I18n.format("pokemob.description.evolve.traded.item", entry.getTranslatedName(),
-                                    nex.getTranslatedName(), d.item.getDisplayName());
-                        }
-                        else subEvo = I18n.format("pokemob.description.evolve.item", entry.getTranslatedName(),
-                                nex.getTranslatedName(), d.item.getDisplayName());
-                    }
-                    else if (!d.item.isEmpty() && d.gender == 1)
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.item.male", entry.getTranslatedName(),
-                                nex.getTranslatedName(), d.item.getDisplayName());
-                    }
-                    else if (!d.item.isEmpty() && d.gender == 2)
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.item.female", entry.getTranslatedName(),
-                                nex.getTranslatedName(), d.item.getDisplayName());
-                    }
-                    else if (d.traded && !d.item.isEmpty())
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.traded.item", entry.getTranslatedName(),
-                                nex.getTranslatedName(), d.item.getDisplayName());
-                    }
-                    else if (d.happy)
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.happy", entry.getTranslatedName(),
-                                nex.getTranslatedName());
-                    }
-                    else if (d.traded)
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.traded", entry.getTranslatedName(),
-                                nex.getTranslatedName());
-                    }
-                    else if (d.move != null && !d.move.isEmpty())
-                    {
-                        subEvo = I18n.format("pokemob.description.evolve.move", entry.getTranslatedName(),
-                                nex.getTranslatedName(), MovesUtils.getMoveName(d.move).getUnformattedText());
-                    }
-                    if (evoString == null) evoString = subEvo;
-                    else evoString = evoString + subEvo;
+                    if (evoString == null) evoString = d.getEvoString();
+                    else evoString = evoString + "\n" + d.getEvoString();
                 }
             }
             String descString = typeDesc;
