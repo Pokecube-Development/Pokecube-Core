@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import pokecube.core.client.gui.helper.ScrollGui;
-import pokecube.core.client.gui.watch.GuiPokeWatch;
+import pokecube.core.client.gui.watch.PokemobInfoPage;
 import pokecube.core.client.gui.watch.util.SpawnListEntry;
 import pokecube.core.database.SpawnBiomeMatcher;
 import pokecube.core.interfaces.IPokemob;
@@ -17,9 +17,9 @@ public class Spawns extends ListPage
 
     int last = 0;
 
-    public Spawns(GuiPokeWatch watch, IPokemob pokemob)
+    public Spawns(PokemobInfoPage parent, IPokemob pokemob)
     {
-        super(watch, pokemob, "spawns");
+        super(parent, pokemob, "spawns");
     }
 
     @Override

@@ -26,7 +26,7 @@ public class Breeding extends ListPage
 
     public Breeding(PokemobInfoPage parent, IPokemob pokemob)
     {
-        super(parent.watch, pokemob, "breeding");
+        super(parent, pokemob, "breeding");
         this.parent = parent;
     }
 

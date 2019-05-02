@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 
 import org.lwjgl.input.Keyboard;
 
@@ -20,6 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import pokecube.core.client.gui.GuiPokedex;
 import pokecube.core.client.gui.watch.pokemob.Breeding;
 import pokecube.core.client.gui.watch.pokemob.Moves;
+import pokecube.core.client.gui.watch.pokemob.PokeInfoPage;
 import pokecube.core.client.gui.watch.pokemob.Spawns;
 import pokecube.core.client.gui.watch.pokemob.StatsInfo;
 import pokecube.core.client.gui.watch.util.PageButton;
@@ -31,17 +33,41 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.handlers.EventsHandlerClient;
 import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.network.packets.PacketPokedex;
 import pokecube.core.utils.EntityTools;
 import pokecube.core.utils.PokeType;
 
 public class PokemobInfoPage extends PageWithSubPages
 {
-    public static int savedIndex = 0;
+    public static int                                 savedIndex = 0;
 
-    IPokemob          pokemob;
-    IPokemob          renderMob;
-    GuiTextField      search;
+    public static List<Class<? extends PokeInfoPage>> PAGELIST   = Lists.newArrayList();
+
+    static
+    {
+        PAGELIST.add(StatsInfo.class);
+        PAGELIST.add(Moves.class);
+        PAGELIST.add(Spawns.class);
+        PAGELIST.add(Breeding.class);
+    }
+
+    private static PokeInfoPage makePage(Class<? extends PokeInfoPage> clazz, PokemobInfoPage parent)
+    {
+        try
+        {
+            return clazz.getConstructor(PokemobInfoPage.class, IPokemob.class).newInstance(parent, parent.pokemob);
+        }
+        catch (Exception e)
+        {
+            PokecubeMod.log(Level.SEVERE, "Error with making a page for watch", e);
+            return null;
+        }
+    }
+
+    IPokemob     pokemob;
+    IPokemob     renderMob;
+    GuiTextField search;
 
     public PokemobInfoPage(GuiPokeWatch watch)
     {
@@ -78,10 +104,11 @@ public class PokemobInfoPage extends PageWithSubPages
         PacketPokedex.sendSpecificSpawnsRequest(pokemob.getPokedexEntry());
         PacketPokedex.updateWatchEntry(pokemob.getPokedexEntry());
         pages.clear();
-        pages.add(new StatsInfo(watch, pokemob));
-        pages.add(new Moves(watch, pokemob));
-        pages.add(new Spawns(watch, pokemob));
-        pages.add(new Breeding(this, pokemob));
+        for (Class<? extends PokeInfoPage> clazz : PAGELIST)
+        {
+            PokeInfoPage page = makePage(clazz, this);
+            if (page != null) pages.add(page);
+        }
         for (WatchPage page : pages)
         {
             page.initGui();

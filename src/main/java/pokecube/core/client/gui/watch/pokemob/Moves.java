@@ -18,7 +18,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import pokecube.core.client.gui.helper.ScrollGui;
-import pokecube.core.client.gui.watch.GuiPokeWatch;
+import pokecube.core.client.gui.watch.PokemobInfoPage;
 import pokecube.core.client.gui.watch.util.LineEntry;
 import pokecube.core.client.gui.watch.util.LineEntry.IClickListener;
 import pokecube.core.database.PokedexEntry;
@@ -30,9 +30,9 @@ public class Moves extends ListPage
 {
     private int[][] moveOffsets;
 
-    public Moves(GuiPokeWatch watch, IPokemob pokemob)
+    public Moves(PokemobInfoPage parent, IPokemob pokemob)
     {
-        super(watch, pokemob, "moves");
+        super(parent, pokemob, "moves");
     }
 
     @Override

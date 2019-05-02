@@ -4,16 +4,16 @@ import java.io.IOException;
 
 import net.minecraft.client.gui.GuiButton;
 import pokecube.core.client.gui.helper.ScrollGui;
-import pokecube.core.client.gui.watch.GuiPokeWatch;
+import pokecube.core.client.gui.watch.PokemobInfoPage;
 import pokecube.core.interfaces.IPokemob;
 
 public abstract class ListPage extends PokeInfoPage
 {
     ScrollGui list;
 
-    public ListPage(GuiPokeWatch watch, IPokemob pokemob, String title)
+    public ListPage(PokemobInfoPage parent, IPokemob pokemob, String title)
     {
-        super(watch, pokemob, title);
+        super(parent, pokemob, title);
     }
 
     @Override

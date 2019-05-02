@@ -2,7 +2,7 @@ package pokecube.core.client.gui.watch.pokemob;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
-import pokecube.core.client.gui.watch.GuiPokeWatch;
+import pokecube.core.client.gui.watch.PokemobInfoPage;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.Stats;
@@ -11,9 +11,9 @@ public class StatsInfo extends PokeInfoPage
 {
     private FontRenderer fontRender;
 
-    public StatsInfo(GuiPokeWatch watch, IPokemob pokemob)
+    public StatsInfo(PokemobInfoPage parent, IPokemob pokemob)
     {
-        super(watch, pokemob, "stats");
+        super(parent, pokemob, "stats");
     }
 
     @Override
