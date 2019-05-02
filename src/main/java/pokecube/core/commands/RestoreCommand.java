@@ -48,7 +48,7 @@ public class RestoreCommand extends CommandBase
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/pokerestore <check|give> <player>";
+        return "/pokerestore <check|checkpc|checkdeleted|give|givepc|givedeleted> <player>";
     }
 
     @Override
@@ -74,24 +74,37 @@ public class RestoreCommand extends CommandBase
         GameProfile profile = MakeCommand.getProfile(server, args[1]);
         if (profile == null)
             throw new PlayerNotFoundException("commands.generic.player.notFound", new Object[] { args[1] });
-        Map<Integer, ItemStack> cache = PlayerDataHandler.getInstance().getPlayerData(profile.getId())
-                .getData(PlayerPokemobCache.class).cache;
+        PlayerPokemobCache pokemobCache = PlayerDataHandler.getInstance().getPlayerData(profile.getId())
+                .getData(PlayerPokemobCache.class);
+        Map<Integer, ItemStack> cache = pokemobCache.cache;
 
-        if (args[0].equals("check") || args[0].equals("give"))
+        if (args[0].startsWith("check") || args[0].startsWith("give"))
         {
             ITextComponent message = new TextComponentString("Pokemobs: ");
             sender.sendMessage(message);
             message = new TextComponentString("");
+            boolean pc = args[0].endsWith("pc");
+            boolean deleted = args[0].endsWith("deleted");
             for (Entry<Integer, ItemStack> entry : cache.entrySet())
             {
                 Integer id = entry.getKey();
+                boolean inPC = pokemobCache.inPC.contains(id);
+                boolean wasDeleted = pokemobCache.genesDeleted.contains(id);
+
+                // If it is in the PC, but we dont care, continue
+                if (!pc && inPC) continue;
+                else if (pc && !inPC) continue;
+                // Same for deleted status.
+                if (!deleted && wasDeleted) continue;
+                else if (deleted && !wasDeleted) continue;
+
                 ItemStack stack = entry.getValue();
                 NBTTagList nbttaglist = stack.getTagCompound().getCompoundTag(TagNames.POKEMOB).getTagList("Pos", 6);
                 double posX = nbttaglist.getDoubleAt(0);
                 double posY = nbttaglist.getDoubleAt(1);
                 double posZ = nbttaglist.getDoubleAt(2);
                 String command;
-                if (args[0].equals("check"))
+                if (args[0].startsWith("check"))
                 {
                     command = "/tp " + posX + " " + posY + " " + posZ;
                 }

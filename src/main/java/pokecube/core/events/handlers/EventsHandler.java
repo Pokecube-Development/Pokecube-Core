@@ -2,7 +2,6 @@ package pokecube.core.events.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -93,6 +92,7 @@ import pokecube.core.ai.properties.IGuardAICapability;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
 import pokecube.core.ai.utils.AIEventHandler;
 import pokecube.core.blocks.TileEntityOwnable;
+import pokecube.core.blocks.healtable.BlockHealTable;
 import pokecube.core.blocks.nests.TileEntityBasePortal;
 import pokecube.core.contributors.Contributor;
 import pokecube.core.contributors.ContributorManager;
@@ -135,7 +135,6 @@ import pokecube.core.network.packets.PacketPokecube;
 import pokecube.core.utils.Permissions;
 import pokecube.core.utils.PokeType;
 import pokecube.core.utils.PokecubeSerializer;
-import pokecube.core.utils.TagNames;
 import pokecube.core.utils.Tools;
 import thut.api.boom.ExplosionCustom;
 import thut.api.entity.ai.IAIMob;
@@ -144,6 +143,7 @@ import thut.api.maths.Vector3;
 import thut.api.terrain.BiomeType;
 import thut.api.terrain.TerrainManager;
 import thut.lib.CompatWrapper;
+import thut.wearables.ThutWearables;
 
 public class EventsHandler
 {
@@ -253,6 +253,11 @@ public class EventsHandler
 
     public static double                               juiceChance = 3.5;
 
+    /** Gets all pokemobs owned by owner within the given distance.
+     * 
+     * @param owner
+     * @param distance
+     * @return */
     public static List<IPokemob> getPokemobs(EntityLivingBase owner, double distance)
     {
         List<IPokemob> ret = new ArrayList<IPokemob>();
@@ -274,30 +279,6 @@ public class EventsHandler
         }
 
         return ret;
-    }
-
-    public static int getShadowPokemonNb(Entity hostile)
-    {
-        String temp = hostile.getName().toLowerCase(java.util.Locale.ENGLISH).trim().replace(" ", "");
-
-        PokedexEntry entry = null;
-
-        ArrayList<PokedexEntry> list = Database.mobReplacements.get(temp);
-        if (list != null)
-        {
-            Collections.shuffle(list);
-            entry = list.get(0);
-            while (Pokedex.getInstance().getEntry(entry.getPokedexNb()) == null && list.size() > 0)
-            {
-                list.remove(0);
-                entry = list.get(0);
-            }
-            if (list.size() == 0)
-            {
-                Database.mobReplacements.remove(temp);
-            }
-        }
-        return entry == null ? 249 : entry.getPokedexNb();
     }
 
     public static void recallAllPokemobsExcluding(EntityPlayer player, IPokemob excluded)
@@ -338,29 +319,6 @@ public class EventsHandler
         }
     }
 
-    public static void setFromNBT(IPokemob pokemob, NBTTagCompound tag)
-    {
-        NBTTagCompound pokemobTag = TagNames.getPokecubePokemobTag(tag);
-        NBTBase genesTag = TagNames.getPokecubeGenesTag(tag);
-        pokemobTag.removeTag(TagNames.INVENTORYTAG);
-        pokemobTag.removeTag(TagNames.AITAG);
-        pokemobTag.removeTag(TagNames.MOVESTAG);
-        pokemob.readPokemobData(pokemobTag);
-        if (pokemob instanceof DefaultPokemob)
-        {
-            try
-            {
-                DefaultPokemob poke = (DefaultPokemob) pokemob;
-                IMobGenetics.GENETICS_CAP.readNBT(poke.genes, null, genesTag);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-        pokemob.onGenesChanged();
-    }
-
     public MeteorAreaSetter meteorprocessor;
 
     public EventsHandler()
@@ -395,6 +353,10 @@ public class EventsHandler
     }
 
     @SubscribeEvent
+    /** Used to make sure that when riding pokemobs underwater, you can mine at
+     * a reasonable speed.
+     * 
+     * @param evt */
     public void breakSpeedCheck(PlayerEvent.BreakSpeed evt)
     {
         Entity ridden = evt.getEntityLiving().getRidingEntity();
@@ -418,8 +380,13 @@ public class EventsHandler
     }
 
     @SubscribeEvent
+    /** Prevents some things from being broken, also possibly adds drops to mob
+     * spawners.
+     * 
+     * @param evt */
     public void BreakBlock(BreakEvent evt)
     {
+        // If there are any, adds extra drops to mob spawners.
         if (evt.getState().getBlock() == Blocks.MOB_SPAWNER)
         {
             ItemStack stack = PokecubeItems.getRandomSpawnerDrop();
@@ -428,12 +395,14 @@ public class EventsHandler
                     evt.getPos().getZ() + 0.5, stack);
             evt.getWorld().spawnEntity(item);
         }
+        // Prevents breaking "Fixed" pokecenters.
         if (evt.getState().getBlock() == PokecubeItems.pokecenter)
         {
-            int meta = evt.getState().getBlock().getMetaFromState(evt.getState());
-            if (meta == 1 && !evt.getPlayer().capabilities.isCreativeMode) evt.setCanceled(true);
+            if (evt.getState().getValue(BlockHealTable.FIXED) && !evt.getPlayer().capabilities.isCreativeMode)
+                evt.setCanceled(true);
         }
         TileEntity tile;
+        // Prevents other players from breaking someone's secret base portal.
         if ((tile = evt.getWorld().getTileEntity(evt.getPos())) instanceof TileEntityBasePortal)
         {
             if (!((TileEntityBasePortal) tile).canEdit(evt.getPlayer()))
@@ -444,6 +413,9 @@ public class EventsHandler
     }
 
     @SubscribeEvent
+    /** Stops mobs spawning in nether fortresses, if this is enabled.
+     * 
+     * @param evt */
     public void clearNetherBridge(InitMapGenEvent evt)
     {
         if (PokecubeMod.core.getConfig().deactivateMonsters && evt.getType() == InitMapGenEvent.EventType.NETHER_BRIDGE)
@@ -596,6 +568,13 @@ public class EventsHandler
 
     public void processInteract(PlayerInteractEvent evt, Entity target)
     {
+        if (evt.getItemStack().getDisplayName().equals("wearables") && !target.world.isRemote)
+        {
+            evt.getEntityPlayer().openGui(ThutWearables.instance, target.entityId, target.getEntityWorld(), 0, 0, 0);
+            evt.setCanceled(true);
+            evt.setCancellationResult(EnumActionResult.SUCCESS);
+            return;
+        }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(target);
         if (pokemob != null && !evt.getWorld().isRemote)
         {

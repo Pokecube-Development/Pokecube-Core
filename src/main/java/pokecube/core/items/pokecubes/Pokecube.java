@@ -35,6 +35,7 @@ import net.minecraftforge.server.permission.context.PlayerContext;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.Config;
+import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.Stats;
@@ -338,6 +339,7 @@ public class Pokecube extends Item implements IPokecube
         {
             thrower.playSound(SoundEvents.ENTITY_EGG_THROW, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
             world.spawnEntity(entity);
+            if (hasMob) PlayerPokemobCache.UpdateCache(stack, false, false);
         }
         return true;
     }
@@ -379,6 +381,7 @@ public class Pokecube extends Item implements IPokecube
             {
                 thrower.playSound(SoundEvents.ENTITY_EGG_THROW, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
                 world.spawnEntity(entity);
+                if (PokecubeManager.isFilled(stack)) PlayerPokemobCache.UpdateCache(stack, false, false);
             }
         }
         else if (!rightclick) { return false; }

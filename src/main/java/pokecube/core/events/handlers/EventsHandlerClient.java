@@ -35,6 +35,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -71,11 +72,14 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import pokecube.core.interfaces.capabilities.DefaultPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import pokecube.core.network.pokemobs.PacketChangeForme;
 import pokecube.core.network.pokemobs.PacketMountedControl;
+import pokecube.core.utils.TagNames;
 import pokecube.core.utils.Tools;
+import thut.api.entity.genetics.IMobGenetics;
 import thut.core.client.ClientProxy;
 
 @SideOnly(Side.CLIENT)
@@ -146,6 +150,29 @@ public class EventsHandlerClient
     private static Map<PokedexEntry, ResourceLocation[]> icons      = Maps.newHashMap();
     static boolean                                       notifier   = false;
 
+    public static void setFromNBT(IPokemob pokemob, NBTTagCompound tag)
+    {
+        NBTTagCompound pokemobTag = TagNames.getPokecubePokemobTag(tag);
+        NBTBase genesTag = TagNames.getPokecubeGenesTag(tag);
+        pokemobTag.removeTag(TagNames.INVENTORYTAG);
+        pokemobTag.removeTag(TagNames.AITAG);
+        pokemobTag.removeTag(TagNames.MOVESTAG);
+        pokemob.readPokemobData(pokemobTag);
+        if (pokemob instanceof DefaultPokemob)
+        {
+            try
+            {
+                DefaultPokemob poke = (DefaultPokemob) pokemob;
+                IMobGenetics.GENETICS_CAP.readNBT(poke.genes, null, genesTag);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        pokemob.onGenesChanged();
+    }
+
     public static IPokemob getPokemobForRender(ItemStack itemStack, World world)
     {
         if (!itemStack.hasTagCompound()) return null;
@@ -157,7 +184,7 @@ public class EventsHandlerClient
             IPokemob pokemob = getRenderMob(entry, world);
             if (pokemob == null) return null;
             NBTTagCompound pokeTag = itemStack.getTagCompound();
-            EventsHandler.setFromNBT(pokemob, pokeTag);
+            setFromNBT(pokemob, pokeTag);
             pokemob.setPokecube(itemStack);
             pokemob.getEntity()
                     .setHealth(Tools.getHealth((int) pokemob.getEntity().getMaxHealth(), itemStack.getItemDamage()));

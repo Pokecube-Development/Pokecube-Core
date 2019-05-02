@@ -16,9 +16,11 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 import pokecube.core.PokecubeCore;
+import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import pokecube.core.utils.PCSaveHandler;
+import thut.core.common.handlers.PlayerDataHandler;
 import thut.lib.CompatWrapper;
 
 public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
@@ -60,6 +62,8 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         {
             ItemStack stack = mob;
             PokecubeManager.heal(stack);
+            PlayerDataHandler.getInstance().getPlayerData(uuid).getData(PlayerPokemobCache.class).addPokemob(mob, true,
+                    false);
             if (PokecubeCore.proxy.getPlayer(uuid) != null) PokecubeCore.proxy.getPlayer(uuid)
                     .sendMessage(new TextComponentTranslation("tile.pc.sentto", mob.getDisplayName()));
         }

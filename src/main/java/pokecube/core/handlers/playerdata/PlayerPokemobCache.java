@@ -1,8 +1,10 @@
 package pokecube.core.handlers.playerdata;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,7 +17,24 @@ import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 /** This is a backup cache of the pokemobs owned by the player. */
 public class PlayerPokemobCache extends PlayerData
 {
-    public Map<Integer, ItemStack> cache = Maps.newHashMap();
+    public static void UpdateCache(IPokemob mob)
+    {
+        if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
+        ItemStack stack = PokecubeManager.pokemobToItem(mob);
+        UpdateCache(stack, false, false);
+    }
+
+    public static void UpdateCache(ItemStack stack, boolean pc, boolean deleted)
+    {
+        String owner = PokecubeManager.getOwner(stack);
+        if (owner.isEmpty()) return;
+        PlayerDataHandler.getInstance().getPlayerData(owner).getData(PlayerPokemobCache.class).addPokemob(stack, pc,
+                deleted);
+    }
+
+    public Map<Integer, ItemStack> cache        = Maps.newHashMap();
+    public Set<Integer>            inPC         = Sets.newHashSet();
+    public Set<Integer>            genesDeleted = Sets.newHashSet();
 
     public PlayerPokemobCache()
     {
@@ -26,8 +45,17 @@ public class PlayerPokemobCache extends PlayerData
     {
         if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
         ItemStack stack = PokecubeManager.pokemobToItem(mob);
-        cache.put(mob.getPokemonUID(), stack);
-        PlayerDataHandler.getInstance().save(mob.getOwnerId().toString(), getIdentifier());
+        addPokemob(stack, false, false);
+    }
+
+    public void addPokemob(ItemStack stack, boolean pc, boolean deleted)
+    {
+        Integer uid = PokecubeManager.getUID(stack);
+        String owner = PokecubeManager.getOwner(stack);
+        cache.put(uid, stack);
+        pc = pc ? inPC.add(uid) : inPC.remove(uid);
+        if (deleted) genesDeleted.add(uid);
+        PlayerDataHandler.getInstance().save(owner, getIdentifier());
     }
 
     @Override
@@ -38,6 +66,8 @@ public class PlayerPokemobCache extends PlayerData
         {
             NBTTagCompound var = new NBTTagCompound();
             var.setInteger("uid", id);
+            var.setBoolean("_in_pc_", inPC.contains(id));
+            var.setBoolean("_dead_", genesDeleted.contains(id));
             ItemStack stack = cache.get(id);
             stack.writeToNBT(var);
             list.appendTag(var);
@@ -49,6 +79,8 @@ public class PlayerPokemobCache extends PlayerData
     public void readFromNBT(NBTTagCompound tag)
     {
         cache.clear();
+        inPC.clear();
+        genesDeleted.clear();
         if (tag.hasKey("data"))
         {
             NBTTagList list = (NBTTagList) tag.getTag("data");
@@ -65,7 +97,18 @@ public class PlayerPokemobCache extends PlayerData
                 {
                     id = PokecubeManager.getUID(stack);
                 }
-                if (id != -1) cache.put(id, stack);
+                if (id != -1)
+                {
+                    cache.put(id, stack);
+                    if (var.getBoolean("_in_pc_"))
+                    {
+                        inPC.add(id);
+                    }
+                    if (var.getBoolean("_dead_"))
+                    {
+                        genesDeleted.add(id);
+                    }
+                }
             }
         }
     }

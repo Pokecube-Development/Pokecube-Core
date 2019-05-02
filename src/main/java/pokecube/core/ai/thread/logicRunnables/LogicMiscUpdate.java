@@ -13,6 +13,7 @@ import net.minecraftforge.common.IShearable;
 import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.nests.TileEntityNest;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.IPokemob;
@@ -75,6 +76,12 @@ public class LogicMiscUpdate extends LogicBase
             checkEvolution();
             // Check and tick inventory
             checkInventory(world);
+
+            // Ensure the cache position is kept updated
+            if (entity.ticksExisted % 20 == 0)
+            {
+                PlayerPokemobCache.UpdateCache(pokemob);
+            }
 
             // Randomly increase happiness for being outside of pokecube.
             if (Math.random() > 0.999 && pokemob.getGeneralState(GeneralStates.TAMED))
