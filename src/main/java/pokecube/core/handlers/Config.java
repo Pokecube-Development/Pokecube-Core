@@ -123,8 +123,7 @@ public class Config extends ConfigBase
     @Configure(category = misc)
     public boolean                       berryBreeding                = true;
     @Configure(category = misc)
-    public String[]                      customSounds                = {};
-    
+    public String[]                      customSounds                 = {};
 
     @Configure(category = perms)
     public boolean                       permsCapture                 = false;
@@ -585,6 +584,8 @@ public class Config extends ConfigBase
      * configs to VERSION, and uses -1 as a "default" to ensure this has
      * changed. */
     public int                           version                      = -1;
+    @Configure(category = advanced)
+    public boolean                       pokemobsAreAllFrozen         = false;
 
     @Configure(category = genetics)
     public String                        epigeneticEVFunction         = GeneticsManager.epigeneticFunction;
