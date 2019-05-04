@@ -17,6 +17,7 @@ import pokecube.core.ai.utils.pathing.PokemobNavigator;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
@@ -124,7 +125,8 @@ public class AIIdle extends AIBase
     private boolean getLocation()
     {
         boolean tameFactor = mob.getGeneralState(GeneralStates.TAMED) && !mob.getGeneralState(GeneralStates.STAYING);
-        int distance = (int) (maxLength = tameFactor ? 8 : 16);
+        int distance = (int) (maxLength = tameFactor ? PokecubeMod.core.getConfig().idleMaxPathTame
+                : PokecubeMod.core.getConfig().idleMaxPathWild);
         if (!tameFactor)
         {
             if (mob.getHome() == null
@@ -206,7 +208,10 @@ public class AIIdle extends AIBase
     public boolean shouldRun()
     {
         // Configs can set this to -1 to disable idle movement entirely.
-        if (IDLETIMER < 0) return false;
+        if (IDLETIMER <= 0) return false;
+
+        // Check random number
+        if (new Random().nextInt(IDLETIMER) != 0) return false;
 
         // Wander disabled, so don't run.
         if (!mob.isRoutineEnabled(AIRoutine.WANDER)) return false;
@@ -246,9 +251,7 @@ public class AIIdle extends AIBase
         // Have path, no need to idle
         if (current != null) return false;
 
-        // Check random number
-        if (new Random().nextInt(IDLETIMER) == 0) return true;
-        return false;
+        return true;
     }
 
     public static Vector3 getRandomPointNear(IBlockAccess world, IPokemob mob, Vector3 v, int distance)
