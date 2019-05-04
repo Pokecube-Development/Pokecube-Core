@@ -62,7 +62,11 @@ public class AIMate extends AIBase
         {
             findLover();
         }
-        if (pokemob.getLover() == null && pokemob.getMalesForBreeding().isEmpty()) return;
+        if (pokemob.getLover() == null && pokemob.getMalesForBreeding().isEmpty())
+        {
+            cooldown = PokecubeMod.core.getConfig().mateAIRate;
+            return;
+        }
         boolean transforms = false;
         for (String s : pokemob.getMoves())
         {
@@ -83,7 +87,7 @@ public class AIMate extends AIBase
         }
         if (!pokemob.tryToBreed())
         {
-            cooldown = 20;
+            cooldown = PokecubeMod.core.getConfig().mateAIRate;
         }
     }
 

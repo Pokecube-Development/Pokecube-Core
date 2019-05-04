@@ -148,7 +148,7 @@ public abstract class AbstractModelRenderer<T extends EntityLiving> extends Rend
                 if (ticks <= LogicMiscUpdate.EXITCUBEDURATION / 2)
                 {
                     float max = LogicMiscUpdate.EXITCUBEDURATION / 2;
-                    s *= (ticks - partialTick) / max;
+                    s *= (ticks + partialTick) / max;
                 }
             }
             sx *= s;

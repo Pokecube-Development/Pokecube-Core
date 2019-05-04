@@ -69,7 +69,8 @@ public abstract class PokemobMoves extends PokemobSexed
         // Check ranged vs contact and set cooldown accordinly.
         boolean distanced = (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0;
         this.setAttackCooldown(MovesUtils.getAttackDelay(this, attack, distanced, target instanceof EntityPlayer));
-        // Syncs that the move has at least been attempted, this is used for the graphical indicator of move cooldowns
+        // Syncs that the move has at least been attempted, this is used for the
+        // graphical indicator of move cooldowns
         PacketSyncMoveUse.sendUpdate(this);
 
         if (target != getEntity())
@@ -214,7 +215,7 @@ public abstract class PokemobMoves extends PokemobSexed
     {
         // Ensure max health, etc are correct.
         updateHealth();
-        //Clear off any persistant effects.
+        // Clear off any persistant effects.
         IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
         if (affected != null)
         {

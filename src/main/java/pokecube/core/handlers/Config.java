@@ -216,6 +216,8 @@ public class Config extends ConfigBase
     @Configure(category = mobAI)
     public float                         mateDensityWild              = 2;
     @Configure(category = mobAI)
+    public int                           mateAIRate                   = 40;
+    @Configure(category = mobAI)
     public float                         mateDensityPlayer            = 4;
     @Configure(category = mobAI)
     public int                           breedingDelay                = 4000;

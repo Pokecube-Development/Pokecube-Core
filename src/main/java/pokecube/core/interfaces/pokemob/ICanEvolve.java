@@ -13,9 +13,11 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.PokedexEntry.EvolutionData;
@@ -286,6 +288,12 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             // Sync health and nickname
             ((EntityLivingBase) evolution).setHealth(thisEntity.getHealth());
             if (this.getPokemonNickname().equals(oldEntry.getName())) this.setPokemonNickname("");
+
+            // Start by syncing all of the capabilities, we will override some
+            // later.
+            CapabilityDispatcher caps_old = ReflectionHelper.getPrivateValue(Entity.class, thisEntity, "capabilities");
+            CapabilityDispatcher caps_new = ReflectionHelper.getPrivateValue(Entity.class, evolution, "capabilities");
+            caps_new.deserializeNBT(caps_old.serializeNBT());
 
             // Sync tags besides the ones that define species and form.
             NBTTagCompound tag = thisMob.writePokemobData();
