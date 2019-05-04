@@ -2047,6 +2047,7 @@ public class PokedexEntry
                     if (d.evolution == null) continue;
                     if (evoString == null) evoString = d.getEvoString();
                     else evoString = evoString + "\n" + d.getEvoString();
+                    evoString = evoString + "\n";
                 }
             }
             String descString = typeDesc;

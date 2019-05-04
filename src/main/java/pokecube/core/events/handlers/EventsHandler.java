@@ -577,7 +577,7 @@ public class EventsHandler
             ItemStack held = player.getHeldItem(hand);
             EntityLiving entity = pokemob.getEntity();
 
-            InteractEvent event = new InteractEvent(pokemob, player);
+            InteractEvent event = new InteractEvent(pokemob, player, evt);
             MinecraftForge.EVENT_BUS.post(event);
             if (event.getResult() != Result.DEFAULT)
             {
