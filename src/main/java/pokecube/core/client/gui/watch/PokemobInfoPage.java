@@ -9,9 +9,11 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,6 +22,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.entity.EntityLivingBase;
 import pokecube.core.client.gui.GuiPokedex;
 import pokecube.core.client.gui.watch.pokemob.Breeding;
+import pokecube.core.client.gui.watch.pokemob.Description;
 import pokecube.core.client.gui.watch.pokemob.Moves;
 import pokecube.core.client.gui.watch.pokemob.PokeInfoPage;
 import pokecube.core.client.gui.watch.pokemob.Spawns;
@@ -30,13 +33,16 @@ import pokecube.core.client.gui.watch.util.WatchPage;
 import pokecube.core.database.Database;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.database.stats.StatsCollector;
 import pokecube.core.events.handlers.EventsHandlerClient;
 import pokecube.core.handlers.PokecubePlayerDataHandler;
+import pokecube.core.handlers.playerdata.PokecubePlayerStats;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.network.packets.PacketPokedex;
 import pokecube.core.utils.EntityTools;
 import pokecube.core.utils.PokeType;
+import thut.core.common.handlers.PlayerDataHandler;
 
 public class PokemobInfoPage extends PageWithSubPages
 {
@@ -50,6 +56,7 @@ public class PokemobInfoPage extends PageWithSubPages
         PAGELIST.add(Moves.class);
         PAGELIST.add(Spawns.class);
         PAGELIST.add(Breeding.class);
+        PAGELIST.add(Description.class);
     }
 
     private static PokeInfoPage makePage(Class<? extends PokeInfoPage> clazz, PokemobInfoPage parent)
@@ -353,6 +360,34 @@ public class PokemobInfoPage extends PageWithSubPages
         // Draw Pokemob
         if (pokemob != null)
         {
+
+            // Draw the icon indicating capture/inspect status.
+            watch.mc.renderEngine.bindTexture(GuiPokeWatch.TEXTURE);
+            PokedexEntry pokedexEntry = pokemob.getPokedexEntry();
+            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getMinecraft().player)
+                    .getData(PokecubePlayerStats.class);
+            boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
+                    || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
+                    || mc.player.capabilities.isCreativeMode;
+
+            // Megas Inherit colouring from the base form.
+            if (!fullColour && pokedexEntry.isMega)
+            {
+                fullColour = (StatsCollector.getCaptured(pokedexEntry.getBaseForme(),
+                        Minecraft.getMinecraft().player) > 0
+                        || StatsCollector.getHatched(pokedexEntry.getBaseForme(), Minecraft.getMinecraft().player) > 0);
+            }
+
+            // Select which box to draw via position.
+            if (fullColour) dr = 0;
+            else if (stats.hasInspected(pokedexEntry)) dr = 9;
+            else dr = 18;
+            GL11.glColor3f(1, 1, 1);
+            dx = -75;
+            dy = 11;
+            // Draw the box.
+            this.drawTexturedModalRect(x + dx, y + dy, dr, 247, 9, 9);
+
             IPokemob pokemob = this.renderMob;
             // Copy the stuff to the render mob if this mob is in world
             if (pokemob.getEntity().addedToChunk)
@@ -406,7 +441,6 @@ public class PokemobInfoPage extends PageWithSubPages
 
             // Draw box around where type displays
             dx = -76;
-            dy = 10;
             dy = 50;
             dr = 20;
             colour = 0xFF78C850;
@@ -414,6 +448,7 @@ public class PokemobInfoPage extends PageWithSubPages
             drawVerticalLine(x + dx + 2 * dr, y + dy, y + dy + dr, colour);
             dr = 40;
             drawHorizontalLine(x + dx, x + dx + dr, y + dy + dr / 2, colour);
+
         }
     }
 

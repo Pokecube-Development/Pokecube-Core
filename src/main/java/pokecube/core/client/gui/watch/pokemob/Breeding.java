@@ -48,7 +48,7 @@ public class Breeding extends ListPage
         List<IGuiListEntry> entries = Lists.newArrayList();
         int offsetX = (watch.width - 160) / 2 + 20;
         int offsetY = (watch.height - 160) / 2 + 85;
-        int height = fontRenderer.FONT_HEIGHT * 6;
+        int height = fontRenderer.FONT_HEIGHT * 12;
         int width = 135;
 
         int y0 = offsetY;

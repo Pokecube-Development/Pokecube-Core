@@ -440,24 +440,43 @@ public class GuiPokedex extends GuiScreen
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
             if (pokemob == null) { return; }
             PokedexEntry pokedexEntry = pokemob.getPokedexEntry();
-            PokecubePlayerStats stats = PlayerDataHandler.getInstance()
-                    .getPlayerData(Minecraft.getMinecraft().player).getData(PokecubePlayerStats.class);
-            if ((StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
-                    || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
-                    || mc.player.capabilities.isCreativeMode)
+            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getMinecraft().player)
+                    .getData(PokecubePlayerStats.class);
+            IMobColourable colourable = pokemob.getEntity() instanceof IMobColourable
+                    ? (IMobColourable) pokemob.getEntity()
+                    : pokemob instanceof IMobColourable ? (IMobColourable) pokemob : null;
+            if (colourable != null)
             {
-                if (entity instanceof IMobColourable) ((IMobColourable) entity).setRGBA(255, 255, 255, 255);
-            }
-            else if (stats.hasInspected(pokedexEntry))
-            {
-                if (entity instanceof IMobColourable) ((IMobColourable) entity).setRGBA(127, 127, 127, 255);
-            }
-            else
-            {
-                if (entity instanceof IMobColourable) ((IMobColourable) entity).setRGBA(15, 15, 15, 255);
-            }
+                boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
+                        || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
+                        || mc.player.capabilities.isCreativeMode;
 
+                // Megas Inherit colouring from the base form.
+                if (!fullColour && pokedexEntry.isMega)
+                {
+                    fullColour = (StatsCollector.getCaptured(pokedexEntry.getBaseForme(),
+                            Minecraft.getMinecraft().player) > 0
+                            || StatsCollector.getHatched(pokedexEntry.getBaseForme(),
+                                    Minecraft.getMinecraft().player) > 0);
+                }
+
+                // Set colouring accordingly.
+                if (fullColour)
+                {
+                    colourable.setRGBA(255, 255, 255, 255);
+                }
+                else if (stats.hasInspected(pokedexEntry))
+                {
+                    colourable.setRGBA(127, 127, 127, 255);
+                }
+                else
+                {
+                    colourable.setRGBA(15, 15, 15, 255);
+                }
+            }
+            // Reset some things that add special effects to rendered mobs.
             pokemob.setGeneralState(GeneralStates.EXITINGCUBE, false);
+            pokemob.setGeneralState(GeneralStates.EVOLVING, false);
 
             float mobScale = pokemob.getSize();
             Vector3f dims = pokemob.getPokedexEntry().getModelSize();
