@@ -447,6 +447,8 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         NBTTagCompound boxes = nbt.getCompoundTag("boxes");
         String id = boxes.getString("UUID");
         this.owner = UUID.fromString(id);
+        PlayerPokemobCache cache = PlayerDataHandler.getInstance().getPlayerData(owner)
+                .getData(PlayerPokemobCache.class);
         for (int k = 0; k < PAGECOUNT; k++)
         {
             if (k == 0)
@@ -471,6 +473,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
                 if (this.contents.containsKey(j)) continue;
                 ItemStack itemstack = new ItemStack(nbttagcompound);
                 this.setInventorySlotContents(j, itemstack);
+                cache.addPokemob(id, itemstack, true, false);
             }
         }
     }

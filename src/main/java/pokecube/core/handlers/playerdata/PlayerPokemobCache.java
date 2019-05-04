@@ -48,14 +48,19 @@ public class PlayerPokemobCache extends PlayerData
         addPokemob(stack, false, false);
     }
 
-    public void addPokemob(ItemStack stack, boolean pc, boolean deleted)
+    public void addPokemob(String owner, ItemStack stack, boolean pc, boolean deleted)
     {
         Integer uid = PokecubeManager.getUID(stack);
-        String owner = PokecubeManager.getOwner(stack);
         cache.put(uid, stack);
         pc = pc ? inPC.add(uid) : inPC.remove(uid);
         if (deleted) genesDeleted.add(uid);
         PlayerDataHandler.getInstance().save(owner, getIdentifier());
+    }
+
+    public void addPokemob(ItemStack stack, boolean pc, boolean deleted)
+    {
+        String owner = PokecubeManager.getOwner(stack);
+        addPokemob(owner, stack, pc, deleted);
     }
 
     @Override
