@@ -315,7 +315,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
 
             // Sync entity data, UUID and location.
             evolution.getEntityData().merge(thisEntity.getEntityData());
-            // evolution.setUniqueId(thisEntity.getUniqueID());
+
             evolution.copyLocationAndAnglesFrom(thisEntity);
 
             // Sync ability back, or store old ability.

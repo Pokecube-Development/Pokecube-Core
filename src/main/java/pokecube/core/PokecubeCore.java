@@ -15,7 +15,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.ListMultimap;
 
@@ -35,6 +38,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
+import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.PlayerOrderedLoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -809,6 +813,32 @@ public class PokecubeCore extends PokecubeMod
     @EventHandler
     public void serverStop(FMLServerStoppingEvent event)
     {
+
+        // Cleanup the redundant cache files made for random reasons.
+        World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
+        ISaveHandler saveHandler = world.getSaveHandler();
+        File dataFolder = saveHandler.getMapFileFromName("test");
+        File playerData = new File(saveHandler.getWorldDirectory(), "playerdata");
+        for (File file : dataFolder.getParentFile().listFiles())
+        {
+            if (!file.isDirectory()) continue;
+            try
+            {
+                UUID id = UUID.fromString(file.getName());
+                // Don't cleanup the blank one.
+                if (id.equals(InventoryPC.blank)) continue;
+                File temp = new File(playerData, file.getName() + ".dat");
+                if (!temp.exists())
+                {
+                    FileUtils.deleteDirectory(file);
+                }
+            }
+            catch (Exception e)
+            {
+                // Not a uuid folder.
+            }
+        }
+
         events.meteorprocessor.clear();
         BerryGenManager.berryLocations.clear();
         PokecubeDimensionManager.getInstance().onServerStop(event);
@@ -830,6 +860,7 @@ public class PokecubeCore extends PokecubeMod
             log("Average Pokemob Tick Time for this Session: " + value + "\u00B5s");
         }
         EntityPokemobBase.averagePokemobTick = 0;
+
     }
 
     @Override

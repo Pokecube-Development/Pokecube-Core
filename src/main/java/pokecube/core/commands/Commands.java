@@ -3,9 +3,6 @@ package pokecube.core.commands;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.io.FileUtils;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -19,10 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import pokecube.core.database.Database;
@@ -171,35 +165,6 @@ public class Commands extends CommandBase
         {
             CommandTools.sendBadArgumentsTryTab(sender);
             return;
-        }
-        if (args[0].equals("cleandata"))
-        {
-            World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
-            ISaveHandler saveHandler = world.getSaveHandler();
-            int n = 0;
-            File dataFolder = saveHandler.getMapFileFromName("test");
-            File playerData = new File(saveHandler.getWorldDirectory(), "playerdata");
-            for (File file : dataFolder.getParentFile().listFiles())
-            {
-                if (!file.isDirectory()) continue;
-                try
-                {
-                    UUID.fromString(file.getName());
-                    File temp = new File(playerData, file.getName() + ".dat");
-                    if (!temp.exists())
-                    {
-                        n++;
-                        FileUtils.deleteDirectory(file);
-                    }
-                }
-                catch (Exception e)
-                {
-                    // Not a uuid folder.
-                }
-            }
-            CommandTools.sendMessage(sender, String.format("Cleaned up %s bad directories.", n));
-            return;
-
         }
         if (args[0].equals("reloadAnims"))
         {
