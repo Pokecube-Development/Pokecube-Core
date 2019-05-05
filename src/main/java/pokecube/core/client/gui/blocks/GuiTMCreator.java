@@ -26,13 +26,13 @@ import pokecube.core.utils.PokeType;
 public class GuiTMCreator extends GuiContainer
 {
     final TileEntityTMMachine table;
-    ContainerTMCreator           cont;
-    GuiTextField                 textFieldSearch;
+    ContainerTMCreator        cont;
+    GuiTextField              textFieldSearch;
 
-    int                          index = 0;
-    ArrayList<String>            moves = new ArrayList<String>();
+    int                       index = 0;
+    ArrayList<String>         moves = new ArrayList<String>();
 
-    private Slot                 theSlot;
+    private Slot              theSlot;
 
     public GuiTMCreator(ContainerTMCreator container)
     {
@@ -85,7 +85,12 @@ public class GuiTMCreator extends GuiContainer
                 moves.addAll(mov);
             }
         }
-        if (moves.isEmpty()) return;
+        if (moves.isEmpty())
+        {
+            String message = table.hasPC() ? "tile.tm_machine.nomoves" : "tile.tm_machine.nopc";
+            fontRenderer.drawString(I18n.format(message), xOffset + 0, yOffset + 85, 0xff4444, false);
+            return;
+        }
 
         index = Math.min(index, moves.size());
         if (index < 0)

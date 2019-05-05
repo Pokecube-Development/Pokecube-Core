@@ -95,7 +95,8 @@ public class Description extends ListPage
             }
             entries.add(new LineEntry(y0, y1, fontRenderer, line, colour).setClickListner(listener));
         }
-        this.list = new ScrollGui(mc, width, height, fontRenderer.FONT_HEIGHT, offsetX, offsetY, entries);
+        this.list = new ScrollGui(mc, width, height - fontRenderer.FONT_HEIGHT / 2, fontRenderer.FONT_HEIGHT, offsetX,
+                offsetY, entries);
     }
 
     @Override

@@ -509,9 +509,9 @@ public class GuiPokemob extends GuiContainer
         buttonList.add(new PokemobButton(1, width / 2 - xOffset + 36, height / 2 - yOffset, 20, 20, guard, pokemob));
         buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset, 20, 20, sit, pokemob));
         yOffset = 77;
-        buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10, "AI"));
-        buttonList.add(new GuiButton(4, width / 2 - xOffset + 30, height / 2 - yOffset, 30, 10, "ST"));
-        buttonList.add(new GuiButton(5, width / 2 - xOffset + 00, height / 2 - yOffset, 30, 10, "RT"));
+        buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.ai")));
+        buttonList.add(new GuiButton(4, width / 2 - xOffset + 30, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.storage")));
+        buttonList.add(new GuiButton(5, width / 2 - xOffset + 00, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.routes")));
         xOffset = 80;
         name = new NameField(0, fontRenderer, width / 2 - xOffset, height / 2 - yOffset, 120, 10);
         name.setText(pokemob.getPokemonDisplayName().getUnformattedComponentText().trim());

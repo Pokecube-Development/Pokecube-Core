@@ -43,12 +43,20 @@ public class StatsInfo extends PokeInfoPage
         int statYOffSet = y + 0;
         int offsetX = -50;
         int dx = 20 + offsetX;
-        drawString(fontRender, "HP", x + dx, statYOffSet + 18, 0xFF0000);
-        drawString(fontRender, "ATT", x + dx, statYOffSet + 27, 0xF08030);
-        drawString(fontRender, "DEF", x + dx, statYOffSet + 36, 0xF8D030);
-        drawString(fontRender, "ATTSPE", x + dx, statYOffSet + 45, 0x6890F0);
-        drawString(fontRender, "DEFSPE", x + dx, statYOffSet + 54, 0x78C850);
-        drawString(fontRender, "VIT", x + dx, statYOffSet + 63, 0xF85888);
+
+        String H = I18n.format("pokewatch.HP");
+        String A = I18n.format("pokewatch.ATT");
+        String D = I18n.format("pokewatch.DEF");
+        String AS = I18n.format("pokewatch.ATTSP");
+        String DS = I18n.format("pokewatch.DEFSP");
+        String S = I18n.format("pokewatch.VIT");
+
+        drawString(fontRender, H, x + dx, statYOffSet + 18, 0xFF0000);
+        drawString(fontRender, A, x + dx, statYOffSet + 27, 0xF08030);
+        drawString(fontRender, D, x + dx, statYOffSet + 36, 0xF8D030);
+        drawString(fontRender, AS, x + dx, statYOffSet + 45, 0x6890F0);
+        drawString(fontRender, DS, x + dx, statYOffSet + 54, 0x78C850);
+        drawString(fontRender, S, x + dx, statYOffSet + 63, 0xF85888);
 
         dx = 60 + offsetX;
         drawString(fontRender, ": " + HP, x + dx, statYOffSet + 18, 0xFF0000);
@@ -93,13 +101,23 @@ public class StatsInfo extends PokeInfoPage
             int dy = 17 + i * 9;
             drawRect(x + dx, statYOffSet + dy, x + dx + 107, statYOffSet + dy + 9, colours[i]);
         }
-        drawString(fontRender, "           TV   IV   EV", x + dx, statYOffSet + 9, 0xFFFFFF);
-        drawString(fontRender, "HP", x + dx, statYOffSet + 18, 0xFF0000);
-        drawString(fontRender, "ATT", x + dx, statYOffSet + 27, 0xF08030);
-        drawString(fontRender, "DEF", x + dx, statYOffSet + 36, 0xF8D030);
-        drawString(fontRender, "ATTSPE", x + dx, statYOffSet + 45, 0x6890F0);
-        drawString(fontRender, "DEFSPE", x + dx, statYOffSet + 54, 0x78C850);
-        drawString(fontRender, "VIT", x + dx, statYOffSet + 63, 0xF85888);
+
+        String H = I18n.format("pokewatch.HP");
+        String A = I18n.format("pokewatch.ATT");
+        String D = I18n.format("pokewatch.DEF");
+        String AS = I18n.format("pokewatch.ATTSP");
+        String DS = I18n.format("pokewatch.DEFSP");
+        String S = I18n.format("pokewatch.VIT");
+
+        String Header = I18n.format("pokewatch.TVIVEV");
+
+        drawString(fontRender, Header, x + dx, statYOffSet + 9, 0xFFFFFF);
+        drawString(fontRender, H, x + dx, statYOffSet + 18, 0xFF0000);
+        drawString(fontRender, A, x + dx, statYOffSet + 27, 0xF08030);
+        drawString(fontRender, D, x + dx, statYOffSet + 36, 0xF8D030);
+        drawString(fontRender, AS, x + dx, statYOffSet + 45, 0x6890F0);
+        drawString(fontRender, DS, x + dx, statYOffSet + 54, 0x78C850);
+        drawString(fontRender, S, x + dx, statYOffSet + 63, 0xF85888);
 
         dx = 60 + offsetX;
         drawString(fontRender, ": " + HP, x + dx, statYOffSet + 18, 0xFF0000);
@@ -147,14 +165,15 @@ public class StatsInfo extends PokeInfoPage
         // Draw ability
         if (ability != null)
         {
-            drawString(fontRender, "AB: " + I18n.format(ability.getName()), x + dx, y + dy, 0xFFFFFF);
+            drawString(fontRender, I18n.format("pokewatch.ability", I18n.format(ability.getName())), x + dx, y + dy,
+                    0xFFFFFF);
         }
         int happiness = pokemob.getHappiness();
         String message = "";
 
         // Draw size
         dy += 11;
-        message = "Size: " + pokemob.getSize();
+        message = I18n.format("pokewatch.size", pokemob.getSize());
         fontRender.drawSplitString(message, x + dx, y + dy, 100, 0xFFFFFF);
 
         if (happiness == 0)

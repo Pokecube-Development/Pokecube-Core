@@ -258,13 +258,14 @@ public class GuiPC extends GuiContainer
         }
         if (cont.pcTile != null)
         {
-            if (!bound) buttonList
-                    .add(new GuiButton(5, width / 2 - xOffset - 137, height / 2 - yOffset - 85, 50, 20, "private"));
+            if (!bound) buttonList.add(new GuiButton(5, width / 2 - xOffset - 137, height / 2 - yOffset - 85, 50, 20,
+                    I18n.format("tile.pc.option.private")));
             else
             {
-                buttonList
-                        .add(new GuiButton(5, width / 2 - xOffset - 137, height / 2 - yOffset - 125, 50, 20, "public"));
-                buttonList.add(new GuiButton(8, width / 2 - xOffset - 137, height / 2 - yOffset - 105, 50, 20, "bind"));
+                buttonList.add(new GuiButton(5, width / 2 - xOffset - 137, height / 2 - yOffset - 125, 50, 20,
+                        I18n.format("tile.pc.option.public")));
+                buttonList.add(new GuiButton(8, width / 2 - xOffset - 137, height / 2 - yOffset - 105, 50, 20,
+                        I18n.format("tile.pc.option.bind")));
             }
         }
         else
@@ -273,8 +274,10 @@ public class GuiPC extends GuiContainer
         }
         if (!bound)
         {
-            buttonList.add(new GuiButton(6, width / 2 - xOffset - 137, height / 2 - yOffset - 65, 50, 20, "release"));
-            buttonList.add(new GuiButton(7, width / 2 - xOffset - 137, height / 2 - yOffset - 45, 50, 20, "confirm"));
+            buttonList.add(new GuiButton(6, width / 2 - xOffset - 137, height / 2 - yOffset - 65, 50, 20,
+                    I18n.format("tile.pc.option.release")));
+            buttonList.add(new GuiButton(7, width / 2 - xOffset - 137, height / 2 - yOffset - 45, 50, 20,
+                    I18n.format("tile.pc.option.confirm")));
             buttonList.get(6).visible = false;
             buttonList.get(6).enabled = false;
 
@@ -296,7 +299,8 @@ public class GuiPC extends GuiContainer
     @Override
     protected void keyTyped(char par1, int par2) throws IOException
     {
-        //This replaces the super call, which also forces closed when "e" is pressed:
+        // This replaces the super call, which also forces closed when "e" is
+        // pressed:
         if (par2 == 1)
         {
             this.mc.player.closeScreen();
@@ -312,10 +316,11 @@ public class GuiPC extends GuiContainer
             }
             else if (this.mc.gameSettings.keyBindDrop.isActiveAndMatches(par2))
             {
-                this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, isCtrlKeyDown() ? 1 : 0, ClickType.THROW);
+                this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, isCtrlKeyDown() ? 1 : 0,
+                        ClickType.THROW);
             }
         }
-        //End super call
+        // End super call
 
         textFieldSearch.textboxKeyTyped(par1, par2);
 

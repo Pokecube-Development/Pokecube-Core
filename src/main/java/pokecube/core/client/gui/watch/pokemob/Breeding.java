@@ -91,7 +91,8 @@ public class Breeding extends ListPage
             main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, entry.getName()));
             entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
         }
-        list = new ScrollGui(mc, width, height, fontRenderer.FONT_HEIGHT, offsetX, offsetY, entries);
+        this.list = new ScrollGui(mc, width, height - fontRenderer.FONT_HEIGHT / 2, fontRenderer.FONT_HEIGHT, offsetX,
+                offsetY, entries);
     }
 
     @Override

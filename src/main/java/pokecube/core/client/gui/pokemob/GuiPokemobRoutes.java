@@ -64,9 +64,9 @@ public class GuiPokemobRoutes extends GuiContainer
         buttonList.clear();
         int xOffset = width / 2 - 10;
         int yOffset = height / 2 - 77;
-        buttonList.add(new GuiButton(0, xOffset + 60, yOffset, 30, 10, "Inv"));
-        buttonList.add(new GuiButton(1, xOffset + 30, yOffset, 30, 10, "ST"));
-        buttonList.add(new GuiButton(2, xOffset + 00, yOffset, 30, 10, "AI"));
+        buttonList.add(new GuiButton(0, xOffset + 60, yOffset, 30, 10, I18n.format("pokemob.gui.inventory")));
+        buttonList.add(new GuiButton(1, xOffset + 30, yOffset, 30, 10, I18n.format("pokemob.gui.storage")));
+        buttonList.add(new GuiButton(2, xOffset + 00, yOffset, 30, 10, I18n.format("pokemob.gui.ai")));
         Function<NBTTagCompound, NBTTagCompound> function = new Function<NBTTagCompound, NBTTagCompound>()
         {
             @Override
