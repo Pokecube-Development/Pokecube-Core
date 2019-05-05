@@ -193,7 +193,7 @@ public class CommonProxy implements IGuiHandler
 
     private static final Gson                        gson           = new Gson();
     private static final Gson                        prettyGson     = new GsonBuilder().setPrettyPrinting().create();
-    private static final String                      CACHEPATH      = ModPokecubeML.ID + File.separator;
+    public static final String                       CACHEPATH      = ModPokecubeML.ID + File.separator;
 
     public static HashMap<String, Object>            modelProviders = Maps.newHashMap();
     public static HashMap<String, IMobProvider>      mobProviders   = Maps.newHashMap();

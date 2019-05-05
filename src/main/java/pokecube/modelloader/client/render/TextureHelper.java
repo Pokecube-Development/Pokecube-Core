@@ -272,7 +272,7 @@ public class TextureHelper implements IPartTexturer
     Map<String, String>                             texNames     = Maps.newHashMap();
     /** Map of part/material name -> map of custom state -> texture name */
     Map<String, Map<String, String>>                texNames2    = Maps.newHashMap();
-    ResourceLocation                                default_tex;
+    public ResourceLocation                         default_tex;
     String                                          default_path;
 
     Map<String, Boolean>                            smoothing    = Maps.newHashMap();

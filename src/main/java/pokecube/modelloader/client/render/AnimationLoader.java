@@ -33,6 +33,7 @@ import pokecube.core.interfaces.PokecubeMod;
 import pokecube.modelloader.IMobProvider;
 import pokecube.modelloader.ModPokecubeML;
 import pokecube.modelloader.client.render.PokemobAnimationChanger.WornOffsets;
+import pokecube.modelloader.client.render.models.URLModelHolder;
 import pokecube.modelloader.common.Config;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
@@ -311,17 +312,49 @@ public class AnimationLoader
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void parse(ModelHolder model)
     {
         try
         {
-            IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model.animation);
+            if (model instanceof URLModelHolder)
+            {
+
+            }
+            else
+            {
+                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model.animation);
+                InputStream stream = res.getInputStream();
+                parse(stream, model);
+                res.close();
+            }
+        }
+        catch (Exception e)
+        {
+            IModelRenderer<?> renderer = modelMaps.get(model.name);
+            DefaultIModelRenderer<?> loaded = null;
+            if (renderer instanceof DefaultIModelRenderer) loaded = (DefaultIModelRenderer<?>) renderer;
+            if (loaded == null)
+            {
+                loaded = new DefaultIModelRenderer<>(new HashMap<String, ArrayList<Vector5>>(), model);
+            }
+            else
+            {
+                loaded.updateModel(new HashMap<String, ArrayList<Vector5>>(), model);
+            }
+            models.put(model.name, model);
+            modelMaps.put(model.name, loaded);
+            System.err.println("No Animation found for " + model.name + " " + model.model);
+            e.printStackTrace();
+        }
+    }
+
+    public static void parse(InputStream stream, ModelHolder model)
+    {
+        try
+        {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputStream stream = res.getInputStream();
             Document doc = dBuilder.parse(stream);
-            res.close();
             doc.getDocumentElement().normalize();
             NodeList modelList = doc.getElementsByTagName("model");
 
@@ -469,10 +502,10 @@ public class AnimationLoader
 
                 IModelRenderer<?> renderer = modelMaps.get(modelName);
                 DefaultIModelRenderer<?> loaded = null;
-                if (renderer instanceof DefaultIModelRenderer) loaded = (DefaultIModelRenderer) renderer;
+                if (renderer instanceof DefaultIModelRenderer) loaded = (DefaultIModelRenderer<?>) renderer;
                 if (loaded == null)
                 {
-                    loaded = new DefaultIModelRenderer(phaseList, model);
+                    loaded = new DefaultIModelRenderer<>(phaseList, model);
                 }
                 loaded.model_holder = model;
                 loaded.updateModel(phaseList, model);
@@ -623,10 +656,10 @@ public class AnimationLoader
         {
             IModelRenderer<?> renderer = modelMaps.get(model.name);
             DefaultIModelRenderer<?> loaded = null;
-            if (renderer instanceof DefaultIModelRenderer) loaded = (DefaultIModelRenderer) renderer;
+            if (renderer instanceof DefaultIModelRenderer) loaded = (DefaultIModelRenderer<?>) renderer;
             if (loaded == null)
             {
-                loaded = new DefaultIModelRenderer(new HashMap<String, ArrayList<Vector5>>(), model);
+                loaded = new DefaultIModelRenderer<>(new HashMap<String, ArrayList<Vector5>>(), model);
             }
             else
             {

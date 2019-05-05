@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pokecube.core.ai.thread.logicRunnables.LogicMiscUpdate;
 import pokecube.core.client.render.entity.RenderPokemob;
 import pokecube.core.client.render.entity.RenderPokemobs;
@@ -18,6 +19,7 @@ import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
+import pokecube.modelloader.client.render.models.URLModelHolder;
 import thut.api.maths.Vector3;
 import thut.core.client.render.animation.ModelHolder;
 import thut.core.client.render.model.IAnimationChanger;
@@ -31,6 +33,7 @@ public abstract class AbstractModelRenderer<T extends EntityLiving> extends Rend
     final Vector3             rotPoint          = Vector3.getNewVector();
 
     private IPartTexturer     texturer;
+    private IPartTexturer     texturer2;
     private IAnimationChanger animator;
 
     // Used to check if it has a custom sleeping animation.
@@ -173,6 +176,51 @@ public abstract class AbstractModelRenderer<T extends EntityLiving> extends Rend
     @Override
     public IPartTexturer getTexturer()
     {
+        if (model_holder instanceof URLModelHolder) { return texturer2 == null ? texturer2 = new IPartTexturer()
+        {
+
+            @Override
+            public boolean shiftUVs(String part, double[] toFill)
+            {
+                return false;
+            }
+
+            @Override
+            public boolean isFlat(String part)
+            {
+                return texturer.isFlat(part);
+            }
+
+            @Override
+            public boolean hasMapping(String part)
+            {
+                return false;
+            }
+
+            @Override
+            public void bindObject(Object thing)
+            {
+
+            }
+
+            @Override
+            public void applyTexture(String part)
+            {
+                FMLClientHandler.instance().getClient().renderEngine.bindTexture(model_holder.texture);
+            }
+
+            @Override
+            public void addMapping(String part, String tex)
+            {
+
+            }
+
+            @Override
+            public void addCustomMapping(String part, String state, String tex)
+            {
+
+            }
+        } : texturer2; }
         return texturer;
     }
 

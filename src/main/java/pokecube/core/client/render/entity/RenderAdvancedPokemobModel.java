@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,12 +18,27 @@ import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.modelloader.client.render.AbstractModelRenderer;
 import pokecube.modelloader.client.render.AnimationLoader;
 import pokecube.modelloader.client.render.ModelWrapper;
+import pokecube.modelloader.client.render.models.URLModelHolder;
 import thut.core.client.render.model.IModelRenderer;
 
 public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPokemobInfos<T>
 {
     public static IModelRenderer<?> getRenderer(String name, EntityLiving entity)
     {
+        models:
+        if (entity.getEntityData().hasKey("url_model"))
+        {
+            NBTTagCompound modeltag = entity.getEntityData().getCompoundTag("url_model");
+            name = modeltag.getString("name");
+            if (name.isEmpty()) break models;
+            if (!AnimationLoader.modelMaps.containsKey(name))
+            {
+                String url_model = modeltag.getString("model");
+                String url_texture = modeltag.getString("texture");
+                String url_xml = modeltag.getString("xml");
+                new URLModelHolder(name, url_model, url_xml, url_texture);
+            }
+        }
         return AnimationLoader.getModel(name);
     }
 
