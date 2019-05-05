@@ -1,5 +1,7 @@
 package pokecube.core.interfaces.pokemob.commandhandlers;
 
+import java.util.logging.Level;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -35,8 +37,14 @@ public class AttackEntityHandler extends DefaultHandler
         Entity target = PokecubeMod.core.getEntityProvider().getEntity(world, targetId, true);
         if (target == null || !(target instanceof EntityLivingBase))
         {
-            if (target == null) throw new IllegalArgumentException("Target Mob cannot be null!");
-            else throw new IllegalArgumentException("Invalid target: " + target);
+            if (PokecubeMod.debug)
+            {
+                if (target == null) PokecubeMod.log(Level.WARNING, "Target Mob cannot be null!",
+                        new IllegalArgumentException(pokemob.getEntity().toString()));
+                else PokecubeMod.log(Level.WARNING, "Invalid Target!",
+                        new IllegalArgumentException(pokemob.getEntity() + " " + target));
+            }
+            return;
         }
         String moveName = "";
         int currentMove = pokemob.getMoveIndex();
