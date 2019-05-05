@@ -279,7 +279,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Misc other
         NBTTagCompound miscTag = new NBTTagCompound();
         miscTag.setInteger(RNGVAL, getRNGValue());
-        miscTag.setInteger(UID, uid);
+        miscTag.setInteger(UID, getPokemonUID());
         miscTag.setBoolean(WASSHADOW, wasShadow);
         miscTag.setTag(EXTRATAG, getExtraData());
 
