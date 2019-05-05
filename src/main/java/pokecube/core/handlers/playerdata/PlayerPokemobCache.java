@@ -28,6 +28,8 @@ public class PlayerPokemobCache extends PlayerData
     {
         String owner = PokecubeManager.getOwner(stack);
         if (owner.isEmpty()) return;
+        Integer uid = PokecubeManager.getUID(stack);
+        if (uid == null || uid == -1) return;
         PlayerDataHandler.getInstance().getPlayerData(owner).getData(PlayerPokemobCache.class).addPokemob(stack, pc,
                 deleted);
     }

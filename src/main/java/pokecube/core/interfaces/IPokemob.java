@@ -595,6 +595,10 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
         return new TextComponentString(this.getPokemonNickname());
     }
 
+    /** Note: This only returns a unique number for player owned pokemobs. All
+     * other pokemobs will return -1
+     * 
+     * @return */
     int getPokemonUID();
 
     /** {@link #MALE} or {@link #FEMALE} or {@link #NOSEXE}

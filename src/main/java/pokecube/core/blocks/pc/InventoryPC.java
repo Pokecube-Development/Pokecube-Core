@@ -71,8 +71,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         {
             ItemStack stack = mob;
             PokecubeManager.heal(stack);
-            PlayerDataHandler.getInstance().getPlayerData(uuid).getData(PlayerPokemobCache.class).addPokemob(mob, true,
-                    false);
+            PlayerPokemobCache.UpdateCache(mob, true, false);
             if (PokecubeCore.proxy.getPlayer(uuid) != null) PokecubeCore.proxy.getPlayer(uuid)
                     .sendMessage(new TextComponentTranslation("tile.pc.sentto", mob.getDisplayName()));
         }
