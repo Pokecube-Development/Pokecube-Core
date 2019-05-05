@@ -301,17 +301,9 @@ public class AIFindTarget extends AIBase implements IAICombat
                                                   @Override
                                                   public boolean apply(Entity input)
                                                   {
-                                                      IPokemob testMob = CapabilityPokemob.getPokemobFor(input);
-                                                      if (testMob != null && input != pokemob.getEntity())
-                                                      {
-                                                          if (!TeamManager.sameTeam(entity, input)) { return true; }
-                                                      }
-                                                      else if (input instanceof EntityLivingBase)
-                                                      {
-                                                          if (!validTargets.apply(input)) return false;
-                                                          if (!TeamManager.sameTeam(entity, input)) { return true; }
-                                                      }
-                                                      return false;
+                                                      if (TeamManager.sameTeam(entity, input)) { return false; }
+                                                      if (!validTargets.apply(input)) return false;
+                                                      return (input instanceof EntityLivingBase);
                                                   }
                                               };
     private int              agroTimer        = -1;
