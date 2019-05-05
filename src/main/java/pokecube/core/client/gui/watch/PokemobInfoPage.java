@@ -200,6 +200,10 @@ public class PokemobInfoPage extends PageWithSubPages
             // change gender if clicking on the gender, and shininess otherwise
             if (!watch.canEdit(pokemob))
             {
+                // If it is actually a real mob, swap it out for the fake one.
+                if (pokemob.getEntity().addedToChunk) pokemob = renderMob = EventsHandlerClient
+                        .getRenderMob(pokemob.getPokedexEntry(), watch.player.getEntityWorld());
+
                 int x = (watch.width - 160) / 2 + 80;
                 int y = (watch.height - 160) / 2 + 8;
                 int mx = mouseX - x;
