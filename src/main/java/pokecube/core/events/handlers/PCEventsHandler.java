@@ -156,12 +156,12 @@ public class PCEventsHandler
                 if (o instanceof EntityPlayer)
                 {
                     EntityPlayer p = (EntityPlayer) o;
-                    if (InventoryPC.map.containsKey(p.getCachedUniqueIdString()))
+                    if (InventoryPC.getMap().containsKey(p.getCachedUniqueIdString()))
                     {
-                        InventoryPC pc = InventoryPC.getPC(p);
+                        InventoryPC pc = InventoryPC.getPC(p.getUniqueID());
                         pc.seenOwner = true;
                         if (evt.getWorld().isRemote) continue;
-                        PacketPC packet = new PacketPC(PacketPC.PCINIT);
+                        PacketPC packet = new PacketPC(PacketPC.PCINIT, pc.owner);
                         packet.data.setBoolean("O", pc.seenOwner);
                         packet.data.setBoolean("A", pc.autoToPC);
                         PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) p);
@@ -297,8 +297,8 @@ public class PCEventsHandler
     @SubscribeEvent
     public void sendPokemobToPCPlayerFull(CaptureEvent.Post evt)
     {
-        //Case for things like snag cubes
-        if(evt.caught == null)
+        // Case for things like snag cubes
+        if (evt.caught == null)
         {
             evt.pokecube.entityDropItem(evt.filledCube, 0.5f);
             return;

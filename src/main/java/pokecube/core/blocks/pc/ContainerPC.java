@@ -68,10 +68,8 @@ public class ContainerPC extends Container
         super();
         xOffset = 0;
         yOffset = 0;
-        InventoryPC temp = pc != null ? pc.getPC() != null ? pc.getPC() : InventoryPC.getPC(ivplay.player.getUniqueID())
+        inv = pc != null ? pc.isBound() ? pc.getPC() : InventoryPC.getPC(ivplay.player.getUniqueID())
                 : InventoryPC.getPC(ivplay.player.getUniqueID());
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) inv = InventoryPC.getPC(ivplay.player);
-        else inv = temp;
         invPlayer = ivplay;
         pcTile = pc;
         bindInventories();
@@ -134,7 +132,7 @@ public class ContainerPC extends Container
         inv.boxes[inv.getPage()] = name;
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
         {
-            PacketPC packet = new PacketPC(PacketPC.RENAME);
+            PacketPC packet = new PacketPC(PacketPC.RENAME, inv.owner);
             packet.data.setString("N", name);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
@@ -174,7 +172,7 @@ public class ContainerPC extends Container
         inv.setPage(page - 1);
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
         {
-            PacketPC packet = new PacketPC(PacketPC.SETPAGE);
+            PacketPC packet = new PacketPC(PacketPC.SETPAGE, inv.owner);
             packet.data.setInteger("P", page);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
@@ -193,7 +191,7 @@ public class ContainerPC extends Container
         inv.autoToPC = !inv.autoToPC;
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
         {
-            PacketPC packet = new PacketPC(PacketPC.TOGGLEAUTO);
+            PacketPC packet = new PacketPC(PacketPC.TOGGLEAUTO, inv.owner);
             packet.data.setBoolean("A", inv.autoToPC);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
@@ -205,7 +203,7 @@ public class ContainerPC extends Container
         {
             if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
             {
-                PacketPC packet = new PacketPC(PacketPC.RELEASE);
+                PacketPC packet = new PacketPC(PacketPC.RELEASE, inv.owner);
                 packet.data.setBoolean("T", false);
                 packet.data.setInteger("page", inv.getPage());
                 for (int i = 0; i < 54; i++)

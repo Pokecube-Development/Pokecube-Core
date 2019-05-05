@@ -15,6 +15,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import pokecube.core.PokecubeCore;
 import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.PokecubeMod;
@@ -25,11 +27,18 @@ import thut.lib.CompatWrapper;
 
 public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
 {
-    public static HashMap<UUID, InventoryPC> map       = new HashMap<UUID, InventoryPC>();
+    static HashMap<UUID, InventoryPC> map_server = new HashMap<UUID, InventoryPC>();
+    static HashMap<UUID, InventoryPC> map_client = new HashMap<UUID, InventoryPC>();
+
+    public static HashMap<UUID, InventoryPC> getMap()
+    {
+        return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT ? map_client : map_server;
+    }
+
     // blank PC for client use.
-    public static InventoryPC                blank;
-    public static UUID                       defaultId = new UUID(1234, 4321);
-    public static int                        PAGECOUNT = 32;
+    public static InventoryPC blank;
+    public static UUID        defaultId = new UUID(1234, 4321);
+    public static int         PAGECOUNT = 32;
 
     public static void addPokecubeToPC(ItemStack mob, World world)
     {
@@ -73,7 +82,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
 
     public static void clearPC()
     {
-        map.clear();
+        getMap().clear();
     }
 
     public static InventoryPC getPC(Entity player)
@@ -87,11 +96,11 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     {
         if (uuid != null)
         {
-            if (!map.containsKey(uuid))
+            if (!getMap().containsKey(uuid))
             {
                 PCSaveHandler.getInstance().loadPC(uuid);
             }
-            if (map.containsKey(uuid)) { return map.get(uuid); }
+            if (getMap().containsKey(uuid)) { return getMap().get(uuid); }
             return new InventoryPC(uuid);
         }
         return null;
@@ -111,7 +120,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
             NBTTagCompound items = nbt.getCompoundTagAt(i);
             InventoryPC loaded = new InventoryPC();
             loaded.deserializeNBT(items);
-            if (!replace && map.containsKey(loaded.owner)) continue;
+            if (!replace && getMap().containsKey(loaded.owner)) continue;
             if (PokecubeMod.debug) PokecubeMod.log("Loading PC for " + loaded.owner);
             InventoryPC load = null;
             load = replace ? loaded : getPC(loaded.owner);
@@ -128,7 +137,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
                 load.contents.clear();
                 load.contents.putAll(loaded.contents);
             }
-            if (!defaultId.equals(loaded.owner)) map.put(loaded.owner, load);
+            getMap().put(loaded.owner, load);
         }
     }
 
@@ -136,7 +145,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     {
         if (PokecubeMod.debug) PokecubeMod.log("Saving PC for " + uuid);
         NBTTagList nbttag = new NBTTagList();
-        NBTTagCompound items = map.get(uuid).serializeNBT();
+        NBTTagCompound items = getMap().get(uuid).serializeNBT();
         nbttag.appendTag(items);
         return nbttag;
     }
@@ -166,7 +175,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
 
     public InventoryPC(UUID player)
     {
-        if (player != defaultId && !map.containsKey(player)) map.put(player, this);
+        if (!getMap().containsKey(player)) getMap().put(player, this);
         opened = new boolean[PAGECOUNT];
         boxes = new String[PAGECOUNT];
         owner = player;
@@ -205,7 +214,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     @Override
     public void closeInventory(EntityPlayer player)
     {
-        PCSaveHandler.getInstance().savePC(player.getUniqueID());
+        PCSaveHandler.getInstance().savePC(owner);
     }
 
     @Override
@@ -384,7 +393,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         int start = box * 54;
         for (int i = start; i < start + 54; i++)
         {
-            ItemStack itemstack = map.get(owner).getStackInSlot(i);
+            ItemStack itemstack = getStackInSlot(i);
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             if (!itemstack.isEmpty())
             {
@@ -401,6 +410,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         int start = nbt.getInteger("box") * 54;
         for (int i = start; i < start + 54; i++)
         {
+            this.setInventorySlotContents(i, ItemStack.EMPTY);
             if (!nbt.hasKey("item" + i)) continue;
             NBTTagCompound nbttagcompound = nbt.getCompoundTag("item" + i);
             int j = nbttagcompound.getShort("Slot");
@@ -418,9 +428,9 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         NBTTagCompound items = new NBTTagCompound();
         NBTTagCompound boxes = new NBTTagCompound();
         boxes.setString("UUID", owner.toString());
-        boxes.setBoolean("seenOwner", map.get(owner).seenOwner);
-        boxes.setBoolean("autoSend", map.get(owner).autoToPC);
-        boxes.setInteger("page", map.get(owner).page);
+        boxes.setBoolean("seenOwner", seenOwner);
+        boxes.setBoolean("autoSend", autoToPC);
+        boxes.setInteger("page", page);
         for (int i = 0; i < PAGECOUNT; i++)
         {
             boxes.setString("name" + i, this.boxes[i]);
@@ -428,7 +438,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         items.setInteger("page", getPage());
         for (int i = 0; i < getSizeInventory(); i++)
         {
-            ItemStack itemstack = map.get(owner).getStackInSlot(i);
+            ItemStack itemstack = getStackInSlot(i);
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             if (!itemstack.isEmpty())
             {

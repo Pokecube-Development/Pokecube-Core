@@ -97,12 +97,15 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
         if (!top) { return false; }
         IBlockState down = worldIn.getBlockState(pos.down());
         Block idDown = down.getBlock();
-        if (!(idDown instanceof BlockPC) || ((BlockPC) idDown).top) return false;
-        InventoryPC inventoryPC = InventoryPC.getPC(playerIn.getUniqueID());
+        if (!(idDown instanceof BlockPC) || ((BlockPC) idDown).top
+                || !(worldIn.getTileEntity(pos) instanceof TileEntityPC))
+            return false;
+        TileEntityPC pc = (TileEntityPC) worldIn.getTileEntity(pos);
+        InventoryPC inventoryPC = pc.isBound() ? pc.getPC() : InventoryPC.getPC(playerIn.getUniqueID());
         if (inventoryPC != null)
         {
             if (worldIn.isRemote) { return true; }
-            PacketPC.sendOpenPacket(playerIn, pos);
+            PacketPC.sendOpenPacket(playerIn, inventoryPC.owner, pos);
             return true;
         }
         return true;

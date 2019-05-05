@@ -104,7 +104,7 @@ public class GuiPC extends GuiContainer
                 cont.release = release;
                 if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
                 {
-                    PacketPC packet = new PacketPC(PacketPC.RELEASE);
+                    PacketPC packet = new PacketPC(PacketPC.RELEASE, cont.inv.owner);
                     packet.data.setBoolean("T", true);
                     packet.data.setBoolean("R", release);
                     PokecubeMod.packetPipeline.sendToServer(packet);

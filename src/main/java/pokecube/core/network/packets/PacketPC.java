@@ -1,6 +1,7 @@
 package pokecube.core.network.packets;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,18 +22,20 @@ import pokecube.core.interfaces.PokecubeMod;
 
 public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
 {
-    public static final byte SETPAGE    = 0;
-    public static final byte RENAME     = 1;
-    public static final byte PCINIT     = 2;
-    public static final byte RELEASE    = 3;
-    public static final byte TOGGLEAUTO = 4;
-    public static final byte BIND       = 5;
-    public static final byte PCOPEN     = 6;
+    public static final byte   SETPAGE    = 0;
+    public static final byte   RENAME     = 1;
+    public static final byte   PCINIT     = 2;
+    public static final byte   RELEASE    = 3;
+    public static final byte   TOGGLEAUTO = 4;
+    public static final byte   BIND       = 5;
+    public static final byte   PCOPEN     = 6;
+
+    public static final String OWNER      = "_owner_";
 
     public static void sendInitialSyncMessage(EntityPlayer sendTo)
     {
-        InventoryPC inv = InventoryPC.getPC(sendTo);
-        PacketPC packet = new PacketPC(PacketPC.PCINIT);
+        InventoryPC inv = InventoryPC.getPC(sendTo.getUniqueID());
+        PacketPC packet = new PacketPC(PacketPC.PCINIT, sendTo.getUniqueID());
         packet.data.setInteger("N", inv.boxes.length);
         packet.data.setBoolean("A", inv.autoToPC);
         packet.data.setBoolean("O", inv.seenOwner);
@@ -44,13 +47,14 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
         PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) sendTo);
     }
 
-    public static void sendOpenPacket(EntityPlayer sendTo, BlockPos pcPos)
+    public static void sendOpenPacket(EntityPlayer sendTo, UUID owner, BlockPos pcPos)
     {
-        InventoryPC inv = InventoryPC.getPC(sendTo);
+        InventoryPC inv = InventoryPC.getPC(owner);
         for (int i = 0; i < inv.boxes.length; i++)
         {
-            PacketPC packet = new PacketPC(PacketPC.PCOPEN);
+            PacketPC packet = new PacketPC(PacketPC.PCOPEN, owner);
             packet.data = inv.serializeBox(i);
+            packet.data.setUniqueId(OWNER, owner);
             PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) sendTo);
         }
         sendTo.openGui(PokecubeMod.core, Config.GUIPC_ID, sendTo.getEntityWorld(), pcPos.getX(), pcPos.getY(),
@@ -67,6 +71,12 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
     public PacketPC(byte message)
     {
         this.message = message;
+    }
+
+    public PacketPC(byte message, UUID owner)
+    {
+        this(message);
+        this.data.setUniqueId(OWNER, owner);
     }
 
     @Override
@@ -152,7 +162,7 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             break;
         case PCINIT:
             InventoryPC.blank = new InventoryPC(InventoryPC.defaultId);
-            pc = InventoryPC.getPC(player);
+            pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
             pc.seenOwner = message.data.getBoolean("O");
             pc.autoToPC = message.data.getBoolean("A");
             if (message.data.hasKey("C")) pc.setPage(message.data.getInteger("C"));
@@ -175,7 +185,7 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             else
             {
                 int page = message.data.getInteger("page");
-                pc = InventoryPC.getPC(player);
+                pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
                 for (int i = 0; i < 54; i++)
                 {
                     if (message.data.getBoolean("val" + i))
@@ -187,13 +197,13 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             }
             break;
         case TOGGLEAUTO:
-            pc = InventoryPC.getPC(player);
+            pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
             pc.autoToPC = message.data.getBoolean("A");
             break;
         case PCOPEN:
             if (ctx.side == Side.CLIENT)
             {
-                pc = InventoryPC.getPC(player);
+                pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
                 pc.deserializeBox(message.data);
             }
             break;
