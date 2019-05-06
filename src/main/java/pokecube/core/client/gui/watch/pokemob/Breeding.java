@@ -82,14 +82,17 @@ public class Breeding extends ListPage
         main.setStyle(new Style());
         main.getStyle().setColor(TextFormatting.GREEN);
         main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, pokemob.getPokedexEntry().getName()));
-        entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
-        for (PokedexEntry entry : pokemob.getPokedexEntry().getRelated())
+        if (pokemob.getPokedexEntry().breeds)
         {
-            main = new TextComponentTranslation(entry.getUnlocalizedName());
-            main.setStyle(new Style());
-            main.getStyle().setColor(TextFormatting.GREEN);
-            main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, entry.getName()));
             entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
+            for (PokedexEntry entry : pokemob.getPokedexEntry().getRelated())
+            {
+                main = new TextComponentTranslation(entry.getUnlocalizedName());
+                main.setStyle(new Style());
+                main.getStyle().setColor(TextFormatting.GREEN);
+                main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, entry.getName()));
+                entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
+            }
         }
         this.list = new ScrollGui(mc, width, height - fontRenderer.FONT_HEIGHT / 2, fontRenderer.FONT_HEIGHT, offsetX,
                 offsetY, entries);

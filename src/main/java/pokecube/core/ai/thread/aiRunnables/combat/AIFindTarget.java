@@ -51,14 +51,17 @@ public class AIFindTarget extends AIBase implements IAICombat
         public boolean apply(Entity input)
         {
             String id = EntityList.getEntityString(input);
+            // First check if disabled by ID
             if (invalidIDs.contains(id)) return false;
             ResourceLocation eid = EntityList.getKey(input);
             if (eid != null) id = eid.toString();
             if (invalidIDs.contains(id)) return false;
+            // Then check if disabled via class
             for (Class<?> clas : invalidClasses)
             {
                 if (clas.isInstance(input)) return false;
             }
+            // Then check if is a spectating player.
             if (input instanceof EntityPlayerMP)
             {
                 EntityPlayerMP player = (EntityPlayerMP) input;
