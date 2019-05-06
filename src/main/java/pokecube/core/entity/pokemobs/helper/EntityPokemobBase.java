@@ -101,6 +101,10 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     @Override
     protected boolean canDespawn()
     {
+        // This is here for until kettle decides to not call this during
+        // constructor.
+        if (this.pokemobCap == null) return false;
+
         boolean canDespawn = pokemobCap.getHungerTime() > PokecubeMod.core.getConfig().pokemobLifeSpan;
         boolean checks = pokemobCap.getGeneralState(GeneralStates.TAMED) || pokemobCap.getOwnerId() != null
                 || pokemobCap.getCombatState(CombatStates.ANGRY) || getAttackTarget() != null || this.hasCustomName()
