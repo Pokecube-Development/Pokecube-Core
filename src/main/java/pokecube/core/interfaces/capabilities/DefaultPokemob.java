@@ -40,6 +40,7 @@ import pokecube.core.interfaces.capabilities.impl.PokemobSaves;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
+import thut.api.entity.ai.EntityAIBaseManager;
 import thut.api.entity.ai.AIThreadManager.AIStuff;
 
 public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializable<NBTTagCompound>, IPokemob
@@ -287,8 +288,22 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
                             .setPathManager(manager).setPriority(400));
         }
 
+        entity.tasks.addTask(1, new EntityAIBaseManager(this, entity));
+
         // Send notification event of AI initilization, incase anyone wants to
         // affect it.
         MinecraftForge.EVENT_BUS.post(new InitAIEvent(this));
+    }
+
+    @Override
+    public void setWrapped(boolean wrapped)
+    {
+        // We are always wrapped.
+    }
+
+    @Override
+    public boolean vanillaWrapped()
+    {
+        return true;
     }
 }

@@ -68,6 +68,12 @@ public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompo
     }
 
     @Override
+    public boolean vanillaWrapped()
+    {
+        return this.wrapped.vanillaWrapped();
+    }
+
+    @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing)
     {
         return capability == THUTMOBAI;
@@ -115,6 +121,12 @@ public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompo
     public void deserializeNBT(NBTTagCompound nbt)
     {
         read = nbt;
+    }
+
+    @Override
+    public void setWrapped(boolean wrapped)
+    {
+        this.wrapped.setWrapped(wrapped);
     }
 
 }
