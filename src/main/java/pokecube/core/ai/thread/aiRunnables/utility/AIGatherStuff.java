@@ -54,6 +54,9 @@ public class AIGatherStuff extends AIBase
                                                                  }
                                                              };
 
+    /** This manages the pokemobs replanting anything that they gather.
+     * 
+     * @author Patrick */
     private static class ReplantTask implements IRunnable
     {
         final int       entityID;
@@ -70,16 +73,21 @@ public class AIGatherStuff extends AIBase
         @Override
         public boolean run(World world)
         {
-            if (!CompatWrapper.isValid(seeds)) return true;
+            if (seeds.isEmpty()) return true;
+            // Check if is is plantable.
             if (seeds.getItem() instanceof IPlantable)
             {
+                // Use the fakeplayer to plant it
                 EntityPlayer player = PokecubeMod.getFakePlayer(world);
                 player.setHeldItem(EnumHand.MAIN_HAND, seeds);
                 seeds.getItem().onItemUse(player, world, pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0.5f, 1, 0.5f);
                 Entity mob = world.getEntityByID(entityID);
                 IPokemob pokemob;
-                if (CompatWrapper.isValid(seeds) && ((pokemob = CapabilityPokemob.getPokemobFor(mob)) != null))
+                // Attempt to plant it.
+                if (!seeds.isEmpty() && ((pokemob = CapabilityPokemob.getPokemobFor(mob)) != null))
                 {
+                    // Add the "returned" stack to the inventory (ie remaining
+                    // seeds)
                     if (!ItemStackTools.addItemStackToInventory(seeds, pokemob.getPokemobInventory(), 2))
                     {
                         mob.entityDropItem(seeds, 0);
@@ -224,6 +232,8 @@ public class AIGatherStuff extends AIBase
             double dist = stuffLoc.distToEntity(entity);
             v.set(entity).subtractFrom(stuffLoc);
             double dot = v.normalize().dot(Vector3.secondAxis);
+            // This means that the item is directly above the pokemob, assume it
+            // can pick up to 3 blocks upwards.
             if (dot < -0.9 && entity.onGround)
             {
                 diff = Math.max(3, diff);
@@ -239,8 +249,11 @@ public class AIGatherStuff extends AIBase
                     NonNullList<ItemStack> list = NonNullList.create();
                     plant.getDrops(list, entity.getEntityWorld(), stuffLoc.getPos(), state, 0);
                     boolean replanted = false;
+                    // See if anything dropped was a seed for the thing we
+                    // picked.
                     for (ItemStack stack : list)
                     {
+                        // If so, Replant it.
                         if (stack.getItem() instanceof IPlantable && !replanted)
                         {
                             toRun.addElement(new ReplantTask(entity, stack.copy(), stuffLoc.getPos()));
@@ -254,7 +267,7 @@ public class AIGatherStuff extends AIBase
                         for (int i = 2; i < pokemob.getPokemobInventory().getSizeInventory(); i++)
                         {
                             ItemStack stack = pokemob.getPokemobInventory().getStackInSlot(i);
-                            if (CompatWrapper.isValid(stack) && stack.getItem() instanceof IPlantable)
+                            if (!stack.isEmpty() && stack.getItem() instanceof IPlantable)
                             {
                                 IPlantable plantable = (IPlantable) stack.getItem();
                                 IBlockState plantState = plantable.getPlant(world, stuffLoc.getPos().up());
