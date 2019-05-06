@@ -226,9 +226,9 @@ public class GuiPokemob extends GuiContainer
                 }
                 renderMob.getEntity().onGround = true;
 
-                int x = this.x + width / 2 - 2;
+                int x = this.x + width / 2 + 4;
                 int y = this.y + height / 2 + 7;
-                double scale = 0.9f;
+                double scale = 0.7f;
                 GL11.glPushMatrix();
                 GL11.glTranslatef(x, y, 10F);
                 GL11.glRotated(90, 0, 1, 0);
@@ -249,7 +249,7 @@ public class GuiPokemob extends GuiContainer
                         || (o = RenderPokemobs.getInstance().getRenderer(entry)) instanceof RenderAdvancedPokemobModel)
                 {
                     RenderAdvancedPokemobModel<?> render = (RenderAdvancedPokemobModel<?>) o;
-                    if (id == StanceHandler.BUTTONTOGGLESTAY)
+                    if (id == StanceHandler.BUTTONTOGGLESIT)
                     {
                         if (pokemob.getLogicState(LogicStates.SITTING))
                         {
@@ -509,9 +509,12 @@ public class GuiPokemob extends GuiContainer
         buttonList.add(new PokemobButton(1, width / 2 - xOffset + 36, height / 2 - yOffset, 20, 20, guard, pokemob));
         buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset, 20, 20, sit, pokemob));
         yOffset = 77;
-        buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.ai")));
-        buttonList.add(new GuiButton(4, width / 2 - xOffset + 30, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.storage")));
-        buttonList.add(new GuiButton(5, width / 2 - xOffset + 00, height / 2 - yOffset, 30, 10, I18n.format("pokemob.gui.routes")));
+        buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10,
+                I18n.format("pokemob.gui.ai")));
+        buttonList.add(new GuiButton(4, width / 2 - xOffset + 30, height / 2 - yOffset, 30, 10,
+                I18n.format("pokemob.gui.storage")));
+        buttonList.add(new GuiButton(5, width / 2 - xOffset + 00, height / 2 - yOffset, 30, 10,
+                I18n.format("pokemob.gui.routes")));
         xOffset = 80;
         name = new NameField(0, fontRenderer, width / 2 - xOffset, height / 2 - yOffset, 120, 10);
         name.setText(pokemob.getPokemonDisplayName().getUnformattedComponentText().trim());
