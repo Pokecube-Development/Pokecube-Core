@@ -444,6 +444,13 @@ public class AIFindTarget extends AIBase implements IAICombat
      * @return a guard target was found */
     protected boolean checkGuard()
     {
+        // Disabled via the boolean config.
+        if (!PokecubeCore.core.getConfig().guardModeEnabled) return false;
+
+        int rate = PokecubeCore.core.getConfig().guardTickRate;
+        // Disable via rate out of bounds, or not correct time in the rate.
+        if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
+
         List<EntityLivingBase> ret = new ArrayList<EntityLivingBase>();
         List<Object> pokemobs = new ArrayList<Object>();
 
@@ -455,7 +462,8 @@ public class AIFindTarget extends AIBase implements IAICombat
             centre.set(pokemob.getHome());
         else centre.set(pokemob.getPokemonOwner());
 
-        pokemobs = getEntitiesWithinDistance(centre, entity.dimension, 16, EntityLivingBase.class);
+        pokemobs = getEntitiesWithinDistance(centre, entity.dimension,
+                PokecubeCore.core.getConfig().guardSearchDistance, EntityLivingBase.class);
 
         // Only allow valid guard targets.
         for (Object o : pokemobs)

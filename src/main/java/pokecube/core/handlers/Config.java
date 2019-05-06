@@ -333,6 +333,13 @@ public class Config extends ConfigBase
     @Configure(category = mobAI)
     @SyncConfig
     public float                         groundSpeedFactor            = 1;
+    @Configure(category = mobAI)
+    @SyncConfig
+    public boolean                       guardModeEnabled             = true;
+    @Configure(category = mobAI)
+    public int                           guardSearchDistance          = 16;
+    @Configure(category = mobAI)
+    public int                           guardTickRate                = 20;
 
     // Used by pathfinder's movehelper for scaling speed in air and water.
     @Configure(category = mobAI)
