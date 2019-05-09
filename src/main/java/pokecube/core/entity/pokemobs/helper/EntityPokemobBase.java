@@ -4,6 +4,7 @@
 package pokecube.core.entity.pokemobs.helper;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -103,7 +104,11 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     {
         // This is here for until kettle decides to not call this during
         // constructor.
-        if (this.pokemobCap == null) return false;
+        if (this.pokemobCap == null)
+        {
+            PokecubeMod.log(Level.FINE, "canDespawn() Called before construction is complete.");
+            return false;
+        }
 
         boolean canDespawn = pokemobCap.getHungerTime() > PokecubeMod.core.getConfig().pokemobLifeSpan;
         boolean checks = pokemobCap.getGeneralState(GeneralStates.TAMED) || pokemobCap.getOwnerId() != null
