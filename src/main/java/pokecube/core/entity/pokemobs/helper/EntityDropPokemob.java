@@ -24,6 +24,7 @@ public abstract class EntityDropPokemob extends EntityMovesPokemob
     @Nullable
     protected ResourceLocation getLootTable()
     {
+        if (this.getEntityData().getBoolean("cloned")) return null;
         if (PokecubeMod.core.getConfig().pokemobsDropItems) return pokemobCap.getPokedexEntry().lootTable;
         else return null;
     }
