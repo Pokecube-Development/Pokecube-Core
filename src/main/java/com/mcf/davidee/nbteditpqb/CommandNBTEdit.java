@@ -71,11 +71,21 @@ public class CommandNBTEdit extends CommandBase
             }
             else if (args.length == 2)
             {
-                EntityPlayer target = getPlayer(server, sender, args[0]);
                 String value = args[1];
                 NBTEdit.log(Level.TRACE, sender.getName() + " issued command \"/pcedit\"");
-                System.out.println(target+" "+value);
-                NBTEdit.NETWORK.sendCustomTag(player, target.getEntityId(), value);
+
+                try
+                {
+                    EntityPlayer target = getPlayer(server, sender, args[0]);
+                    NBTEdit.NETWORK.sendCustomTag(player, target.getEntityId(), value);
+                }
+                catch (PlayerNotFoundException e)
+                {
+                    // TODO in here we should make a packet that tries to just
+                    // send the UUID, and then have that be proceesed for custom
+                    // tags instead.
+                    throw e;
+                }
             }
             else
             {
@@ -116,7 +126,7 @@ public class CommandNBTEdit extends CommandBase
                 }
                 return getListOfStringsMatchingLastWord(args, options);
             }
-            else if(args.length == 1)
+            else if (args.length == 1)
             {
             }
         }

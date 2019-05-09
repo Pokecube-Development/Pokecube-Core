@@ -129,7 +129,7 @@ public class PacketHandler
                 public void run()
                 {
                     Entity entity = player.getServerWorld().getEntityByID(entityId);
-                    System.out.println(entity);
+
                     if (entity != null && !(entity instanceof EntityPlayer))
                     {
                         NBTEdit.proxy.sendMessage(player, "\"Error- Target must be a player", TextFormatting.RED);
@@ -147,7 +147,6 @@ public class PacketHandler
                         else
                         {
                             data.writeToNBT(tag);
-                            System.out.println(tag);
                             INSTANCE.sendTo(new CustomNBTPacket(entityId, customType, tag), player);
                         }
                     }
