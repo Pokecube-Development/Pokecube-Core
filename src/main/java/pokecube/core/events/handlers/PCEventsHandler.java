@@ -320,7 +320,7 @@ public class PCEventsHandler
             {
                 System.err.println("Cube is null");
             }
-            else if (num == -1 || pc.autoToPC || player.isDead)
+            else if (num == -1 || pc.autoToPC || player.isDead || player.getHealth() <= 0)
             {
                 evt.setCanceled(true);
                 InventoryPC.addPokecubeToPC(evt.filledCube, catcher.getEntityWorld());

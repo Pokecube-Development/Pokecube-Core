@@ -131,12 +131,6 @@ public class EntityPokecube extends EntityPokecubeBase
         if (PokecubeManager.hasMob(entityItem)) tilt = -2;
     }
 
-    @Override
-    protected void collideWithNearbyEntities()
-    {
-        super.collideWithNearbyEntities();
-    }
-
     /** Applies a velocity to each of the entities pushing them away from each
      * other. Args: entity */
     @Override
@@ -426,12 +420,6 @@ public class EntityPokecube extends EntityPokecubeBase
             dir.scalarMultBy(dist);
             dir.setVelocities(this);
         }
-    }
-
-    @Override
-    public void setDead()
-    {
-        super.setDead();
     }
 
     @Override

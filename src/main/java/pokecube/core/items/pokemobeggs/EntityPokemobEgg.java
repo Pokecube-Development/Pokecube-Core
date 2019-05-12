@@ -274,4 +274,10 @@ public class EntityPokemobEgg extends EntityLiving
         nbt.setInteger("age", age);
         nbt.setInteger("hatchtime", hatch);
     }
+    
+    @Override
+    protected boolean canDespawn()
+    {
+        return false;
+    }
 }

@@ -205,6 +205,12 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     }
 
     @Override
+    protected boolean canDespawn()
+    {
+        return false;
+    }
+
+    @Override
     public void shoot(double x, double y, double z, float velocity, float inacurracy)
     {
         float f2 = MathHelper.sqrt(x * x + y * y + z * z);
