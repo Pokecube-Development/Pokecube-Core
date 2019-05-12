@@ -170,7 +170,7 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public int getMoveIndex()
     {
-        int ret = dataManager.get(params.MOVEINDEXDW);
+        byte ret = dataSync().get(params.MOVEINDEXDW);
         return Math.max(0, ret);
     }
 
@@ -195,19 +195,20 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public byte getStatus()
     {
-        return (byte) Math.max(0, dataManager.get(params.STATUSDW));
+        Byte val = dataSync().get(params.STATUSDW);
+        return (byte) Math.max(0, val);
     }
 
     @Override
     public short getStatusTimer()
     {
-        return dataManager.get(params.STATUSTIMERDW).shortValue();
+        return dataSync().get(params.STATUSTIMERDW);
     }
 
     @Override
     public Entity getTransformedTo()
     {
-        return getEntity().getEntityWorld().getEntityByID(getDataManager().get(params.TRANSFORMEDTODW));
+        return getEntity().getEntityWorld().getEntityByID(this.dataSync().get(params.TRANSFORMEDTODW));
     }
 
     @Override
@@ -221,7 +222,7 @@ public abstract class PokemobMoves extends PokemobSexed
         {
             affected.removeEffects(PersistantStatusEffect.ID);
         }
-        dataManager.set(params.STATUSDW, (byte) 0);
+        dataSync().set(params.STATUSDW, (byte) 0);
     }
 
     @Override
@@ -250,7 +251,7 @@ public abstract class PokemobMoves extends PokemobSexed
             moveInfo.BLOCKCOUNTER = 0;
             moveInfo.blocked = false;
             moveInfo.blockTimer = 0;
-            dataManager.set(params.MOVEINDEXDW, (byte) moveIndex);
+            dataSync().set(params.MOVEINDEXDW, (byte) moveIndex);
         }
     }
 
@@ -270,7 +271,7 @@ public abstract class PokemobMoves extends PokemobSexed
         {
             IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
             affected.removeEffects(PersistantStatusEffect.ID);
-            dataManager.set(params.STATUSDW, status);
+            dataSync().set(params.STATUSDW, status);
             return true;
         }
         Status actual = Status.getStatus(status);
@@ -294,7 +295,7 @@ public abstract class PokemobMoves extends PokemobSexed
         if ((status == STATUS_PSN || status == STATUS_PSN2)
                 && (isType(PokeType.getType("poison")) || isType(PokeType.getType("steel"))))
             return false;
-        dataManager.set(params.STATUSDW, status);
+        dataSync().set(params.STATUSDW, status);
         if ((status == STATUS_SLP || status == STATUS_FRZ) && turns == -1) turns = 5;
         short timer = (short) (turns == -1 ? PokecubeMod.core.getConfig().attackCooldown * 5
                 : turns * PokecubeMod.core.getConfig().attackCooldown);
@@ -312,7 +313,7 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public void setStatusTimer(short timer)
     {
-        dataManager.set(params.STATUSTIMERDW, (int) timer);
+        dataSync().set(params.STATUSTIMERDW, (int) timer);
     }
 
     @Override
@@ -328,19 +329,19 @@ public abstract class PokemobMoves extends PokemobSexed
         }
         this.setType1(newEntry.getType1());
         this.setType2(newEntry.getType2());
-        getDataManager().set(params.TRANSFORMEDTODW, getMoveStats().transformedTo);
+        this.dataSync().set(params.TRANSFORMEDTODW, getMoveStats().transformedTo);
     }
 
     @Override
     public int getAttackCooldown()
     {
-        return this.getDataManager().get(params.ATTACKCOOLDOWN);
+        return this.dataSync().get(params.ATTACKCOOLDOWN);
     }
 
     @Override
     public void setAttackCooldown(int timer)
     {
-        this.getDataManager().set(params.ATTACKCOOLDOWN, timer);
+        this.dataSync().set(params.ATTACKCOOLDOWN, timer);
     }
 
     @Override
@@ -358,13 +359,13 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public void setDisableTimer(int index, int timer)
     {
-        this.getDataManager().set(params.DISABLE[index], timer);
+        this.dataSync().set(params.DISABLE[index], timer);
     }
 
     @Override
     public int getDisableTimer(int index)
     {
-        return this.getDataManager().get(params.DISABLE[index]);
+        return this.dataSync().get(params.DISABLE[index]);
     }
 
     @Override

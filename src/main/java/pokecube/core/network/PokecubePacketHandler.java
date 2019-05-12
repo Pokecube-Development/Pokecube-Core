@@ -57,7 +57,6 @@ import pokecube.core.network.pokemobs.PacketMountedControl;
 import pokecube.core.network.pokemobs.PacketNickname;
 import pokecube.core.network.pokemobs.PacketPokemobGui;
 import pokecube.core.network.pokemobs.PacketPokemobMessage;
-import pokecube.core.network.pokemobs.PacketPokemobMetadata;
 import pokecube.core.network.pokemobs.PacketSyncExp;
 import pokecube.core.network.pokemobs.PacketSyncGene;
 import pokecube.core.network.pokemobs.PacketSyncModifier;
@@ -451,11 +450,6 @@ public class PokecubePacketHandler
         PokecubeMod.packetPipeline.registerMessage(PacketMountedControl.class, PacketMountedControl.class,
                 PokecubeCore.getMessageID(), Side.CLIENT);
         PokecubeMod.packetPipeline.registerMessage(PacketMountedControl.class, PacketMountedControl.class,
-                PokecubeCore.getMessageID(), Side.SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketPokemobMetadata.class, PacketPokemobMetadata.class,
-                PokecubeCore.getMessageID(), Side.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketPokemobMetadata.class, PacketPokemobMetadata.class,
                 PokecubeCore.getMessageID(), Side.SERVER);
 
         PokecubeMod.packetPipeline.registerMessage(PacketSyncRoutes.class, PacketSyncRoutes.class,

@@ -46,6 +46,7 @@ import pokecube.core.utils.PokeType;
 import thut.api.entity.IBreedingMob;
 import thut.api.entity.IHungrymob;
 import thut.api.pathing.IPathingMob;
+import thut.api.world.mobs.data.DataSync;
 
 /** @author Manchou */
 public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOwner, IHasStats, IHungrymob,
@@ -768,6 +769,11 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
         return false;
     }
 
+    DataSync dataSync();
+
+    void setDataSync(DataSync sync);
+
+    @Deprecated
     default EntityDataManager getDataManager()
     {
         return getEntity().getDataManager();

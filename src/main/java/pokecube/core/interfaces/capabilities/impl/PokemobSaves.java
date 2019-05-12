@@ -127,7 +127,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read visuals tag
         if (!visualsTag.hasNoTags())
         {
-            dataManager.set(params.SPECIALINFO, visualsTag.getInteger(SPECIALTAG));
+            dataSync().set(params.SPECIALINFO, visualsTag.getInteger(SPECIALTAG));
             setSize((float) (getSize() / PokecubeMod.core.getConfig().scalefactor));
             int[] flavourAmounts = visualsTag.getIntArray(FLAVOURSTAG);
             if (flavourAmounts.length == 5) for (int i = 0; i < flavourAmounts.length; i++)
@@ -249,7 +249,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // This is still written for pokecubes to read from. Actual form is
         // stored in genes.
         visualsTag.setString(FORME, getPokedexEntry().getTrimmedName());
-        visualsTag.setInteger(SPECIALTAG, dataManager.get(params.SPECIALINFO));
+        visualsTag.setInteger(SPECIALTAG, dataSync().get(params.SPECIALINFO));
         int[] flavourAmounts = new int[5];
         for (int i = 0; i < flavourAmounts.length; i++)
         {

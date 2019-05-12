@@ -147,7 +147,7 @@ public abstract class PokemobHungry extends PokemobMoves
     @Override
     public int getHungerTime()
     {
-        return getDataManager().get(params.HUNGERDW);
+        return this.dataSync().get(params.HUNGERDW);
     }
 
     @Override
@@ -219,7 +219,7 @@ public abstract class PokemobHungry extends PokemobMoves
     @Override
     public void setHungerTime(int hungerTime)
     {
-        getDataManager().set(params.HUNGERDW, hungerTime);
+        this.dataSync().set(params.HUNGERDW, hungerTime);
     }
 
     @Override
@@ -231,12 +231,12 @@ public abstract class PokemobHungry extends PokemobMoves
     @Override
     public int getFlavourAmount(int index)
     {
-        return dataManager.get(params.FLAVOURS[index]);
+        return dataSync().get(params.FLAVOURS[index]);
     }
 
     @Override
     public void setFlavourAmount(int index, int amount)
     {
-        dataManager.set(params.FLAVOURS[index], amount);
+        dataSync().set(params.FLAVOURS[index], amount);
     }
 }

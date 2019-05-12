@@ -144,6 +144,7 @@ import thut.api.entity.genetics.IMobGenetics;
 import thut.api.maths.Vector3;
 import thut.api.terrain.BiomeType;
 import thut.api.terrain.TerrainManager;
+import thut.core.common.world.mobs.data.DataSync_Impl;
 import thut.lib.CompatWrapper;
 
 public class EventsHandler
@@ -235,6 +236,7 @@ public class EventsHandler
 
     public static final ResourceLocation               POKEMOBCAP  = new ResourceLocation(PokecubeMod.ID, "pokemob");
     public static final ResourceLocation               AFFECTEDCAP = new ResourceLocation(PokecubeMod.ID, "affected");
+    public static final ResourceLocation               DATACAP     = new ResourceLocation(PokecubeMod.ID, "data");
 
     @CapabilityInject(IGuardAICapability.class)
     public static final Capability<IGuardAICapability> GUARDAI_CAP = null;
@@ -1041,11 +1043,14 @@ public class EventsHandler
             DefaultPokemob pokemob = new DefaultPokemob();
             GeneticsProvider genes = new GeneticsProvider();
             AICapWrapper aiCap = new AICapWrapper(pokemob);
+            DataSync_Impl data = new DataSync_Impl();
+            pokemob.setDataSync(data);
             pokemob.setEntity((EntityLiving) event.getObject());
             pokemob.genes = genes.getCapability(IMobGenetics.GENETICS_CAP, null);
             event.addCapability(GeneticsManager.POKECUBEGENETICS, genes);
             event.addCapability(POKEMOBCAP, pokemob);
             event.addCapability(AICapWrapper.AICAP, aiCap);
+            event.addCapability(DATACAP, data);
             isPokemob = true;
         }
 
