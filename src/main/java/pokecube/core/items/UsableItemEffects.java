@@ -307,15 +307,15 @@ public class UsableItemEffects
         public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
         {
             EntityLivingBase mob = pokemob.getEntity();
-            float health = mob.getHealth();
+            float health = pokemob.getHealth();
             if ((int) health <= 0) return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
-            float maxHealth = mob.getMaxHealth();
+            float maxHealth = pokemob.getMaxHealth();
             if (user == mob)
             {
                 if (health >= maxHealth / 3) return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
             }
-            if (health + 20 < maxHealth) mob.setHealth(health + 20);
-            else mob.setHealth(maxHealth);
+            if (health + 20 < maxHealth) pokemob.setHealth(health + 20);
+            else pokemob.setHealth(maxHealth);
             boolean useStack = true;
             if (user instanceof EntityPlayer && ((EntityPlayer) user).capabilities.isCreativeMode) useStack = false;
             if (useStack) stack.splitStack(1);

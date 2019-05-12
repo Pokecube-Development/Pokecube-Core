@@ -70,9 +70,9 @@ public abstract class PokemobHungry extends PokemobMoves
         hungerCooldown = 0;
         setCombatState(CombatStates.HUNTING, false);
         if (getEntity().isDead) return;
-        float missingHp = getEntity().getMaxHealth() - getEntity().getHealth();
-        float toHeal = getEntity().getHealth() + Math.max(1, missingHp * 0.25f);
-        getEntity().setHealth(Math.min(toHeal, getEntity().getMaxHealth()));
+        float missingHp = this.getMaxHealth() - this.getHealth();
+        float toHeal = this.getHealth() + Math.max(1, missingHp * 0.25f);
+        this.setHealth(Math.min(toHeal, this.getMaxHealth()));
         // Make wild pokemon level up naturally to their cap, to allow wild
         // hatches
         if (!getGeneralState(GeneralStates.TAMED))

@@ -115,7 +115,7 @@ public class AIMate extends AIBase
                 for (int i = 0; i < males.length; i++)
                 {
                     IPokemob mob = males[i];
-                    if (mob.getLevel() < level || mob.getEntity().getHealth() < mob.getEntity().getMaxHealth() / 1.5f)
+                    if (mob.getLevel() < level || mob.getHealth() < mob.getMaxHealth() / 1.5f)
                     {
                         loverMob.getMalesForBreeding().remove(mob);
                         mob.resetLoveStatus();

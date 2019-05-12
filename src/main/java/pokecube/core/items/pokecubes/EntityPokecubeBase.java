@@ -72,8 +72,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     public static void setNoCaptureBasedOnConfigs(IPokemob pokemob)
     {
 
-        if (PokecubeMod.core.getConfig().captureDelayTillAttack)
-            pokemob.setCombatState(CombatStates.NOITEMUSE, true);
+        if (PokecubeMod.core.getConfig().captureDelayTillAttack) pokemob.setCombatState(CombatStates.NOITEMUSE, true);
         else pokemob.getEntity().getEntityData().setLong(CUBETIMETAG,
                 pokemob.getEntity().getEntityWorld().getTotalWorldTime()
                         + PokecubeMod.core.getConfig().captureDelayTicks);
@@ -406,7 +405,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     public EntityLivingBase sendOut()
     {
         if (getEntityWorld().isRemote || isReleasing()) { return null; }
-        IPokemob entity1 = PokecubeManager.itemToPokemob(getItem(), getEntityWorld());
+        IPokemob pokemob = PokecubeManager.itemToPokemob(getItem(), getEntityWorld());
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (config.permsSendOut && shootingEntity instanceof EntityPlayer)
@@ -423,12 +422,12 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
                 return null;
             }
         }
-        if (entity1 != null)
+        if (pokemob != null)
         {
             // Check permissions
             if (config.permsSendOutSpecific && shootingEntity instanceof EntityPlayer)
             {
-                PokedexEntry entry = entity1.getPokedexEntry();
+                PokedexEntry entry = pokemob.getPokedexEntry();
                 EntityPlayer player = (EntityPlayer) shootingEntity;
                 IPermissionHandler handler = PermissionAPI.getPermissionHandler();
                 PlayerContext context = new PlayerContext(player);
@@ -450,11 +449,11 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             v.set(v.intX() + 0.5, v.y, v.intZ() + 0.5);
             IBlockState state = v.getBlockState(getEntityWorld());
             if (state.getMaterial().isSolid()) v.y = Math.ceil(v.y);
-            EntityLiving entity = entity1.getEntity();
+            EntityLiving entity = pokemob.getEntity();
             entity.fallDistance = 0;
             v.moveEntity(entity);
 
-            SendOut evt = new SendOut.Pre(entity1.getPokedexEntry(), v, getEntityWorld(), entity1);
+            SendOut evt = new SendOut.Pre(pokemob.getPokedexEntry(), v, getEntityWorld(), pokemob);
             if (MinecraftForge.EVENT_BUS.post(evt))
             {
                 if (shootingEntity != null && shootingEntity instanceof EntityPlayer)
@@ -466,19 +465,19 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             }
 
             getEntityWorld().spawnEntity(entity);
-            entity1.popFromPokecube();
-            entity1.setGeneralState(GeneralStates.TAMED, true);
-            entity1.setGeneralState(GeneralStates.EXITINGCUBE, true);
-            entity1.setEvolutionTicks(50 + LogicMiscUpdate.EXITCUBEDURATION);
-            Entity owner = entity1.getPokemonOwner();
+            pokemob.popFromPokecube();
+            pokemob.setGeneralState(GeneralStates.TAMED, true);
+            pokemob.setGeneralState(GeneralStates.EXITINGCUBE, true);
+            pokemob.setEvolutionTicks(50 + LogicMiscUpdate.EXITCUBEDURATION);
+            Entity owner = pokemob.getPokemonOwner();
             if (owner instanceof EntityPlayer)
             {
                 ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.action.sendout", "green",
-                        entity1.getPokemonDisplayName());
-                entity1.displayMessageToOwner(mess);
+                        pokemob.getPokemonDisplayName());
+                pokemob.displayMessageToOwner(mess);
             }
 
-            if (entity.getHealth() <= 0)
+            if (pokemob.getHealth() <= 0)
             {
                 // notify the mob is dead
                 this.getEntityWorld().setEntityState(entity, (byte) 3);
@@ -487,8 +486,8 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             motionX = motionY = motionZ = 0;
             time = 10;
             setReleasing(true);
-            this.setItem(entity1.getPokecube());
-            evt = new SendOut.Post(entity1.getPokedexEntry(), v, getEntityWorld(), entity1);
+            this.setItem(pokemob.getPokecube());
+            evt = new SendOut.Post(pokemob.getPokedexEntry(), v, getEntityWorld(), pokemob);
             MinecraftForge.EVENT_BUS.post(evt);
         }
         else
@@ -529,7 +528,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             this.entityDropItem(getItem(), 0.5f);
             this.setDead();
         }
-        if (entity1 == null) return null;
-        return entity1.getEntity();
+        if (pokemob == null) return null;
+        return pokemob.getEntity();
     }
 }

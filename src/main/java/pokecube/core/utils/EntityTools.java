@@ -12,27 +12,31 @@ public class EntityTools
         to.posX = from.posX;
         to.posY = from.posY;
         to.posZ = from.posZ;
+        to.lastTickPosX = from.lastTickPosX;
+        to.lastTickPosY = from.lastTickPosY;
+        to.lastTickPosZ = from.lastTickPosZ;
+
         to.motionX = from.motionX;
         to.motionY = from.motionY;
         to.motionZ = from.motionZ;
+
         to.rotationPitch = from.rotationPitch;
         to.ticksExisted = from.ticksExisted;
         to.rotationYaw = from.rotationYaw;
         to.setRotationYawHead(from.getRotationYawHead());
-        to.dimension = from.dimension;
         to.prevRotationPitch = from.prevRotationPitch;
         to.prevRotationYaw = from.prevRotationYaw;
         to.prevRotationYawHead = from.prevRotationYawHead;
+        to.prevRenderYawOffset = from.prevRenderYawOffset;
+        to.renderYawOffset = from.renderYawOffset;
+
+        to.dimension = from.dimension;
+
         to.onGround = from.onGround;
+
         to.prevLimbSwingAmount = from.prevLimbSwingAmount;
         to.limbSwing = from.limbSwing;
         to.limbSwingAmount = from.limbSwingAmount;
-        to.prevDistanceWalkedModified = from.prevDistanceWalkedModified;
-        to.lastTickPosX = from.lastTickPosX;
-        to.lastTickPosY = from.lastTickPosY;
-        to.lastTickPosZ = from.lastTickPosZ;
-        to.prevRenderYawOffset = from.prevRenderYawOffset;
-        to.renderYawOffset = from.renderYawOffset;
     }
 
     public static void copyEntityData(EntityLivingBase to, EntityLivingBase from)

@@ -430,7 +430,7 @@ public class PokecubeSerializer
         if (entity != null)
         {
             entity.setForSpawn(Tools.levelToXp(entity.getExperienceMode(), 5));
-            entity.getEntity().setHealth(entity.getEntity().getMaxHealth());
+            entity.setHealth(entity.getMaxHealth());
             entity.setPokemonOwner(owner);
             Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
             if (contrib != null)

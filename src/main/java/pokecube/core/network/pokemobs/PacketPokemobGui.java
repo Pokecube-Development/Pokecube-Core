@@ -67,7 +67,8 @@ public class PacketPokemobGui implements IMessage, IMessageHandler<PacketPokemob
 
     void processMessage(MessageContext ctx, PacketPokemobGui message)
     {
-        Entity entity = ctx.getServerHandler().player.getEntityWorld().getEntityByID(message.id);
+        Entity entity = PokecubeCore.core.getEntityProvider().getEntity(ctx.getServerHandler().player.getEntityWorld(),
+                message.id, true);
 
         int id = -1;
         switch (message.message)

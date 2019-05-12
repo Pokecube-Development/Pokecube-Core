@@ -380,9 +380,9 @@ public abstract class PokemobBase implements IPokemob
      * @param level */
     public void updateHealth()
     {
-        float old = getEntity().getMaxHealth();
+        float old = this.getMaxHealth();
         float maxHealth = getStat(Stats.HP, false);
-        float health = getEntity().getHealth();
+        float health = this.getHealth();
 
         if (maxHealth > old)
         {
@@ -395,6 +395,6 @@ public abstract class PokemobBase implements IPokemob
             }
         }
         setMaxHealth(maxHealth);
-        getEntity().setHealth(health);
+        this.setHealth(health);
     }
 }

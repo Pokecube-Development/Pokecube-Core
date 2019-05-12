@@ -99,10 +99,10 @@ public class PokemobTerrainEffects implements ITerrainEffect
             }
             if (effects[EFFECT_TERRAIN_GRASS] > 0 && mob.getOnGround())
             {
-                float thisHP = entity.getHealth();
-                float thisMaxHP = entity.getMaxHealth();
+                float thisHP = mob.getHealth();
+                float thisMaxHP = mob.getMaxHealth();
                 int damage = Math.max(1, (int) (0.0625 * thisMaxHP));
-                entity.setHealth(Math.min(thisMaxHP, thisHP + damage));
+                mob.setHealth(Math.min(thisMaxHP, thisHP + damage));
             }
             if (effects[EFFECT_TERRAIN_MISTY] > 0 && mob.getOnGround())
             {
@@ -164,14 +164,14 @@ public class PokemobTerrainEffects implements ITerrainEffect
             }
             if (effects[EFFECT_SPIKES] > 0)
             {
-                float thisHP = entity.getHealth();
-                float thisMaxHP = entity.getMaxHealth();
+                float thisHP = mob.getHealth();
+                float thisMaxHP = mob.getMaxHealth();
                 int damage = Math.max(1, (int) (0.0625 * thisMaxHP));
-                entity.setHealth(Math.min(thisMaxHP, thisHP + damage));
+                mob.setHealth(Math.min(thisMaxHP, thisHP + damage));
             }
             if (effects[EFFECT_ROCKS] > 0)
             {
-                float thisMaxHP = entity.getMaxHealth();
+                float thisMaxHP = mob.getMaxHealth();
                 int damage = Math.max(1, (int) (0.0625 * thisMaxHP));
                 double mult = PokeType.getAttackEfficiency(PokeType.getType("rock"), mob.getType1(), mob.getType2());
                 entity.attackEntityFrom(DamageSource.GENERIC, (float) (damage * mult));

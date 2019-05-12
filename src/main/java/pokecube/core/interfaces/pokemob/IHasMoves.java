@@ -197,16 +197,6 @@ public interface IHasMoves extends IHasStats
      * @param pos */
     void setTargetPos(Vector3 pos);
 
-    /** Held item as a weapon, theoretically this should be then rendered on the
-     * mob somehow, This is not implemented though. TODO implement this.
-     * 
-     * @param index
-     * @return */
-    default Entity getWeapon(int index)
-    {
-        return index == 0 ? getMoveStats().weapon1 : getMoveStats().weapon2;
-    }
-
     /** The pokemob learns the specified move. It will be set to an available
      * position or erase an existing one if non are available.
      *
@@ -384,16 +374,6 @@ public interface IHasMoves extends IHasStats
      * 
      * @param to */
     void setTransformedTo(Entity to);
-
-    /** Used by moves such as vine whip to set the pokemob as using something.
-     * 
-     * @param index
-     * @param weapon */
-    default void setWeapon(int index, Entity weapon)
-    {
-        if (index == 0) getMoveStats().weapon1 = weapon;
-        else getMoveStats().weapon2 = weapon;
-    }
 
     /** Marks the move as disabled for a certain time.
      * 

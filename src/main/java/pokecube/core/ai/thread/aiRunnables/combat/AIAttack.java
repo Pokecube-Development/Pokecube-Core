@@ -86,7 +86,7 @@ public class AIAttack extends AIBase implements IAICombat
         {
             if (pokemobTarget != null)
             {
-                if (pokemobTarget.getEntity().getHealth() < pokemobTarget.getEntity().getMaxHealth() / 1.5f)
+                if (pokemobTarget.getHealth() < pokemobTarget.getMaxHealth() / 1.5f)
                 {
                     setCombatState(this.pokemob, CombatStates.MATEFIGHT, false);
                     setCombatState(pokemobTarget, CombatStates.MATEFIGHT, false);
@@ -442,9 +442,9 @@ public class AIAttack extends AIBase implements IAICombat
     {
         world = TickHandler.getInstance().getWorldCache(attacker.dimension);
         if (world == null) return false;
-        EntityLivingBase var1 = attacker.getAttackTarget();
+        EntityLivingBase target = attacker.getAttackTarget();
         // No target, we can't do anything, so return false
-        if (var1 == null)
+        if (target == null)
         {
             if (attacker.getNavigator().noPath() && pokemob.getCombatState(CombatStates.EXECUTINGMOVE))
             {
@@ -454,14 +454,14 @@ public class AIAttack extends AIBase implements IAICombat
         }
         // If either us, or target is dead, or about to be so (0 health) return
         // false
-        if (var1.isDead || var1.getHealth() <= 0 || attacker.getHealth() <= 0 || attacker.isDead) { return false; }
+        if (target.isDead || target.getHealth() <= 0 || pokemob.getHealth() <= 0 || attacker.isDead) { return false; }
 
         // If we do have the target, but are not angry, return false.
         if (!pokemob.getCombatState(CombatStates.ANGRY)) return false;
 
         // Set target, set attack, return true
         attack = MovesUtils.getMoveFromName(pokemob.getMove(pokemob.getMoveIndex()));
-        entityTarget = var1;
+        entityTarget = target;
         if (attack == null) attack = MovesUtils.getMoveFromName(IMoveConstants.DEFAULT_MOVE);
         return true;
     }

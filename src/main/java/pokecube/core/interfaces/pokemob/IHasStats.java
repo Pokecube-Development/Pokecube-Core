@@ -257,4 +257,19 @@ public interface IHasStats extends IHasEntry
     {
         getModifiers().type2 = type2;
     }
+
+    default float getHealth()
+    {
+        return getEntity().getHealth();
+    }
+
+    default float getMaxHealth()
+    {
+        return getEntity().getMaxHealth();
+    }
+
+    default void setHealth(float health)
+    {
+        getEntity().setHealth(health);
+    }
 }

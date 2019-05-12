@@ -160,9 +160,9 @@ public class Tools
 
     public static int computeCatchRate(IPokemob pokemob, double cubeBonus, int cubeBonus2)
     {
-        float HPmax = pokemob.getEntity().getMaxHealth();
+        float HPmax = pokemob.getMaxHealth();
         Random rand = new Random();
-        float HP = pokemob.getEntity().getHealth();
+        float HP = pokemob.getHealth();
         float statusBonus = 1F;
         byte status = pokemob.getStatus();
         if (status == IMoveConstants.STATUS_FRZ || status == IMoveConstants.STATUS_SLP)

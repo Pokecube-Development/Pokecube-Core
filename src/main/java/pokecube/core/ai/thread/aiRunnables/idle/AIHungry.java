@@ -333,8 +333,8 @@ public class AIHungry extends AIBase
             // Otherwise take damage.
             else if (entity.ticksExisted % hungerTicks == 0 && ratio > 0)
             {
-                boolean dead = entity.getMaxHealth() * ratio > entity.getHealth();
-                float damage = entity.getMaxHealth() * ratio;
+                boolean dead = pokemob.getMaxHealth() * ratio > pokemob.getHealth();
+                float damage = pokemob.getMaxHealth() * ratio;
                 if (damage >= 1 && ratio >= 0.0625)
                 {
                     entity.attackEntityFrom(DamageSource.STARVE, damage);
@@ -386,13 +386,13 @@ public class AIHungry extends AIBase
         if (hunger != hungerTime) pokemob.setHungerTime(hunger);
 
         // Regenerate health if out of battle.
-        if (entity.getAttackTarget() == null && entity.getHealth() > 0 && !entity.isDead
+        if (entity.getAttackTarget() == null && pokemob.getHealth() > 0 && !entity.isDead
                 && !entity.getEntityWorld().isRemote && pokemob.getHungerCooldown() < 0 && pokemob.getHungerTime() < 0
                 && cur % 10 == tick)
         {
-            float dh = Math.max(1, entity.getMaxHealth() * 0.05f);
-            float toHeal = entity.getHealth() + dh;
-            entity.setHealth(Math.min(toHeal, entity.getMaxHealth()));
+            float dh = Math.max(1, pokemob.getMaxHealth() * 0.05f);
+            float toHeal = pokemob.getHealth() + dh;
+            pokemob.setHealth(Math.min(toHeal, pokemob.getMaxHealth()));
         }
     }
 

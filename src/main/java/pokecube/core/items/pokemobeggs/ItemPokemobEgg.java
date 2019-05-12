@@ -272,7 +272,7 @@ public class ItemPokemobEgg extends Item
         {
             IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
             mob.setGeneralState(GeneralStates.EXITINGCUBE, true);
-            entity.setHealth(entity.getMaxHealth());
+            mob.setHealth(mob.getMaxHealth());
             int exp = Tools.levelToXp(mob.getExperienceMode(), 1);
             exp = Math.max(1, exp);
             mob.setForSpawn(exp);

@@ -177,7 +177,7 @@ public class PokecubeManager
     public static ItemStack pokemobToItem(IPokemob pokemob)
     {
         ItemStack itemStack = pokemob.getPokecube();
-        int damage = Tools.serialize(pokemob.getEntity().getMaxHealth(), pokemob.getEntity().getHealth());
+        int damage = Tools.serialize(pokemob.getMaxHealth(), pokemob.getHealth());
         if (!CompatWrapper.isValid(itemStack))
         {
             itemStack = new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE), 1, damage);
@@ -291,7 +291,7 @@ public class PokecubeManager
                     pokemob.healStatus();
                     pokemob.healChanges();
                     pokemob.getEntity().hurtTime = 0;
-                    pokemob.getEntity().setHealth(pokemob.getStat(Stats.HP, false));
+                    pokemob.setHealth(pokemob.getStat(Stats.HP, false));
                     ItemStack healed = pokemobToItem(pokemob);
                     stack.setTagCompound(healed.getTagCompound());
                 }

@@ -240,16 +240,16 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             if (pre.isCanceled()) return;
             RecallEvent evtrec = new RecallEvent(this);
             MinecraftForge.EVENT_BUS.post(evtrec);
-            if (getEntity().getHealth() > 0 && evtrec.isCanceled()) { return; }
+            if (this.getHealth() > 0 && evtrec.isCanceled()) { return; }
             this.setEvolutionTicks(0);
             this.setGeneralState(GeneralStates.EXITINGCUBE, false);
             this.setGeneralState(GeneralStates.EVOLVING, false);
             if (getCombatState(CombatStates.MEGAFORME) || getPokedexEntry().isMega)
             {
                 this.setCombatState(CombatStates.MEGAFORME, false);
-                float hp = getEntity().getHealth();
+                float hp = this.getHealth();
                 IPokemob base = megaEvolve(getPokedexEntry().getBaseForme());
-                base.getEntity().setHealth(hp);
+                base.setHealth(hp);
                 if (base == this) returning = false;
                 if (getEntity().getEntityData().hasKey(TagNames.ABILITY))
                     base.setAbility(AbilityManager.getAbility(getEntity().getEntityData().getString(TagNames.ABILITY)));
@@ -260,7 +260,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             if (PokecubeMod.debug) PokecubeMod.log("Recalling " + this.getEntity());
 
             /** If this has fainted, status should be reset. */
-            if (getEntity().getHealth() <= 0)
+            if (this.getHealth() <= 0)
             {
                 healStatus();
                 healChanges();
@@ -270,7 +270,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             /** If we have a target, and we were recalled with health, assign
              * the target to our owner instead. */
             if (this.getCombatState(CombatStates.ANGRY) && this.getEntity().getAttackTarget() != null
-                    && this.getEntity().getHealth() > 0)
+                    && this.getHealth() > 0)
             {
                 if (owner instanceof EntityLivingBase)
                 {
@@ -488,7 +488,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             {
                 pokemob.setHeldItem(pokemob.wildHeldItem(getEntity()));
                 if (pokemob instanceof PokemobOwned) ((PokemobOwned) pokemob).updateHealth();
-                pokemob.getEntity().setHealth(pokemob.getEntity().getMaxHealth());
+                pokemob.setHealth(pokemob.getMaxHealth());
                 return pokemob;
             }
             getEntity().getEntityData().removeTag("initSpawn");
