@@ -1,24 +1,23 @@
 package pokecube.core.moves.implementations.actions;
 
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import pokecube.core.events.handlers.MoveEventsHandler;
+import pokecube.core.events.pokemob.combat.MoveUse;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.Move_Base;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
+import pokecube.core.moves.MovesUtils;
 import pokecube.core.moves.templates.Move_Basic;
 import pokecube.core.world.terrain.PokecubeTerrainChecker;
 import thut.api.maths.Vector3;
@@ -53,38 +52,8 @@ public class ActionSmash implements IMoveAction
             List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, location.getAABB().grow(1));
             if (!items.isEmpty())
             {
-                // TODO instead of using reverse smelting, make an event that
-                // can be used to allow pulverizer compatiblity.
-                boolean smelt = false;
-                for (int i = 0; i < items.size(); i++)
-                {
-                    EntityItem item = items.get(i);
-                    ItemStack stack = item.getItem();
-                    if (Block.getBlockFromItem(stack.getItem()) == null) continue;
-                    int num = stack.getCount();
-                    ItemStack newstack = null;
-                    for (Entry<ItemStack, ItemStack> entry : FurnaceRecipes.instance().getSmeltingList().entrySet())
-                    {
-                        ItemStack result = entry.getValue();
-                        if (stack.getItem() == result.getItem() && stack.getMetadata() == result.getMetadata())
-                        {
-                            newstack = entry.getKey();
-                            break;
-                        }
-                    }
-                    if (newstack != null && newstack.getItem() instanceof ItemBlock)
-                    {
-                        newstack = newstack.copy();
-                        if (newstack.getItemDamage() == 32767) newstack.setItemDamage(stack.getItemDamage());
-                        newstack.setCount(num);
-                        int hunger = PokecubeMod.core.getConfig().baseSmeltingHunger * num;
-                        hunger = (int) Math.max(1, hunger / (float) user.getLevel());
-                        user.setHungerTime(user.getHungerTime() + hunger);
-                        item.setItem(newstack);
-                        smelt = true;
-                    }
-                }
-                return smelt;
+                Move_Base move = MovesUtils.getMoveFromName(getMoveName());
+                return PokecubeMod.MOVE_BUS.post(new MoveUse.MoveWorldAction.AffectItem(move, user, location, items));
             }
         }
         return used;

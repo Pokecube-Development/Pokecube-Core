@@ -404,6 +404,8 @@ public class GuiAnimate extends GuiScreen
         int yOffset = height / 2;
         int xOffset = width / 2;
 
+        // TODO better state selector, for the custom textures by them
+
         String name = PokecubePlayerDataHandler.getCustomDataTag(Minecraft.getMinecraft().player).getString("WEntry");
         pokeentry = Database.getEntry(name);
         if (pokeentry == null) pokeentry = Pokedex.getInstance().getFirstEntry();

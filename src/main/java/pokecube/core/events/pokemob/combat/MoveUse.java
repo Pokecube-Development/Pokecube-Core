@@ -1,6 +1,9 @@
 package pokecube.core.events.pokemob.combat;
 
+import java.util.List;
+
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import pokecube.core.interfaces.IPokemob;
@@ -172,12 +175,22 @@ public class MoveUse extends Event
         @Cancelable
         public static class PreAction extends MoveWorldAction
         {
-
             public PreAction(Move_Base move, IPokemob user, Vector3 location)
             {
                 super(move, user, location);
             }
+        }
 
+        @Cancelable
+        public static class AffectItem extends MoveWorldAction
+        {
+            public final List<EntityItem> items;
+
+            public AffectItem(Move_Base move, IPokemob user, Vector3 location, List<EntityItem> items)
+            {
+                super(move, user, location);
+                this.items = items;
+            }
         }
 
         public static class PostAction extends MoveWorldAction
