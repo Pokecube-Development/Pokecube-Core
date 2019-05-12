@@ -286,7 +286,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             evoMob.setGeneralState(GeneralStates.EVOLVING, true);
 
             // Sync health and nickname
-            ((EntityLivingBase) evolution).setHealth(thisEntity.getHealth());
+            evoMob.setHealth(thisMob.getHealth());
             if (this.getPokemonNickname().equals(oldEntry.getName())) this.setPokemonNickname("");
 
             // Start by syncing all of the capabilities, we will override some
