@@ -601,12 +601,53 @@ public final class SpawnHandler
         if (PokecubeMod.core.getConfig().pokemonSpawn) MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private int doSpawnForLocation(World world, Vector3 v)
+    /** Attempts to spawn mobs near the player.
+     * 
+     * @param player
+     * @param world
+     * @return number of mobs spawned. */
+    public int doSpawnForPlayer(EntityPlayer player, World world)
+    {
+        long time = System.nanoTime();
+        Vector3 v = getRandomPointNear(player, PokecubeMod.core.getConfig().maxSpawnRadius);
+        double dt = (System.nanoTime() - time) / 1000d;
+        if (PokecubeMod.debug && dt > 100)
+        {
+            PokecubeMod.log(Level.INFO, "Location Find took " + dt);
+        }
+
+        if (v == null) return 0;
+        AxisAlignedBB box = v.getAABB();
+        int radius = PokecubeMod.core.getConfig().maxSpawnRadius;
+        int height = v.getMaxY(world);
+        List<EntityPokemobBase> list = world.getEntitiesWithinAABB(EntityPokemobBase.class,
+                box.grow(radius, Math.max(height, radius), radius));
+        if (list.size() < MAXNUM * MAX_DENSITY)
+        {
+            time = System.nanoTime();
+            int num = doSpawnForLocation(world, v);
+            dt = (System.nanoTime() - time) / 10e3D;
+            if (PokecubeMod.debug && dt > 100)
+            {
+                PokecubeMod.log(dt + "\u00B5" + "s for player " + player.getDisplayNameString() + " at " + v
+                        + ", spawned " + num);
+            }
+            return num;
+        }
+        return 0;
+    }
+
+    public int doSpawnForLocation(World world, Vector3 v)
+    {
+        return doSpawnForLocation(world, v, true);
+    }
+
+    public int doSpawnForLocation(World world, Vector3 v, boolean checkPlayers)
     {
         int ret = 0;
-        if (!v.doChunksExist(world, 32)) return ret;
+        if (!v.doChunksExist(world, 8)) return ret;
         int radius = PokecubeMod.core.getConfig().maxSpawnRadius;
-        boolean player = Tools.isAnyPlayerInRange(radius, 10, world, v);
+        boolean player = !checkPlayers || Tools.isAnyPlayerInRange(radius, 10, world, v);
         if (!player) return ret;
         int num = 0;
         int height = world.getActualHeight();
@@ -636,7 +677,7 @@ public final class SpawnHandler
         }
         num = 0;
         time = System.nanoTime();
-        ret += num = doSpawnForType(world, v, dbe, parser, t);
+        ret += num = doSpawnForType(world, v, dbe, parser, t, checkPlayers);
         dt = (System.nanoTime() - time) / 10e3D;
         if (PokecubeMod.debug && dt > 500)
         {
@@ -647,7 +688,8 @@ public final class SpawnHandler
         return ret;
     }
 
-    private int doSpawnForType(World world, Vector3 loc, PokedexEntry dbe, JEP parser, TerrainSegment t)
+    private int doSpawnForType(World world, Vector3 loc, PokedexEntry dbe, JEP parser, TerrainSegment t,
+            boolean checkPlayers)
     {
         SpawnData entry = dbe.getSpawnData();
 
@@ -683,7 +725,7 @@ public final class SpawnHandler
 
             if (!checkNoSpawnerInArea(world, (int) x, (int) y, (int) z)) continue;
             float dist = PokecubeMod.core.getConfig().minSpawnRadius;
-            boolean player = Tools.isAnyPlayerInRange(dist, dist, world, point);
+            boolean player = checkPlayers && Tools.isAnyPlayerInRange(dist, dist, world, point);
             if (player) continue;
             if (distFromSpawnPoint >= 256.0F)
             {
@@ -755,32 +797,7 @@ public final class SpawnHandler
         for (int i = 0; i < players.size(); i++)
         {
             if (players.get(i).dimension != world.provider.getDimension()) continue;
-
-            long time = System.nanoTime();
-            Vector3 v = getRandomPointNear(players.get(i), PokecubeMod.core.getConfig().maxSpawnRadius);
-            double dt = (System.nanoTime() - time) / 1000d;
-            if (PokecubeMod.debug && dt > 100)
-            {
-                PokecubeMod.log(Level.INFO, "Location Find took " + dt);
-            }
-
-            if (v == null) continue;
-            AxisAlignedBB box = v.getAABB();
-            int radius = PokecubeMod.core.getConfig().maxSpawnRadius;
-            int height = v.getMaxY(world);
-            List<EntityPokemobBase> list = world.getEntitiesWithinAABB(EntityPokemobBase.class,
-                    box.grow(radius, Math.max(height, radius), radius));
-            if (list.size() < MAXNUM * MAX_DENSITY)
-            {
-                time = System.nanoTime();
-                int num = doSpawnForLocation(world, v);
-                dt = (System.nanoTime() - time) / 10e3D;
-                if (PokecubeMod.debug && dt > 100)
-                {
-                    PokecubeMod.log(dt + "\u00B5" + "s for player " + players.get(0).getDisplayNameString() + " at " + v
-                            + ", spawned " + num);
-                }
-            }
+            doSpawnForPlayer(players.get(i), world);
         }
     }
 
