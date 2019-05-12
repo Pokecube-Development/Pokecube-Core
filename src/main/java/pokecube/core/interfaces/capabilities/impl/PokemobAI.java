@@ -38,33 +38,33 @@ public abstract class PokemobAI extends PokemobEvolves
     @Override
     public float getDirectionPitch()
     {
-        return dataManager.get(params.DIRECTIONPITCHDW);
+        return dataSync().get(params.DIRECTIONPITCHDW);
     }
 
     @Override
     public boolean getGeneralState(GeneralStates state)
     {
-        if (getEntity().getEntityWorld().isRemote) cachedGeneralState = dataManager.get(params.GENERALSTATESDW);
+        if (getEntity().getEntityWorld().isRemote) cachedGeneralState = dataSync().get(params.GENERALSTATESDW);
         return (cachedGeneralState & state.getMask()) != 0;
     }
 
     @Override
     public int getTotalGeneralState()
     {
-        return dataManager.get(params.GENERALSTATESDW);
+        return dataSync().get(params.GENERALSTATESDW);
     }
 
     @Override
     public void setTotalGeneralState(int state)
     {
         cachedGeneralState = state;
-        dataManager.set(params.GENERALSTATESDW, state);
+        dataSync().set(params.GENERALSTATESDW, state);
     }
 
     @Override
     public void setGeneralState(GeneralStates state, boolean flag)
     {
-        int byte0 = dataManager.get(params.GENERALSTATESDW);
+        int byte0 = dataSync().get(params.GENERALSTATESDW);
         int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
         setTotalGeneralState(newState);
     }
@@ -72,27 +72,27 @@ public abstract class PokemobAI extends PokemobEvolves
     @Override
     public boolean getCombatState(CombatStates state)
     {
-        if (getEntity().getEntityWorld().isRemote) cachedCombatState = dataManager.get(params.COMBATSTATESDW);
+        if (getEntity().getEntityWorld().isRemote) cachedCombatState = dataSync().get(params.COMBATSTATESDW);
         return (cachedCombatState & state.getMask()) != 0;
     }
 
     @Override
     public int getTotalCombatState()
     {
-        return dataManager.get(params.COMBATSTATESDW);
+        return dataSync().get(params.COMBATSTATESDW);
     }
 
     @Override
     public void setTotalCombatState(int state)
     {
         cachedCombatState = state;
-        dataManager.set(params.COMBATSTATESDW, state);
+        dataSync().set(params.COMBATSTATESDW, state);
     }
 
     @Override
     public void setCombatState(CombatStates state, boolean flag)
     {
-        int byte0 = dataManager.get(params.COMBATSTATESDW);
+        int byte0 = dataSync().get(params.COMBATSTATESDW);
         int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
         setTotalCombatState(newState);
     }
@@ -100,27 +100,27 @@ public abstract class PokemobAI extends PokemobEvolves
     @Override
     public boolean getLogicState(LogicStates state)
     {
-        if (getEntity().getEntityWorld().isRemote) cachedLogicState = dataManager.get(params.LOGICSTATESDW);
+        if (getEntity().getEntityWorld().isRemote) cachedLogicState = dataSync().get(params.LOGICSTATESDW);
         return (cachedLogicState & state.getMask()) != 0;
     }
 
     @Override
     public int getTotalLogicState()
     {
-        return dataManager.get(params.LOGICSTATESDW);
+        return dataSync().get(params.LOGICSTATESDW);
     }
 
     @Override
     public void setTotalLogicState(int state)
     {
         cachedLogicState = state;
-        dataManager.set(params.LOGICSTATESDW, state);
+        dataSync().set(params.LOGICSTATESDW, state);
     }
 
     @Override
     public void setLogicState(LogicStates state, boolean flag)
     {
-        int byte0 = dataManager.get(params.LOGICSTATESDW);
+        int byte0 = dataSync().get(params.LOGICSTATESDW);
         int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
         setTotalLogicState(newState);
     }
@@ -335,7 +335,7 @@ public abstract class PokemobAI extends PokemobEvolves
     @Override
     public void setDirectionPitch(float pitch)
     {
-        dataManager.set(params.DIRECTIONPITCHDW, pitch);
+        dataSync().set(params.DIRECTIONPITCHDW, pitch);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package pokecube.core.interfaces.capabilities.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -15,10 +13,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializer;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -30,7 +24,6 @@ import pokecube.core.ai.thread.logicRunnables.LogicInMaterials;
 import pokecube.core.ai.thread.logicRunnables.LogicMiscUpdate;
 import pokecube.core.ai.thread.logicRunnables.LogicMountedControl;
 import pokecube.core.ai.thread.logicRunnables.LogicMovesUpdates;
-import pokecube.core.ai.utils.PokemobDataManager;
 import pokecube.core.ai.utils.PokemobMoveHelper;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.entity.pokemobs.AnimalChest;
@@ -42,177 +35,91 @@ import thut.api.entity.genetics.Alleles;
 import thut.api.entity.genetics.IMobGenetics;
 import thut.api.maths.Matrix3;
 import thut.api.maths.Vector3;
+import thut.api.world.mobs.data.DataSync;
+import thut.core.common.world.mobs.data.SyncHandler;
+import thut.core.common.world.mobs.data.types.Data_Byte;
+import thut.core.common.world.mobs.data.types.Data_Float;
+import thut.core.common.world.mobs.data.types.Data_Int;
+import thut.core.common.world.mobs.data.types.Data_ItemStack;
+import thut.core.common.world.mobs.data.types.Data_String;
 
 public abstract class PokemobBase implements IPokemob
 {
-    private static final Map<Class<? extends Entity>, DataParameters> paramsMap = Maps.newHashMap();
-
-    public static DataParameters getParameters(Class<? extends Entity> clazz)
-    {
-        DataParameters params = paramsMap.get(clazz);
-        if (params == null)
-        {
-            paramsMap.put(clazz, params = createParams(clazz));
-        }
-        return params;
-    }
-
-    // This method is used as Forge decided to add 29k lines of spam to my logs.
-    private static <T> DataParameter<T> createKey(Class<? extends Entity> clazz, DataSerializer<T> serializer)
-    {
-        int j;
-
-        if (EntityDataManager.NEXT_ID_MAP.containsKey(clazz))
-        {
-            j = ((Integer) EntityDataManager.NEXT_ID_MAP.get(clazz)).intValue() + 1;
-        }
-        else
-        {
-            int i = 0;
-            Class<?> oclass1 = clazz;
-
-            while (oclass1 != Entity.class)
-            {
-                oclass1 = oclass1.getSuperclass();
-
-                if (EntityDataManager.NEXT_ID_MAP.containsKey(oclass1))
-                {
-                    i = ((Integer) EntityDataManager.NEXT_ID_MAP.get(oclass1)).intValue() + 1;
-                    break;
-                }
-            }
-
-            j = i;
-        }
-
-        if (j > 254)
-        {
-            throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
-        }
-        else
-        {
-            EntityDataManager.NEXT_ID_MAP.put(clazz, Integer.valueOf(j));
-            return serializer.createKey(j);
-        }
-    }
-
-    private static DataParameters createParams(Class<? extends Entity> clazz)
-    {
-        DataParameters params = new DataParameters();
-        for (int i = 0; i < 5; i++)
-        {
-            params.FLAVOURS[i] = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            params.DISABLE[i] = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        }
-        params.GENERALSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.LOGICSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.COMBATSTATESDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.ATTACKTARGETIDDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HUNGERDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.STATUSDW = PokemobBase.<Byte> createKey(clazz, DataSerializers.BYTE);
-        params.STATUSTIMERDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.MOVEINDEXDW = PokemobBase.<Byte> createKey(clazz, DataSerializers.BYTE);
-        params.SPECIALINFO = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.EVOLTICKDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HAPPYDW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.ATTACKCOOLDOWN = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.NICKNAMEDW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
-        params.ZMOVECD = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HEADINGDW = PokemobBase.<Float> createKey(clazz, DataSerializers.FLOAT);
-        params.DIRECTIONPITCHDW = PokemobBase.<Float> createKey(clazz, DataSerializers.FLOAT);
-        params.TRANSFORMEDTODW = PokemobBase.<Integer> createKey(clazz, DataSerializers.VARINT);
-        params.HELDITEM = PokemobBase.<ItemStack> createKey(clazz, DataSerializers.ITEM_STACK);
-        params.TYPE1DW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
-        params.TYPE2DW = PokemobBase.<String> createKey(clazz, DataSerializers.STRING);
-        return params;
-    }
-
-    @SuppressWarnings("unchecked")
     public static class DataParameters
     {
-        public final DataParameter<Integer>[] FLAVOURS = new DataParameter[5];
-        public DataParameter<ItemStack>       HELDITEM;
-        public DataParameter<Integer>         EVOLTICKDW;
-        public DataParameter<Integer>         HAPPYDW;
-        public DataParameter<Integer>         ATTACKCOOLDOWN;
-        public DataParameter<String>          NICKNAMEDW;
-        public DataParameter<Integer>         ZMOVECD;
-        public DataParameter<Float>           DIRECTIONPITCHDW;
-        public DataParameter<Float>           HEADINGDW;
-        public DataParameter<Integer>         TRANSFORMEDTODW;
-        public DataParameter<Integer>         GENERALSTATESDW;
-        public DataParameter<Integer>         LOGICSTATESDW;
-        public DataParameter<Integer>         COMBATSTATESDW;
-        public DataParameter<Integer>         ATTACKTARGETIDDW;
-        public DataParameter<Integer>         HUNGERDW;
-        public DataParameter<Byte>            STATUSDW;
-        public DataParameter<Integer>         STATUSTIMERDW;
-        public DataParameter<Byte>            MOVEINDEXDW;
-        public DataParameter<Integer>         SPECIALINFO;
-        public DataParameter<String>          TYPE1DW;
-        public DataParameter<String>          TYPE2DW;
-        public final DataParameter<Integer>[] DISABLE  = new DataParameter[4];
 
-        public PokemobDataManager register(EntityDataManager dataManager, EntityLiving entity)
+        public final int[] FLAVOURS = new int[5];
+
+        public int         HELDITEMDW;
+        public int         EVOLTICKDW;
+        public int         HAPPYDW;
+        public int         ATTACKCOOLDOWN;
+        public int         NICKNAMEDW;
+        public int         ZMOVECD;
+        public int         DIRECTIONPITCHDW;
+        public int         HEADINGDW;
+        public int         TRANSFORMEDTODW;
+        public int         GENERALSTATESDW;
+        public int         LOGICSTATESDW;
+        public int         COMBATSTATESDW;
+        public int         ATTACKTARGETIDDW;
+        public int         HUNGERDW;
+        public int         STATUSDW;
+        public int         STATUSTIMERDW;
+        public int         MOVEINDEXDW;
+        public int         SPECIALINFO;
+        public int         TYPE1DW;
+        public int         TYPE2DW;
+        public final int[] DISABLE  = new int[4];
+
+        public void register(IPokemob pokemob)
         {
-            dataManager.register(HUNGERDW, new Integer(0));// Hunger time
+            DataSync sync = pokemob.dataSync();
+            // Held Item timer
+            HELDITEMDW = sync.register(new Data_ItemStack(), ItemStack.EMPTY);
+
+            // Humger timer
+            HUNGERDW = sync.register(new Data_Int(), new Integer(0));
             // // for sheared status
-            dataManager.register(NICKNAMEDW, "");// nickname
-            dataManager.register(HAPPYDW, new Integer(0));// Happiness
-            dataManager.register(TYPE1DW, "");// overriden type1
-            dataManager.register(TYPE2DW, "");// overriden type2
+            NICKNAMEDW = sync.register(new Data_String(), "");// nickname
+            HAPPYDW = sync.register(new Data_Int(), new Integer(0));// Happiness
+            TYPE1DW = sync.register(new Data_String(), "");// overriden type1
+            TYPE2DW = sync.register(new Data_String(), "");// overriden type2
 
             // From EntityAiPokemob
-            dataManager.register(DIRECTIONPITCHDW, Float.valueOf(0));
-            dataManager.register(HEADINGDW, Float.valueOf(0));
-            dataManager.register(ATTACKTARGETIDDW, Integer.valueOf(-1));
-            dataManager.register(GENERALSTATESDW, Integer.valueOf(0));
-            dataManager.register(LOGICSTATESDW, Integer.valueOf(0));
-            dataManager.register(COMBATSTATESDW, Integer.valueOf(0));
+            DIRECTIONPITCHDW = sync.register(new Data_Float(), Float.valueOf(0));
+            HEADINGDW = sync.register(new Data_Float(), Float.valueOf(0));
+            ATTACKTARGETIDDW = sync.register(new Data_Int(), Integer.valueOf(-1));
+            GENERALSTATESDW = sync.register(new Data_Int(), Integer.valueOf(0));
+            LOGICSTATESDW = sync.register(new Data_Int(), Integer.valueOf(0));
+            COMBATSTATESDW = sync.register(new Data_Int(), Integer.valueOf(0));
 
             // from EntityEvolvablePokemob
-            dataManager.register(EVOLTICKDW, new Integer(0));// evolution tick
+            EVOLTICKDW = sync.register(new Data_Int(), new Integer(0));// evolution
+                                                                       // tick
 
             // From EntityMovesPokemb
-            dataManager.register(STATUSDW, Byte.valueOf((byte) -1));
-            dataManager.register(MOVEINDEXDW, Byte.valueOf((byte) -1));
-            dataManager.register(STATUSTIMERDW, Integer.valueOf(0));
-            dataManager.register(ATTACKCOOLDOWN, Integer.valueOf(0));
+            STATUSDW = sync.register(new Data_Byte(), Byte.valueOf((byte) -1));
+            MOVEINDEXDW = sync.register(new Data_Byte(), Byte.valueOf((byte) -1));
+            STATUSTIMERDW = sync.register(new Data_Int(), Integer.valueOf(0));
+            ATTACKCOOLDOWN = sync.register(new Data_Int(), Integer.valueOf(0));
 
-            dataManager.register(SPECIALINFO, Integer.valueOf(-1));
-            dataManager.register(TRANSFORMEDTODW, Integer.valueOf(-1));
+            SPECIALINFO = sync.register(new Data_Int(), Integer.valueOf(-1));
+            TRANSFORMEDTODW = sync.register(new Data_Int(), Integer.valueOf(-1));
 
-            dataManager.register(ZMOVECD, Integer.valueOf(-1));
-
-            // Held item sync
-            dataManager.register(HELDITEM, ItemStack.EMPTY);
+            ZMOVECD = sync.register(new Data_Int(), Integer.valueOf(-1));
 
             // Flavours for various berries eaten.
             for (int i = 0; i < 5; i++)
             {
-                dataManager.register(FLAVOURS[i], Integer.valueOf(0));
+                FLAVOURS[i] = sync.register(new Data_Int(), Integer.valueOf(0));
             }
 
             // Flavours for various berries eaten.
             for (int i = 0; i < 4; i++)
             {
-                dataManager.register(DISABLE[i], Integer.valueOf(0));
+                DISABLE[i] = sync.register(new Data_Int(), Integer.valueOf(0));
             }
-
-            PokemobDataManager manager = new PokemobDataManager(entity);
-            manager.manualSyncSet.add(TRANSFORMEDTODW);
-            manager.manualSyncSet.add(STATUSDW);
-            manager.manualSyncSet.add(EVOLTICKDW);
-            manager.manualSyncSet.add(NICKNAMEDW);
-            manager.manualSyncSet.add(MOVEINDEXDW);
-            manager.manualSyncSet.add(ATTACKCOOLDOWN);
-            manager.manualSyncSet.add(HUNGERDW);
-            manager.manualSyncSet.add(TYPE1DW);
-            manager.manualSyncSet.add(TYPE2DW);
-            return manager;
         }
     }
 
@@ -292,11 +199,10 @@ public abstract class PokemobBase implements IPokemob
     protected EntityLiving         entity;
     /** RNG used, should be entity.getRNG() */
     protected Random               rand             = new Random();
-    /** Data manager used for syncing data, this should be identical to
-     * entity.getDataManager() */
-    public PokemobDataManager      dataManager;
+    /** Data manager used for syncing data */
+    public DataSync                dataSync;
     /** Holds the data parameters used for syncing our stuff. */
-    protected DataParameters       params;
+    protected final DataParameters params           = new DataParameters();
 
     /** Our owner. */
     protected UUID                 ownerID;
@@ -324,11 +230,11 @@ public abstract class PokemobBase implements IPokemob
     @Override
     public void setEntity(EntityLiving entityIn)
     {
-        entity = entityIn;
-        if (!isSameDatamanager(entity.getDataManager()))
+        rand = entityIn.getRNG();
+        if (entityIn != entity)
         {
-            this.params = getParameters(entity.getClass());
-            this.dataManager = params.register(entity.getDataManager(), entity);
+            entity = entityIn;
+            params.register(this);
             this.aiStuff = new AIStuff(entity);
             // Controller is done separately for ease of locating it for
             // controls.
@@ -343,7 +249,6 @@ public abstract class PokemobBase implements IPokemob
             this.getAI().addAILogic(new LogicFloatFlySwim(this));
             this.getAI().addAILogic(new LogicMiscUpdate(this));
         }
-        rand = entity.getRNG();
     }
 
     @Override
@@ -353,15 +258,16 @@ public abstract class PokemobBase implements IPokemob
     }
 
     @Override
-    public EntityDataManager getDataManager()
+    public DataSync dataSync()
     {
-        return this.dataManager;
+        if (this.dataSync == null) this.dataSync = SyncHandler.getData(getEntity());
+        return dataSync;
     }
 
-    private boolean isSameDatamanager(EntityDataManager toTest)
+    @Override
+    public void setDataSync(DataSync sync)
     {
-        if (this.dataManager == null) return false;
-        return toTest == this.dataManager.wrappedManager;
+        this.dataSync = sync;
     }
 
     protected void setMaxHealth(float maxHealth)

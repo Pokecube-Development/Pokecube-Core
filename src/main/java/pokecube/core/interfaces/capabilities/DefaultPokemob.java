@@ -40,13 +40,14 @@ import pokecube.core.interfaces.capabilities.impl.PokemobSaves;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
-import thut.api.entity.ai.EntityAIBaseManager;
 import thut.api.entity.ai.AIThreadManager.AIStuff;
+import thut.api.entity.ai.EntityAIBaseManager;
 
 public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializable<NBTTagCompound>, IPokemob
 {
     public DefaultPokemob(EntityLiving mob)
     {
+        this();
         this.setEntity(mob);
     }
 
@@ -141,13 +142,13 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
     @Override
     public int getTargetID()
     {
-        return dataManager.get(params.ATTACKTARGETIDDW);
+        return dataSync.get(params.ATTACKTARGETIDDW);
     }
 
     @Override
     public void setTargetID(int id)
     {
-        dataManager.set(params.ATTACKTARGETIDDW, Integer.valueOf(id));
+        dataSync.set(params.ATTACKTARGETIDDW, Integer.valueOf(id));
     }
 
     @Override
@@ -168,14 +169,14 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
         if (getGeneralState(GeneralStates.CONTROLLED))
         {
             getEntity().rotationYaw = heading;
-            dataManager.set(params.HEADINGDW, heading);
+            dataSync.set(params.HEADINGDW, heading);
         }
     }
 
     @Override
     public float getHeading()
     {
-        if (getGeneralState(GeneralStates.CONTROLLED)) { return dataManager.get(params.HEADINGDW); }
+        if (getGeneralState(GeneralStates.CONTROLLED)) { return dataSync.get(params.HEADINGDW); }
         return getEntity().rotationYaw;
     }
 

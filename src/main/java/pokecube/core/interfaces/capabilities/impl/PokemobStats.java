@@ -33,13 +33,13 @@ public abstract class PokemobStats extends PokemobGenes
     public void addHappiness(int toAdd)
     {
         this.bonusHappiness += toAdd;
-        this.dataManager.set(params.HAPPYDW, Integer.valueOf(bonusHappiness));
+        this.dataSync().set(params.HAPPYDW, Integer.valueOf(bonusHappiness));
     }
 
     @Override
     public int getHappiness()
     {
-        bonusHappiness = dataManager.get(params.HAPPYDW);
+        bonusHappiness = dataSync().get(params.HAPPYDW);
         bonusHappiness = Math.max(bonusHappiness, -getPokedexEntry().getHappiness());
         bonusHappiness = Math.min(bonusHappiness, 255 - getPokedexEntry().getHappiness());
         return bonusHappiness + getPokedexEntry().getHappiness();
@@ -54,7 +54,7 @@ public abstract class PokemobStats extends PokemobGenes
     @Override
     public String getPokemonNickname()
     {
-        return getDataManager().get(params.NICKNAMEDW);
+        return this.dataSync().get(params.NICKNAMEDW);
     }
 
     @Override
@@ -133,11 +133,11 @@ public abstract class PokemobStats extends PokemobGenes
         {
             if (getPokedexEntry().getName().equals(nickname))
             {
-                dataManager.set(params.NICKNAMEDW, "");
+                dataSync().set(params.NICKNAMEDW, "");
             }
             else
             {
-                dataManager.set(params.NICKNAMEDW, nickname);
+                dataSync().set(params.NICKNAMEDW, nickname);
             }
         }
     }
@@ -149,7 +149,7 @@ public abstract class PokemobStats extends PokemobGenes
     @Override
     public PokeType getType1()
     {
-        PokeType type = PokeType.getType(getDataManager().get(params.TYPE1DW));
+        PokeType type = PokeType.getType(this.dataSync().get(params.TYPE1DW));
         return type != PokeType.unknown ? type : getPokedexEntry().getType1();
     }
 
@@ -160,7 +160,7 @@ public abstract class PokemobStats extends PokemobGenes
     @Override
     public PokeType getType2()
     {
-        PokeType type = PokeType.getType(getDataManager().get(params.TYPE2DW));
+        PokeType type = PokeType.getType(this.dataSync().get(params.TYPE2DW));
         return type != PokeType.unknown ? type : getPokedexEntry().getType2();
     }
 
@@ -169,7 +169,7 @@ public abstract class PokemobStats extends PokemobGenes
     {
         if (type1 == getType1()) return;
         String name = type1 == null || type1 == PokeType.unknown ? "" : type1.name;
-        this.getDataManager().set(params.TYPE1DW, name);
+        this.dataSync().set(params.TYPE1DW, name);
     }
 
     @Override
@@ -177,7 +177,7 @@ public abstract class PokemobStats extends PokemobGenes
     {
         if (type2 == getType2()) return;
         String name = type2 == null || type2 == PokeType.unknown ? "" : type2.name;
-        this.getDataManager().set(params.TYPE2DW, name);
+        this.dataSync().set(params.TYPE2DW, name);
     }
 
     @Override

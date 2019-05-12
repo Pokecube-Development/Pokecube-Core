@@ -21,7 +21,7 @@ public abstract class PokemobEvolves extends PokemobHungry
     @Override
     public int getEvolutionTicks()
     {
-        return dataManager.get(params.EVOLTICKDW);
+        return dataSync().get(params.EVOLTICKDW);
     }
 
     /** @param evolutionTicks
@@ -29,6 +29,6 @@ public abstract class PokemobEvolves extends PokemobHungry
     @Override
     public void setEvolutionTicks(int evolutionTicks)
     {
-        dataManager.set(params.EVOLTICKDW, new Integer(evolutionTicks));
+        dataSync().set(params.EVOLTICKDW, new Integer(evolutionTicks));
     }
 }

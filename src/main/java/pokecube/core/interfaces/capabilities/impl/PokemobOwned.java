@@ -159,7 +159,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     @Override
     public int getSpecialInfo()
     {
-        int info = dataManager.get(params.SPECIALINFO);
+        int info = dataSync().get(params.SPECIALINFO);
         if (info == -1)
         {
             info = isShiny() ? getPokedexEntry().defaultSpecials : getPokedexEntry().defaultSpecial;
@@ -388,14 +388,15 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             ItemStack oldStack = getHeldItem();
             this.getPokemobInventory().setInventorySlotContents(1, itemStack);
             getPokedexEntry().onHeldItemChange(oldStack, itemStack, this);
-            dataManager.set(params.HELDITEM, itemStack);
+            super.setHeldItem(itemStack);
+            dataSync().set(params.HELDITEMDW, itemStack);
+
         }
         catch (Exception e)
         {
             // Should not happen anymore
             e.printStackTrace();
         }
-        super.setHeldItem(itemStack);
     }
 
     @Override
@@ -468,7 +469,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     @Override
     public void setSpecialInfo(int info)
     {
-        this.dataManager.set(params.SPECIALINFO, Integer.valueOf(info));
+        this.dataSync().set(params.SPECIALINFO, Integer.valueOf(info));
     }
 
     @Override
