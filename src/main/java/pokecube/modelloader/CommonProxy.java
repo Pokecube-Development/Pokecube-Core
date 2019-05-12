@@ -10,8 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -395,7 +396,7 @@ public class CommonProxy implements IGuiHandler
     }
 
     private void filesExist(Object mod, boolean[] ret, ResourceLocation[] file, Set<String> files)
-            throws UnsupportedEncodingException
+            throws UnsupportedEncodingException, URISyntaxException
     {
         File resourceDir = new File(ModPokecubeML.configDir.getParent(), "resourcepacks");
         // Check Resource Packs
@@ -406,7 +407,11 @@ public class CommonProxy implements IGuiHandler
         String scannedPath = scannedPackage.replace(DOT, SLASH);
         URL scannedUrl = Thread.currentThread().getContextClassLoader().getResource(scannedPath);
         if (scannedUrl == null) return;
-        resourceDir = new File(java.net.URLDecoder.decode(scannedUrl.getFile(), Charset.defaultCharset().name()));
+        String urlString = scannedUrl.toString();
+        urlString = urlString.replaceFirst("jar:", "");
+        urlString = urlString.replace("!" + scannedPath, "");
+        URI uri = new URI(urlString);
+        resourceDir = new File(uri.getPath());
         if (resourceDir.toString().contains("file:") && resourceDir.toString().contains(".jar"))
         {
             String name = resourceDir.toString();
@@ -597,7 +602,7 @@ public class CommonProxy implements IGuiHandler
             tex = toLocations(modid, ".tbl", entry);
             filesExist(mod, ret, tex, files);
         }
-        catch (UnsupportedEncodingException e)
+        catch (Exception e)
         {
             PokecubeMod.log(Level.WARNING, "Error with model check " + modid + " " + entry, e);
         }
