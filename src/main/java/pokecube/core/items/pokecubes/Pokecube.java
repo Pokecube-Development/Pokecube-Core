@@ -196,7 +196,11 @@ public class Pokecube extends Item implements IPokecube
     @Override
     public double getCaptureModifier(EntityLivingBase mob, ResourceLocation pokecubeId)
     {
-        if (pokecubeId.getResourcePath().equals("snag")) return 1;
+        if (pokecubeId.getResourcePath().equals("snag"))
+        {
+            if (mob.invulnerable) return 0;
+            return 1;
+        }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         return (pokemob != null) ? getCaptureModifier(pokemob, pokecubeId) : 0;
     }

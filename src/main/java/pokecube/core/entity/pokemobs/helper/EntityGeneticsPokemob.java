@@ -25,12 +25,6 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
     }
 
     @Override
-    public void init(int nb)
-    {
-        super.init(nb);
-    }
-
-    @Override
     public int[] getRGBA()
     {
         if (genesColour == null)

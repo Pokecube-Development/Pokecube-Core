@@ -125,24 +125,6 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     }
 
     @Override
-    protected void entityInit()
-    {
-        super.entityInit();
-    }
-
-    @Override
-    public void onLivingUpdate()
-    {
-        super.onLivingUpdate();
-    }
-
-    @Override
-    public void onUpdate()
-    {
-        super.onUpdate();
-    }
-
-    @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
         if (!getEntityWorld().isRemote && hand == EnumHand.MAIN_HAND)
