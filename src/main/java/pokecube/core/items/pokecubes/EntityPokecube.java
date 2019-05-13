@@ -297,13 +297,13 @@ public class EntityPokecube extends EntityPokecubeBase
                     CaptureEvent.Post event = new CaptureEvent.Post(this);
                     MinecraftForge.EVENT_BUS.post(event);
                 }
-                else if (shootingEntity != null && shootingEntity instanceof EntityPlayerMP)
+                else if (shootingEntity instanceof EntityPlayerMP && !(shootingEntity instanceof FakePlayer))
                 {
-                    if (shootingEntity instanceof FakePlayer)
-                    {
-                        entityDropItem(getItem(), 0.5f);
-                    }
-                    else Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                    Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                }
+                else
+                {
+                    entityDropItem(getItem(), 0.5f);
                 }
             }
             setDead();
@@ -428,9 +428,9 @@ public class EntityPokecube extends EntityPokecubeBase
         ItemStack stack = player.getHeldItem(hand);
         if (!player.getEntityWorld().isRemote)
         {
-            if (player.isSneaking() && player.capabilities.isCreativeMode)
+            if (player.isSneaking() && PokecubeManager.isFilled(getItem()) && player.capabilities.isCreativeMode)
             {
-                if (stack != null)
+                if (!stack.isEmpty())
                 {
                     isLoot = true;
                     addLoot(new LootEntry(stack, 1));
@@ -442,7 +442,12 @@ public class EntityPokecube extends EntityPokecubeBase
                 if (PokecubeManager.isFilled(getItem())
                         || (getItem().hasTagCompound() && (getItem().getTagCompound()).hasKey(TagNames.MOBID)))
                 {
-                    sendOut();
+                    if (player.isSneaking())
+                    {
+                        Tools.giveItem(player, getItem());
+                        this.setDead();
+                    }
+                    else sendOut();
                 }
                 else
                 {

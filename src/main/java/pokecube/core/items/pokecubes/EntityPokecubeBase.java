@@ -319,7 +319,6 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
                     getItem().setStackDisplayName(caught.getDisplayName().getFormattedText());
                     ITextComponent mess = new TextComponentTranslation("pokecube.caught", caught.getDisplayName());
                     ((EntityPlayer) shootingEntity).sendMessage(mess);
-                    this.setPosition(shootingEntity.posX, shootingEntity.posY, shootingEntity.posZ);
                     this.playSound(POKECUBESOUND, 1, 1);
                 }
                 return true;

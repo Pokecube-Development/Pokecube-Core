@@ -34,6 +34,13 @@ public class StatsHandler
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void canCapture(CaptureEvent.Pre evt)
     {
+        ResourceLocation id = PokecubeItems.getCubeId(evt.filledCube);
+        if (IPokecube.BEHAVIORS.containsKey(id))
+        {
+            PokecubeBehavior cube = IPokecube.BEHAVIORS.getValue(id);
+            cube.onPreCapture(evt);
+        }
+        if (evt.caught == null) return;
         PokedexEntry entry = evt.caught.getPokedexEntry();
         if (evt.caught.getGeneralState(GeneralStates.TAMED)) evt.setResult(Result.DENY);
         if (evt.caught.getGeneralState(GeneralStates.DENYCAPTURE)) evt.setResult(Result.DENY);
@@ -89,12 +96,6 @@ public class StatsHandler
                 return;
             }
         }
-        ResourceLocation id = PokecubeItems.getCubeId(evt.filledCube);
-        if (IPokecube.BEHAVIORS.containsKey(id))
-        {
-            PokecubeBehavior cube = IPokecube.BEHAVIORS.getValue(id);
-            cube.onPreCapture(evt);
-        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
@@ -106,7 +107,7 @@ public class StatsHandler
             PokecubeBehavior cube = IPokecube.BEHAVIORS.getValue(id);
             cube.onPostCapture(evt);
         }
-        if (evt.caught.isShadow() || evt.isCanceled()) return;
+        if (evt.caught == null || evt.isCanceled() || evt.caught.isShadow()) return;
         StatsCollector.addCapture(evt.caught);
     }
 
