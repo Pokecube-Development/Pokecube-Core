@@ -2,10 +2,10 @@ package pokecube.core.interfaces.pokemob.commandhandlers;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.text.TextComponentTranslation;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.properties.IGuardAICapability;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
@@ -37,7 +37,7 @@ public class StanceHandler extends DefaultHandler
     {
         if (key == BUTTONTOGGLEGUARD)
         {
-            if (PokecubeCore.core.getConfig().guardModeEnabled)
+            if (PokecubeMod.core.getConfig().guardModeEnabled)
                 pokemob.setCombatState(CombatStates.GUARDING, !pokemob.getCombatState(CombatStates.GUARDING));
             else pokemob.displayMessageToOwner(new TextComponentTranslation("pokecube.config.guarddisabled"));
         }

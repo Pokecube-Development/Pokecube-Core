@@ -26,7 +26,6 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import pokecube.core.PokecubeCore;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.handlers.TeamManager;
@@ -448,9 +447,9 @@ public class AIFindTarget extends AIBase implements IAICombat
     protected boolean checkGuard()
     {
         // Disabled via the boolean config.
-        if (!PokecubeCore.core.getConfig().guardModeEnabled) return false;
+        if (!PokecubeMod.core.getConfig().guardModeEnabled) return false;
 
-        int rate = PokecubeCore.core.getConfig().guardTickRate;
+        int rate = PokecubeMod.core.getConfig().guardTickRate;
         // Disable via rate out of bounds, or not correct time in the rate.
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
@@ -466,7 +465,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         else centre.set(pokemob.getPokemonOwner());
 
         pokemobs = getEntitiesWithinDistance(centre, entity.dimension,
-                PokecubeCore.core.getConfig().guardSearchDistance, EntityLivingBase.class);
+                PokecubeMod.core.getConfig().guardSearchDistance, EntityLivingBase.class);
 
         // Only allow valid guard targets.
         for (Object o : pokemobs)
@@ -622,7 +621,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         boolean tame = pokemob.getGeneralState(GeneralStates.TAMED);
 
         // Target is too far away, lets forget it.
-        if (target != null && entity.getDistance(target) > PokecubeCore.core.getConfig().chaseDistance)
+        if (target != null && entity.getDistance(target) > PokecubeMod.core.getConfig().chaseDistance)
         {
             addTargetInfo(this.entity, null);
             agroTimer = -1;

@@ -26,7 +26,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.database.moves.MoveEntry;
 import pokecube.core.events.pokemob.combat.MoveUse;
@@ -474,8 +473,8 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         if (finalAttackStrength > 0)
         {
             double damageRatio = (packet.getMove().getAttackCategory() & CATEGORY_CONTACT) > 0
-                    ? PokecubeCore.core.getConfig().contactAttackDamageScale
-                    : PokecubeCore.core.getConfig().rangedAttackDamageScale;
+                    ? PokecubeMod.core.getConfig().contactAttackDamageScale
+                    : PokecubeMod.core.getConfig().rangedAttackDamageScale;
             finalAttackStrength = (int) Math.max(1, finalAttackStrength * damageRatio);
         }
 

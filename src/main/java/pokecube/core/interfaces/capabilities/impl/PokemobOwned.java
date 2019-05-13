@@ -15,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
-import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -201,14 +200,8 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
         return 7;
     }
 
-    // 1.11
     @Override
     public void onInventoryChanged(IInventory inventory)
-    {
-    }
-
-    // 1.10
-    public void onInventoryChanged(InventoryBasic inventory)
     {
     }
 

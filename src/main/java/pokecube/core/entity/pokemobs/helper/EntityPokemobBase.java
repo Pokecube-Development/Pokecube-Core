@@ -487,7 +487,7 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     @Override
     public void onUpdate()
     {
-        if (PokecubeCore.core.getConfig().pokemobsAreAllFrozen) return;
+        if (PokecubeMod.core.getConfig().pokemobsAreAllFrozen) return;
         if (!Pokedex.getInstance().isRegistered(pokemobCap.getPokedexEntry())) return;
         this.portalCounter = 0;
         long time = System.nanoTime();

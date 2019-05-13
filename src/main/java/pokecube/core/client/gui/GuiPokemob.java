@@ -278,7 +278,7 @@ public class GuiPokemob extends GuiContainer
                 mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
                 this.drawTexturedModalRect(x + 2, y + 2,
                         mc.getTextureMapBlocks().getAtlasSprite("minecraft:items/diamond_sword"), 16, 16);
-                if (!pokemob.getCombatState(CombatStates.GUARDING) || !PokecubeCore.core.getConfig().guardModeEnabled)
+                if (!pokemob.getCombatState(CombatStates.GUARDING) || !PokecubeMod.core.getConfig().guardModeEnabled)
                 {
                     this.drawGradientRect(x + 2, y + 2, x + width - 2, y + width - 2, 0x88884444, 0x88884444);
                 }

@@ -611,7 +611,7 @@ public class Database
         }
 
         // Register sound events from config.
-        for (String var : PokecubeCore.core.getConfig().customSounds)
+        for (String var : PokecubeMod.core.getConfig().customSounds)
         {
             ModContainer mc = Loader.instance().activeModContainer();
             ResourceLocation sound = new ResourceLocation(var);
