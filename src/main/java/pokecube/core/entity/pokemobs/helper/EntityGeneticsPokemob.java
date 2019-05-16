@@ -2,6 +2,10 @@ package pokecube.core.entity.pokemobs.helper;
 
 import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.COLOURGENE;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -12,6 +16,8 @@ import pokecube.core.interfaces.capabilities.AICapWrapper;
 import thut.api.entity.ai.IAIMob;
 import thut.api.entity.genetics.Alleles;
 import thut.api.entity.genetics.IMobGenetics;
+import thut.api.world.mobs.data.Data;
+import thut.core.common.world.mobs.data.DataSync_Impl;
 
 /** This class will store the various stats of the pokemob as Alleles, and will
  * provider quick getters and setters for the genes. */
@@ -68,6 +74,17 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
     @Override
     public void writeSpawnData(ByteBuf data)
     {
+        // Write the dataSync stuff
+        List<Data<?>> data_list = pokemobCap.dataSync().getAll();
+        byte num = (byte) (data_list.size());
+        data.writeByte(num);
+        for (int i = 0; i < num; i++)
+        {
+            Data<?> val = data_list.get(i);
+            data.writeInt(val.getUID());
+            val.write(data);
+        }
+
         this.pokemobCap.updateHealth();
         this.onGenesChanged();
         pokemobCap.onGenesChanged();
@@ -89,6 +106,28 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
     @Override
     public void readSpawnData(ByteBuf data)
     {
+        // Read the datasync stuff
+        List<Data<?>> data_list = Lists.newArrayList();
+        byte num = data.readByte();
+        if (num > 0)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                int uid = data.readInt();
+                try
+                {
+                    Data<?> val = DataSync_Impl.makeData(uid);
+                    val.read(data);
+                    data_list.add(val);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            pokemobCap.dataSync().update(data_list);
+        }
+
         PacketBuffer buffer = new PacketBuffer(data);
         try
         {
