@@ -231,24 +231,21 @@ public abstract class PokemobBase implements IPokemob
     public void setEntity(EntityLiving entityIn)
     {
         rand = entityIn.getRNG();
-        if (entityIn != entity)
-        {
-            entity = entityIn;
-            params.register(this);
-            this.aiStuff = new AIStuff(entity);
-            // Controller is done separately for ease of locating it for
-            // controls.
-            this.getAI().addAILogic(controller = new LogicMountedControl(this));
+        entity = entityIn;
+        this.aiStuff = new AIStuff(entity);
+        this.getAI().aiLogic.clear();
+        // Controller is done separately for ease of locating it for
+        // controls.
+        this.getAI().addAILogic(controller = new LogicMountedControl(this));
 
-            // Add in the various logic AIs that are needed on both client and
-            // server, so it is done here instead of in initAI.
-            this.getAI().addAILogic(new LogicInLiquid(this));
-            this.getAI().addAILogic(new LogicCollision(this));
-            this.getAI().addAILogic(new LogicMovesUpdates(this));
-            this.getAI().addAILogic(new LogicInMaterials(this));
-            this.getAI().addAILogic(new LogicFloatFlySwim(this));
-            this.getAI().addAILogic(new LogicMiscUpdate(this));
-        }
+        // Add in the various logic AIs that are needed on both client and
+        // server, so it is done here instead of in initAI.
+        this.getAI().addAILogic(new LogicInLiquid(this));
+        this.getAI().addAILogic(new LogicCollision(this));
+        this.getAI().addAILogic(new LogicMovesUpdates(this));
+        this.getAI().addAILogic(new LogicInMaterials(this));
+        this.getAI().addAILogic(new LogicFloatFlySwim(this));
+        this.getAI().addAILogic(new LogicMiscUpdate(this));
     }
 
     @Override
@@ -260,7 +257,10 @@ public abstract class PokemobBase implements IPokemob
     @Override
     public DataSync dataSync()
     {
-        if (this.dataSync == null) this.dataSync = SyncHandler.getData(getEntity());
+        if (this.dataSync == null)
+        {
+            this.dataSync = SyncHandler.getData(getEntity());
+        }
         return dataSync;
     }
 
@@ -268,6 +268,7 @@ public abstract class PokemobBase implements IPokemob
     public void setDataSync(DataSync sync)
     {
         this.dataSync = sync;
+        params.register(this);
     }
 
     protected void setMaxHealth(float maxHealth)

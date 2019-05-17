@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -261,18 +260,17 @@ public class GuiDisplayPokecubeInfo extends Gui
                 PokecubeMod.core.getConfig().guiSize);
         int w = 0;// trans[0];
         int h = 0;// trans[1];
-        IPokemob originalPokemob = getCurrentPokemob();
-        if (originalPokemob != null)
+        IPokemob pokemob = getCurrentPokemob();
+        if (pokemob != null)
         {
-            EntityLiving entity = originalPokemob.getEntity();
-            String displayName = originalPokemob.getPokemonDisplayName().getFormattedText();
-            int currentMoveIndex = originalPokemob.getMoveIndex();
+            String displayName = pokemob.getPokemonDisplayName().getFormattedText();
+            int currentMoveIndex = pokemob.getMoveIndex();
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
             // Render HP
             minecraft.renderEngine.bindTexture(Resources.GUI_BATTLE);
             this.drawTexturedModalRect(hpOffsetX + w, hpOffsetY + h, 43, 12, 92, 7);
-            float total = entity.getMaxHealth();
-            float ratio = entity.getHealth() / total;
+            float total = pokemob.getMaxHealth();
+            float ratio = pokemob.getHealth() / total;
             float f = 0.00390625F;
             float f1 = 0.00390625F;
             float x = hpOffsetX + 1 + w;
@@ -293,10 +291,10 @@ public class GuiDisplayPokecubeInfo extends Gui
             // Render XP
             this.drawTexturedModalRect(xpOffsetX + w, xpOffsetY + h, 43, 19, 92, 5);
 
-            int current = originalPokemob.getExp();
-            int level = originalPokemob.getLevel();
-            int prev = Tools.levelToXp(originalPokemob.getExperienceMode(), level);
-            int next = Tools.levelToXp(originalPokemob.getExperienceMode(), level + 1);
+            int current = pokemob.getExp();
+            int level = pokemob.getLevel();
+            int prev = Tools.levelToXp(pokemob.getExperienceMode(), level);
+            int next = Tools.levelToXp(pokemob.getExperienceMode(), level + 1);
             int levelDiff = next - prev;
             int diff = current - prev;
             ratio = diff / ((float) levelDiff);
@@ -315,7 +313,7 @@ public class GuiDisplayPokecubeInfo extends Gui
             tessellator.draw();
 
             // Render Status
-            byte status = originalPokemob.getStatus();
+            byte status = pokemob.getStatus();
             if (status != IMoveConstants.STATUS_NON)
             {
                 int dv = 0;
@@ -337,7 +335,7 @@ public class GuiDisplayPokecubeInfo extends Gui
                 }
                 this.drawTexturedModalRect(statusOffsetX + w, statusOffsetY + h, 0, 138 + dv, 15, 15);
             }
-            if ((originalPokemob.getChanges() & IMoveConstants.CHANGE_CONFUSED) != 0)
+            if ((pokemob.getChanges() & IMoveConstants.CHANGE_CONFUSED) != 0)
             {
                 GlStateManager.translate(0, 0, 100);
                 this.drawTexturedModalRect(confuseOffsetX + w, confuseOffsetY + h, 0, 211, 24, 16);
@@ -378,7 +376,7 @@ public class GuiDisplayPokecubeInfo extends Gui
             int moveCount = 0;
             for (moveCount = 0; moveCount < 4; moveCount++)
             {
-                if (originalPokemob.getMove(moveCount) == null) break;
+                if (pokemob.getMove(moveCount) == null) break;
             }
             if (dir == -1)
             {
@@ -388,8 +386,8 @@ public class GuiDisplayPokecubeInfo extends Gui
             {
                 int index = moveIndex;
 
-                Move_Base move = MovesUtils.getMoveFromName(originalPokemob.getMove(index));
-                boolean disabled = index >= 0 && index < 4 && originalPokemob.getDisableTimer(index) > 0;
+                Move_Base move = MovesUtils.getMoveFromName(pokemob.getMove(index));
+                boolean disabled = index >= 0 && index < 4 && pokemob.getDisableTimer(index) > 0;
                 if (move != null)
                 {
                     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -409,14 +407,14 @@ public class GuiDisplayPokecubeInfo extends Gui
                         // Draw cooldown box
                         float timer = 1;
                         Move_Base lastMove;
-                        if (MovesUtils.isAbleToUseMoves(originalPokemob) != AbleStatus.ABLE)
+                        if (MovesUtils.isAbleToUseMoves(pokemob) != AbleStatus.ABLE)
                         {
                             timer = 0;
                         }
-                        else if ((lastMove = MovesUtils.getMoveFromName(originalPokemob.getLastMoveUsed())) != null)
+                        else if ((lastMove = MovesUtils.getMoveFromName(pokemob.getLastMoveUsed())) != null)
                         {
-                            timer -= (originalPokemob.getAttackCooldown() / (float) MovesUtils.getAttackDelay(
-                                    originalPokemob, originalPokemob.getLastMoveUsed(),
+                            timer -= (pokemob.getAttackCooldown() / (float) MovesUtils.getAttackDelay(
+                                    pokemob, pokemob.getLastMoveUsed(),
                                     (lastMove.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0, false));
                         }
                         timer = Math.max(0, Math.min(timer, 1));
@@ -436,12 +434,12 @@ public class GuiDisplayPokecubeInfo extends Gui
                     GL11.glPopMatrix();
                     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                     GL11.glPushMatrix();
-                    Color moveColor = new Color(move.getType(originalPokemob).colour);
+                    Color moveColor = new Color(move.getType(pokemob).colour);
                     GL11.glColor4f(moveColor.getRed() / 255f, moveColor.getGreen() / 255f, moveColor.getBlue() / 255f,
                             1.0F);
                     fontRenderer.drawString(MovesUtils.getMoveName(move.getName()).getFormattedText(),
                             5 + movesOffsetX + w, index * 13 + movesOffsetY + 3 + h,
-                            move.getType(originalPokemob).colour);
+                            move.getType(pokemob).colour);
                     GL11.glPopMatrix();
                 }
             }
@@ -452,7 +450,7 @@ public class GuiDisplayPokecubeInfo extends Gui
             this.drawTexturedModalRect(mobOffsetX + w, mobOffsetY + h, 0, 0, 42, 42);
             GlStateManager.disableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
             GL11.glColor4f(1, 1, 1, 1);
-            GuiPokemob.renderMob(originalPokemob, -30, -25, 0, 0, 0, 0, 0, 0.75f);
+            GuiPokemob.renderMob(pokemob, -30, -25, 0, 0, 0, 0, 0, 0.75f);
         }
         GL11.glPopMatrix();
     }
