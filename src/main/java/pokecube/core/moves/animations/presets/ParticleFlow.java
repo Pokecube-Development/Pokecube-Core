@@ -2,9 +2,6 @@ package pokecube.core.moves.animations.presets;
 
 import java.util.Random;
 
-import net.minecraft.world.IWorldEventListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.moves.animations.AnimPreset;
@@ -15,12 +12,6 @@ import thut.api.maths.Vector3;
 public class ParticleFlow extends MoveAnimationBase
 {
     public ParticleFlow()
-    {
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
     {
     }
 

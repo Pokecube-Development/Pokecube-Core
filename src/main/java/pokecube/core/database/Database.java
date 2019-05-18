@@ -35,7 +35,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -1075,7 +1074,7 @@ public class Database
 
         for (PokedexEntry entry : Database.getSortedFormes())
         {
-            Class<? extends Entity> clazz = PokecubeMod.pokedexmap.get(entry);
+            Class<?> clazz = PokecubeMod.pokedexmap.get(entry);
             if (clazz != null)
             {
                 // Initialize the datamanager parameters for the added pokemob.

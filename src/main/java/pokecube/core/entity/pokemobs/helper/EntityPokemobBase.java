@@ -6,26 +6,18 @@ package pokecube.core.entity.pokemobs.helper;
 import java.util.List;
 import java.util.logging.Level;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -49,11 +41,10 @@ import thut.api.maths.Vector3;
 /** @author Manchou, Thutmose */
 public abstract class EntityPokemobBase extends EntityAiPokemob implements IEntityMultiPart, TagNames
 {
-    public static boolean       multibox           = true;
+    public static boolean       multibox           = false;
     public static double        averagePokemobTick = 0;
     private int                 despawntimer       = 0;
     private EntityPokemobPart[] partsArray;
-    private float               nextStepDistance;
 
     public EntityPokemobBase(World world)
     {
@@ -61,7 +52,6 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
         this.setSize(1, 1);
         this.width = 1;
         this.height = 1;
-        nextStepDistance = 1;
     }
 
     /** Returns true if other Entities should be prevented from moving through
@@ -288,176 +278,6 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
         aabbs = list;
     }
 
-    /** Tries to moves the entity by the passed in displacement. Args: x, y,
-     * z */
-    @Override
-    public void move(MoverType type, double x, double y, double z)
-    {
-        if (!this.addedToChunk) return;
-        boolean normalSize = this.height > 0.125 && this.width < 2 && this.width > 0.125 && this.length < 2
-                && this.length > 0.125;
-        float max = Math.max(width, length);
-        float min = Math.min(width, length);
-        if (max / min < 2) normalSize = true;
-        if (pokemobCap.mainBox == null)
-            pokemobCap.setSize((float) (pokemobCap.getSize() / PokecubeMod.core.getConfig().scalefactor));
-        if (!multibox || normalSize || pokemobCap.mainBox == null)
-        {
-            this.noClip = false;
-            super.move(type, x, y, z);
-            return;
-        }
-        else if (aabbs != null)
-        {
-            double x0 = x, y0 = y, z0 = z;
-            IBlockAccess world = getEntityWorld();
-            Vector3 diffs = Vector3.getNewVector();
-            diffs.set(x, y, z);
-            boolean multi = false;
-            if (getParts() != null && multi)
-            {
-                Matrix3 box = new Matrix3();
-                box.set(getEntityBoundingBox());
-                getTileCollsionBoxes();
-                diffs.set(box.doTileCollision(world, aabbs, this, Vector3.empty, diffs, false));
-                for (EntityPokemobPart e : partsArray)
-                {
-                    Vector3 v = Vector3.getNewVector().set(e.offset.x, e.offset.y, e.offset.z);
-                    v.scalarMultBy(pokemobCap.getSize());
-                    Vector3 v0 = v.copy();
-                    float sin = MathHelper.sin(this.rotationYaw * 0.017453292F);
-                    float cos = MathHelper.cos(this.rotationYaw * 0.017453292F);
-                    v.x = v0.x * cos - v0.z * sin;
-                    v.z = v0.x * sin + v0.z * cos;
-                    e.motionX = motionX;
-                    e.motionY = motionY;
-                    e.motionZ = motionZ;
-                    e.setPosition(posX + v.x, posY + v.y, posZ + v.z);
-                    box.set(e.defaultBox.offset(e.posX, e.posY, e.posZ));
-                    diffs.set(box.doTileCollision(world, aabbs, e, Vector3.empty, diffs, false));
-                }
-                x = diffs.x;
-                y = diffs.y;
-                z = diffs.z;
-            }
-            else
-            {
-                pokemobCap.mainBox.boxMin().clear();
-                pokemobCap.mainBox.boxMax().x = pokemobCap.getPokedexEntry().width * pokemobCap.getSize();
-                pokemobCap.mainBox.boxMax().z = pokemobCap.getPokedexEntry().length * pokemobCap.getSize();
-                pokemobCap.mainBox.boxMax().y = pokemobCap.getPokedexEntry().height * pokemobCap.getSize();
-                pokemobCap.offset.set(-pokemobCap.mainBox.boxMax().x / 2, 0, -pokemobCap.mainBox.boxMax().z / 2);
-                double ar = pokemobCap.mainBox.boxMax().x / pokemobCap.mainBox.boxMax().z;
-                if (ar > 2 || ar < 0.5)
-                    pokemobCap.mainBox.set(2, pokemobCap.mainBox.rows[2].set(0, 0, (-rotationYaw) * Math.PI / 180));
-                pokemobCap.mainBox.addOffsetTo(pokemobCap.offset).addOffsetTo(here);
-                this.setEntityBoundingBox(pokemobCap.mainBox.getBoundingBox());
-                getTileCollsionBoxes();
-                diffs.set(pokemobCap.mainBox.doTileCollision(world, aabbs, this, Vector3.empty, diffs, false));
-                x = diffs.x;
-                y = diffs.y;
-                z = diffs.z;
-            }
-
-            // TODO implement stepping upwards
-
-            this.posX = here.x;
-            this.posY = here.y;
-            this.posZ = here.z;
-
-            x = diffs.x;
-            y = diffs.y;
-            z = diffs.z;
-
-            double dy = 0;
-            double yOff = this.yOffset;
-            double newY = y + yOff + dy;
-            double size = Math.max(pokemobCap.getSize() * pokemobCap.getPokedexEntry().length, 3);
-            Vector3 dir = Vector3.getNewVector().set(x, newY, z).norm().scalarMult(size);
-            boolean border = getEntityWorld().getWorldBorder()
-                    .contains(getEntityBoundingBox().offset(dir.x, dir.y, dir.z));
-            if (!border)
-            {
-                x = newY = z = 0;
-            }
-
-            if (newY == 0)
-            {
-                motionY = 0;
-            }
-            this.posX += x;
-            this.posY += newY;
-            this.posZ += z;
-            this.setPosition(posX, posY, posZ);
-
-            this.collidedHorizontally = x0 != x || z0 != z;
-            this.collidedVertically = y0 != y;
-            this.onGround = y0 != y && y0 <= 0.0D;
-            this.collided = this.collidedHorizontally || this.collidedVertically;
-            BlockPos blockpos = getPosition().down();
-            IBlockState state = getEntityWorld().getBlockState(blockpos);
-            Block block1 = state.getBlock();
-
-            this.updateFallState(y, this.onGround, state, blockpos);
-
-            if (this.canTriggerWalking() && this.getRidingEntity() == null)
-            {
-                double d15 = this.posX;
-                double d16 = this.posY;
-                double d17 = this.posZ;
-
-                if (block1 != Blocks.LADDER)
-                {
-                    d16 = 0.0D;
-                }
-
-                if (block1 != null && this.onGround)
-                {
-                    block1.onEntityCollidedWithBlock(this.getEntityWorld(), blockpos, state, this);
-                }
-
-                this.distanceWalkedModified = (float) (this.distanceWalkedModified
-                        + MathHelper.sqrt(d15 * d15 + d17 * d17) * 0.6D);
-                this.distanceWalkedOnStepModified = (float) (this.distanceWalkedOnStepModified
-                        + MathHelper.sqrt(d15 * d15 + d16 * d16 + d17 * d17) * 0.6D);
-
-                if (this.distanceWalkedOnStepModified > this.nextStepDistance && state.getMaterial() != Material.AIR)
-                {
-                    this.nextStepDistance = (int) this.distanceWalkedOnStepModified + 1;
-
-                    if (this.isInWater() && !pokemobCap.swims())
-                    {
-                        float f = MathHelper.sqrt(this.motionX * this.motionX * 0.20000000298023224D
-                                + this.motionY * this.motionY + this.motionZ * this.motionZ * 0.20000000298023224D)
-                                * 0.35F;
-
-                        if (f > 1.0F)
-                        {
-                            f = 1.0F;
-                        }
-
-                        this.playSound(this.getSwimSound(), f,
-                                1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
-                    }
-                }
-            }
-
-            try
-            {
-                this.doBlockCollisions();
-            }
-            catch (Throwable throwable)
-            {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
-                CrashReportCategory crashreportcategory = crashreport
-                        .makeCategory("Entity being checked for collision");
-                this.addEntityCrashInfo(crashreportcategory);
-                throw new ReportedException(crashreport);
-            }
-        }
-
-    }
-
     @Override
     public void onLivingUpdate()
     {
@@ -581,6 +401,5 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
         category.addCrashSection("World:", getEntityWorld() == null ? "NULL" : getEntityWorld().toString());
         category.addCrashSection("Owner:",
                 pokemobCap.getPokemonOwnerID() == null ? "NULL" : pokemobCap.getPokemonOwnerID().toString());
-        Thread.dumpStack();
     }
 }

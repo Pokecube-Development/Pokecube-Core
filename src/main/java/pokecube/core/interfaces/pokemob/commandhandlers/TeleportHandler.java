@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.Sets;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -225,17 +224,5 @@ public class TeleportHandler extends DefaultHandler
         if (fromOwner()) pokemob.displayMessageToOwner(text);
         EventsHandler.recallAllPokemobsExcluding(player, (IPokemob) null);
         Transporter.teleportEntity(player, loc, dim, false);
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-    }
-
-    @Override
-    public void readFromBuf(ByteBuf buf)
-    {
-        super.readFromBuf(buf);
     }
 }

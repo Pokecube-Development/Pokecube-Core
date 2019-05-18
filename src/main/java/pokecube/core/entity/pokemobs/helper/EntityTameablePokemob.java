@@ -19,14 +19,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import pokecube.core.PokecubeItems;
@@ -42,13 +39,6 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
         IRangedAttackMob, IEntityAdditionalSpawnData, IJumpingMount
 {
 
-    protected boolean              looksWithInterest;
-    protected float                headRotation;
-    protected float                headRotationOld;
-    protected boolean              isPokemonShaking;
-    protected boolean              isPokemonWet;
-    protected float                timePokemonIsShaking;
-    protected float                prevTimePokemonIsShaking;
     public float                   length = 1;
     protected Vector3              here   = Vector3.getNewVector();
     protected Vector3              vec    = Vector3.getNewVector();
@@ -73,30 +63,6 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
         return PokecubeItems.isValidHeldItem(itemStack);
     }
 
-    @SideOnly(Side.CLIENT)
-    public float getInterestedAngle(float f)
-    {
-        return (headRotationOld + (headRotation - headRotationOld) * f) * 0.15F * (float) Math.PI;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public float getShakeAngle(float f, float f1)
-    {
-        float f2 = (prevTimePokemonIsShaking + (timePokemonIsShaking - prevTimePokemonIsShaking) * f + f1) / 1.8F;
-
-        if (f2 < 0.0F)
-        {
-            f2 = 0.0F;
-        }
-        else if (f2 > 1.0F)
-        {
-            f2 = 1.0F;
-        }
-
-        return MathHelper.sin(f2 * (float) Math.PI) * MathHelper.sin(f2 * (float) Math.PI * 11F) * 0.15F
-                * (float) Math.PI;
-    }
-
     /** returns true if a sheeps wool has been sheared */
     public boolean getSheared()
     {
@@ -113,13 +79,12 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
 
     public void init(int nb)
     {
-        looksWithInterest = false;
     }
 
     @Override
     protected boolean isMovementBlocked()
     {
-        return isPokemonWet || this.getHealth() <= 0.0F;
+        return this.getHealth() <= 0.0F;
     }
 
     @Override

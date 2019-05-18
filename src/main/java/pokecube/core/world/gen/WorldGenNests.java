@@ -16,9 +16,6 @@ import pokecube.core.interfaces.PokecubeMod;
 
 public class WorldGenNests implements IWorldGenerator
 {
-
-    static boolean buildingTemple = false;
-
     @Override
     public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
             IChunkProvider chunkProvider)

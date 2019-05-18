@@ -3,7 +3,6 @@ package pokecube.core.moves.animations.presets.parametric;
 import org.nfunk.jep.JEP;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IWorldEventListener;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.moves.animations.AnimPreset;
@@ -24,12 +23,6 @@ public class SphericalFunction extends MoveAnimationBase
 
     public SphericalFunction()
     {
-    }
-
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
-
     }
 
     @Override

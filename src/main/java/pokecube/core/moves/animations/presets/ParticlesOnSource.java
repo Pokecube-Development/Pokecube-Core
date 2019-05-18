@@ -2,9 +2,6 @@ package pokecube.core.moves.animations.presets;
 
 import java.util.Random;
 
-import net.minecraft.world.IWorldEventListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.moves.animations.AnimPreset;
 import thut.api.maths.Vector3;
@@ -15,12 +12,6 @@ public class ParticlesOnSource extends ParticlesOnTarget
     public ParticlesOnSource()
     {
         super();
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
     }
 
     @Override

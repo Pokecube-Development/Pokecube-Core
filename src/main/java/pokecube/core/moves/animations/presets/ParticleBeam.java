@@ -1,6 +1,5 @@
 package pokecube.core.moves.animations.presets;
 
-import net.minecraft.world.IWorldEventListener;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.moves.animations.AnimPreset;
@@ -16,12 +15,6 @@ public class ParticleBeam extends MoveAnimationBase
 
     public ParticleBeam()
     {
-    }
-
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
-
     }
 
     @Override

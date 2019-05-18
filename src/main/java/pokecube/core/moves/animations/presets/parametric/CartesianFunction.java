@@ -2,7 +2,6 @@ package pokecube.core.moves.animations.presets.parametric;
 
 import org.nfunk.jep.JEP;
 
-import net.minecraft.world.IWorldEventListener;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.moves.animations.AnimPreset;
@@ -23,12 +22,6 @@ public class CartesianFunction extends MoveAnimationBase
 
     public CartesianFunction()
     {
-    }
-
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
-
     }
 
     @Override

@@ -471,8 +471,8 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
          * here, probably causes creeper animation to go weird) */
         public int          lastActiveTime;
 
-        /** Entity ID of the mob we are transformed to */
-        public int          transformedTo              = -1;
+        /** Mob transformed into */
+        public Entity       transformedTo;
 
         /** The amount of time since the creeper was close enough to the player
          * to ignite */
@@ -759,10 +759,6 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     /** Sets the value obtained by getAttackCooldown() */
     @Override
     void setAttackCooldown(int timer);
-
-    /** Last attack used by this pokemob; */
-    @Override
-    String getLastMoveUsed();
 
     default boolean moveToShoulder(EntityPlayer player)
     {

@@ -3,10 +3,11 @@ package pokecube.core.network.pokemobs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -33,13 +34,14 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
         PokecubeMod.packetPipeline.sendToServer(packet);
     }
 
-    public static void sendPacketToNear(Entity mob, PokedexEntry forme, int distance)
+    public static void sendPacketToTracking(Entity mob, PokedexEntry forme)
     {
         PacketChangeForme packet = new PacketChangeForme();
         packet.entityId = mob.getEntityId();
         packet.forme = forme;
-        PokecubeMod.packetPipeline.sendToAllAround(packet,
-                new TargetPoint(mob.dimension, mob.posX, mob.posY, mob.posZ, distance));
+        WorldServer server = (WorldServer) mob.getEntityWorld();
+        for (EntityPlayer player : server.getEntityTracker().getTrackingPlayers(mob))
+            PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
     }
 
     int          entityId;

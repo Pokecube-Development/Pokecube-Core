@@ -340,7 +340,7 @@ public class PokecubeCore extends PokecubeMod
      *            the pokedex entry
      * @return the {@link Class} of the pokemob */
     @Override
-    public Class<? extends Entity> getEntityClassForEntry(PokedexEntry entry)
+    public Class<?> getEntityClassForEntry(PokedexEntry entry)
     {
         try
         {

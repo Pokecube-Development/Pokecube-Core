@@ -1,6 +1,5 @@
 package pokecube.core.interfaces.pokemob.commandhandlers;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraftforge.common.MinecraftForge;
 import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
@@ -18,17 +17,5 @@ public class AttackNothingHandler extends DefaultHandler
     {
         MinecraftForge.EVENT_BUS.post(new CommandAttackEvent(pokemob.getEntity(), null));
         pokemob.executeMove(pokemob.getEntity(), null, 0);
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-    }
-
-    @Override
-    public void readFromBuf(ByteBuf buf)
-    {
-        super.readFromBuf(buf);
     }
 }

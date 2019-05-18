@@ -110,8 +110,7 @@ public interface TagNames
     public static final String ABILITYINDEX = "abilityIndex";
     public static final String FLAVOURSTAG  = "flavours";
     public static final String POKECUBE     = "pokecube";
-    @Deprecated
-    public static final String AISTATE      = "aiState";
+
     public static final String LOGICSTATE   = "logicState";
     public static final String GENERALSTATE = "generalState";
     public static final String COMBATSTATE  = "combatState";

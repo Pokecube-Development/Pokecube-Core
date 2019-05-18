@@ -2,9 +2,6 @@ package pokecube.core.moves.animations.presets;
 
 import java.util.Random;
 
-import net.minecraft.world.IWorldEventListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.moves.animations.AnimPreset;
@@ -21,12 +18,6 @@ public class AnimationPowder extends MoveAnimationBase
     int     meshId  = 0;
 
     public AnimationPowder()
-    {
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
     {
     }
 

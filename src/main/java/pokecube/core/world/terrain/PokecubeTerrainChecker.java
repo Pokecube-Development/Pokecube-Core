@@ -260,10 +260,4 @@ public class PokecubeTerrainChecker implements ISubBiomeChecker
         state = up.getBlockState(world);
         return isCave(state);
     }
-
-    public boolean isInside(Vector3 v, World world)
-    {
-        return true;
-    }
-
 }

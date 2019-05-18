@@ -89,11 +89,6 @@ public abstract class MoveAnimationBase implements IMoveAnimation
     }
 
     @Override
-    public void spawnClientEntities(MovePacketInfo info)
-    {
-    }
-
-    @Override
     @SideOnly(Side.CLIENT)
     public void reallyInitRGBA()
     {

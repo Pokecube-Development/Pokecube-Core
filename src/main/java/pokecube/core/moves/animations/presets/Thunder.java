@@ -2,13 +2,12 @@ package pokecube.core.moves.animations.presets;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import pokecube.core.interfaces.Move_Base;
 import pokecube.core.moves.animations.AnimPreset;
 import pokecube.core.moves.animations.MoveAnimationBase;
 
-@AnimPreset(getPreset="thunder")
+@AnimPreset(getPreset = "thunder")
 public class Thunder extends MoveAnimationBase
 {
 
@@ -34,10 +33,6 @@ public class Thunder extends MoveAnimationBase
     @Override
     public void initColour(long time, float partialTicks, Move_Base move)
     {
-    }
-
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
+        // No colouring for thunder.
     }
 }

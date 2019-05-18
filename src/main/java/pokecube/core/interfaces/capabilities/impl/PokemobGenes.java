@@ -16,9 +16,6 @@ import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.abilities.Ability;
@@ -43,16 +40,16 @@ import pokecube.core.utils.Tools;
 import thut.api.entity.IMobColourable;
 import thut.api.entity.genetics.Alleles;
 
-public abstract class PokemobGenes extends PokemobBase implements IMobColourable
+public abstract class PokemobGenes extends PokemobSided implements IMobColourable
 {
-    private static HashMap<Class<? extends EntityLiving>, PokedexEntry> classMap = Maps.newHashMap();
+    private static HashMap<Class<?>, PokedexEntry> classMap = Maps.newHashMap();
 
-    public static boolean isRegistered(Class<? extends EntityLiving> clazz)
+    public static boolean isRegistered(Class<?> clazz)
     {
         return classMap.containsKey(clazz);
     }
 
-    public static void registerClass(Class<? extends EntityLiving> clazz, PokedexEntry entry)
+    public static void registerClass(Class<?> clazz, PokedexEntry entry)
     {
         if (classMap.containsValue(entry)) throw new IllegalArgumentException("Cannot register " + entry + " twice!");
         PokecubeMod.pokedexmap.put(entry, clazz);
@@ -262,7 +259,7 @@ public abstract class PokemobGenes extends PokemobBase implements IMobColourable
     public void setMove(int i, String moveName)
     {
         // do not blanket set moves on client, or when transformed.
-        if (!entity.isServerWorld() || getTransformedTo() != null) return;
+        if (!getEntity().isServerWorld() || getTransformedTo() != null) return;
 
         String[] moves = getMoves();
         moves[i] = moveName;
@@ -303,7 +300,7 @@ public abstract class PokemobGenes extends PokemobBase implements IMobColourable
     public void setMoves(String[] moves)
     {
         // do not blanket set moves on client, or when transformed.
-        if (entity.getEntityWorld().isRemote || getTransformedTo() != null) return;
+        if (getEntity().getEntityWorld().isRemote || getTransformedTo() != null) return;
         if (moves != null && moves.length == 4)
         {
             if (genesMoves == null)
@@ -336,10 +333,17 @@ public abstract class PokemobGenes extends PokemobBase implements IMobColourable
             a = entry.width * size;
             b = entry.height * size;
             c = entry.length * size;
+            // Do not allow them to be smaller than 1/100 of a block.
             if (a < 0.01 || b < 0.01 || c < 0.01)
             {
                 float min = 0.01f / Math.min(a, Math.min(c, b));
                 size *= min / PokecubeMod.core.getConfig().scalefactor;
+            }
+            // Do not allow them to be larger than 20 blocks.
+            if (a > 20 || b > 20 || c > 20)
+            {
+                float max = 20 / Math.max(a, Math.max(c, b));
+                size *= max / PokecubeMod.core.getConfig().scalefactor;
             }
         }
         genesSize.getExpressed().setValue(size);
@@ -481,11 +485,11 @@ public abstract class PokemobGenes extends PokemobBase implements IMobColourable
         IPokemob ret = this;
         info.entry = newEntry;
         ret = megaEvolve(newEntry);
-        if (entity.getEntityWorld() != null)
+        if (getEntity().getEntityWorld() != null)
             ret.setSize((float) (ret.getSize() / PokecubeMod.core.getConfig().scalefactor));
-        if (entity.getEntityWorld() != null && FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        if (getEntity().getEntityWorld() != null && getEntity().isServerWorld())
         {
-            PacketChangeForme.sendPacketToNear(ret.getEntity(), newEntry, 128);
+            PacketChangeForme.sendPacketToTracking(ret.getEntity(), newEntry);
         }
         return ret;
     }

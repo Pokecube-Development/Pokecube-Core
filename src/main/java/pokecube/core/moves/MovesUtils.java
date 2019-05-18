@@ -86,11 +86,14 @@ public class MovesUtils implements IMoveConstants
     /** For contact moves like tackle. The mob gets close to its target and
      * hits.
      *
-     * @return whether the mob must attack */
+     * @return whether the mob can attack */
     public static boolean contactAttack(IPokemob attacker, Entity attacked)
     {
         if (attacked == null || attacker == null) return false;
-        return true;
+        double range = PokecubeMod.core.getConfig().contactAttackDistance;
+        range = Math.max(attacker.getMobSizes().x, range);
+        range = Math.max(1, range);
+        return attacker.getEntity().getDistance(attacked) <= range;
     }
 
     /** @param attacker
@@ -837,13 +840,6 @@ public class MovesUtils implements IMoveConstants
             @Nonnull Vector3 start, @Nonnull Vector3 end)
     {
         move.ActualMoveUse(user, target, start, end);
-    }
-
-    @Deprecated
-    public static void useMove(@Nonnull String move, @Nonnull Entity user, @Nullable Entity target,
-            @Nonnull Vector3 start, @Nonnull Vector3 end)
-    {
-        useMove(getMoveFromName(move), user, target, start, end);
     }
 
     /** @param attacker

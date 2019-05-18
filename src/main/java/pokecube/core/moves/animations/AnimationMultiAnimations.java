@@ -106,6 +106,7 @@ public class AnimationMultiAnimations extends MoveAnimationBase
     @Override
     public void initColour(long time, float partialTicks, Move_Base move)
     {
+        //We don't do this.
     }
 
     @Override

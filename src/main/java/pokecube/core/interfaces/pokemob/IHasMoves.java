@@ -145,7 +145,10 @@ public interface IHasMoves extends IHasStats
     }
 
     /** @return Name of the last move we used. */
-    String getLastMoveUsed();
+    default String getLastMoveUsed()
+    {
+        return this.getMoveStats().lastMove;
+    }
 
     /** Gets the {@link String} id of the specified move.
      *
@@ -360,7 +363,10 @@ public interface IHasMoves extends IHasStats
      * @param status
      *            the status to set
      * @return whether the status has actually been set */
-    boolean setStatus(byte status);
+    default boolean setStatus(byte status)
+    {
+        return setStatus(status, -1);
+    }
 
     /** Sets the initial status timer. The timer will be decreased until 0. The
      * timer for SLP. When reach 0, the mob wakes up.

@@ -18,11 +18,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.IPokemob.Stats;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
@@ -120,30 +116,6 @@ public abstract class AIBase implements IAIRunnable
      * @author Thutmose */
     public static class MoveInfo implements IRunnable
     {
-        public static final Comparator<MoveInfo> compare = new Comparator<MoveInfo>()
-                                                         {
-                                                             @Override
-                                                             public int compare(MoveInfo o1, MoveInfo o2)
-                                                             {
-                                                                 if (o1.dim != o2.dim) return 0;
-                                                                 if (FMLCommonHandler.instance()
-                                                                         .getSide() == Side.SERVER)
-                                                                 {
-                                                                     WorldServer world = FMLCommonHandler.instance()
-                                                                             .getMinecraftServerInstance()
-                                                                             .getWorld(o1.dim);
-                                                                     IPokemob e1 = CapabilityPokemob.getPokemobFor(
-                                                                             world.getEntityByID(o1.attacker));
-                                                                     IPokemob e2 = CapabilityPokemob.getPokemobFor(
-                                                                             world.getEntityByID(o2.attacker));
-                                                                     if (e2 != null
-                                                                             && e1 != null) { return pokemobComparator
-                                                                                     .compare(e1, e2); }
-                                                                 }
-                                                                 return 0;
-                                                             }
-                                                         };
-
         public final int                         attacker;
         public final int                         targetEnt;
         public final int                         dim;
@@ -276,19 +248,7 @@ public abstract class AIBase implements IAIRunnable
             return set;
         }
     }
-
-    /** Sorts pokemobs by move order. */
-    public static final Comparator<IPokemob> pokemobComparator = new Comparator<IPokemob>()
-                                                               {
-                                                                   @Override
-                                                                   public int compare(IPokemob o1, IPokemob o2)
-                                                                   {
-                                                                       int speed1 = o1.getStat(Stats.VIT, true);
-                                                                       int speed2 = o2.getStat(Stats.VIT, true);
-                                                                       return speed2 - speed1;
-                                                                   }
-                                                               };
-
+    
     protected IBlockAccess                   world;
 
     int                                      priority          = 0;

@@ -320,12 +320,6 @@ public class ClientProxy extends CommonProxy
     }
 
     @Override
-    public void preInit()
-    {
-        super.preInit();
-    }
-
-    @Override
     public void registerRenderInformation()
     {
         for (String modid : modelProviders.keySet())

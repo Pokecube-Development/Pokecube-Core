@@ -467,7 +467,7 @@ public class ClientProxyPokecube extends CommonProxyPokecube
         else
         {
             PokedexEntry entry = Database.getEntry(name);
-            Class<? extends Entity> c = PokecubeCore.instance.getEntityClassForEntry(entry);
+            Class<? extends Entity> c = (Class<? extends Entity>) PokecubeCore.instance.getEntityClassForEntry(entry);
 
             if (PokecubeMod.debug) PokecubeMod.log("Registering Renderer for " + entry + " " + name + " " + c + " "
                     + renderer.createRenderFor(Minecraft.getMinecraft().getRenderManager()));

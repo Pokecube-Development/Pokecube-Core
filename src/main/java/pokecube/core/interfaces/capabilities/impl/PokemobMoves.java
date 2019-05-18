@@ -208,7 +208,13 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public Entity getTransformedTo()
     {
-        return getEntity().getEntityWorld().getEntityByID(this.dataSync().get(params.TRANSFORMEDTODW));
+        int id = this.dataSync().get(params.TRANSFORMEDTODW);
+        if (id == -1) return null;
+        Entity to = getMoveStats().transformedTo;
+        if (to != null && id == to.getEntityId()) return to;
+        to = getEntity().getEntityWorld().getEntityByID(id);
+        this.setTransformedTo(to);
+        return to;
     }
 
     @Override
@@ -305,12 +311,6 @@ public abstract class PokemobMoves extends PokemobSexed
     }
 
     @Override
-    public boolean setStatus(byte status)
-    {
-        return setStatus(status, -1);
-    }
-
-    @Override
     public void setStatusTimer(short timer)
     {
         dataSync().set(params.STATUSTIMERDW, (int) timer);
@@ -319,17 +319,20 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public void setTransformedTo(Entity to)
     {
-        if (to != null) getMoveStats().transformedTo = to.getEntityId();
-        else getMoveStats().transformedTo = -1;
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(to);
+        int id = to == null ? -1 : to.getEntityId();
         PokedexEntry newEntry = getPokedexEntry();
-        if (pokemob != null)
+        if (id != -1)
         {
-            newEntry = pokemob.getPokedexEntry();
+            IPokemob pokemob = CapabilityPokemob.getPokemobFor(to);
+            if (pokemob != null)
+            {
+                newEntry = pokemob.getPokedexEntry();
+            }
         }
+        this.getMoveStats().transformedTo = to;
         this.setType1(newEntry.getType1());
         this.setType2(newEntry.getType2());
-        this.dataSync().set(params.TRANSFORMEDTODW, getMoveStats().transformedTo);
+        this.dataSync().set(params.TRANSFORMEDTODW, id);
     }
 
     @Override
@@ -342,12 +345,6 @@ public abstract class PokemobMoves extends PokemobSexed
     public void setAttackCooldown(int timer)
     {
         this.dataSync().set(params.ATTACKCOOLDOWN, timer);
-    }
-
-    @Override
-    public String getLastMoveUsed()
-    {
-        return this.getMoveStats().lastMove;
     }
 
     @Override

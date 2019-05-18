@@ -35,13 +35,17 @@ public interface IMoveAnimation
      * @param world
      * @param partialTick */
     @SideOnly(Side.CLIENT)
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick);
+    default public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
+    {
+    }
 
     /** Used if you need to spawn in something like thunder effects.
      * 
      * @param info */
     @SideOnly(Side.CLIENT)
-    public void spawnClientEntities(MovePacketInfo info);
+    default public void spawnClientEntities(MovePacketInfo info)
+    {
+    }
 
     /** How long this animation plays for in world ticks.
      * 

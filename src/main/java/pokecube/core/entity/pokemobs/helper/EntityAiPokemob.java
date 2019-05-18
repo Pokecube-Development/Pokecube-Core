@@ -48,10 +48,42 @@ import thut.api.maths.Vector3;
 /** @author Manchou */
 public abstract class EntityAiPokemob extends EntityMountablePokemob
 {
+    protected boolean looksWithInterest = false;
+    protected float   headRotation;
+    protected float   headRotationOld;
+    protected boolean isPokemonShaking;
+    protected boolean isPokemonWet;
+    protected float   timePokemonIsShaking;
+    protected float   prevTimePokemonIsShaking;
+
     public EntityAiPokemob(World world)
     {
         super(world);
         here = Vector3.getNewVector();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public float getInterestedAngle(float f)
+    {
+        return (headRotationOld + (headRotation - headRotationOld) * f) * 0.15F * (float) Math.PI;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public float getShakeAngle(float f, float f1)
+    {
+        float f2 = (prevTimePokemonIsShaking + (timePokemonIsShaking - prevTimePokemonIsShaking) * f + f1) / 1.8F;
+
+        if (f2 < 0.0F)
+        {
+            f2 = 0.0F;
+        }
+        else if (f2 > 1.0F)
+        {
+            f2 = 1.0F;
+        }
+
+        return MathHelper.sin(f2 * (float) Math.PI) * MathHelper.sin(f2 * (float) Math.PI * 11F) * 0.15F
+                * (float) Math.PI;
     }
 
     @Override

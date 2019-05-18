@@ -352,16 +352,16 @@ public class AIHungry extends AIBase
         v.set(entity);
 
         // Reset hunting status if we are not actually hungry
-        if (!pokemob.neverHungry() && pokemob.getHungerCooldown() < 0)
+        if (!pokemob.neverHungry() && pokemob.getHungerCooldown() < 0 && hungerTime > 0)
         {
             if (hungerTime > 0 && !pokemob.getCombatState(CombatStates.HUNTING))
             {
                 pokemob.setCombatState(CombatStates.HUNTING, true);
             }
-            else if (hungerTime < 0 && pokemob.getCombatState(CombatStates.HUNTING))
-            {
-                pokemob.setCombatState(CombatStates.HUNTING, false);
-            }
+        }
+        else if (hungerTime < 0 && pokemob.getCombatState(CombatStates.HUNTING))
+        {
+            pokemob.setCombatState(CombatStates.HUNTING, false);
         }
 
         // Check if we should go after bait. The Math.random() > 0.99 is to

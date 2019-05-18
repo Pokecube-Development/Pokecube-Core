@@ -17,7 +17,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -209,10 +208,5 @@ public class MoveAnimationHelper
             e.printStackTrace();
         }
         effects = num;
-    }
-
-    @SubscribeEvent
-    public void WorldUnloadEvent(Unload evt)
-    {
     }
 }

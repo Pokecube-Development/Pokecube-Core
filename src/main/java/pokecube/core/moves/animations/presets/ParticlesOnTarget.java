@@ -2,7 +2,6 @@ package pokecube.core.moves.animations.presets;
 
 import java.util.Random;
 
-import net.minecraft.world.IWorldEventListener;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.moves.animations.AnimPreset;
@@ -28,11 +27,6 @@ public class ParticlesOnTarget extends MoveAnimationBase
         float width = this.width * dw;
         temp.addTo(rand.nextGaussian() * width, rand.nextGaussian() * width, rand.nextGaussian() * width);
         PokecubeMod.core.spawnParticle(info.attacker.getEntityWorld(), particle, temp, null, rgba);
-    }
-
-    @Override
-    public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
-    {
     }
 
     @Override
