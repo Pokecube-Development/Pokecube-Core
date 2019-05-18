@@ -16,13 +16,20 @@ public class ItemTyped extends Item
 {
     public final String type;
 
+    public ItemTyped(String type, boolean reg)
+    {
+        this.type = type;
+        if (reg)
+        {
+            this.setRegistryName(PokecubeMod.ID, type);
+            this.setUnlocalizedName(this.getRegistryName().getResourcePath());
+        }
+        this.setCreativeTab(PokecubeMod.creativeTabPokecube);
+    }
+
     public ItemTyped(String type)
     {
-        super();
-        this.type = type;
-        this.setRegistryName(PokecubeMod.ID, type);
-        this.setCreativeTab(PokecubeMod.creativeTabPokecube);
-        this.setUnlocalizedName(this.getRegistryName().getResourcePath());
+        this(type, true);
     }
 
     /** allows items to add custom lines of information to the mouseover

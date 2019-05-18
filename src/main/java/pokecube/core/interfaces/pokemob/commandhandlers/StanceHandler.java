@@ -35,14 +35,9 @@ public class StanceHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob) throws Exception
     {
-        if (key == BUTTONTOGGLEGUARD)
+        switch (key)
         {
-            if (PokecubeMod.core.getConfig().guardModeEnabled)
-                pokemob.setCombatState(CombatStates.GUARDING, !pokemob.getCombatState(CombatStates.GUARDING));
-            else pokemob.displayMessageToOwner(new TextComponentTranslation("pokecube.config.guarddisabled"));
-        }
-        else if (key == BUTTONTOGGLESTAY)
-        {
+        case BUTTONTOGGLESTAY:
             boolean stay;
             pokemob.setGeneralState(GeneralStates.STAYING, stay = !pokemob.getGeneralState(GeneralStates.STAYING));
             IGuardAICapability guard = pokemob.getEntity().getCapability(EventsHandler.GUARDAI_CAP, null);
@@ -59,10 +54,15 @@ public class StanceHandler extends DefaultHandler
             {
                 if (guard != null) guard.getPrimaryTask().setActiveTime(TimePeriod.never);
             }
-        }
-        else if (key == BUTTONTOGGLESIT)
-        {
+            break;
+        case BUTTONTOGGLEGUARD:
+            if (PokecubeMod.core.getConfig().guardModeEnabled)
+                pokemob.setCombatState(CombatStates.GUARDING, !pokemob.getCombatState(CombatStates.GUARDING));
+            else pokemob.displayMessageToOwner(new TextComponentTranslation("pokecube.config.guarddisabled"));
+            break;
+        case BUTTONTOGGLESIT:
             pokemob.setLogicState(LogicStates.SITTING, !pokemob.getLogicState(LogicStates.SITTING));
+            break;
         }
     }
 

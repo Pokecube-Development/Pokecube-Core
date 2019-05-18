@@ -413,8 +413,8 @@ public class GuiDisplayPokecubeInfo extends Gui
                         }
                         else if ((lastMove = MovesUtils.getMoveFromName(pokemob.getLastMoveUsed())) != null)
                         {
-                            timer -= (pokemob.getAttackCooldown() / (float) MovesUtils.getAttackDelay(
-                                    pokemob, pokemob.getLastMoveUsed(),
+                            timer -= (pokemob.getAttackCooldown() / (float) MovesUtils.getAttackDelay(pokemob,
+                                    pokemob.getLastMoveUsed(),
                                     (lastMove.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0, false));
                         }
                         timer = Math.max(0, Math.min(timer, 1));
@@ -438,8 +438,7 @@ public class GuiDisplayPokecubeInfo extends Gui
                     GL11.glColor4f(moveColor.getRed() / 255f, moveColor.getGreen() / 255f, moveColor.getBlue() / 255f,
                             1.0F);
                     fontRenderer.drawString(MovesUtils.getMoveName(move.getName()).getFormattedText(),
-                            5 + movesOffsetX + w, index * 13 + movesOffsetY + 3 + h,
-                            move.getType(pokemob).colour);
+                            5 + movesOffsetX + w, index * 13 + movesOffsetY + 3 + h, move.getType(pokemob).colour);
                     GL11.glPopMatrix();
                 }
             }
@@ -684,7 +683,6 @@ public class GuiDisplayPokecubeInfo extends Gui
         if (pokemob != null)
         {
             int index = (pokemob.getMoveIndex() + i);
-
             int max = 0;
             for (max = 0; max < 4; max++)
             {
@@ -692,7 +690,7 @@ public class GuiDisplayPokecubeInfo extends Gui
             }
             if (index >= 5) index = 0;
             if (index >= max) index = 5;
-            sendMoveIndexPacket(pokemob, index);
+            setMove(index);
         }
     }
 
@@ -850,7 +848,6 @@ public class GuiDisplayPokecubeInfo extends Gui
         if (pokemob != null)
         {
             int index = pokemob.getMoveIndex();
-
             if (index == 5)
             {
                 for (int i = 3; i > 0; i -= j)
@@ -869,7 +866,7 @@ public class GuiDisplayPokecubeInfo extends Gui
 
             if (index % 5 >= 0) index = index % 5;
             else index = 5;
-            sendMoveIndexPacket(pokemob, index);
+            setMove(index);
         }
     }
 
@@ -894,7 +891,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         if (pokemob != null)
         {
             int index = num;
-            if (index % 4 >= 0) index = index % 4;
+            if (index > 5) index = index % 6;
             sendMoveIndexPacket(pokemob, index);
         }
     }

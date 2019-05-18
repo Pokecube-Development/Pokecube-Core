@@ -2,6 +2,7 @@ package pokecube.core.client.gui;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.vecmath.Vector3f;
 
@@ -325,40 +326,41 @@ public class GuiPokemob extends GuiContainer
     public static void renderMob(IPokemob pokemob, int width, int height, int xSize, int ySize, float xRenderAngle,
             float yRenderAngle, float zRenderAngle, float scale)
     {
+        EntityLiving entity = pokemob.getEntity();
+        float size = 0;
+        int j = width;
+        int k = height;
+        float mobScale = pokemob.getSize();
+        Vector3f dims = pokemob.getPokedexEntry().getModelSize();
+        size = Math.max(dims.z * mobScale, Math.max(dims.y * mobScale, dims.x * mobScale));
+        yRenderAngle = entity.renderYawOffset - entity.ticksExisted;
+        float zoom = (25f / size) * scale;
+        GL11.glPushMatrix();
+        GL11.glTranslatef(j + 55, k + 60, 50F);
+        GL11.glScalef(-zoom, zoom, zoom);
+        GL11.glRotatef(180F, 0.0F, 0.0F, 1.0F);
+        GL11.glRotatef(135F, 0.0F, 1.0F, 0.0F);
+        RenderHelper.enableStandardItemLighting();
+        GL11.glRotatef(yRenderAngle, 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef(xRenderAngle, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(zRenderAngle, 0.0F, 0.0F, 1.0F);
         try
         {
-            EntityLiving entity = pokemob.getEntity();
-            float size = 0;
-            int j = width;
-            int k = height;
-            float mobScale = pokemob.getSize();
-            Vector3f dims = pokemob.getPokedexEntry().getModelSize();
-            size = Math.max(dims.z * mobScale, Math.max(dims.y * mobScale, dims.x * mobScale));
-            yRenderAngle = entity.renderYawOffset - entity.ticksExisted;
-            float zoom = (25f / size) * scale;
-            GL11.glPushMatrix();
-            GL11.glTranslatef(j + 55, k + 60, 50F);
-            GL11.glScalef(-zoom, zoom, zoom);
-            GL11.glRotatef(180F, 0.0F, 0.0F, 1.0F);
-            GL11.glRotatef(135F, 0.0F, 1.0F, 0.0F);
-            RenderHelper.enableStandardItemLighting();
-            GL11.glRotatef(yRenderAngle, 0.0F, 1.0F, 0.0F);
-            GL11.glRotatef(xRenderAngle, 1.0F, 0.0F, 0.0F);
-            GL11.glRotatef(zRenderAngle, 0.0F, 0.0F, 1.0F);
             Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0,
                     Minecraft.getMinecraft().getRenderPartialTicks(), false);
-            GL11.glPopMatrix();
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-            GlStateManager.disableTexture2D();
-            GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
         }
         catch (Throwable e)
         {
-            e.printStackTrace();
+            if (PokecubeMod.debug)
+                PokecubeMod.log(Level.WARNING, "Error rendering " + pokemob.getPokedexEntry(), new Exception(e));
         }
+        GL11.glPopMatrix();
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GlStateManager.disableTexture2D();
+        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
     }
 
     private IInventory   playerInventory;

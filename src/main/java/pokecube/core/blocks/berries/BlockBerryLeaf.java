@@ -159,18 +159,6 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
         return false;
     }
 
-    // 1.11
-    public boolean isVisuallyOpaque(IBlockState state)
-    {
-        return false;
-    }
-
-    // 1.10
-    public boolean isVisuallyOpaque()
-    {
-        return false;
-    }
-
     @Override
     public List<ItemStack> onSheared(ItemStack item, IBlockAccess world, BlockPos pos, int fortune)
     {
