@@ -24,19 +24,6 @@ public class PokedexEntryJsonProcessor
     private static final Set<String> list = Sets.newHashSet();
     static
     {
-
-        // list.add("baseForme");
-        // list.add("childNb");
-        // list.add("childNumbers");
-        // list.add("evolutions");
-        // list.add("evolvesBy");
-        // list.add("evolvesFrom");
-        // list.add("formeItems");
-        // list.add("forms");
-        // list.add("prey");
-        // list.add("related");
-        // list.add("male");
-
         list.add("abilities");
         list.add("abilitiesHidden");
         list.add("activeTimes");

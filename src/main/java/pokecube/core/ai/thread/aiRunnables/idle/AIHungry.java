@@ -24,7 +24,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.blocks.berries.BerryGenManager;
-import pokecube.core.events.handlers.SpawnHandler;
+import pokecube.core.events.handlers.MoveEventsHandler;
 import pokecube.core.interfaces.IBerryFruitBlock;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -250,7 +250,7 @@ public class AIHungry extends AIBase
             if (PokecubeMod.core.getConfig().pokemobsEatRocks)
             {
                 v.set(entity).offsetBy(EnumFacing.DOWN);
-                if (SpawnHandler.checkNoSpawnerInArea(entity.getEntityWorld(), v.intX(), v.intY(), v.intZ()))
+                if (MoveEventsHandler.canEffectBlock(pokemob, v))
                 {
                     if (b == Blocks.COBBLESTONE)
                     {

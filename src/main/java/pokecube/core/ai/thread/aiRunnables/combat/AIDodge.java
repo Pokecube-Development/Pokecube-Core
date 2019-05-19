@@ -18,9 +18,10 @@ import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.moves.MovesUtils;
+import thut.api.entity.ai.IAICombat;
 import thut.api.maths.Vector3;
 
-public class AIDodge extends AIBase
+public class AIDodge extends AIBase implements IAICombat
 {
     final EntityLiving attacker;
     final IPokemob     pokemob;

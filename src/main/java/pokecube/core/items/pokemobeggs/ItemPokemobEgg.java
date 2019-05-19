@@ -175,7 +175,7 @@ public class ItemPokemobEgg extends Item
             IMobGenetics.GENETICS_CAP.getStorage().readNBT(IMobGenetics.GENETICS_CAP, eggs, null, genes);
             GeneticsManager.initFromGenes(eggs, mob);
         }
-        EntityLivingBase owner = imprintOwner(mob);
+        EntityLivingBase owner = nbt.hasKey("nestLocation") ? null : imprintOwner(mob);
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
         if (owner instanceof EntityPlayer && (config.permsHatch || config.permsHatchSpecific))
@@ -277,13 +277,12 @@ public class ItemPokemobEgg extends Item
             exp = Math.max(1, exp);
             mob.setForSpawn(exp);
             entity.setLocationAndAngles(par2, par4, par6, world.rand.nextFloat() * 360F, 0.0F);
+            int[] nest = null;
             if (stack.hasTagCompound())
             {
                 if (stack.getTagCompound().hasKey("nestLocation"))
                 {
-                    int[] nest = stack.getTagCompound().getIntArray("nestLocation");
-                    mob.setHome(nest[0], nest[1], nest[2], 16);
-                    mob.setGeneralState(GeneralStates.EXITINGCUBE, false);
+                    nest = stack.getTagCompound().getIntArray("nestLocation");
                 }
                 else
                 {
@@ -302,6 +301,11 @@ public class ItemPokemobEgg extends Item
                     world.spawnEntity(new EntityXPOrb(world, entity.posX, entity.posY, entity.posZ,
                             entity.getRNG().nextInt(7) + 1));
                 }
+            }
+            if (nest != null)
+            {
+                mob.setHome(nest[0], nest[1], nest[2], 16);
+                mob.setGeneralState(GeneralStates.EXITINGCUBE, false);
             }
             entity.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
             entity.playLivingSound();

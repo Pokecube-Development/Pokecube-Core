@@ -32,7 +32,7 @@ public class BlockNest extends Block implements ITileEntityProvider
 
     static
     {
-        types.add("next");
+        types.add("nest");
         types.add("secretPortal");
     }
 
@@ -70,8 +70,8 @@ public class BlockNest extends Block implements ITileEntityProvider
     {
         if (state.getValue(TYPE) == 1) return Blocks.STONEBRICK.getDefaultState().withProperty(BlockStoneBrick.VARIANT,
                 BlockStoneBrick.EnumType.CHISELED);
-
-        if (pos.getY() > 0) return worldIn.getBlockState(pos.down()).getActualState(worldIn, pos.down());
+        if (pos.getY() > 0) state = worldIn.getBlockState(pos.down()).getActualState(worldIn, pos.down());
+        if (!state.isBlockNormalCube()) state = Blocks.STONE.getDefaultState();
         return state;
     }
 
@@ -87,8 +87,8 @@ public class BlockNest extends Block implements ITileEntityProvider
         {
             TileEntityNest nest = (TileEntityNest) tile_entity;
             PokedexEntry entry = ItemPokemobEgg.getEntry(playerIn.getHeldItemMainhand());
-            if (entry != null) nest.pokedexNb = entry.getPokedexNb();
-            playerIn.sendMessage(new TextComponentString("Set to " + entry));
+            if (entry != null) nest.spawns.add(entry);
+            playerIn.sendMessage(new TextComponentString("Added " + entry));
             return true;
         }
         if (state.getValue(TYPE) == 1)

@@ -9,12 +9,13 @@ import pokecube.core.ai.utils.pathing.PokemobNavigator;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
+import thut.api.entity.ai.IAICombat;
 import thut.api.maths.Vector3;
 
 /** This IAIRunnable manages the movement of the mob while it is in combat, but
  * on cooldown between attacks. It also manages the leaping at targets, and the
  * dodging of attacks. */
-public class AICombatMovement extends AIBase
+public class AICombatMovement extends AIBase implements IAICombat
 {
     final EntityLiving attacker;
     final IPokemob     pokemob;

@@ -1,6 +1,8 @@
 package pokecube.core.ai.thread.logicRunnables;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 
 import net.minecraft.init.SoundEvents;
@@ -75,15 +77,6 @@ public class LogicMovesUpdates extends LogicBase
         // Run tasks that only should go on server side.
         if (!world.isRemote)
         {
-            int num = pokemob.getAttackCooldown();
-
-            // Check if active move is done, if so, clear it.
-            if (pokemob.getActiveMove() != null && pokemob.getActiveMove().isDone()) pokemob.setActiveMove(null);
-
-            // Only reduce cooldown if the pokemob does not currently have a
-            // move being fired.
-            if (num > 0 && pokemob.getActiveMove() == null) pokemob.setAttackCooldown(num - 1);
-
             for (int i = 0; i < 4; i++)
             {
                 int timer = pokemob.getDisableTimer(i);
@@ -107,27 +100,44 @@ public class LogicMovesUpdates extends LogicBase
 
             if (pokemob.getMoves()[0] == null)
             {
-                pokemob.learn(IMoveNames.MOVE_TACKLE);
+                String move = IMoveNames.MOVE_TACKLE;
+                List<String> moves = pokemob.getPokedexEntry().getMovesForLevel(pokemob.getLevel());
+                if (!moves.isEmpty()) move = moves.get(new Random().nextInt(moves.size()));
+                pokemob.learn(move);
             }
         }
 
         // Run tasks that can be on server or client.
+
+        // Update move cooldowns.
+        int num = pokemob.getAttackCooldown();
+
+        // Check if active move is done, if so, clear it.
+        if (pokemob.getActiveMove() != null && pokemob.getActiveMove().isDone()) pokemob.setActiveMove(null);
+
+        // Only reduce cooldown if the pokemob does not currently have a
+        // move being fired.
+        if (num > 0 && pokemob.getActiveMove() == null) pokemob.setAttackCooldown(num - 1);
+
+        // Revert transform if not in battle or breeding.
         if (pokemob.getTransformedTo() != null && entity.getAttackTarget() == null
                 && !(pokemob.getGeneralState(GeneralStates.MATING) || pokemob.getLover() != null))
-
         {
             pokemob.setTransformedTo(null);
         }
-        if (pokemob.getTransformedTo() == null && pokemob.getLover() != null &&
-
-                hasMove(IMoveNames.MOVE_TRANSFORM))
+        // apply transform if breeding and applicable.
+        if (pokemob.getTransformedTo() == null && pokemob.getLover() != null && hasMove(IMoveNames.MOVE_TRANSFORM))
         {
             pokemob.setTransformedTo(pokemob.getLover());
         }
+
+        // Update abilities.
         if (pokemob.getAbility() != null && entity.isServerWorld())
         {
             pokemob.getAbility().onUpdate(pokemob);
         }
+
+        // Tick held items.
         IPokemobUseable usable = IPokemobUseable.getUsableFor(pokemob.getHeldItem());
         if (!entity.isDead && usable != null)
         {

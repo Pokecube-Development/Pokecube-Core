@@ -369,11 +369,20 @@ public abstract class PokemobMoves extends PokemobSexed
     public void setActiveMove(EntityMoveUse move)
     {
         this.activeMove = move;
+        int id = move == null ? -1 : move.getEntityId();
+        this.dataSync().set(params.ACTIVEMOVEID, id);
     }
 
     @Override
     public EntityMoveUse getActiveMove()
     {
+        int id = this.dataSync().get(params.ACTIVEMOVEID);
+        if (id == -1) return null;
+        if (this.activeMove == null || this.activeMove.getEntityId() != id)
+        {
+            Entity move = this.getEntity().getEntityWorld().getEntityByID(id);
+            if (move instanceof EntityMoveUse) this.activeMove = (EntityMoveUse) move;
+        }
         return this.activeMove;
     }
 

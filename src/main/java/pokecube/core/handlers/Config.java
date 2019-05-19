@@ -355,7 +355,7 @@ public class Config extends ConfigBase
     @Configure(category = mobAI)
     public int                           idleTickRate                 = 20;
     @Configure(category = mobAI)
-    public int                           idleMaxPathWild              = 16;
+    public int                           idleMaxPathWild              = 8;
     @Configure(category = mobAI)
     public int                           idleMaxPathTame              = 8;
     @Configure(category = mobAI)

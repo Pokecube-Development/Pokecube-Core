@@ -12,9 +12,10 @@ import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
+import thut.api.entity.ai.IAICombat;
 import thut.api.maths.Vector3;
 
-public class AILeap extends AIBase
+public class AILeap extends AIBase implements IAICombat
 {
     final EntityLiving attacker;
     final IPokemob     pokemob;

@@ -9,7 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import pokecube.core.ai.thread.logicRunnables.LogicMountedControl;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
@@ -116,9 +115,4 @@ public interface IHasOwner extends IEntityOwnable, IHasMobAIStates
 
     /** @return The direction this mob is going, only relevant when ridden. */
     float getHeading();
-
-    /** Additional NBT tag for addons to save stuff specific to the pokemob in
-     * 
-     * @return */
-    NBTTagCompound getExtraData();
 }

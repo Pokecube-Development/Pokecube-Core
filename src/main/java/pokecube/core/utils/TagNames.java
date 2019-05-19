@@ -117,7 +117,6 @@ public interface TagNames
     public static final String AIROUTINES   = "aiRoutines";
     public static final String HUNGER       = "hunger";
     public static final String ITEMS        = "items";
-    public static final String EXTRATAG     = "extraTag";
 
     // Tag names for Pokecubes
     public static final String POKEMOB      = "Pokemob";

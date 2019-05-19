@@ -126,48 +126,66 @@ public final class SpawnHandler
         }
     }
 
-    public static Variance                             DEFAULT_VARIANCE        = new Variance();
-    private static final Map<ChunkCoordinate, Integer> forbiddenSpawningCoords = new HashMap<ChunkCoordinate, Integer>();
-    private static Int2ObjectArrayMap<Function>        functions               = new Int2ObjectArrayMap<>();
-    public static HashMap<Integer, Variance>           subBiomeLevels          = new HashMap<Integer, Variance>();
-    public static boolean                              doSpawns                = true;
-    public static boolean                              onlySubbiomes           = false;
-    public static boolean                              refreshSubbiomes        = false;
-    public static HashSet<Integer>                     dimensionBlacklist      = Sets.newHashSet();
-    public static HashSet<Integer>                     dimensionWhitelist      = Sets.newHashSet();
-    public static Predicate<Integer>                   biomeToRefresh          = new Predicate<Integer>()
-                                                                               {
-                                                                                   @Override
-                                                                                   public boolean apply(Integer input)
-                                                                                   {
-                                                                                       if (input == -1
-                                                                                               || refreshSubbiomes)
-                                                                                           return true;
-                                                                                       return input == BiomeType.SKY
-                                                                                               .getType()
-                                                                                               || input == BiomeType.CAVE
-                                                                                                       .getType()
-                                                                                               || input == BiomeType.CAVE_WATER
-                                                                                                       .getType()
-                                                                                               || input == BiomeType.VILLAGE
-                                                                                                       .getType()
-                                                                                               || input == BiomeType.ALL
-                                                                                                       .getType()
-                                                                                               || input == PokecubeTerrainChecker.INSIDE
-                                                                                                       .getType()
-                                                                                               || input == BiomeType.NONE
-                                                                                                       .getType();
-                                                                                   }
-                                                                               };
+    public static enum ForbidReason
+    {
+        NONE, REPEL, NEST;
+    }
 
-    private static Vector3                             vec1                    = Vector3.getNewVector();
-    private static Vector3                             temp                    = Vector3.getNewVector();
-    public static double                               MAX_DENSITY             = 1;
-    public static int                                  MAXNUM                  = 10;
-    public static boolean                              lvlCap                  = false;
-    public static boolean                              expFunction             = false;
-    public static int                                  capLevel                = 50;
-    public static final HashMap<Integer, JEP>          parsers                 = new HashMap<Integer, JEP>();
+    public static class ForbiddenEntry
+    {
+        final int          range;
+        final ForbidReason reason;
+
+        public ForbiddenEntry(int range, ForbidReason reason)
+        {
+            this.range = range;
+            this.reason = reason;
+        }
+    }
+
+    public static Variance                                    DEFAULT_VARIANCE        = new Variance();
+    private static final Map<ChunkCoordinate, ForbiddenEntry> forbiddenSpawningCoords = new HashMap<ChunkCoordinate, ForbiddenEntry>();
+    private static Int2ObjectArrayMap<Function>               functions               = new Int2ObjectArrayMap<>();
+    public static HashMap<Integer, Variance>                  subBiomeLevels          = new HashMap<Integer, Variance>();
+    public static boolean                                     doSpawns                = true;
+    public static boolean                                     onlySubbiomes           = false;
+    public static boolean                                     refreshSubbiomes        = false;
+    public static HashSet<Integer>                            dimensionBlacklist      = Sets.newHashSet();
+    public static HashSet<Integer>                            dimensionWhitelist      = Sets.newHashSet();
+    public static Predicate<Integer>                          biomeToRefresh          = new Predicate<Integer>()
+                                                                                      {
+                                                                                          @Override
+                                                                                          public boolean apply(
+                                                                                                  Integer input)
+                                                                                          {
+                                                                                              if (input == -1
+                                                                                                      || refreshSubbiomes)
+                                                                                                  return true;
+                                                                                              return input == BiomeType.SKY
+                                                                                                      .getType()
+                                                                                                      || input == BiomeType.CAVE
+                                                                                                              .getType()
+                                                                                                      || input == BiomeType.CAVE_WATER
+                                                                                                              .getType()
+                                                                                                      || input == BiomeType.VILLAGE
+                                                                                                              .getType()
+                                                                                                      || input == BiomeType.ALL
+                                                                                                              .getType()
+                                                                                                      || input == PokecubeTerrainChecker.INSIDE
+                                                                                                              .getType()
+                                                                                                      || input == BiomeType.NONE
+                                                                                                              .getType();
+                                                                                          }
+                                                                                      };
+
+    private static Vector3                                    vec1                    = Vector3.getNewVector();
+    private static Vector3                                    temp                    = Vector3.getNewVector();
+    public static double                                      MAX_DENSITY             = 1;
+    public static int                                         MAXNUM                  = 10;
+    public static boolean                                     lvlCap                  = false;
+    public static boolean                                     expFunction             = false;
+    public static int                                         capLevel                = 50;
+    public static final HashMap<Integer, JEP>                 parsers                 = new HashMap<Integer, JEP>();
 
     public static PokedexEntry getSpawnForLoc(World world, Vector3 pos)
     {
@@ -197,14 +215,14 @@ public final class SpawnHandler
 
     public static boolean addForbiddenSpawningCoord(BlockPos pos, int dimensionId, int distance)
     {
-        return addForbiddenSpawningCoord(pos.getX(), pos.getY(), pos.getZ(), dimensionId, distance);
+        return addForbiddenSpawningCoord(pos.getX(), pos.getY(), pos.getZ(), dimensionId, distance, ForbidReason.REPEL);
     }
 
-    public static boolean addForbiddenSpawningCoord(int x, int y, int z, int dim, int range)
+    public static boolean addForbiddenSpawningCoord(int x, int y, int z, int dim, int range, ForbidReason reason)
     {
         ChunkCoordinate coord = new ChunkCoordinate(x, y, z, dim);
         if (forbiddenSpawningCoords.containsKey(coord)) return false;
-        forbiddenSpawningCoords.put(coord, range);
+        forbiddenSpawningCoords.put(coord, new ForbiddenEntry(range, reason));
         return true;
     }
 
@@ -252,26 +270,30 @@ public final class SpawnHandler
         return data.isValid(world, v);
     }
 
-    /** Checks there's no spawner in the area
-     * 
-     * @param world
-     * @param chunkPosX
-     * @param chunkPosY
-     * @param chunkPosZ
-     * @return */
-    public static boolean checkNoSpawnerInArea(World world, int chunkPosX, int chunkPosY, int chunkPosZ)
+    public static boolean checkNoSpawnerInArea(World world, int x, int y, int z)
+    {
+        ForbiddenEntry entry = getForbiddenEntry(world, x, y, z);
+        return entry == null ? true : entry.reason != ForbidReason.NONE;
+    }
+
+    public static ForbidReason getNoSpawnReason(World world, int x, int y, int z)
+    {
+        ForbiddenEntry entry = getForbiddenEntry(world, x, y, z);
+        return entry == null ? ForbidReason.NONE : entry.reason;
+    }
+
+    public static ForbiddenEntry getForbiddenEntry(World world, int x, int y, int z)
     {
         ArrayList<ChunkCoordinate> coords = new ArrayList<ChunkCoordinate>(forbiddenSpawningCoords.keySet());
-
         for (ChunkCoordinate coord : coords)
         {
-            int tolerance = forbiddenSpawningCoords.get(coord);
-            if (chunkPosX >= coord.getX() - tolerance && chunkPosZ >= coord.getZ() - tolerance
-                    && chunkPosY >= coord.getY() - tolerance && chunkPosY <= coord.getY() + tolerance
-                    && chunkPosX <= coord.getX() + tolerance && chunkPosZ <= coord.getZ() + tolerance
-                    && world.provider.getDimension() == coord.dim) { return false; }
+            ForbiddenEntry entry = forbiddenSpawningCoords.get(coord);
+            int tolerance = entry.range;
+            if (x >= coord.getX() - tolerance && z >= coord.getZ() - tolerance && y >= coord.getY() - tolerance
+                    && y <= coord.getY() + tolerance && x <= coord.getX() + tolerance && z <= coord.getZ() + tolerance
+                    && world.provider.getDimension() == coord.dim) { return entry; }
         }
-        return true;
+        return null;
     }
 
     public static EntityLiving creatureSpecificInit(EntityLiving entityliving, World world, double posX, double posY,

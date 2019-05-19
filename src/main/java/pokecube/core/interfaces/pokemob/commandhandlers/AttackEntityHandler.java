@@ -46,13 +46,12 @@ public class AttackEntityHandler extends DefaultHandler
             }
             return;
         }
-        String moveName = "";
         int currentMove = pokemob.getMoveIndex();
-        MinecraftForge.EVENT_BUS.post(new CommandAttackEvent(pokemob.getEntity(), target));
-        if (currentMove != 5 && MovesUtils.canUseMove(pokemob))
+        CommandAttackEvent event = new CommandAttackEvent(pokemob.getEntity(), target);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (!event.isCanceled() && currentMove != 5 && MovesUtils.canUseMove(pokemob))
         {
             Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
-            moveName = MovesUtils.getUnlocalizedMove(move.getName());
             if (move.isSelfMove())
             {
                 pokemob.executeMove(pokemob.getEntity(), null, 0);
@@ -61,7 +60,7 @@ public class AttackEntityHandler extends DefaultHandler
             {
                 ITextComponent mess = new TextComponentTranslation("pokemob.command.attack",
                         pokemob.getPokemonDisplayName(), target.getDisplayName(),
-                        new TextComponentTranslation(moveName));
+                        new TextComponentTranslation(MovesUtils.getUnlocalizedMove(move.getName())));
                 if (fromOwner()) pokemob.displayMessageToOwner(mess);
                 pokemob.getEntity().setAttackTarget((EntityLivingBase) target);
                 if (target instanceof EntityLiving) ((EntityLiving) target).setAttackTarget(pokemob.getEntity());

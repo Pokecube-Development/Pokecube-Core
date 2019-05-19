@@ -71,6 +71,7 @@ public abstract class PokemobBase implements IPokemob
         public int         TYPE1DW;
         public int         TYPE2DW;
         public final int[] DISABLE  = new int[4];
+        public int         ACTIVEMOVEID;
 
         public void register(IPokemob pokemob)
         {
@@ -120,6 +121,9 @@ public abstract class PokemobBase implements IPokemob
             {
                 DISABLE[i] = sync.register(new Data_Int(), Integer.valueOf(0));
             }
+
+            // EntityID of the active move use entity.
+            ACTIVEMOVEID = sync.register(new Data_Int(), Integer.valueOf(-1));
         }
     }
 

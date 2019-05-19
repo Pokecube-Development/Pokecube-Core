@@ -15,7 +15,8 @@ public class AttackNothingHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob)
     {
-        MinecraftForge.EVENT_BUS.post(new CommandAttackEvent(pokemob.getEntity(), null));
-        pokemob.executeMove(pokemob.getEntity(), null, 0);
+        CommandAttackEvent event = new CommandAttackEvent(pokemob.getEntity(), null);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (!event.isCanceled()) pokemob.executeMove(pokemob.getEntity(), null, 0);
     }
 }

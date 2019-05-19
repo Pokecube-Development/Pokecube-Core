@@ -14,8 +14,9 @@ import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.utils.Tools;
+import thut.api.entity.ai.IAICombat;
 
-public class AISelectMove extends AIBase
+public class AISelectMove extends AIBase implements IAICombat
 {
     final EntityLiving attacker;
     final IPokemob     pokemob;

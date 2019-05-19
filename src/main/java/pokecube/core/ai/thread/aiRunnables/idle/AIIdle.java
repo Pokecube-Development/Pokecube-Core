@@ -127,6 +127,7 @@ public class AIIdle extends AIBase
         boolean tameFactor = mob.getGeneralState(GeneralStates.TAMED) && !mob.getGeneralState(GeneralStates.STAYING);
         int distance = (int) (maxLength = tameFactor ? PokecubeMod.core.getConfig().idleMaxPathTame
                 : PokecubeMod.core.getConfig().idleMaxPathWild);
+        boolean goHome = false;
         if (!tameFactor)
         {
             if (mob.getHome() == null
@@ -137,6 +138,10 @@ public class AIIdle extends AIBase
             }
             distance = (int) Math.min(distance, mob.getHomeDistance());
             v.set(mob.getHome());
+            if (entity.getDistanceSq(mob.getHome()) > mob.getHomeDistance() * mob.getHomeDistance())
+            {
+                goHome = true;
+            }
         }
         else
         {
@@ -144,15 +149,24 @@ public class AIIdle extends AIBase
             if (mob.getPokemonOwner() != null) setTo = mob.getPokemonOwner();
             v.set(setTo);
         }
-        Vector3 v = getRandomPointNear(world, mob, v1, distance);
-        if (v == null) return false;
-        double diff = Math.max(mob.getPokedexEntry().length * mob.getSize(),
-                mob.getPokedexEntry().width * mob.getSize());
-        diff = Math.max(2, diff);
-        if (this.v.distToSq(v) < diff) { return false; }
-        this.x = v.x;
-        this.y = Math.round(v.y);
-        this.z = v.z;
+        if (goHome)
+        {
+            this.x = v.x;
+            this.y = Math.round(v.y);
+            this.z = v.z;
+        }
+        else
+        {
+            Vector3 v = getRandomPointNear(world, mob, v1, distance);
+            if (v == null) return false;
+            double diff = Math.max(mob.getPokedexEntry().length * mob.getSize(),
+                    mob.getPokedexEntry().width * mob.getSize());
+            diff = Math.max(2, diff);
+            if (this.v.distToSq(v) < diff) { return false; }
+            this.x = v.x;
+            this.y = Math.round(v.y);
+            this.z = v.z;
+        }
         mob.setGeneralState(GeneralStates.IDLE, true);
         return true;
     }
