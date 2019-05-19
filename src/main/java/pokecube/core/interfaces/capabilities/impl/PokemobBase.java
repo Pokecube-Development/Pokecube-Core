@@ -28,6 +28,8 @@ import pokecube.core.ai.utils.PokemobMoveHelper;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.entity.pokemobs.AnimalChest;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.pokemob.moves.PokemobMoveStats;
+import pokecube.core.interfaces.pokemob.stats.StatModifiers;
 import pokecube.core.moves.animations.EntityMoveUse;
 import thut.api.entity.IBreedingMob;
 import thut.api.entity.ai.AIThreadManager.AIStuff;

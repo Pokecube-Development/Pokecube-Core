@@ -69,7 +69,7 @@ public enum Nature
         return ret;
     }
 
-    final byte[] stats;
+    public final byte[] stats;
 
     final byte   badFlavour;
 

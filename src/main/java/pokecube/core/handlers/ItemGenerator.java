@@ -19,7 +19,7 @@ import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.berries.BlockBerryLog;
 import pokecube.core.blocks.berries.BlockBerryWood;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.IPokemob.MovePacket;
+import pokecube.core.interfaces.pokemob.moves.MovePacket;
 import pokecube.core.items.ItemFossil;
 import pokecube.core.items.ItemHeldItems;
 import pokecube.core.items.ItemTM;

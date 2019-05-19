@@ -7,8 +7,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.IPokemob.MovePacket;
 import pokecube.core.interfaces.Move_Base;
+import pokecube.core.interfaces.pokemob.moves.MovePacket;
 import thut.api.maths.Vector3;
 
 /** These events are fired on the

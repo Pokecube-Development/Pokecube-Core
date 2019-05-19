@@ -5,7 +5,6 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -27,7 +26,7 @@ public abstract class PokemobHungry extends PokemobMoves
 {
 
     @Override
-    public void eat(Entity e)
+    public void eat(Object e)
     {
         int hungerValue = PokecubeMod.core.getConfig().pokemobLifeSpan / 4;
         if (e instanceof EntityItem)
@@ -202,7 +201,7 @@ public abstract class PokemobHungry extends PokemobMoves
     }
 
     @Override
-    public void noEat(Entity e)
+    public void noEat(Object e)
     {
         if (e != null)
         {

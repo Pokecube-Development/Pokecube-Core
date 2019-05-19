@@ -15,8 +15,8 @@ import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
-import pokecube.core.interfaces.IPokemob.MovePacket;
 import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.interfaces.pokemob.moves.MovePacket;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.utils.PokeType;
 

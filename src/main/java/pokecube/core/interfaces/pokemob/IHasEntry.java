@@ -7,10 +7,7 @@ import pokecube.core.interfaces.IPokemob;
 public interface IHasEntry extends IHasMobAIStates
 {
     /** @return the minecraft entity associated with this pokemob */
-    default EntityLiving getEntity()
-    {
-        return (EntityLiving) this;
-    }
+    EntityLiving getEntity();
 
     /** @return the {@link PokedexEntry} of the species of this Pokemob */
     PokedexEntry getPokedexEntry();
@@ -32,10 +29,7 @@ public interface IHasEntry extends IHasMobAIStates
 
     /** @param entityIn
      *            Sets the vanilla entity for this pokemob */
-    default void setEntity(EntityLiving entityIn)
-    {
-        // Nope for default impl
-    }
+    void setEntity(EntityLiving entityIn);
 
     /** @return the {@link PokedexEntry} of the species of this Pokemob */
     IPokemob setPokedexEntry(PokedexEntry newEntry);

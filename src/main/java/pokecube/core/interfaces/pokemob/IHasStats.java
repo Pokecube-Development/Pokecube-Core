@@ -5,11 +5,11 @@ import pokecube.core.database.abilities.Ability;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.HappinessType;
-import pokecube.core.interfaces.IPokemob.StatModifiers;
 import pokecube.core.interfaces.IPokemob.Stats;
 import pokecube.core.interfaces.Nature;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
+import pokecube.core.interfaces.pokemob.stats.StatModifiers;
 import pokecube.core.utils.PokeType;
 import pokecube.core.utils.Tools;
 

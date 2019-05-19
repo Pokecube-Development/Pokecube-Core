@@ -13,6 +13,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.pokemob.LevelUpEvent;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.pokemob.stats.StatModifiers;
 import pokecube.core.network.pokemobs.PacketNickname;
 import pokecube.core.network.pokemobs.PacketSyncExp;
 import pokecube.core.utils.PokeType;
