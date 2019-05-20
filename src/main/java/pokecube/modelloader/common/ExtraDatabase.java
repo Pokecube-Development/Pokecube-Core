@@ -186,6 +186,7 @@ public class ExtraDatabase
         {
             loading = ProgressManager.push("XML Overrides", xmls.size());
         }
+        long time = System.nanoTime();
         for (String s : xmls.keySet())
         {
             if (toApply != null && !toApply.equalsIgnoreCase(s)) continue;
@@ -193,6 +194,8 @@ public class ExtraDatabase
             entry = apply(xmls.get(s).xml, entry);
             if (bar) loading.step(entry.getName());
         }
+        double dt = (System.nanoTime() - time) / 1e6;
+        if (PokecubeMod.debug) PokecubeMod.log("Extra XMLs took: " + dt);
         if (bar)
         {
             ProgressManager.pop(loading);
@@ -282,12 +285,18 @@ public class ExtraDatabase
         return entry;
     }
 
+    static JAXBContext  jaxbContext  = null;
+    static Unmarshaller unmarshaller = null;
+
     public static PokedexEntry apply(String xml, PokedexEntry entry)
     {
         try
         {
-            JAXBContext jaxbContext = JAXBContext.newInstance(XMLFile.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            if (jaxbContext == null)
+            {
+                jaxbContext = JAXBContext.newInstance(XMLFile.class);
+                unmarshaller = jaxbContext.createUnmarshaller();
+            }
             XMLFile file = (XMLFile) unmarshaller.unmarshal(new StringReader(xml));
             try
             {
