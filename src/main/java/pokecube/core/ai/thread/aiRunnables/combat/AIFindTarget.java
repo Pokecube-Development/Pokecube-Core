@@ -27,7 +27,6 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
-import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.handlers.TeamManager;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
@@ -257,41 +256,6 @@ public class AIFindTarget extends AIBase implements IAICombat
 
             pokemob.onSetTarget(evt.getTarget());
         }
-        // Attempt to swap target onto a pokemob owned by the target entity.
-        if (evt.getTarget() != null && evt.getEntityLiving() instanceof EntityLiving)
-        {
-            List<IPokemob> pokemon = EventsHandler.getPokemobs(evt.getTarget(), 32);
-            if (pokemon.isEmpty()) return;
-            double closest = 1000;
-            IPokemob newtarget = null;
-            // Find nearest pokemob owned by the target
-            for (IPokemob e : pokemon)
-            {
-                double dist = e.getEntity().getDistanceSq(evt.getEntityLiving());
-                if (e.getEntity() == evt.getEntityLiving()) continue;
-                if (e.getEntity().isDead) continue;
-                if (dist < closest
-                        && !(e.getGeneralState(GeneralStates.STAYING) && e.getLogicState(LogicStates.SITTING))
-                        && e.isRoutineEnabled(AIRoutine.AGRESSIVE))
-                {
-                    closest = dist;
-                    newtarget = e;
-                }
-            }
-            // swap target onto the pokemob found.
-            if (newtarget != null)
-            {
-                ((EntityLiving) evt.getEntityLiving()).setAttackTarget(newtarget.getEntity());
-                IPokemob mob = CapabilityPokemob.getPokemobFor(evt.getEntityLiving());
-                if (mob != null)
-                {
-                    mob.setCombatState(CombatStates.ANGRY, true);
-                    mob.setLogicState(LogicStates.SITTING, false);
-                }
-                newtarget.getEntity().setAttackTarget(evt.getEntityLiving());
-                newtarget.setCombatState(CombatStates.ANGRY, true);
-            }
-        }
     }
 
     final IPokemob           pokemob;
@@ -404,15 +368,18 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
         List<Entity> list = getEntitiesWithinDistance(pokemob.getPokemonOwner(), 16, EntityLivingBase.class);
+        Entity old = entity.getAttackTarget();
+        Entity oldOwner = old instanceof IEntityOwnable ? ((IEntityOwnable) old).getOwner() : null;
 
         if (!list.isEmpty() && pokemob.getPokemonOwner() != null)
         {
             for (int j = 0; j < list.size(); j++)
             {
                 Entity entity = list.get(j);
+                if (oldOwner != null && entity == oldOwner) return false;
 
                 if (entity instanceof EntityCreature && ((EntityCreature) entity).getAttackTarget() != null
-                        && ((EntityCreature) entity).getAttackTarget().equals(pokemob.getPokemonOwner())
+                        && ((EntityCreature) entity).getAttackTarget().equals(owner)
                         && Vector3.isVisibleEntityFromEntity(entity, entity))
                 {
                     addTargetInfo(this.entity, entity);
