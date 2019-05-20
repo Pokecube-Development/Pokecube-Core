@@ -392,11 +392,18 @@ public class AIFindTarget extends AIBase implements IAICombat
      * @return if target was found. */
     protected boolean checkOwner()
     {
+        Entity owner = pokemob.getPokemonOwner();
+
+        // Only apply if has owner.
+        if (owner == null) return false;
+        // Only apply if owner is close.
+        if (entity.getDistanceSq(owner) > 64) return false;
+
         int rate = PokecubeMod.core.getConfig().guardTickRate;
         // Disable via rate out of bounds, or not correct time in the rate.
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
-        List<Entity> list = getEntitiesWithinDistance(entity, 16, EntityLivingBase.class);
+        List<Entity> list = getEntitiesWithinDistance(pokemob.getPokemonOwner(), 16, EntityLivingBase.class);
 
         if (!list.isEmpty() && pokemob.getPokemonOwner() != null)
         {
@@ -409,6 +416,7 @@ public class AIFindTarget extends AIBase implements IAICombat
                         && Vector3.isVisibleEntityFromEntity(entity, entity))
                 {
                     addTargetInfo(this.entity, entity);
+                    addTargetInfo(entity, this.entity);
                     entityTarget = (EntityLivingBase) entity;
                     setCombatState(pokemob, CombatStates.ANGRY, true);
                     setLogicState(pokemob, LogicStates.SITTING, false);
@@ -527,13 +535,6 @@ public class AIFindTarget extends AIBase implements IAICombat
             }
             return;
         }
-        // Check if the pokemob is set to follow, and if so, look for mobs
-        // nearby trying to attack the owner of the pokemob, if any such are
-        // found, try to aggress them immediately.
-        if (!pokemob.getGeneralState(GeneralStates.STAYING) && pokemob.getGeneralState(GeneralStates.TAMED))
-        {
-            if (checkOwner()) return;
-        }
 
         // If hunting, look for valid prey, and if found, agress it.
         if (!pokemob.getLogicState(LogicStates.SITTING) && pokemob.isCarnivore()
@@ -639,6 +640,14 @@ public class AIFindTarget extends AIBase implements IAICombat
             agroTimer = -1;
             entityTarget = null;
             return false;
+        }
+
+        // Check if the pokemob is set to follow, and if so, look for mobs
+        // nearby trying to attack the owner of the pokemob, if any such are
+        // found, try to aggress them immediately.
+        if (!pokemob.getGeneralState(GeneralStates.STAYING) && pokemob.getGeneralState(GeneralStates.TAMED))
+        {
+            if (checkOwner()) return false;
         }
 
         /*
