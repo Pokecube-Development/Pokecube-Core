@@ -98,6 +98,13 @@ public class LogicMountedControl extends LogicBase
                 canDive = false;
             }
         }
+        if (canFly) for (int i = 0; i < PokecubeMod.core.getConfig().flyDimBlacklist.length; i++)
+            if (PokecubeMod.core.getConfig().flyDimBlacklist[i] == world.provider.getDimension())
+            {
+                canFly = false;
+                break;
+            }
+
         if (canFly) shouldControl = verticalControl = PokecubeMod.core.getConfig().flyEnabled || shouldControl;
         if ((canSurf || canDive) && (waterSpeed = entity.isInWater()))
             shouldControl = verticalControl = PokecubeMod.core.getConfig().surfEnabled || shouldControl;

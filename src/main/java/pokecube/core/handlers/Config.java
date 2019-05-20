@@ -301,6 +301,9 @@ public class Config extends ConfigBase
     @Configure(category = mobAI)
     public boolean                       flyEnabled                   = true;
     @Configure(category = mobAI)
+    @SyncConfig
+    public int[]                         flyDimBlacklist              = { -1, 1 };
+    @Configure(category = mobAI)
     public boolean                       surfEnabled                  = true;
     @Configure(category = mobAI)
     public boolean                       diveEnabled                  = true;

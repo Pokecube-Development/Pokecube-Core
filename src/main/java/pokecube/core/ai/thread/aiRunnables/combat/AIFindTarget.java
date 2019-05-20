@@ -227,7 +227,10 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (!handleDamagedTargets || evt.getEntity().getEntityWorld().isRemote) return;
         // Only handle attack target set, not revenge target set.
         if (evt.getTarget() == evt.getEntityLiving().getRevengeTarget()) return;
-
+        // Only handle actual changes in target.
+        if (evt.getEntityLiving() instanceof EntityLiving
+                && evt.getTarget() == ((EntityLiving) evt.getEntityLiving()).getAttackTarget())
+            return;
         // Prevent mob from targetting self.
         if (evt.getTarget() == evt.getEntityLiving())
         {
@@ -389,7 +392,12 @@ public class AIFindTarget extends AIBase implements IAICombat
      * @return if target was found. */
     protected boolean checkOwner()
     {
+        int rate = PokecubeMod.core.getConfig().guardTickRate;
+        // Disable via rate out of bounds, or not correct time in the rate.
+        if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
+
         List<Entity> list = getEntitiesWithinDistance(entity, 16, EntityLivingBase.class);
+
         if (!list.isEmpty() && pokemob.getPokemonOwner() != null)
         {
             for (int j = 0; j < list.size(); j++)
@@ -418,6 +426,10 @@ public class AIFindTarget extends AIBase implements IAICombat
      * @return if a hunt target was found. */
     protected boolean checkHunt()
     {
+        int rate = PokecubeMod.core.getConfig().hungerTickRate;
+        // Disable via rate out of bounds, or not correct time in the rate.
+        if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
+
         List<Entity> list = getEntitiesWithinDistance(entity, 16, EntityLivingBase.class);
         if (!list.isEmpty())
         {
@@ -464,8 +476,8 @@ public class AIFindTarget extends AIBase implements IAICombat
             centre.set(pokemob.getHome());
         else centre.set(pokemob.getPokemonOwner());
 
-        pokemobs = getEntitiesWithinDistance(centre, entity.dimension,
-                PokecubeMod.core.getConfig().guardSearchDistance, EntityLivingBase.class);
+        pokemobs = getEntitiesWithinDistance(centre, entity.dimension, PokecubeMod.core.getConfig().guardSearchDistance,
+                EntityLivingBase.class);
 
         // Only allow valid guard targets.
         for (Object o : pokemobs)

@@ -121,11 +121,6 @@ public class LogicMiscUpdate extends LogicBase
         }
         int id = pokemob.getTargetID();
 
-        if (entity.getEntityWorld().isRemote) if (id <= 0 && entity.getAttackTarget() != null)
-        {
-            pokemob.setTargetID(entity.getAttackTarget().getEntityId());
-        }
-
         if (!entity.getEntityWorld().isRemote) return;
 
         if (id >= 0 && entity.getAttackTarget() == null)
