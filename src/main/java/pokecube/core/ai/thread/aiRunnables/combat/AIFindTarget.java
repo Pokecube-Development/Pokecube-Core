@@ -11,7 +11,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -377,8 +376,8 @@ public class AIFindTarget extends AIBase implements IAICombat
                 Entity entity = list.get(j);
                 if (oldOwner != null && entity == oldOwner) return false;
 
-                if (entity instanceof EntityCreature && ((EntityCreature) entity).getAttackTarget() != null
-                        && ((EntityCreature) entity).getAttackTarget().equals(owner)
+                if (entity instanceof EntityLiving && ((EntityLiving) entity).getAttackTarget() != null
+                        && ((EntityLiving) entity).getAttackTarget().equals(owner)
                         && Vector3.isVisibleEntityFromEntity(entity, entity))
                 {
                     addTargetInfo(this.entity, entity);

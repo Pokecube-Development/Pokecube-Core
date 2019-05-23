@@ -116,11 +116,11 @@ public abstract class AIBase implements IAIRunnable
      * @author Thutmose */
     public static class MoveInfo implements IRunnable
     {
-        public final int                         attacker;
-        public final int                         targetEnt;
-        public final int                         dim;
-        public final Vector3                     target;
-        public final float                       distance;
+        public final int     attacker;
+        public final int     targetEnt;
+        public final int     dim;
+        public final Vector3 target;
+        public final float   distance;
 
         public MoveInfo(int _attacker, int _targetEnt, int dimension, Vector3 _target, float _distance)
         {
@@ -248,18 +248,18 @@ public abstract class AIBase implements IAIRunnable
             return set;
         }
     }
-    
-    protected IBlockAccess                   world;
 
-    int                                      priority          = 0;
+    protected IBlockAccess      world;
 
-    int                                      mutex             = 0;
+    int                         priority = 0;
 
-    protected Vector<IRunnable>              toRun             = new Vector<IRunnable>();
+    int                         mutex    = 0;
 
-    protected Vector<IRunnable>              moves             = new Vector<IRunnable>();
+    protected Vector<IRunnable> toRun    = new Vector<IRunnable>();
 
-    private PathManager                      pathManager;
+    protected Vector<IRunnable> moves    = new Vector<IRunnable>();
+
+    private PathManager         pathManager;
 
     /** Set the pathmanager for this mob. This is only really needed if the
      * AIBase is intended to manage prioritized pathfinding.
