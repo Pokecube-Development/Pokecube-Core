@@ -328,7 +328,7 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
             return;
         }
         super.onUpdate();
-        double dt = (System.nanoTime() - time) / 10e3D;
+        double dt = (System.nanoTime() - time) / 1e3;
         averagePokemobTick = ((averagePokemobTick * (ticksExisted - 1)) + dt) / ticksExisted;
         double toolong = 500;
         if (PokecubeMod.debug && dt > toolong && !getEntityWorld().isRemote)

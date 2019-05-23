@@ -77,7 +77,7 @@ public class LogicMiscUpdate extends LogicBase
             checkInventory(world);
 
             // Ensure the cache position is kept updated
-            if (entity.ticksExisted % 20 == 0)
+            if (entity.ticksExisted % 100 == 0)
             {
                 PlayerPokemobCache.UpdateCache(pokemob);
             }

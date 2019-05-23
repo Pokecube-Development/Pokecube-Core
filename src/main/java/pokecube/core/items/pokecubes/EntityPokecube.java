@@ -164,6 +164,7 @@ public class EntityPokecube extends EntityPokecubeBase
                     else
                     {
                         entity1.getEntity().setAttackTarget(entityHit);
+                        entity1.setCombatState(CombatStates.ANGRY, true);
                         entity1.setLogicState(LogicStates.SITTING, false);
                         if (entityHit instanceof EntityCreature)
                         {

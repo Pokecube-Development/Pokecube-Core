@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import thut.core.common.handlers.PlayerDataHandler;
@@ -20,8 +21,16 @@ public class PlayerPokemobCache extends PlayerData
     public static void UpdateCache(IPokemob mob)
     {
         if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
-        ItemStack stack = PokecubeManager.pokemobToItem(mob);
-        UpdateCache(stack, false, false);
+        final ItemStack stack = PokecubeManager.pokemobToItem(mob);
+        // Schedule this to run at some point, as it takes a while.
+        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                UpdateCache(stack, false, false);
+            }
+        });
     }
 
     public static void UpdateCache(ItemStack stack, boolean pc, boolean deleted)

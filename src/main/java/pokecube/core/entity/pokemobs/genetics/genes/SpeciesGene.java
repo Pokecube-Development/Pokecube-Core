@@ -80,6 +80,7 @@ public class SpeciesGene implements Gene
         if (info.value == otherG.info.value) mother = rand.nextFloat() < 0.5 ? this : otherG;
         SpeciesGene father = mother == otherG ? this : otherG;
         newGene.setValue(mother.info.clone());
+        if (newGene.info.entry.isMega) newGene.info.entry = newGene.info.entry.getBaseForme();
         newGene.info.entry = newGene.info.entry.getChild(father.info.entry);
         newGene.mutate();
         return newGene;
@@ -91,6 +92,8 @@ public class SpeciesGene implements Gene
         SpeciesGene newGene = new SpeciesGene();
         newGene.setValue(info.clone());
         newGene.info.value = getSexe(newGene.info.entry.getSexeRatio(), rand);
+        // Prevents mobs from hatching with wrong forms.
+        newGene.info.entry = info.entry.getChild();
         return newGene;
     }
 

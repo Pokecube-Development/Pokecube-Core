@@ -151,7 +151,7 @@ public class AIFindTarget extends AIBase implements IAICombat
 
         Entity attacker = source.getTrueSource();
 
-        // Camcel the event if it is from owner.
+        // Cancel the event if it is from owner.
         if (pokemobCap.getGeneralState(GeneralStates.TAMED)
                 && ((attacker instanceof EntityPlayer && ((EntityPlayer) attacker) == pokemobCap.getOwner())))
         {
@@ -253,7 +253,6 @@ public class AIFindTarget extends AIBase implements IAICombat
                 }
                 return;
             }
-
             pokemob.onSetTarget(evt.getTarget());
         }
     }
@@ -603,6 +602,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Target is too far away, lets forget it.
         if (target != null && entity.getDistance(target) > PokecubeMod.core.getConfig().chaseDistance)
         {
+            if (PokecubeMod.debug) PokecubeMod.log(Level.INFO, "Forgetting Target due to distance.");
             addTargetInfo(this.entity, null);
             agroTimer = -1;
             entityTarget = null;

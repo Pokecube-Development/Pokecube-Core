@@ -14,6 +14,8 @@ import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
 import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.network.pokemobs.PacketCommand.DefaultHandler;
 
@@ -63,7 +65,10 @@ public class AttackEntityHandler extends DefaultHandler
                         new TextComponentTranslation(MovesUtils.getUnlocalizedMove(move.getName())));
                 if (fromOwner()) pokemob.displayMessageToOwner(mess);
                 pokemob.getEntity().setAttackTarget((EntityLivingBase) target);
+                pokemob.setCombatState(CombatStates.ANGRY, true);
                 if (target instanceof EntityLiving) ((EntityLiving) target).setAttackTarget(pokemob.getEntity());
+                IPokemob targ = CapabilityPokemob.getPokemobFor(target);
+                if (targ != null) targ.setCombatState(CombatStates.ANGRY, true);
             }
         }
     }
