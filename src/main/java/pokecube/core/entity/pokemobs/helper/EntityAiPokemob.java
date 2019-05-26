@@ -42,7 +42,6 @@ import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
 import pokecube.core.utils.PokeType;
-import thut.api.entity.ai.ILogicRunnable;
 import thut.api.maths.Vector3;
 
 /** @author Manchou */
@@ -595,10 +594,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
         this.moveHelper = getMoveHelper();
         this.jumpHelper = getJumpHelper();
         super.onUpdate();
-        if (pokemobCap.selfManaged()) for (ILogicRunnable logic : pokemobCap.getAI().aiLogic)
-        {
-            logic.doServerTick(getEntityWorld());
-        }
+        
         headRotationOld = headRotation;
         if (looksWithInterest)
         {

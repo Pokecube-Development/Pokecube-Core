@@ -355,10 +355,6 @@ public class PokecubePacketHandler
                 IPokemob pokemob = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, worldObj));
                 if (pokemob != null)
                 {
-                    if (args.length > 1)
-                    {
-                        MakeCommand.setToArgs(args, pokemob, 1, null, false);
-                    }
                     pokemob.setPokemonOwner(owner.getUniqueID());
                     Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
                     if (contrib != null)
@@ -368,6 +364,10 @@ public class PokecubePacketHandler
                     else pokemob.setPokecube(new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE)));
                     pokemob.setExp(Tools.levelToXp(pokemob.getExperienceMode(), 5), true);
                     pokemob.getEntity().setHealth(pokemob.getEntity().getMaxHealth());
+                    if (args.length > 1)
+                    {
+                        MakeCommand.setToArgs(args, pokemob, 1, null, false);
+                    }
                     ItemStack item = PokecubeManager.pokemobToItem(pokemob);
                     PokecubeManager.heal(item);
                     pokemob.getEntity().isDead = true;

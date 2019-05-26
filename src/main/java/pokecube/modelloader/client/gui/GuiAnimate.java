@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -26,6 +29,9 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.handlers.EventsHandlerClient;
 import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.pokemob.ai.CombatStates;
+import pokecube.core.interfaces.pokemob.ai.GeneralStates;
+import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import pokecube.core.network.packets.PacketPokedex;
 import pokecube.modelloader.ModPokecubeML;
 import pokecube.modelloader.client.ClientProxy;
@@ -36,7 +42,9 @@ public class GuiAnimate extends GuiScreen
 
     PokedexEntry           pokeentry;
     protected GuiTextField anim;
-    protected GuiTextField state;
+    protected GuiTextField state_g;
+    protected GuiTextField state_c;
+    protected GuiTextField state_l;
     protected GuiTextField forme;
 
     protected GuiTextField info;
@@ -247,11 +255,18 @@ public class GuiAnimate extends GuiScreen
         super.drawScreen(mouseX, mouseY, partialTicks);
         int yOffset = height / 2;
         int xOffset = width / 2;
-        fontRenderer.drawString("Animation", width - 101, yOffset - yOffset / 2, 0xFFFFFF);
-        fontRenderer.drawString("State       Info:", width - 101, yOffset + 30 - yOffset / 2, 0xFFFFFF);
+
+        fontRenderer.drawString("State-General", width - 101, yOffset - 42 - yOffset / 2, 0xFFFFFF);
+        fontRenderer.drawString("State-Combat", width - 101, yOffset - 22 - yOffset / 2, 0xFFFFFF);
+        fontRenderer.drawString("State-Logic", width - 101, yOffset - 02 - yOffset / 2, 0xFFFFFF);
+
+        fontRenderer.drawString("Animation", width - 101, yOffset + 30 - yOffset / 2, 0xFFFFFF);
+        fontRenderer.drawString("              Info:", width - 101, yOffset + 30 - yOffset / 2, 0xFFFFFF);
         fontRenderer.drawString("Forme", width - 101, yOffset + 60 - yOffset / 2, 0xFFFFFF);
         anim.drawTextBox();
-        state.drawTextBox();
+        state_g.drawTextBox();
+        state_c.drawTextBox();
+        state_l.drawTextBox();
         forme.drawTextBox();
         info.drawTextBox();
         PokedexEntry entry = pokeentry;
@@ -302,11 +317,75 @@ public class GuiAnimate extends GuiScreen
 
         GL11.glScaled(scale, scale, scale);
 
-        String tex = state.getText().trim();
+        String tex = state_g.getText().trim();
 
-        if (!tex.isEmpty() && !state.isFocused())
+        if (!state_g.isFocused())
         {
-            // TODO per state rendering for this.
+            Set<GeneralStates> states = Sets.newHashSet();
+            String[] args = tex.split(" ");
+            for (String s : args)
+            {
+                try
+                {
+                    states.add(GeneralStates.valueOf(s.toUpperCase(Locale.ENGLISH)));
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            for (GeneralStates state : GeneralStates.values())
+            {
+                boolean value = states.contains(state);
+                pokemob.setGeneralState(state, value);
+            }
+        }
+        tex = state_l.getText().trim();
+
+        if (!state_l.isFocused())
+        {
+            Set<LogicStates> states = Sets.newHashSet();
+            String[] args = tex.split(" ");
+            for (String s : args)
+            {
+                try
+                {
+                    states.add(LogicStates.valueOf(s.toUpperCase(Locale.ENGLISH)));
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            for (LogicStates state : LogicStates.values())
+            {
+                boolean value = states.contains(state);
+                pokemob.setLogicState(state, value);
+            }
+        }
+
+        tex = state_c.getText().trim();
+
+        if (!state_c.isFocused())
+        {
+            Set<CombatStates> states = Sets.newHashSet();
+            String[] args = tex.split(" ");
+            for (String s : args)
+            {
+                try
+                {
+                    states.add(CombatStates.valueOf(s.toUpperCase(Locale.ENGLISH)));
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            for (CombatStates state : CombatStates.values())
+            {
+                boolean value = states.contains(state);
+                pokemob.setCombatState(state, value);
+            }
         }
 
         EntityLiving entity = pokemob.getEntity();
@@ -345,14 +424,15 @@ public class GuiAnimate extends GuiScreen
         {
 
         }
-        if (rend instanceof RenderAdvancedPokemobModel)
+        tex = anim.getText().trim();
+        if (!tex.isEmpty()) if (rend instanceof RenderAdvancedPokemobModel)
         {
             RenderAdvancedPokemobModel render = (RenderAdvancedPokemobModel) rend;
-            render.wrapper.anim = anim.getText();
+            render.wrapper.anim = tex;
             render.wrapper.overrideAnim = true;
         }
         EventsHandlerClient.renderMob(pokemob, partialTicks, false);
-        if (rend instanceof RenderAdvancedPokemobModel)
+        if (!tex.isEmpty()) if (rend instanceof RenderAdvancedPokemobModel)
         {
             RenderAdvancedPokemobModel render = (RenderAdvancedPokemobModel) rend;
             render.wrapper.anim = "";
@@ -409,9 +489,12 @@ public class GuiAnimate extends GuiScreen
         String name = PokecubePlayerDataHandler.getCustomDataTag(Minecraft.getMinecraft().player).getString("WEntry");
         pokeentry = Database.getEntry(name);
         if (pokeentry == null) pokeentry = Pokedex.getInstance().getFirstEntry();
-        anim = new GuiTextField(0, fontRenderer, width - 101, yOffset + 13 - yOffset / 2, 100, 10);
-        anim.setText("idle");
-        state = new GuiTextField(0, fontRenderer, width - 101, yOffset + 43 - yOffset / 2, 100, 10);
+        anim = new GuiTextField(0, fontRenderer, width - 101, yOffset + 43 - yOffset / 2, 100, 10);
+
+        state_g = new GuiTextField(0, fontRenderer, width - 101, yOffset - 33 - yOffset / 2, 100, 10);
+        state_c = new GuiTextField(0, fontRenderer, width - 101, yOffset - 13 - yOffset / 2, 100, 10);
+        state_l = new GuiTextField(0, fontRenderer, width - 101, yOffset + 07 - yOffset / 2, 100, 10);
+
         forme = new GuiTextField(0, fontRenderer, width - 101, yOffset + 73 - yOffset / 2, 100, 10);
         mob = PokecubePlayerDataHandler.getCustomDataTag(mc.player).getString("WEntry");
         PokedexEntry entry = Database.getEntry(mob);
@@ -446,7 +529,9 @@ public class GuiAnimate extends GuiScreen
     {
         super.keyTyped(typedChar, keyCode);
         boolean hit = anim.textboxKeyTyped(typedChar, keyCode);
-        hit = hit || state.textboxKeyTyped(typedChar, keyCode);
+        hit = hit || state_g.textboxKeyTyped(typedChar, keyCode);
+        hit = hit || state_c.textboxKeyTyped(typedChar, keyCode);
+        hit = hit || state_l.textboxKeyTyped(typedChar, keyCode);
         hit = hit || forme.textboxKeyTyped(typedChar, keyCode);
         hit = hit || info.textboxKeyTyped(typedChar, keyCode);
 
@@ -488,7 +573,9 @@ public class GuiAnimate extends GuiScreen
     {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         anim.mouseClicked(mouseX, mouseY, mouseButton);
-        state.mouseClicked(mouseX, mouseY, mouseButton);
+        state_g.mouseClicked(mouseX, mouseY, mouseButton);
+        state_c.mouseClicked(mouseX, mouseY, mouseButton);
+        state_l.mouseClicked(mouseX, mouseY, mouseButton);
         forme.mouseClicked(mouseX, mouseY, mouseButton);
         info.mouseClicked(mouseX, mouseY, mouseButton);
         int xConv = mouseX - ((width));

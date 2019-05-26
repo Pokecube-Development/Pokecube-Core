@@ -1,5 +1,6 @@
 package pokecube.modelloader.client.render;
 
+import java.util.Locale;
 import java.util.Random;
 
 import net.minecraft.client.model.ModelBase;
@@ -163,6 +164,12 @@ public class ModelWrapper extends ModelBase
             }
         }
 
+        for (LogicStates state : LogicStates.values())
+        {
+            String anim = state.toString().toLowerCase(Locale.ENGLISH);
+            if (pokemob.getLogicState(state) && model.hasAnimation(anim, entity)) { return anim; }
+        }
+
         if (asleep && model.hasAnimation("sleeping", entity))
         {
             phase = "sleeping";
@@ -171,11 +178,6 @@ public class ModelWrapper extends ModelBase
         if (asleep && model.hasAnimation("asleep", entity))
         {
             phase = "asleep";
-            return phase;
-        }
-        if (pokemob.getLogicState(LogicStates.SITTING) && model.hasAnimation("sitting", entity))
-        {
-            phase = "sitting";
             return phase;
         }
         if (!entity.onGround && model.hasAnimation("flight", entity))
@@ -202,6 +204,12 @@ public class ModelWrapper extends ModelBase
         {
             phase = "walk";
             return phase;
+        }
+
+        for (CombatStates state : CombatStates.values())
+        {
+            String anim = state.toString().toLowerCase(Locale.ENGLISH);
+            if (pokemob.getCombatState(state) && model.hasAnimation(anim, entity)) { return anim; }
         }
         return phase;
     }
