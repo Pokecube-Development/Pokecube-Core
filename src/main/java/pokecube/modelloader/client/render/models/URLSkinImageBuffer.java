@@ -19,7 +19,7 @@ public class URLSkinImageBuffer extends ImageBufferDownload
     {
         imageWidth = bufferedimage.getWidth(null);
         imageHeight = bufferedimage.getHeight(null);
-        BufferedImage bufferedimage1 = new BufferedImage(imageWidth, imageWidth, 2);
+        BufferedImage bufferedimage1 = new BufferedImage(imageWidth, imageHeight, 2);
         Graphics graphics = bufferedimage1.getGraphics();
         graphics.drawImage(bufferedimage, 0, 0, null);
         graphics.dispose();

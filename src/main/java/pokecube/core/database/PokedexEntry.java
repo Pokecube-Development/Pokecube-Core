@@ -1218,15 +1218,15 @@ public class PokedexEntry
     {
         if (male != null)
         {
-            copyToForme(male);
+            copyFieldsToGenderForm(male);
         }
         if (female != null)
         {
-            copyToForme(female);
+            copyFieldsToGenderForm(female);
         }
     }
 
-    public void copyToForme(PokedexEntry forme)
+    public void copyFieldsToGenderForm(PokedexEntry forme)
     {
         Class<?> me = getClass();
         CopyToGender c;

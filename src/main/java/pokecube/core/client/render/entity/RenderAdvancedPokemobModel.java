@@ -29,8 +29,9 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
         if (entity.getEntityData().hasKey("url_model"))
         {
             NBTTagCompound modeltag = entity.getEntityData().getCompoundTag("url_model");
-            name = modeltag.getString("name");
-            if (name.isEmpty()) break models;
+            String tag_name = modeltag.getString("name");
+            if (tag_name.isEmpty()) break models;
+            name = tag_name + "___" + name;
             if (!AnimationLoader.modelMaps.containsKey(name))
             {
                 String url_model = modeltag.getString("model");

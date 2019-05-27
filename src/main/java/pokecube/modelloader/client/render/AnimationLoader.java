@@ -366,6 +366,31 @@ public class AnimationLoader
             float[] headCaps = { -180, 180 };
             float[] headCaps1 = { -30, 70 };
 
+            // Get or initialzie a pokedex entry.
+            PokedexEntry entry = Database.getEntry(model.name);
+            // No entry, so initialize it.
+            if (entry == null)
+            {
+                // Default base form.
+                PokedexEntry base = Database.missingno;
+
+                // Check for alternate base form.
+                String[] args = model.name.split("___");
+                if (args.length == 2)
+                {
+                    String name = args[1];
+                    base = Database.getEntry(name);
+                    if (base == null) base = Database.missingno;
+                }
+
+                // Make new entry, and copy values over from base.
+                entry = new PokedexEntry(base.getPokedexNb(), model.name);
+                base.copyToForm(entry);
+                base.copyFieldsToGenderForm(entry);
+                // Set as dummy.
+                entry.dummy = true;
+            }
+
             // Global model transforms
             Vector3 offset = null;
             Vector5 rotation = null;
@@ -464,7 +489,6 @@ public class AnimationLoader
                         // Texture Animation info
                         else if (phaseName.equals("textures"))
                         {
-                            PokedexEntry entry = Database.getEntry(model.name);
                             setTextureDetails(part, entry);
                         }
                         else
@@ -667,7 +691,7 @@ public class AnimationLoader
             }
             models.put(model.name, model);
             modelMaps.put(model.name, loaded);
-            System.err.println("No Animation found for " + model.name + " " + model.model);
+            PokecubeMod.log("No Animation found for " + model.name + " " + model.model);
             e.printStackTrace();
         }
     }
@@ -711,7 +735,7 @@ public class AnimationLoader
             shift = node.getAttributes().getNamedItem("female").getNodeValue();
             female = shift.split(",");
         }
-        if (female == null && male != null)
+        if (female == null && male != null || entry.textureDetails == null)
         {
             female = male;
         }

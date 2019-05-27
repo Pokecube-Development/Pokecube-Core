@@ -47,6 +47,7 @@ import thut.api.maths.Vector3;
 /** @author Manchou */
 public abstract class EntityAiPokemob extends EntityMountablePokemob
 {
+    public int        soundTicks        = 400;
     protected boolean looksWithInterest = false;
     protected float   headRotation;
     protected float   headRotationOld;
@@ -154,7 +155,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
      * silent. */
     public int getTalkInterval()
     {// TODO config option for this maybe?
-        return 400;
+        return soundTicks;
     }
 
     /*
@@ -594,7 +595,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
         this.moveHelper = getMoveHelper();
         this.jumpHelper = getJumpHelper();
         super.onUpdate();
-        
+
         headRotationOld = headRotation;
         if (looksWithInterest)
         {

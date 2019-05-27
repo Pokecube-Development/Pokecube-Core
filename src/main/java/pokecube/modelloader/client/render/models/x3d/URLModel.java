@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.Minecraft;
 import pokecube.modelloader.CommonProxy;
+import thut.core.client.render.model.IExtendedModelPart;
 import thut.core.client.render.x3d.X3dModel;
 import thut.core.client.render.x3d.X3dXML;
 
@@ -21,6 +23,7 @@ public class URLModel extends X3dModel
     private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
     private final File                 cacheFile;
     private final String               modelUrl;
+    public boolean                     done                  = false;
     private Thread                     downloadThread;
 
     public URLModel()
@@ -43,14 +46,19 @@ public class URLModel extends X3dModel
         }
     }
 
-    public synchronized void initModel()
+    public void initModel()
     {
         try
         {
-            FileInputStream stream = new FileInputStream(cacheFile);
-            X3dXML xml = new X3dXML(stream);
-            stream.close();
-            makeObjects(xml);
+            synchronized (this)
+            {
+                FileInputStream stream = new FileInputStream(cacheFile);
+                this.parts = new HashMap<String, IExtendedModelPart>();
+                X3dXML xml = new X3dXML(stream);
+                stream.close();
+                makeObjects(xml);
+                done = true;
+            }
         }
         catch (Exception e)
         {

@@ -101,6 +101,8 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
         nbt.setTag("p", pokemobCap.writePokemobData());
         nbt.setTag("g", list);
         buffer.writeCompoundTag(nbt);
+        nbt = getEntityData().getCompoundTag("url_model");
+        buffer.writeCompoundTag(nbt);
     }
 
     @Override
@@ -143,6 +145,11 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
             {
                 AICapWrapper wrapper = (AICapWrapper) ai;
                 wrapper.deserializeNBT(tag.getCompoundTag("a"));
+            }
+            tag = buffer.readCompoundTag();
+            if (!tag.hasNoTags())
+            {
+                getEntityData().setTag("url_model", tag);
             }
         }
         catch (Exception e)

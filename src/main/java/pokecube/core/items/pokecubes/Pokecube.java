@@ -125,6 +125,7 @@ public class Pokecube extends Item implements IPokecube
                 list.add("ERROR");
                 return;
             }
+            list.add(pokemob.getPokedexEntry().getTranslatedName());
 
             NBTTagCompound pokeTag = item.getTagCompound().getCompoundTag(TagNames.POKEMOB);
 

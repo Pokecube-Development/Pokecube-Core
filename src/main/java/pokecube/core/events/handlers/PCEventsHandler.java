@@ -328,8 +328,8 @@ public class PCEventsHandler
             else
             {
                 player.inventory.addItemStackToInventory(evt.filledCube);
-                if (player instanceof EntityPlayerMP)
-                    ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
+                if (player instanceof EntityPlayerMP) ((EntityPlayerMP) player)
+                        .sendAllContents(player.inventoryContainer, player.inventoryContainer.inventoryItemStacks);
             }
             if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) return;
 

@@ -95,7 +95,8 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
             }
             if (player instanceof EntityPlayerMP)
             {
-                ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
+                ((EntityPlayerMP) player).sendAllContents(player.inventoryContainer,
+                        player.inventoryContainer.inventoryItemStacks);
             }
         }
     }

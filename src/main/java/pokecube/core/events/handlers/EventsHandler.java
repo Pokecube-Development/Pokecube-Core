@@ -144,6 +144,7 @@ import thut.api.entity.genetics.IMobGenetics;
 import thut.api.maths.Vector3;
 import thut.api.terrain.BiomeType;
 import thut.api.terrain.TerrainManager;
+import thut.api.terrain.TerrainSegment;
 import thut.core.common.world.mobs.data.DataSync_Impl;
 import thut.lib.CompatWrapper;
 
@@ -167,10 +168,12 @@ public class EventsHandler
                 if (thisTick == null || thisTick.isEmpty()) return;
                 int i = 0;
                 int num = 0;
+
                 for (i = 0; i < Math.min(1000, thisTick.size()); i++)
                 {
                     BlockPos pos = thisTick.get(i);
-                    TerrainManager.getInstance().getTerrain(evt.world, pos).setBiome(pos, BiomeType.METEOR.getType());
+                    TerrainSegment seg = TerrainManager.getInstance().getTerrain(evt.world, pos);
+                    seg.setBiome(pos, BiomeType.METEOR.getType());
                     num = i + 1;
                 }
                 if (PokecubeMod.debug) PokecubeMod.log(Level.INFO, "Processed " + num + " blocks as meteor.");

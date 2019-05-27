@@ -64,6 +64,7 @@ public class URLXML
             public void run()
             {
                 HttpURLConnection connection = null;
+                System.out.println(cacheFile+" "+cacheFile.exists()+" "+URLXML.this.modelUrl);
                 URLXML.logger.debug("Downloading http texture from {} to {}",
                         new Object[] { URLXML.this.modelUrl, URLXML.this.cacheFile });
                 try
@@ -85,7 +86,7 @@ public class URLXML
                 }
                 catch (Exception exception)
                 {
-                    URLXML.logger.error("Couldn\'t download http model", exception);
+                    URLXML.logger.error("Couldn\'t download http xml", exception);
                 }
                 finally
                 {
