@@ -624,7 +624,7 @@ public class Tools
             }
             else if (key.toString().equals("tag"))
             {
-                tag = values.get(key);
+                tag = values.get(key).trim();
             }
         }
         if (id.isEmpty()) return ItemStack.EMPTY;
