@@ -95,7 +95,7 @@ public class TextureHelper implements IPartTexturer
             {
 
             }
-            if (state)
+            else if (state)
             {
 
             }
@@ -115,9 +115,10 @@ public class TextureHelper implements IPartTexturer
 
         private boolean parseState(String trigger, double[] arr)
         {
+            if (trigger != null) trigger = trigger.trim().toLowerCase(Locale.ENGLISH);
             for (LogicStates state : LogicStates.values())
             {
-                if (state.name().toLowerCase(Locale.ENGLISH).equals(trigger))
+                if (state.toString().toLowerCase(Locale.ENGLISH).equals(trigger))
                 {
                     logic.put(state, arr);
                     logicNames.put(trigger, state);
@@ -126,7 +127,7 @@ public class TextureHelper implements IPartTexturer
             }
             for (GeneralStates state : GeneralStates.values())
             {
-                if (state.name().toLowerCase(Locale.ENGLISH).equals(trigger))
+                if (state.toString().toLowerCase(Locale.ENGLISH).equals(trigger))
                 {
                     general.put(state, arr);
                     generalNames.put(trigger, state);
@@ -135,7 +136,7 @@ public class TextureHelper implements IPartTexturer
             }
             for (CombatStates state : CombatStates.values())
             {
-                if (state.name().toLowerCase(Locale.ENGLISH).equals(trigger))
+                if (state.toString().toLowerCase(Locale.ENGLISH).equals(trigger))
                 {
                     combat.put(state, arr);
                     combatNames.put(trigger, state);

@@ -458,10 +458,18 @@ public class AnimationLoader
                             if (phaseName.equals(s))
                             {
                                 if (PokecubeMod.debug) PokecubeMod.log("Loading " + s + " for " + model.name);
-                                Animation anim = AnimationRegistry.make(s, part.getAttributes(), null);
-                                if (anim != null)
+                                try
                                 {
-                                    tblAnims.add(anim);
+                                    Animation anim = AnimationRegistry.make(s, part.getAttributes(), null);
+                                    if (anim != null)
+                                    {
+                                        tblAnims.add(anim);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    PokecubeMod.log(Level.WARNING,
+                                            "Error with animation for model: " + model.name + " Anim: " + s, e);
                                 }
                             }
                         }

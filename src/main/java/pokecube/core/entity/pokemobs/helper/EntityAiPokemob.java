@@ -48,42 +48,11 @@ import thut.api.maths.Vector3;
 public abstract class EntityAiPokemob extends EntityMountablePokemob
 {
     public int        soundTicks        = 400;
-    protected boolean looksWithInterest = false;
-    protected float   headRotation;
-    protected float   headRotationOld;
-    protected boolean isPokemonShaking;
-    protected boolean isPokemonWet;
-    protected float   timePokemonIsShaking;
-    protected float   prevTimePokemonIsShaking;
 
     public EntityAiPokemob(World world)
     {
         super(world);
         here = Vector3.getNewVector();
-    }
-
-    @SideOnly(Side.CLIENT)
-    public float getInterestedAngle(float f)
-    {
-        return (headRotationOld + (headRotation - headRotationOld) * f) * 0.15F * (float) Math.PI;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public float getShakeAngle(float f, float f1)
-    {
-        float f2 = (prevTimePokemonIsShaking + (timePokemonIsShaking - prevTimePokemonIsShaking) * f + f1) / 1.8F;
-
-        if (f2 < 0.0F)
-        {
-            f2 = 0.0F;
-        }
-        else if (f2 > 1.0F)
-        {
-            f2 = 1.0F;
-        }
-
-        return MathHelper.sin(f2 * (float) Math.PI) * MathHelper.sin(f2 * (float) Math.PI * 11F) * 0.15F
-                * (float) Math.PI;
     }
 
     @Override
@@ -567,13 +536,6 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
         }
         if (this.ticksExisted > 100) forceSpawn = false;
         super.onLivingUpdate();
-        if (isServerWorld() && isPokemonShaking && !isPokemonWet && !hasPath() && onGround)
-        {
-            isPokemonWet = true;
-            timePokemonIsShaking = 0.0F;
-            prevTimePokemonIsShaking = 0.0F;
-            getEntityWorld().setEntityState(this, (byte) 8);
-        }
     }
 
     /** Returns whether the entity is in a server world */
@@ -595,52 +557,6 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
         this.moveHelper = getMoveHelper();
         this.jumpHelper = getJumpHelper();
         super.onUpdate();
-
-        headRotationOld = headRotation;
-        if (looksWithInterest)
-        {
-            headRotation = headRotation + (1.0F - headRotation) * 0.4F;
-        }
-        else
-        {
-            headRotation = headRotation + (0.0F - headRotation) * 0.4F;
-        }
-        if (looksWithInterest)
-        {
-
-        }
-        if (isWet() && !(pokemobCap.canUseSurf()))
-        {
-            isPokemonShaking = true;
-            isPokemonWet = false;
-            timePokemonIsShaking = 0.0F;
-            prevTimePokemonIsShaking = 0.0F;
-        }
-        else if ((isPokemonShaking || isPokemonWet) && isPokemonWet)
-        {
-            prevTimePokemonIsShaking = timePokemonIsShaking;
-            timePokemonIsShaking += 0.05F;
-            if (prevTimePokemonIsShaking >= 2.0F)
-            {
-                isPokemonShaking = false;
-                isPokemonWet = false;
-                prevTimePokemonIsShaking = 0.0F;
-                timePokemonIsShaking = 0.0F;
-            }
-            if (timePokemonIsShaking > 0.4F && !pokemobCap.swims())
-            {
-                float f = (float) posY;
-                int i = (int) (MathHelper.sin((timePokemonIsShaking - 0.4F) * (float) Math.PI) * 7F);
-
-                for (int j = 0; j < i; j++)
-                {
-                    float f1 = (rand.nextFloat() * 2.0F - 1.0F) * width * 0.5F;
-                    float f2 = (rand.nextFloat() * 2.0F - 1.0F) * width * 0.5F;
-                    getEntityWorld().spawnParticle(EnumParticleTypes.WATER_SPLASH, posX + f1, f + 0.8F, posZ + f2,
-                            motionX, motionY, motionZ);
-                }
-            }
-        }
     }
 
     @Override

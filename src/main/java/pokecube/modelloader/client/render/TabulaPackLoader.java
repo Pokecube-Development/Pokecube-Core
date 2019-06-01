@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +34,7 @@ import net.minecraftforge.common.IShearable;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.modelloader.IMobProvider;
 import thut.api.maths.Vector3;
@@ -238,7 +240,15 @@ public class TabulaPackLoader extends AnimationLoader
                         {
                             if (phaseName.equals(s))
                             {
-                                addAnimation(AnimationRegistry.make(s, part.getAttributes(), this));
+                                try
+                                {
+                                    addAnimation(AnimationRegistry.make(s, part.getAttributes(), this));
+                                }
+                                catch (Exception e)
+                                {
+                                    PokecubeMod.log(Level.WARNING,
+                                            "Error with animation for model: " + animation + " Anim: " + s, e);
+                                }
                                 preset = true;
                             }
                         }
