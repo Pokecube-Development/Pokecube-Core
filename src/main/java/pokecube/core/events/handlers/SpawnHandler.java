@@ -272,8 +272,8 @@ public final class SpawnHandler
 
     public static boolean checkNoSpawnerInArea(World world, int x, int y, int z)
     {
-        ForbiddenEntry entry = getForbiddenEntry(world, x, y, z);
-        return entry == null ? true : entry.reason != ForbidReason.NONE;
+        ForbidReason reason = getNoSpawnReason(world, x, y, z);
+        return reason == ForbidReason.NONE;
     }
 
     public static ForbidReason getNoSpawnReason(World world, int x, int y, int z)
