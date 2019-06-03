@@ -17,7 +17,6 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import pokecube.core.ai.properties.IGuardAICapability;
-import pokecube.core.ai.thread.logicRunnables.LogicCollision;
 import pokecube.core.ai.thread.logicRunnables.LogicFloatFlySwim;
 import pokecube.core.ai.thread.logicRunnables.LogicInLiquid;
 import pokecube.core.ai.thread.logicRunnables.LogicInMaterials;
@@ -247,7 +246,6 @@ public abstract class PokemobBase implements IPokemob
         // Add in the various logic AIs that are needed on both client and
         // server, so it is done here instead of in initAI.
         this.getAI().addAILogic(new LogicInLiquid(this));
-        this.getAI().addAILogic(new LogicCollision(this));
         this.getAI().addAILogic(new LogicMovesUpdates(this));
         this.getAI().addAILogic(new LogicInMaterials(this));
         this.getAI().addAILogic(new LogicFloatFlySwim(this));

@@ -3,7 +3,6 @@
  */
 package pokecube.core.entity.pokemobs.helper;
 
-import java.util.List;
 import java.util.logging.Level;
 
 import net.minecraft.crash.CrashReportCategory;
@@ -22,7 +21,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
-import pokecube.core.PokecubeCore;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.PokemobBodies;
 import pokecube.core.entity.pokemobs.EntityPokemobPart;
@@ -35,8 +33,6 @@ import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import pokecube.core.utils.PokeType;
 import pokecube.core.utils.TagNames;
 import pokecube.core.utils.Tools;
-import thut.api.maths.Matrix3;
-import thut.api.maths.Vector3;
 
 /** @author Manchou, Thutmose */
 public abstract class EntityPokemobBase extends EntityAiPokemob implements IEntityMultiPart, TagNames
@@ -234,48 +230,6 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     public boolean isInLava()
     {
         return pokemobCap.getLogicState(LogicStates.INLAVA);
-    }
-
-    List<AxisAlignedBB> aabbs = null;
-
-    public List<AxisAlignedBB> getTileCollsionBoxes()
-    {
-        if (this.getEntityWorld().isRemote && this.isBeingRidden()
-                && (this.getServer() == null || this.getServer().isDedicatedServer())
-                && pokemobCap.getOwner() == PokecubeCore.proxy.getPlayer((String) null))
-        {
-            Vector3 vec = Vector3.getNewVector();
-            Vector3 vec2 = Vector3.getNewVector();
-            double x = pokemobCap.getPokedexEntry().width * pokemobCap.getSize();
-            double z = pokemobCap.getPokedexEntry().length * pokemobCap.getSize();
-            double y = pokemobCap.getPokedexEntry().height * pokemobCap.getSize();
-            double v = vec.setToVelocity(this).mag();
-            vec.set(this);
-            vec2.set(x + v, y + v, z + v);
-            Matrix3 mainBox = new Matrix3();
-            Vector3 offset = Vector3.getNewVector();
-            mainBox.boxMin().clear();
-            mainBox.boxMax().x = x;
-            mainBox.boxMax().z = y;
-            mainBox.boxMax().y = z;
-            offset.set(-mainBox.boxMax().x / 2, 0, -mainBox.boxMax().z / 2);
-            double ar = mainBox.boxMax().x / mainBox.boxMax().z;
-            if (ar > 2 || ar < 0.5) mainBox.set(2, mainBox.rows[2].set(0, 0, (-rotationYaw) * Math.PI / 180));
-            mainBox.addOffsetTo(offset).addOffsetTo(vec);
-            AxisAlignedBB box = mainBox.getBoundingBox();
-            AxisAlignedBB box1 = box.grow(2 + x, 2 + y, 2 + z);
-            box1 = box1.grow(motionX, motionY, motionZ);
-            aabbs = mainBox.getCollidingBoxes(box1, getEntityWorld(), getEntityWorld());
-            // Matrix3.mergeAABBs(aabbs, x/2, y/2, z/2);
-            Matrix3.expandAABBs(aabbs, box);
-            if (box.getAverageEdgeLength() < 3) Matrix3.mergeAABBs(aabbs, 0.01, 0.01, 0.01);
-        }
-        return aabbs;
-    }
-
-    public void setTileCollsionBoxes(List<AxisAlignedBB> list)
-    {
-        aabbs = list;
     }
 
     @Override

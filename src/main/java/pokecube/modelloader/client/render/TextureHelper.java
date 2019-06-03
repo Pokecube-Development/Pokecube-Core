@@ -168,8 +168,9 @@ public class TextureHelper implements IPartTexturer
             {
                 // If logic state, or state is sleeping, and mob has sleep
                 // status.
-                if (pokemob.getLogicState(state)
+                if ((pokemob.getLogicState(state)
                         || (state == LogicStates.SLEEPING && (pokemob.getStatus() & IMoveConstants.STATUS_SLP) != 0))
+                        && logic.containsKey(state))
                 {
                     double[] arr = logic.get(state);
                     dx = arr[0];
@@ -184,7 +185,7 @@ public class TextureHelper implements IPartTexturer
             {
                 // If logic state, or state is sleeping, and mob has sleep
                 // status.
-                if (pokemob.getGeneralState(state))
+                if (pokemob.getGeneralState(state) && logic.containsKey(state))
                 {
                     double[] arr = logic.get(state);
                     dx = arr[0];
@@ -199,7 +200,7 @@ public class TextureHelper implements IPartTexturer
             {
                 // If logic state, or state is sleeping, and mob has sleep
                 // status.
-                if (pokemob.getCombatState(state))
+                if (pokemob.getCombatState(state) && logic.containsKey(state))
                 {
                     double[] arr = logic.get(state);
                     dx = arr[0];

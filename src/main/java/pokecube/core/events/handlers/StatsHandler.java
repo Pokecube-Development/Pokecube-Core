@@ -1,5 +1,7 @@
 package pokecube.core.events.handlers;
 
+import java.util.logging.Level;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -84,7 +86,17 @@ public class StatsHandler
 
         if (ISpecialCaptureCondition.captureMap.containsKey(entry))
         {
-            if (!ISpecialCaptureCondition.captureMap.get(entry).canCapture(catcher, evt.caught))
+            boolean deny = true;
+            try
+            {
+                deny = !ISpecialCaptureCondition.captureMap.get(entry).canCapture(catcher, evt.caught);
+            }
+            catch (Exception e)
+            {
+                PokecubeMod.log(Level.WARNING, "Error checking capture for " + entry, e);
+            }
+
+            if (deny)
             {
                 evt.setCanceled(true);
                 if (catcher instanceof EntityPlayer)

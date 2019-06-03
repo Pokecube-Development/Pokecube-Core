@@ -12,6 +12,7 @@ import thut.api.maths.Vector3;
  * seperate thread via doLogic() for performance reasons. */
 public class LogicInLiquid extends LogicBase
 {
+    Matrix3 box = new Matrix3();
 
     public LogicInLiquid(IPokemob pokemob_)
     {
@@ -29,7 +30,6 @@ public class LogicInLiquid extends LogicBase
         {
             for (Entity e : entity.getParts())
             {
-                Matrix3 box = new Matrix3();
                 box.set(e.getEntityBoundingBox());
                 if (!lava) lava = lava || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.LAVA);
                 if (!water) water = water || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.WATER);
@@ -37,7 +37,6 @@ public class LogicInLiquid extends LogicBase
         }
         else
         {
-            Matrix3 box = new Matrix3();
             box.set(entity.getEntityBoundingBox());
             if (!lava) lava = lava || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.LAVA);
             if (!water) water = water || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.WATER);
