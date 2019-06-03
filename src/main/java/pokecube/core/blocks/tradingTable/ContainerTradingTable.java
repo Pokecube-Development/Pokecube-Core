@@ -99,8 +99,7 @@ public class ContainerTradingTable extends Container
             itemstack = itemstack1.copy();
             if (index < 2)
             {
-                if (!this.mergeItemStack(itemstack1, 2, this.inventorySlots.size(),
-                        false)) { return ItemStack.EMPTY; }
+                if (!this.mergeItemStack(itemstack1, 2, this.inventorySlots.size(), false)) { return ItemStack.EMPTY; }
             }
             else if (!this.mergeItemStack(itemstack1, 0, 2, false)) { return ItemStack.EMPTY; }
             if (!CompatWrapper.isValid(itemstack1))

@@ -115,6 +115,7 @@ public class ContainerHealTable extends Container implements IHealer
                 dropCube(var3, player);
             }
         }
+        inventoryHealTable.closeInventory(player);
     }
 
     private void dropCube(ItemStack cube, EntityPlayer player)
