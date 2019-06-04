@@ -173,6 +173,8 @@ public class AIMate extends AIBase
                     @Override
                     public boolean apply(Entity input)
                     {
+                        World world = input.getEntityWorld();
+                        input = PokecubeMod.core.getEntityProvider().getEntity(world, input.entityId, true);
                         return input instanceof EntityAnimal && pokemob.canMate((EntityAnimal) input);
                     }
                 });
