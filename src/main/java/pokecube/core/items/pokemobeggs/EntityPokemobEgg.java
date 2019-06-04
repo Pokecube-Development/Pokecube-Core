@@ -158,6 +158,28 @@ public class EntityPokemobEgg extends EntityLiving
         return getHeldItemMainhand().copy();
     }
 
+    @Override
+    protected boolean processInteract(EntityPlayer player, EnumHand hand)
+    {
+        if (this.delayBeforeCanPickup > 0) { return false; }
+        ItemStack itemstack = this.getHeldItemMainhand();
+        int i = itemstack.getCount();
+        if (mother != null && mother.getOwner() != player)
+        {
+            mother.getEntity().setAttackTarget(player);
+        }
+        if ((i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+        {
+            player.onItemPickup(this, i);
+            if (itemstack.isEmpty())
+            {
+                this.setDead();
+            }
+            return true;
+        }
+        return super.processInteract(player, hand);
+    }
+
     /** Returns a generic pokemob instance with the data of the one in the egg,
      * this is not to be used for spawning into the world.
      * 
@@ -274,7 +296,7 @@ public class EntityPokemobEgg extends EntityLiving
         nbt.setInteger("age", age);
         nbt.setInteger("hatchtime", hatch);
     }
-    
+
     @Override
     protected boolean canDespawn()
     {
