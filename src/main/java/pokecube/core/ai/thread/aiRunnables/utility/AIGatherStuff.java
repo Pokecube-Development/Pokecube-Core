@@ -1,9 +1,12 @@
 package pokecube.core.ai.thread.aiRunnables.utility;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -42,17 +45,26 @@ import thut.lib.ItemStackTools;
  * before it will run. */
 public class AIGatherStuff extends AIBase
 {
-    public static int                           COOLDOWN     = 200;
+    public static int                           COOLDOWN_SEARCH  = 200;
+    public static int                           COOLDOWN_COLLECT = 20;
 
     // Matcher used to determine if a block is a fruit or crop to be picked.
-    private static final Predicate<IBlockState> berryMatcher = new Predicate<IBlockState>()
-                                                             {
-                                                                 @Override
-                                                                 public boolean apply(IBlockState input)
+    private static final Predicate<IBlockState> berryMatcher     = new Predicate<IBlockState>()
                                                                  {
-                                                                     return PokecubeTerrainChecker.isFruit(input);
-                                                                 }
-                                                             };
+                                                                     @Override
+                                                                     public boolean apply(IBlockState input)
+                                                                     {
+                                                                         return PokecubeTerrainChecker.isFruit(input);
+                                                                     }
+                                                                 };
+    private static final Predicate<EntityItem>  deaditemmatcher  = new Predicate<EntityItem>()
+                                                                 {
+                                                                     @Override
+                                                                     public boolean apply(EntityItem input)
+                                                                     {
+                                                                         return input.isDead || !input.addedToChunk;
+                                                                     }
+                                                                 };
 
     /** This manages the pokemobs replanting anything that they gather.
      * 
@@ -96,14 +108,13 @@ public class AIGatherStuff extends AIBase
             }
             return true;
         }
-
     }
 
     final EntityLiving entity;
     final double       distance;
     IPokemob           pokemob;
     boolean            block           = false;
-    EntityItem         stuff           = null;
+    List<EntityItem>   stuff           = Lists.newArrayList();
     Vector3            stuffLoc        = Vector3.getNewVector();
     boolean            hasRoom         = true;
     int                collectCooldown = 0;
@@ -127,17 +138,58 @@ public class AIGatherStuff extends AIBase
         super.doMainThreadTick(world);
         synchronized (stuffLoc)
         {
-            if (collectCooldown-- < 0 && !stuffLoc.isEmpty())
+            // check stuff for being still around.
+            if (collectCooldown-- < 0 && !stuff.isEmpty())
             {
-                if (stuff != null)
+                int num = stuff.size();
+                stuff.removeIf(deaditemmatcher);
+                Collections.sort(stuff, new Comparator<EntityItem>()
                 {
+                    @Override
+                    public int compare(EntityItem o1, EntityItem o2)
+                    {
+                        int dist1 = (int) o1.getDistanceSq(entity);
+                        int dist2 = (int) o2.getDistanceSq(entity);
+                        return dist1 - dist2;
+                    }
+                });
+
+                if (stuff.isEmpty())
+                {
+                    reset();
+                    return;
+                }
+
+                if (stuff.size() != num)
+                {
+                    stuffLoc.set(stuff.get(0));
+                    return;
+                }
+            }
+
+            if (!stuffLoc.isEmpty())
+            {
+                if (!stuff.isEmpty())
+                {
+                    EntityItem itemStuff = stuff.get(0);
+                    if (itemStuff.isDead || !itemStuff.addedToChunk)
+                    {
+                        stuff.remove(0);
+                        return;
+                    }
                     double close = entity.width * entity.width;
                     close = Math.max(close, 2);
-                    if (stuff.getDistance(entity) < close)
+                    if (itemStuff.getDistance(entity) < close)
                     {
-                        ItemStackTools.addItemStackToInventory(stuff.getItem(), pokemob.getPokemobInventory(), 2);
-                        stuff.setDead();
-                        reset();
+                        ItemStackTools.addItemStackToInventory(itemStuff.getItem(), pokemob.getPokemobInventory(), 2);
+                        itemStuff.setDead();
+                        stuff.remove(0);
+                        if (stuff.isEmpty()) reset();
+                        else
+                        {
+                            collectCooldown = COOLDOWN_COLLECT;
+                            stuffLoc.set(stuff.get(0));
+                        }
                     }
                 }
                 else
@@ -160,7 +212,7 @@ public class AIGatherStuff extends AIBase
                 : PokecubeMod.core.getConfig().wildGatherDistance;
 
         List<Entity> list = getEntitiesWithinDistance(entity, distance, EntityItem.class);
-        EntityItem newTarget = null;
+        stuff.clear();
         double closest = 1000;
 
         // Check for items to possibly gather.
@@ -171,15 +223,24 @@ public class AIGatherStuff extends AIBase
             v.set(e);
             if (dist < closest && Vector3.isVisibleEntityFromEntity(entity, e))
             {
+                stuff.add(e);
                 closest = dist;
-                newTarget = e;
             }
         }
         // Found an item, return.
-        if (newTarget != null)
+        if (!stuff.isEmpty())
         {
-            stuffLoc.set(newTarget);
-            stuff = newTarget;
+            Collections.sort(stuff, new Comparator<EntityItem>()
+            {
+                @Override
+                public int compare(EntityItem o1, EntityItem o2)
+                {
+                    int dist1 = (int) o1.getDistanceSq(entity);
+                    int dist2 = (int) o2.getDistanceSq(entity);
+                    return dist1 - dist2;
+                }
+            });
+            stuffLoc.set(stuff.get(0));
             return;
         }
         v.set(entity).addTo(0, entity.getEyeHeight(), 0);
@@ -200,7 +261,7 @@ public class AIGatherStuff extends AIBase
         // Nothing found, enter cooldown.
         if (stuffLoc.isEmpty())
         {
-            collectCooldown = COOLDOWN;
+            collectCooldown = COOLDOWN_SEARCH;
         }
     }
 
@@ -291,7 +352,7 @@ public class AIGatherStuff extends AIBase
     public void reset()
     {
         stuffLoc.clear();
-        stuff = null;
+        stuff.clear();
     }
 
     @Override
@@ -326,7 +387,7 @@ public class AIGatherStuff extends AIBase
         // Apply cooldown.
         if (collectCooldown < -2000)
         {
-            collectCooldown = COOLDOWN;
+            collectCooldown = COOLDOWN_SEARCH;
         }
         // If too far, clear location.
         if (stuffLoc.distToEntity(entity) > 32) stuffLoc.clear();
