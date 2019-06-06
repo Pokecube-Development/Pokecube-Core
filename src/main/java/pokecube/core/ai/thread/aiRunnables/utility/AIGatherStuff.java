@@ -62,7 +62,8 @@ public class AIGatherStuff extends AIBase
                                                                      @Override
                                                                      public boolean apply(EntityItem input)
                                                                      {
-                                                                         return input.isDead || !input.addedToChunk;
+                                                                         return input.isDead || !input.addedToChunk
+                                                                                 || !input.isAddedToWorld();
                                                                      }
                                                                  };
 
@@ -172,7 +173,7 @@ public class AIGatherStuff extends AIBase
                 if (!stuff.isEmpty())
                 {
                     EntityItem itemStuff = stuff.get(0);
-                    if (itemStuff.isDead || !itemStuff.addedToChunk)
+                    if (itemStuff.isDead || !itemStuff.addedToChunk || !itemStuff.isAddedToWorld())
                     {
                         stuff.remove(0);
                         return;
