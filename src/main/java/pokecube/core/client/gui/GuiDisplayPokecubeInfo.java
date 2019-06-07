@@ -225,11 +225,11 @@ public class GuiDisplayPokecubeInfo extends Gui
             indexPokemob = 0;
             arrayRet = getPokemobsToDisplay();
         }
+        if (getPokemobsToDisplay().length == 0) { return; }
         if (indexPokemob >= getPokemobsToDisplay().length)
         {
             indexPokemob = 0;
         }
-        if (indexPokemob >= getPokemobsToDisplay().length) { return; }
         if (fontRenderer == null) fontRenderer = minecraft.fontRenderer;
         MinecraftForge.EVENT_BUS.post(new GuiEvent.RenderSelectedInfo());
         MinecraftForge.EVENT_BUS.post(new GuiEvent.RenderTargetInfo());

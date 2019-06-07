@@ -199,7 +199,7 @@ public class Pokecube extends Item implements IPokecube
     {
         if (pokecubeId.getResourcePath().equals("snag"))
         {
-            if (mob.invulnerable) return 0;
+            if (mob.getIsInvulnerable()) return 0;
             return 1;
         }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);

@@ -340,11 +340,15 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
 
             // Set this mob wild, then kill it.
             this.setPokemonOwner((UUID) null);
-            thisEntity.setDead();
+
+            EvolveEvent evt = new EvolveEvent.Post(evoMob);
+            MinecraftForge.EVENT_BUS.post(evt);
 
             // Schedule adding to world.
-            if (thisEntity.addedToChunk)
+            if (!evt.isCanceled() && thisEntity.addedToChunk)
             {
+                thisEntity.setDead();
+
                 evolution.getEntityWorld().spawnEntity(evolution);
 
                 // Remount riders on the new mob.
