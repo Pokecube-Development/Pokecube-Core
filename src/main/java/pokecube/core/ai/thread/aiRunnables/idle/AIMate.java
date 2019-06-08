@@ -30,10 +30,13 @@ import thut.api.maths.Vector3;
  * applicable), then tells the mobs to breed if they should. */
 public class AIMate extends AIBase
 {
+    public static int  PATHCOOLDOWN   = 5;
+
     final IPokemob     pokemob;
     final EntityLiving entity;
     int                cooldown       = 0;
     int                spawnBabyDelay = 0;
+    int                pathDelay      = 0;
 
     public AIMate(IPokemob entity2)
     {
@@ -296,7 +299,11 @@ public class AIMate extends AIBase
 
         double dist = entity.width * entity.width + emob.width * emob.width;
         dist = Math.max(dist, 1);
-        entity.getNavigator().tryMoveToEntityLiving(emob, pokemob.getMovementSpeed());
+        if (pathDelay-- < 0)
+        {
+            pathDelay = PATHCOOLDOWN;
+            entity.getNavigator().tryMoveToEntityLiving(emob, pokemob.getMovementSpeed());
+        }
         spawnBabyDelay++;
         pokemob.setGeneralState(GeneralStates.MATING, true);
         IPokemob loverMob = CapabilityPokemob.getPokemobFor(emob);

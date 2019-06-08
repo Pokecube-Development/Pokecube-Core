@@ -20,11 +20,14 @@ import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
  * guarded. */
 public class AIGuardEgg extends AIBase
 {
-    IPokemob         pokemob;
-    EntityLiving     entity;
-    EntityPokemobEgg egg            = null;
-    int              cooldown       = 0;
-    int              spawnBabyDelay = 0;
+    public static int PATHCOOLDOWN      = 50;
+    public static int SEARCHCOOLDOWN    = 50;
+
+    IPokemob          pokemob;
+    EntityLiving      entity;
+    EntityPokemobEgg  egg               = null;
+    int               eggSearchCooldown = 0;
+    int               eggPathCooldown   = 0;
 
     public AIGuardEgg(IPokemob entity2)
     {
@@ -37,10 +40,10 @@ public class AIGuardEgg extends AIBase
     {
         super.doMainThreadTick(world);
         // Cooldown and have egg, nothing to do here.
-        if (cooldown-- > 0 || egg != null) { return; }
+        if (eggSearchCooldown-- > 0 || egg != null) { return; }
         // Only the female (or neutral) will guard the eggs.
         if (pokemob.getSexe() == IPokemob.MALE) return;
-        cooldown = 20;
+        eggSearchCooldown = SEARCHCOOLDOWN;
         AxisAlignedBB bb = entity.getEntityBoundingBox().grow(16, 8, 16);
         // Search for valid eggs.
         List<Entity> list2 = entity.getEntityWorld().getEntitiesInAABBexcluding(entity, bb, new Predicate<Entity>()
@@ -75,6 +78,9 @@ public class AIGuardEgg extends AIBase
         pokemob.resetLoveStatus();
         // If too close to egg, don't bother moving.
         if (entity.getDistanceSq(egg) < 4) return;
+        // On cooldown
+        if (eggPathCooldown-- > 0) return;
+        eggPathCooldown = PATHCOOLDOWN;
         // Path to the egg.
         Path path = entity.getNavigator().getPathToEntityLiving(egg);
         this.addEntityPath(entity, path, pokemob.getMovementSpeed());

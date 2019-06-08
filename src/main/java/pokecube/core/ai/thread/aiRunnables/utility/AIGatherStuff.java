@@ -47,6 +47,7 @@ public class AIGatherStuff extends AIBase
 {
     public static int                           COOLDOWN_SEARCH  = 200;
     public static int                           COOLDOWN_COLLECT = 20;
+    public static int                           COOLDOWN_PATH    = 50;
 
     // Matcher used to determine if a block is a fruit or crop to be picked.
     private static final Predicate<IBlockState> berryMatcher     = new Predicate<IBlockState>()
@@ -90,10 +91,13 @@ public class AIGatherStuff extends AIBase
             // Check if is is plantable.
             if (seeds.getItem() instanceof IPlantable)
             {
+                BlockPos down = pos.down();
+                if (world.isAirBlock(down)) return true;
                 // Use the fakeplayer to plant it
                 EntityPlayer player = PokecubeMod.getFakePlayer(world);
+                player.setPosition(pos.getX(), pos.getY(), pos.getZ());
                 player.setHeldItem(EnumHand.MAIN_HAND, seeds);
-                seeds.getItem().onItemUse(player, world, pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0.5f, 1, 0.5f);
+                seeds.getItem().onItemUse(player, world, down, EnumHand.MAIN_HAND, EnumFacing.UP, 0.5f, 1, 0.5f);
                 Entity mob = world.getEntityByID(entityID);
                 IPokemob pokemob;
                 // Attempt to plant it.
@@ -119,6 +123,7 @@ public class AIGatherStuff extends AIBase
     Vector3            stuffLoc        = Vector3.getNewVector();
     boolean            hasRoom         = true;
     int                collectCooldown = 0;
+    int                pathCooldown    = 0;
     final AIStoreStuff storage;
     Vector3            seeking         = Vector3.getNewVector();
     Vector3            v               = Vector3.getNewVector();
@@ -139,8 +144,9 @@ public class AIGatherStuff extends AIBase
         super.doMainThreadTick(world);
         synchronized (stuffLoc)
         {
+            if (collectCooldown-- > 0) return;
             // check stuff for being still around.
-            if (collectCooldown-- < 0 && !stuff.isEmpty())
+            if (!stuff.isEmpty())
             {
                 int num = stuff.size();
                 stuff.removeIf(deaditemmatcher);
@@ -196,6 +202,7 @@ public class AIGatherStuff extends AIBase
                 else
                 {
                     gatherStuff(true);
+                    collectCooldown = COOLDOWN_COLLECT;
                 }
             }
         }
@@ -270,6 +277,8 @@ public class AIGatherStuff extends AIBase
     {
         if (!mainThread)
         {
+            if (pathCooldown-- > 0) return;
+            pathCooldown = COOLDOWN_PATH;
             // Set path to the stuff found.
             if (entity.getNavigator().noPath())
             {

@@ -170,13 +170,13 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
             stuff = findItemStorage(false);
             if (!stuff) searchInventoryCooldown = 50 * COOLDOWN;
         }
-        if (!stuff || entity.getDistanceSq(pokemob.getHome()) > 256 || doStorageCooldown-- > 0) return;
+        if (!stuff || doStorageCooldown-- > 0 || entity.getDistanceSq(pokemob.getHome()) > 256) return;
         IItemHandlerModifiable itemhandler = new InvWrapper(pokemob.getPokemobInventory());
         if (doBerryCheck(itemhandler) || doStorageCheck(itemhandler) || doEmptyCheck(itemhandler))
         {
             doStorageCooldown = 5;
         }
-        else doStorageCooldown = COOLDOWN;
+        else doStorageCooldown = 10 * COOLDOWN;
     }
 
     private boolean doBerryCheck(IItemHandlerModifiable pokemobInv)
