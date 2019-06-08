@@ -11,7 +11,7 @@ public class GuiNBTButton extends Gui{
 	
 	public static final int WIDTH = 9, HEIGHT = 9;
 	
-	private Minecraft mc = Minecraft.getMinecraft();
+	private Minecraft mc = Minecraft.getInstance();
 	
 	private byte id;
 	private int x, y;

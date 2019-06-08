@@ -164,13 +164,13 @@ public class PokemobNavigator extends PathNavigate2
     }
 
     @Override
-    public Path getPathToEntityLiving(Entity entityIn)
+    public Path getPathToMobEntity(Entity entityIn)
     {
         if (!this.canNavigate() || entityIn == null) { return null; }
         checkValues();
         try
         {
-            return wrapped.getPathToEntityLiving(entityIn);
+            return wrapped.getPathToMobEntity(entityIn);
         }
         catch (Exception e)
         {

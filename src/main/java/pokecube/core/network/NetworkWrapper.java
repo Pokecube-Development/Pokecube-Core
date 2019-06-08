@@ -8,7 +8,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
@@ -117,7 +117,7 @@ public class NetworkWrapper
         packetCodec.addDiscriminator(discriminator, requestMessageType);
         FMLEmbeddedChannel channel = channels.get(side);
         String type = channel.findChannelHandlerNameForType(SimpleIndexedCodec.class);
-        if (side == Side.SERVER)
+        if (side == Dist.DEDICATED_SERVER)
         {
             addServerHandlerAfter(channel, type, messageHandler, requestMessageType);
         }
@@ -131,7 +131,7 @@ public class NetworkWrapper
             FMLEmbeddedChannel channel, String type, IMessageHandler<? super REQ, ? extends REPLY> messageHandler,
             Class<REQ> requestType)
     {
-        SimpleChannelHandlerWrapper<REQ, REPLY> handler = getHandlerWrapper(messageHandler, Side.SERVER, requestType);
+        SimpleChannelHandlerWrapper<REQ, REPLY> handler = getHandlerWrapper(messageHandler, Dist.DEDICATED_SERVER, requestType);
         channel.pipeline().addAfter(type, generateName(channel.pipeline(), handler), handler);
     }
 
@@ -139,7 +139,7 @@ public class NetworkWrapper
             FMLEmbeddedChannel channel, String type, IMessageHandler<? super REQ, ? extends REPLY> messageHandler,
             Class<REQ> requestType)
     {
-        SimpleChannelHandlerWrapper<REQ, REPLY> handler = getHandlerWrapper(messageHandler, Side.CLIENT, requestType);
+        SimpleChannelHandlerWrapper<REQ, REPLY> handler = getHandlerWrapper(messageHandler, Dist.CLIENT, requestType);
         channel.pipeline().addAfter(type, generateName(channel.pipeline(), handler), handler);
     }
 
@@ -158,7 +158,7 @@ public class NetworkWrapper
      * @return A minecraft {@link Packet} suitable for use in minecraft APIs */
     public Packet<?> getPacketFrom(IMessage message)
     {
-        return channels.get(Side.SERVER).generatePacketFrom(message);
+        return channels.get(Dist.DEDICATED_SERVER).generatePacketFrom(message);
     }
 
     /** Send this message to everyone. The {@link IMessageHandler} for this
@@ -168,8 +168,8 @@ public class NetworkWrapper
      *            The message to send */
     public void sendToAll(IMessage message)
     {
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.ALL);
-        channels.get(Side.SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.ALL);
+        channels.get(Dist.DEDICATED_SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     /** Send this message to the specified player. The {@link IMessageHandler}
@@ -179,21 +179,21 @@ public class NetworkWrapper
      *            The message to send
      * @param player
      *            The player to send it to */
-    public void sendTo(IMessage message, EntityPlayerMP player)
+    public void sendTo(IMessage message, ServerPlayerEntity player)
     {
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
                 .set(FMLOutboundHandler.OutboundTarget.PLAYER);
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
-        channels.get(Side.SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
+        channels.get(Dist.DEDICATED_SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     public void sendTo(IMessage message, Channel channel)
     {
-        PokecubeMod.packetPipeline.channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
+        PokecubeMod.packetPipeline.channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
                 .set(FMLOutboundHandler.OutboundTarget.DISPATCHER);
-        PokecubeMod.packetPipeline.channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS)
+        PokecubeMod.packetPipeline.channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS)
                 .set(channel.attr(NetworkDispatcher.FML_DISPATCHER).get());
-        PokecubeMod.packetPipeline.channels.get(Side.SERVER).writeOutbound(message);
+        PokecubeMod.packetPipeline.channels.get(Dist.DEDICATED_SERVER).writeOutbound(message);
     }
 
     /** Send this message to everyone within a certain range of a point. The
@@ -206,10 +206,10 @@ public class NetworkWrapper
      *            The {@link TargetPoint} around which to send */
     public void sendToAllAround(IMessage message, NetworkRegistry.TargetPoint point)
     {
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
                 .set(FMLOutboundHandler.OutboundTarget.ALLAROUNDPOINT);
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(point);
-        channels.get(Side.SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(point);
+        channels.get(Dist.DEDICATED_SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     /** Send this message to everyone within the supplied dimension. The
@@ -222,10 +222,10 @@ public class NetworkWrapper
      *            The dimension id to target */
     public void sendToDimension(IMessage message, int dimensionId)
     {
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET)
                 .set(FMLOutboundHandler.OutboundTarget.DIMENSION);
-        channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(dimensionId);
-        channels.get(Side.SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        channels.get(Dist.DEDICATED_SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(dimensionId);
+        channels.get(Dist.DEDICATED_SERVER).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     /** Send this message to the server. The {@link IMessageHandler} for this
@@ -235,8 +235,8 @@ public class NetworkWrapper
      *            The message to send */
     public void sendToServer(IMessage message)
     {
-        channels.get(Side.CLIENT).attr(FMLOutboundHandler.FML_MESSAGETARGET)
+        channels.get(Dist.CLIENT).attr(FMLOutboundHandler.FML_MESSAGETARGET)
                 .set(FMLOutboundHandler.OutboundTarget.TOSERVER);
-        channels.get(Side.CLIENT).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        channels.get(Dist.CLIENT).writeAndFlush(message).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 }

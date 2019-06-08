@@ -6,10 +6,10 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -43,7 +43,7 @@ public class PokedexInspector
             this.tagString = tagString;
         }
 
-        private boolean check(Entity entity, String configArg, NBTTagCompound tag, ItemStack reward, int num,
+        private boolean check(Entity entity, String configArg, CompoundNBT tag, ItemStack reward, int num,
                 boolean giveReward)
         {
             if (reward == null || tag.getBoolean(tagString)) return false;
@@ -51,10 +51,10 @@ public class PokedexInspector
             {
                 if (giveReward)
                 {
-                    tag.setBoolean(tagString, true);
-                    entity.sendMessage(new TextComponentTranslation(message));
-                    EntityPlayer entityPlayer = (EntityPlayer) entity;
-                    Tools.giveItem(entityPlayer, reward);
+                    tag.putBoolean(tagString, true);
+                    entity.sendMessage(new TranslationTextComponent(message));
+                    PlayerEntity PlayerEntity = (PlayerEntity) entity;
+                    Tools.giveItem(PlayerEntity, reward);
                     PokecubePlayerDataHandler.saveCustomData(entity.getCachedUniqueIdString());
                 }
                 return true;
@@ -97,7 +97,7 @@ public class PokedexInspector
         }
     }
 
-    public static boolean inspect(EntityPlayer player, boolean reward)
+    public static boolean inspect(PlayerEntity player, boolean reward)
     {
         PokedexInspectEvent evt;
         MinecraftForge.EVENT_BUS.post(evt = new PokedexInspectEvent(player, reward));

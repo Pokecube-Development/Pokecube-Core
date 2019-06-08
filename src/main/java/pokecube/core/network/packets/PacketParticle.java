@@ -16,7 +16,7 @@ public class PacketParticle implements IMessage, IMessageHandler<PacketParticle,
     public static void sendMessage(World world, Vector3 location, Vector3 velocity, String sound, int... args)
     {
         PacketParticle toSend = new PacketParticle(location, velocity, sound, args);
-        PokecubePacketHandler.sendToAllNear(toSend, location, world.provider.getDimension(), 32);
+        PokecubePacketHandler.sendToAllNear(toSend, location, world.dimension.getDimension(), 32);
     }
 
     Vector3 velocity;

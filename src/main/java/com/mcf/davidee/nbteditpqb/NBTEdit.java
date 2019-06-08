@@ -15,7 +15,7 @@ import com.mcf.davidee.nbteditpqb.nbt.SaveStates;
 import com.mcf.davidee.nbteditpqb.packets.PacketHandler;
 
 import net.minecraft.command.ServerCommandManager;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import pokecube.core.interfaces.PokecubeMod;
 
@@ -53,7 +53,7 @@ public class NBTEdit
     private SaveStates                saves;
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
+    public void preInit(FMLCommonSetupEvent event)
     {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
@@ -127,7 +127,7 @@ public class NBTEdit
 
     static final String SEP = System.getProperty("line.separator");
 
-    public static void logTag(NBTTagCompound tag)
+    public static void logTag(CompoundNBT tag)
     {
         NBTTree tree = new NBTTree(tag);
         String sb = "";

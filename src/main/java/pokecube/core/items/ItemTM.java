@@ -6,10 +6,10 @@ import java.util.logging.Level;
 import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import pokecube.core.PokecubeItems;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
@@ -33,9 +33,9 @@ public class ItemTM extends Item
             return stack;
         }
         stack = new ItemStack(tms.get(attack.move.type));
-        NBTTagCompound nbt = stack.getTagCompound() == null ? new NBTTagCompound() : stack.getTagCompound();
-        nbt.setString("move", move.trim());
-        stack.setTagCompound(nbt);
+        CompoundNBT nbt = stack.getTag() == null ? new CompoundNBT() : stack.getTag();
+        nbt.putString("move", move.trim());
+        stack.put(nbt);
         String name = MovesUtils.getMoveName(move.trim()).getFormattedText();
         if (name.startsWith("pokemob.move.")) name = name.replaceFirst("pokemob.move.", "");
         stack.setStackDisplayName(name);
@@ -69,7 +69,7 @@ public class ItemTM extends Item
     {
         if (stack.getItem() instanceof ItemTM)
         {
-            NBTTagCompound nbt = stack.getTagCompound();
+            CompoundNBT nbt = stack.getTag();
             if (nbt == null) return null;
             String name = nbt.getString("move");
             if (!name.contentEquals("")) return name;
@@ -81,7 +81,7 @@ public class ItemTM extends Item
     {
         if (tm.getItem() instanceof ItemTM)
         {
-            NBTTagCompound nbt = tm.getTagCompound();
+            CompoundNBT nbt = tm.getTag();
             if (nbt == null) return false;
             String name = nbt.getString("move");
             if (name.contentEquals("")) return false;
@@ -126,10 +126,10 @@ public class ItemTM extends Item
         return false;
     }
 
-    public static boolean applyEffect(EntityLivingBase mob, ItemStack stack)
+    public static boolean applyEffect(LivingEntity mob, ItemStack stack)
     {
-        if (mob.getEntityWorld().isRemote) return stack.hasTagCompound();
-        if (stack.hasTagCompound())
+        if (mob.getEntityWorld().isRemote) return stack.hasTag();
+        if (stack.hasTag())
         {
             // Check if is TM or valid candy
             return feedToPokemob(stack, mob);

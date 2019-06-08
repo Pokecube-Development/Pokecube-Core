@@ -4,8 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -21,14 +21,14 @@ import pokecube.modelloader.client.render.ModelWrapper;
 import pokecube.modelloader.client.render.models.URLModelHolder;
 import thut.core.client.render.model.IModelRenderer;
 
-public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPokemobInfos<T>
+public class RenderAdvancedPokemobModel<T extends MobEntity> extends RenderPokemobInfos<T>
 {
-    public static IModelRenderer<?> getRenderer(String name, EntityLiving entity)
+    public static IModelRenderer<?> getRenderer(String name, MobEntity entity)
     {
         models:
         if (entity.getEntityData().hasKey("url_model"))
         {
-            NBTTagCompound modeltag = entity.getEntityData().getCompoundTag("url_model");
+            CompoundNBT modeltag = entity.getEntityData().getCompound("url_model");
             String tag_name = modeltag.getString("name");
             if (tag_name.isEmpty()) break models;
             name = tag_name + "___" + name;
@@ -159,11 +159,11 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
         return ret;
     }
 
-    protected void doAnimations(EntityLiving entity, float partialTick)
+    protected void doAnimations(MobEntity entity, float partialTick)
     {
         float f5 = 0.0F;
         float f6 = 0.0F;
-        if (!entity.isRiding())
+        if (!entity.isPassenger())
         {
             f5 = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTick;
             f6 = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTick);

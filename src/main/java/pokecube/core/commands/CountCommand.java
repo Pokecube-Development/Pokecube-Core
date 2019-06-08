@@ -12,10 +12,10 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -39,13 +39,13 @@ public class CountCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokecount";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         boolean specific = args.length > 0;
         World world = cSender.getEntityWorld();
@@ -88,6 +88,6 @@ public class CountCommand extends CommandBase
             }
         });
         cSender.sendMessage(CommandTools.makeTranslatedMessage("pokecube.command.count", "", count1, count2));
-        cSender.sendMessage(new TextComponentString(entries.toString()));
+        cSender.sendMessage(new StringTextComponent(entries.toString()));
     }
 }

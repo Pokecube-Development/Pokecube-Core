@@ -7,12 +7,12 @@ import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -51,7 +51,7 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
 
     /** allows items to add custom lines of information to the mouseover
      * description */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
     {
@@ -113,13 +113,13 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand,
-            EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
+            Direction side, float hitX, float hitY, float hitZ)
     {
         ItemStack stack = playerIn.getHeldItem(hand);
         net.minecraft.block.state.IBlockState state = worldIn.getBlockState(pos);
-        if (side == EnumFacing.UP && playerIn.canPlayerEdit(pos.offset(side), side, stack)
-                && state.getBlock().canSustainPlant(state, worldIn, pos, EnumFacing.UP, (IPlantable) Items.WHEAT_SEEDS)
+        if (side == Direction.UP && playerIn.canPlayerEdit(pos.offset(side), side, stack)
+                && state.getBlock().canSustainPlant(state, worldIn, pos, Direction.UP, (IPlantable) Items.WHEAT_SEEDS)
                 && worldIn.isAirBlock(pos.up()))
         {
             worldIn.setBlockState(pos.up(), BerryManager.berryCrop.getDefaultState());

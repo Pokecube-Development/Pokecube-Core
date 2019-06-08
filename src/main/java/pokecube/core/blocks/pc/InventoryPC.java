@@ -6,13 +6,13 @@ import java.util.UUID;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -25,14 +25,14 @@ import pokecube.core.utils.PCSaveHandler;
 import thut.core.common.handlers.PlayerDataHandler;
 import thut.lib.CompatWrapper;
 
-public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
+public class InventoryPC implements IInventory, INBTSerializable<CompoundNBT>
 {
     static HashMap<UUID, InventoryPC> map_server = new HashMap<UUID, InventoryPC>();
     static HashMap<UUID, InventoryPC> map_client = new HashMap<UUID, InventoryPC>();
 
     public static HashMap<UUID, InventoryPC> getMap()
     {
-        return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT ? map_client : map_server;
+        return FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT ? map_client : map_server;
     }
 
     // blank PC for client use.
@@ -73,7 +73,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
             PokecubeManager.heal(stack);
             PlayerPokemobCache.UpdateCache(mob, true, false);
             if (PokecubeCore.proxy.getPlayer(uuid) != null) PokecubeCore.proxy.getPlayer(uuid)
-                    .sendMessage(new TextComponentTranslation("tile.pc.sentto", mob.getDisplayName()));
+                    .sendMessage(new TranslationTextComponent("tile.pc.sentto", mob.getDisplayName()));
         }
         pc.addItem(mob.copy());
         PCSaveHandler.getInstance().savePC(uuid);
@@ -105,18 +105,18 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         return null;
     }
 
-    public static void loadFromNBT(NBTTagList nbt)
+    public static void loadFromNBT(ListNBT nbt)
     {
         loadFromNBT(nbt, true);
     }
 
-    public static void loadFromNBT(NBTTagList nbt, boolean replace)
+    public static void loadFromNBT(ListNBT nbt, boolean replace)
     {
         int i;
         tags:
-        for (i = 0; i < nbt.tagCount(); i++)
+        for (i = 0; i < nbt.size(); i++)
         {
-            NBTTagCompound items = nbt.getCompoundTagAt(i);
+            CompoundNBT items = nbt.getCompound(i);
             InventoryPC loaded = new InventoryPC();
             loaded.deserializeNBT(items);
             if (!replace && getMap().containsKey(loaded.owner)) continue;
@@ -140,11 +140,11 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         }
     }
 
-    public static NBTTagList saveToNBT(UUID uuid)
+    public static ListNBT saveToNBT(UUID uuid)
     {
         if (PokecubeMod.debug) PokecubeMod.log("Saving PC for " + uuid);
-        NBTTagList nbttag = new NBTTagList();
-        NBTTagCompound items = getMap().get(uuid).serializeNBT();
+        ListNBT nbttag = new ListNBT();
+        CompoundNBT items = getMap().get(uuid).serializeNBT();
         nbttag.appendTag(items);
         return nbttag;
     }
@@ -211,7 +211,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     }
 
     @Override
-    public void closeInventory(EntityPlayer player)
+    public void closeInventory(PlayerEntity player)
     {
         PCSaveHandler.getInstance().savePC(owner);
     }
@@ -268,7 +268,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     @Override
     public String getName()
     {
-        EntityPlayer player = PokecubeCore.getPlayer(owner.toString());
+        PlayerEntity player = PokecubeCore.getPlayer(owner.toString());
         String name = "Public";
         if (!owner.equals(defaultId))
         {
@@ -316,7 +316,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer entityplayer)
+    public boolean isUsableByPlayer(PlayerEntity PlayerEntity)
     {
         return true;
     }
@@ -327,7 +327,7 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
     }
 
     @Override
-    public void openInventory(EntityPlayer player)
+    public void openInventory(PlayerEntity player)
     {
     }
 
@@ -385,75 +385,75 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         return true;
     }
 
-    public NBTTagCompound serializeBox(int box)
+    public CompoundNBT serializeBox(int box)
     {
-        NBTTagCompound items = new NBTTagCompound();
+        CompoundNBT items = new CompoundNBT();
         items.setInteger("box", box);
         int start = box * 54;
         for (int i = start; i < start + 54; i++)
         {
             ItemStack itemstack = getStackInSlot(i);
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            CompoundNBT CompoundNBT = new CompoundNBT();
             if (!itemstack.isEmpty())
             {
-                nbttagcompound.setShort("Slot", (short) i);
-                itemstack.writeToNBT(nbttagcompound);
-                items.setTag("item" + i, nbttagcompound);
+                CompoundNBT.setShort("Slot", (short) i);
+                itemstack.writeToNBT(CompoundNBT);
+                items.put("item" + i, CompoundNBT);
             }
         }
         return items;
     }
 
-    public void deserializeBox(NBTTagCompound nbt)
+    public void deserializeBox(CompoundNBT nbt)
     {
         int start = nbt.getInteger("box") * 54;
         for (int i = start; i < start + 54; i++)
         {
             this.setInventorySlotContents(i, ItemStack.EMPTY);
             if (!nbt.hasKey("item" + i)) continue;
-            NBTTagCompound nbttagcompound = nbt.getCompoundTag("item" + i);
-            int j = nbttagcompound.getShort("Slot");
+            CompoundNBT CompoundNBT = nbt.getCompound("item" + i);
+            int j = CompoundNBT.getShort("Slot");
             if (j >= start && j < start + 54)
             {
-                ItemStack itemstack = new ItemStack(nbttagcompound);
+                ItemStack itemstack = new ItemStack(CompoundNBT);
                 this.setInventorySlotContents(j, itemstack);
             }
         }
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound items = new NBTTagCompound();
-        NBTTagCompound boxes = new NBTTagCompound();
-        boxes.setString("UUID", owner.toString());
-        boxes.setBoolean("seenOwner", seenOwner);
-        boxes.setBoolean("autoSend", autoToPC);
+        CompoundNBT items = new CompoundNBT();
+        CompoundNBT boxes = new CompoundNBT();
+        boxes.putString("UUID", owner.toString());
+        boxes.putBoolean("seenOwner", seenOwner);
+        boxes.putBoolean("autoSend", autoToPC);
         boxes.setInteger("page", page);
         for (int i = 0; i < PAGECOUNT; i++)
         {
-            boxes.setString("name" + i, this.boxes[i]);
+            boxes.putString("name" + i, this.boxes[i]);
         }
         items.setInteger("page", getPage());
         for (int i = 0; i < getSizeInventory(); i++)
         {
             ItemStack itemstack = getStackInSlot(i);
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            CompoundNBT CompoundNBT = new CompoundNBT();
             if (!itemstack.isEmpty())
             {
-                nbttagcompound.setShort("Slot", (short) i);
-                itemstack.writeToNBT(nbttagcompound);
-                items.setTag("item" + i, nbttagcompound);
+                CompoundNBT.setShort("Slot", (short) i);
+                itemstack.writeToNBT(CompoundNBT);
+                items.put("item" + i, CompoundNBT);
             }
         }
-        items.setTag("boxes", boxes);
+        items.put("boxes", boxes);
         return items;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
-        NBTTagCompound boxes = nbt.getCompoundTag("boxes");
+        CompoundNBT boxes = nbt.getCompound("boxes");
         String id = boxes.getString("UUID");
         this.owner = UUID.fromString(id);
         PlayerPokemobCache cache = PlayerDataHandler.getInstance().getPlayerData(owner)
@@ -475,12 +475,12 @@ public class InventoryPC implements IInventory, INBTSerializable<NBTTagCompound>
         for (int k = 0; k < this.getSizeInventory(); k++)
         {
             if (!nbt.hasKey("item" + k)) continue;
-            NBTTagCompound nbttagcompound = nbt.getCompoundTag("item" + k);
-            int j = nbttagcompound.getShort("Slot");
+            CompoundNBT CompoundNBT = nbt.getCompound("item" + k);
+            int j = CompoundNBT.getShort("Slot");
             if (j >= 0 && j < this.getSizeInventory())
             {
                 if (this.contents.containsKey(j)) continue;
-                ItemStack itemstack = new ItemStack(nbttagcompound);
+                ItemStack itemstack = new ItemStack(CompoundNBT);
                 this.setInventorySlotContents(j, itemstack);
                 cache.addPokemob(id, itemstack, true, false);
             }

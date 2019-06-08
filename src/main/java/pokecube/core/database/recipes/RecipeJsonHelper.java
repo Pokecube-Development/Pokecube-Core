@@ -156,15 +156,15 @@ public class RecipeJsonHelper
         {
             ItemStack stack = (ItemStack) thing;
             Map<String, Object> ret = new LinkedHashMap<>();
-            if (stack.hasTagCompound()) ret.put("type", "minecraft:item_nbt");
+            if (stack.hasTag()) ret.put("type", "minecraft:item_nbt");
             ret.put("item", stack.getItem().getRegistryName().toString());
             if (stack.getItem().getHasSubtypes() || stack.getItemDamage() != 0)
             {
                 ret.put("data", stack.getItemDamage());
             }
-            if (stack.hasTagCompound())
+            if (stack.hasTag())
             {
-                ret.put("nbt", stack.getTagCompound().toString());
+                ret.put("nbt", stack.getTag().toString());
             }
             if (stack.getCount() > 1)
             {

@@ -11,32 +11,32 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTSizeTracker;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class NBTHelper {
 	
-	public static NBTTagCompound nbtRead(DataInputStream in) throws IOException {
+	public static CompoundNBT nbtRead(DataInputStream in) throws IOException {
 		return CompressedStreamTools.read(in);
 	}
 	
-	public static void nbtWrite(NBTTagCompound compound, DataOutput out) throws IOException {
+	public static void nbtWrite(CompoundNBT compound, DataOutput out) throws IOException {
 		CompressedStreamTools.write(compound, out);
 	}
 	
-	public static Map<String,NBTBase> getMap(NBTTagCompound tag){
-		return ReflectionHelper.getPrivateValue(NBTTagCompound.class, tag, 2);
+	public static Map<String,INBT> getMap(CompoundNBT tag){
+		return ReflectionHelper.getPrivateValue(CompoundNBT.class, tag, 2);
 	}
 	
-	public static NBTBase getTagAt(NBTTagList tag, int index) {
-		List<NBTBase> list = ReflectionHelper.getPrivateValue(NBTTagList.class, tag, 1);
+	public static INBT getTagAt(ListNBT tag, int index) {
+		List<INBT> list = ReflectionHelper.getPrivateValue(ListNBT.class, tag, 1);
 		return list.get(index);
 	}
 
-	public static void writeToBuffer(NBTTagCompound nbt, ByteBuf buf) {
+	public static void writeToBuffer(CompoundNBT nbt, ByteBuf buf) {
 		if (nbt == null) {
 			buf.writeByte(0);
 		} else {
@@ -48,7 +48,7 @@ public class NBTHelper {
 		}
 	}
 
-	public static NBTTagCompound readNbtFromBuffer(ByteBuf buf) {
+	public static CompoundNBT readNbtFromBuffer(ByteBuf buf) {
 		int index = buf.readerIndex();
 		byte isNull = buf.readByte();
 

@@ -25,9 +25,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.profiler.ISnooperInfo;
@@ -48,7 +48,7 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.CommonProxyPokecube;
@@ -103,7 +103,7 @@ import thut.core.client.render.particle.ParticleFactory;
 import thut.core.client.render.particle.ParticleHandler;
 import thut.core.common.config.Configure;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClientProxyPokecube extends CommonProxyPokecube
 {
@@ -143,7 +143,7 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     }
 
     @Override
-    public Object getClientGuiElement(int guiID, EntityPlayer player, World world, int x, int y, int z)
+    public Object getClientGuiElement(int guiID, PlayerEntity player, World world, int x, int y, int z)
     {
         BlockPos pos = new BlockPos(x, y, z);
 
@@ -207,36 +207,36 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     public String getFolderName()
     {
         if (FMLClientHandler.instance().getClient().world != null)
-            return FMLClientHandler.instance().getClient().world.provider.getSaveFolder();
+            return FMLClientHandler.instance().getClient().world.dimension.getSaveFolder();
         return "";
     }
 
     @Override
     public IThreadListener getMainThreadListener()
     {
-        if (isOnClientSide()) { return Minecraft.getMinecraft(); }
+        if (isOnClientSide()) { return Minecraft.getInstance(); }
         return super.getMainThreadListener();
     }
 
     @Override
     public ISnooperInfo getMinecraftInstance()
     {
-        if (isOnClientSide()) { return Minecraft.getMinecraft(); }
+        if (isOnClientSide()) { return Minecraft.getInstance(); }
         return super.getMinecraftInstance();
     }
 
     @Override
-    public EntityPlayer getPlayer(String playerName)
+    public PlayerEntity getPlayer(String playerName)
     {
         if (playerName != null) { return super.getPlayer(playerName); }
-        return Minecraft.getMinecraft().player;
+        return Minecraft.getInstance().player;
     }
 
     @Override
     public World getWorld()
     {
         if (FMLCommonHandler.instance()
-                .getEffectiveSide() == Side.CLIENT) { return FMLClientHandler.instance().getWorldClient(); }
+                .getEffectiveSide() == Dist.CLIENT) { return FMLClientHandler.instance().getWorldClient(); }
         return super.getWorld();
     }
 
@@ -262,7 +262,7 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     public void initClient()
     {
         super.initClient();
-        Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new IItemColor()
+        Minecraft.getInstance().getItemColors().registerItemColorHandler(new IItemColor()
         {
             @Override
             public int colorMultiplier(ItemStack stack, int tintIndex)
@@ -284,7 +284,7 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     @Override
     public boolean isOnClientSide()
     {
-        return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
+        return FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT;
     }
 
     @Override
@@ -292,17 +292,17 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     {
         if (sound != null)
         {
-            ISound old = Minecraft.getMinecraft().renderGlobal.mapSoundPositions.remove(location);
+            ISound old = Minecraft.getInstance().renderGlobal.mapSoundPositions.remove(location);
             if (old != null)
             {
-                Minecraft.getMinecraft().getSoundHandler().stopSound(old);
+                Minecraft.getInstance().getSoundHandler().stopSound(old);
             }
             else
             {
                 ISound isound = new PositionedSoundRecord(sound.getRegistryName(), SoundCategory.RECORDS, 2, 1, true, 0,
                         AttenuationType.LINEAR, location.getX() + 0.5f, location.getY() + 0.5f, location.getZ() + 0.5f);
-                Minecraft.getMinecraft().getSoundHandler().playSound(isound);
-                Minecraft.getMinecraft().renderGlobal.mapSoundPositions.put(location, isound);
+                Minecraft.getInstance().getSoundHandler().playSound(isound);
+                Minecraft.getInstance().renderGlobal.mapSoundPositions.put(location, isound);
             }
         }
     }
@@ -313,8 +313,8 @@ public class ClientProxyPokecube extends CommonProxyPokecube
         try
         {
             BlockPos num = new BlockPos(location.intX(), location.intY(), location.intZ());
-            Object sound = Minecraft.getMinecraft().renderGlobal.mapSoundPositions.get(num);
-            return sound != null && Minecraft.getMinecraft().getSoundHandler().isSoundPlaying((ISound) sound);
+            Object sound = Minecraft.getInstance().renderGlobal.mapSoundPositions.get(num);
+            return sound != null && Minecraft.getInstance().getSoundHandler().isSoundPlaying((ISound) sound);
         }
         catch (Exception e)
         {
@@ -324,29 +324,29 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     }
 
     @Override
-    public void preInit(FMLPreInitializationEvent evt)
+    public void preInit(FMLCommonSetupEvent evt)
     {
         super.preInit(evt);
-        RenderingRegistry.registerEntityRenderingHandler(EntityProfessor.class, new IRenderFactory<EntityLiving>()
+        RenderingRegistry.registerEntityRenderingHandler(EntityProfessor.class, new IRenderFactory<MobEntity>()
         {
             @Override
-            public Render<? super EntityLiving> createRenderFor(RenderManager manager)
+            public Render<? super MobEntity> createRenderFor(RenderManager manager)
             {
                 return new RenderProfessor<>(manager);
             }
         });
-        RenderingRegistry.registerEntityRenderingHandler(EntityPokecube.class, new IRenderFactory<EntityLiving>()
+        RenderingRegistry.registerEntityRenderingHandler(EntityPokecube.class, new IRenderFactory<MobEntity>()
         {
             @Override
-            public Render<? super EntityLiving> createRenderFor(RenderManager manager)
+            public Render<? super MobEntity> createRenderFor(RenderManager manager)
             {
                 return new RenderPokecube<>(manager);
             }
         });
-        RenderingRegistry.registerEntityRenderingHandler(EntityPokemob.class, new IRenderFactory<EntityLivingBase>()
+        RenderingRegistry.registerEntityRenderingHandler(EntityPokemob.class, new IRenderFactory<LivingEntity>()
         {
             @Override
-            public Render<? super EntityLivingBase> createRenderFor(RenderManager manager)
+            public Render<? super LivingEntity> createRenderFor(RenderManager manager)
             {
                 return RenderPokemobs.getInstance(manager);
             }
@@ -469,19 +469,19 @@ public class ClientProxyPokecube extends CommonProxyPokecube
             Class<? extends Entity> c = (Class<? extends Entity>) PokecubeCore.instance.getEntityClassForEntry(entry);
 
             if (PokecubeMod.debug) PokecubeMod.log("Registering Renderer for " + entry + " " + name + " " + c + " "
-                    + renderer.createRenderFor(Minecraft.getMinecraft().getRenderManager()));
+                    + renderer.createRenderFor(Minecraft.getInstance().getRenderManager()));
 
             /** Register this for when the rendermanager is refreshed */
             RenderingRegistry.registerEntityRenderingHandler(c, renderer);
             /** Register this here for when just updating renderer at runtime
              * (say from reloading models) */
-            Minecraft.getMinecraft().getRenderManager().entityRenderMap.put(c,
-                    renderer.createRenderFor(Minecraft.getMinecraft().getRenderManager()));
+            Minecraft.getInstance().getRenderManager().entityRenderMap.put(c,
+                    renderer.createRenderFor(Minecraft.getInstance().getRenderManager()));
         }
     }
 
     @Override
-    public void registerClass(Class<? extends EntityLiving> clazz, PokedexEntry entry)
+    public void registerClass(Class<? extends MobEntity> clazz, PokedexEntry entry)
     {
         super.registerClass(clazz, entry);
         // Register the pokemob class as having animations
@@ -501,8 +501,8 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     @Override
     public void spawnParticle(World world, String par1Str, Vector3 location, Vector3 velocity, int... args)
     {
-        if (world == null || Minecraft.getMinecraft().player == null) return;
-        if (world.provider.getDimension() != Minecraft.getMinecraft().player.dimension) return;
+        if (world == null || Minecraft.getInstance().player == null) return;
+        if (world.dimension.getDimension() != Minecraft.getInstance().player.dimension) return;
         if (velocity == null) velocity = Vector3.empty;
         IParticle particle2 = ParticleFactory.makeParticle(par1Str, location, velocity, args);
         ParticleHandler.Instance().addParticle(location, particle2);
@@ -511,9 +511,9 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     @Override
     public StatisticsManager getManager(UUID player)
     {
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) return super.getManager(player);
-        if (player == null || player.equals(Minecraft.getMinecraft().player.getUniqueID()))
-            return Minecraft.getMinecraft().player.getStatFileWriter();
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER) return super.getManager(player);
+        if (player == null || player.equals(Minecraft.getInstance().player.getUniqueID()))
+            return Minecraft.getInstance().player.getStatFileWriter();
         return super.getManager(player);
     }
 
@@ -564,12 +564,12 @@ public class ClientProxyPokecube extends CommonProxyPokecube
     }
 
     @Override
-    public EntityPlayer getPlayer(UUID player)
+    public PlayerEntity getPlayer(UUID player)
     {
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) return super.getPlayer(player);
-        if (Minecraft.getMinecraft().player != null
-                && (player == null || player.equals(Minecraft.getMinecraft().player.getUniqueID())))
-            return Minecraft.getMinecraft().player;
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER) return super.getPlayer(player);
+        if (Minecraft.getInstance().player != null
+                && (player == null || player.equals(Minecraft.getInstance().player.getUniqueID())))
+            return Minecraft.getInstance().player;
         return super.getPlayer(player);
     }
 }

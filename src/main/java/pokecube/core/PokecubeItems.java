@@ -27,7 +27,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -260,11 +260,11 @@ public class PokecubeItems extends Items
 
     public static void deValidate(ItemStack stack)
     {
-        if (stack.hasTagCompound())
+        if (stack.hasTag())
         {
-            long time = stack.getTagCompound().getLong("time");
+            long time = stack.getTag().getLong("time");
             times.remove(time);
-            stack.setTagCompound(null);
+            stack.put(null);
             stack.splitStack(1);
         }
     }
@@ -463,9 +463,9 @@ public class PokecubeItems extends Items
 
     public static boolean isValid(ItemStack stack)
     {
-        if (stack.hasTagCompound())
+        if (stack.hasTag())
         {
-            long time = stack.getTagCompound().getLong("time");
+            long time = stack.getTag().getLong("time");
             return times.contains(time);
         }
         return false;
@@ -484,7 +484,7 @@ public class PokecubeItems extends Items
         return Tools.isStack(stack, "pokemob_held");
     }
 
-    public static void loadTime(NBTTagCompound nbt)
+    public static void loadTime(CompoundNBT nbt)
     {
         if (resetTimeTags)
         {
@@ -512,9 +512,9 @@ public class PokecubeItems extends Items
     {
         long time = System.nanoTime();
         if (isValid(stack)) deValidate(stack);
-        if (!stack.hasTagCompound()) stack.setTagCompound(new NBTTagCompound());
+        if (!stack.hasTag()) stack.put(new CompoundNBT());
         times.add(time);
-        stack.getTagCompound().setLong("time", time);
+        stack.getTag().putLong("time", time);
     }
 
     @SuppressWarnings("unchecked")
@@ -548,7 +548,7 @@ public class PokecubeItems extends Items
         ModelLoader.setCustomModelResourceLocation(item, meta, loc);
     }
 
-    public static void saveTime(NBTTagCompound nbt)
+    public static void saveTime(CompoundNBT nbt)
     {
         Long[] i = times.toArray(new Long[0]);
 
@@ -562,7 +562,7 @@ public class PokecubeItems extends Items
         {
             if (l != null)
             {
-                nbt.setLong("" + num, l.longValue());
+                nbt.putLong("" + num, l.longValue());
                 num++;
             }
         }

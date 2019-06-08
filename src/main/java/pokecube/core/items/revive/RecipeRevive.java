@@ -3,7 +3,7 @@ package pokecube.core.items.revive;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import pokecube.core.PokecubeItems;
@@ -57,12 +57,12 @@ public class RecipeRevive implements IDefaultRecipe
 
         if (pokeseal)
         {
-            if (seal.hasTagCompound())
+            if (seal.hasTag())
             {
                 IPokemob mob = PokecubeManager.itemToPokemob(other, world);
-                NBTTagCompound tag = seal.getTagCompound().getCompoundTag(TagNames.POKESEAL);
-                NBTTagCompound mobtag = mob.getEntity().getEntityData();
-                mobtag.setTag("sealtag", tag);
+                CompoundNBT tag = seal.getTag().getCompound(TagNames.POKESEAL);
+                CompoundNBT mobtag = mob.getEntity().getEntityData();
+                mobtag.put("sealtag", tag);
                 other = PokecubeManager.pokemobToItem(mob);
                 healed = other;
             }

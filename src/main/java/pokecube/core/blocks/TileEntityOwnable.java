@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,13 +22,13 @@ public class TileEntityOwnable extends TileEntity implements IOwnableTE
     @Override
     public boolean canEdit(Entity editor)
     {
-        if (editor instanceof EntityPlayer && ((EntityPlayer) editor).capabilities.isCreativeMode) return true;
+        if (editor instanceof PlayerEntity && ((PlayerEntity) editor).capabilities.isCreativeMode) return true;
         if (placer == null || placer.compareTo(editor.getUniqueID()) != 0) return false;
         return true;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound)
+    public void readFromNBT(CompoundNBT tagCompound)
     {
         super.readFromNBT(tagCompound);
         if (tagCompound.getBoolean("owned"))
@@ -65,14 +65,14 @@ public class TileEntityOwnable extends TileEntity implements IOwnableTE
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT tagCompound)
     {
         super.writeToNBT(tagCompound);
         if (placer != null)
         {
-            tagCompound.setBoolean("owned", true);
-            tagCompound.setLong("uuidMost", placer.getMostSignificantBits());
-            tagCompound.setLong("uuidLeast", placer.getLeastSignificantBits());
+            tagCompound.putBoolean("owned", true);
+            tagCompound.putLong("uuidMost", placer.getMostSignificantBits());
+            tagCompound.putLong("uuidLeast", placer.getLeastSignificantBits());
         }
         return tagCompound;
     }

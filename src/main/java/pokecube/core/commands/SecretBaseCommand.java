@@ -6,12 +6,12 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import pokecube.core.PokecubeItems;
@@ -39,9 +39,9 @@ public class SecretBaseCommand extends CommandBase
     }
 
     @Override
-    /** Check if the given ICommandSender has permission to execute this
+    /** Check if the given ICommandSource has permission to execute this
      * command */
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSource sender)
     {
         return true;
     }
@@ -53,15 +53,15 @@ public class SecretBaseCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokebase";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
-        EntityPlayer player = getCommandSenderAsPlayer(sender);
+        PlayerEntity player = getCommandSenderAsPlayer(sender);
         try
         {
             if (args[0].equals("reset"))
@@ -129,7 +129,7 @@ public class SecretBaseCommand extends CommandBase
                         baseExit.set(Double.parseDouble(args[1]), Double.parseDouble(args[2]),
                                 Double.parseDouble(args[3]));
                         PokecubeDimensionManager.setBaseEntrance(player, player.dimension, baseExit.getPos());
-                        TextComponentTranslation message = new TextComponentTranslation("pokemob.createbase.confirmed",
+                        TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.confirmed",
                                 pos);
                         sender.sendMessage(message);
                     }

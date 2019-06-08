@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResource;
@@ -199,7 +199,7 @@ public class TabulaPackLoader extends AnimationLoader
         }
 
         @Override
-        public String modifyAnimation(EntityLiving entity, float partialTicks, String phase)
+        public String modifyAnimation(MobEntity entity, float partialTicks, String phase)
         {
             if (animator != null) return animator.modifyAnimation(entity, partialTicks, phase);
             return phase;
@@ -207,7 +207,7 @@ public class TabulaPackLoader extends AnimationLoader
 
         public void parse(ResourceLocation animation) throws Exception
         {
-            IResource res = Minecraft.getMinecraft().getResourceManager().getResource(animation);
+            IResource res = Minecraft.getInstance().getResourceManager().getResource(animation);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(res.getInputStream());
@@ -481,7 +481,7 @@ public class TabulaPackLoader extends AnimationLoader
         {
             if (entry != null)
             {
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(model);
                 ZipInputStream zip = new ZipInputStream(res.getInputStream());
                 Scanner scanner = new Scanner(zip);
                 zip.getNextEntry();

@@ -6,10 +6,10 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -23,20 +23,20 @@ import pokecube.core.utils.TagNames;
 public class PacketSyncNewMoves implements IMessage, IMessageHandler<PacketSyncNewMoves, IMessage>
 {
     public int            entityId;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public static void sendUpdatePacket(IPokemob pokemob)
     {
-        if (pokemob.getPokemonOwner() instanceof EntityPlayerMP)
+        if (pokemob.getPokemonOwner() instanceof ServerPlayerEntity)
         {
-            EntityPlayerMP player = (EntityPlayerMP) pokemob.getPokemonOwner();
-            NBTTagList newMoves = new NBTTagList();
+            ServerPlayerEntity player = (ServerPlayerEntity) pokemob.getPokemonOwner();
+            ListNBT newMoves = new ListNBT();
             for (String s : pokemob.getMoveStats().newMoves)
             {
                 newMoves.appendTag(new NBTTagString(s));
             }
             PacketSyncNewMoves packet = new PacketSyncNewMoves();
-            packet.data.setTag(TagNames.NEWMOVES, newMoves);
+            packet.data.put(TagNames.NEWMOVES, newMoves);
             packet.entityId = pokemob.getEntity().getEntityId();
             PokecubeMod.packetPipeline.sendTo(packet, player);
         }
@@ -85,16 +85,16 @@ public class PacketSyncNewMoves implements IMessage, IMessageHandler<PacketSyncN
 
     void processMessage(MessageContext ctx, PacketSyncNewMoves message)
     {
-        EntityPlayer player = PokecubeCore.getPlayer(null);
+        PlayerEntity player = PokecubeCore.getPlayer(null);
         int id = message.entityId;
-        NBTTagCompound data = message.data;
+        CompoundNBT data = message.data;
         Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
         if (pokemob != null)
         {
-            NBTTagList newMoves = (NBTTagList) data.getTag(TagNames.NEWMOVES);
+            ListNBT newMoves = (ListNBT) data.getTag(TagNames.NEWMOVES);
             pokemob.getMoveStats().newMoves.clear();
-            for (int i = 0; i < newMoves.tagCount(); i++)
+            for (int i = 0; i < newMoves.size(); i++)
                 if (!pokemob.getMoveStats().newMoves.contains(newMoves.getStringTagAt(i)))
                     pokemob.getMoveStats().newMoves.add(newMoves.getStringTagAt(i));
         }

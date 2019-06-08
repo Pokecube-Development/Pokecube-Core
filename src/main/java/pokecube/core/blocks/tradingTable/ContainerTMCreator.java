@@ -1,6 +1,6 @@
 package pokecube.core.blocks.tradingTable;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
@@ -36,9 +36,9 @@ public class ContainerTMCreator extends Container
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer entityPlayer)
+    public boolean canInteractWith(PlayerEntity PlayerEntity)
     {
-        return tile.isUsableByPlayer(entityPlayer);
+        return tile.isUsableByPlayer(PlayerEntity);
     }
 
     protected void clearSlots()
@@ -52,14 +52,14 @@ public class ContainerTMCreator extends Container
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer playerIn)
+    public void onContainerClosed(PlayerEntity playerIn)
     {
         super.onContainerClosed(playerIn);
         tile.closeInventory(playerIn);
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int index)
+    public ItemStack transferStackInSlot(PlayerEntity player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);

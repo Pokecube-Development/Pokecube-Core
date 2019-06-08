@@ -4,8 +4,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -23,12 +23,12 @@ public abstract class TemplateStructureBase extends Village
     public BlockPos          templatePosition;
     public int               averageGroundLevel = -1;
 
-    public static Rotation getFromDir(EnumFacing dir)
+    public static Rotation getFromDir(Direction dir)
     {
         Rotation rotation = Rotation.CLOCKWISE_180;
-        if (dir == EnumFacing.NORTH) rotation = Rotation.NONE;
-        if (dir == EnumFacing.EAST) rotation = Rotation.CLOCKWISE_90;
-        if (dir == EnumFacing.WEST) rotation = Rotation.COUNTERCLOCKWISE_90;
+        if (dir == Direction.NORTH) rotation = Rotation.NONE;
+        if (dir == Direction.EAST) rotation = Rotation.CLOCKWISE_90;
+        if (dir == Direction.WEST) rotation = Rotation.COUNTERCLOCKWISE_90;
         return rotation;
     }
 
@@ -37,7 +37,7 @@ public abstract class TemplateStructureBase extends Village
         placeSettings = new PlacementSettings().setIgnoreEntities(false).setReplacedBlock(null);
     }
 
-    public TemplateStructureBase(String type, BlockPos pos, EnumFacing dir)
+    public TemplateStructureBase(String type, BlockPos pos, Direction dir)
     {
         this();
 
@@ -76,7 +76,7 @@ public abstract class TemplateStructureBase extends Village
         setup(template, pos, placeSettings, dir);
     }
 
-    protected void setup(Template template, BlockPos pos, PlacementSettings settings, EnumFacing dir)
+    protected void setup(Template template, BlockPos pos, PlacementSettings settings, Direction dir)
     {
         this.template = template;
         this.templatePosition = pos;
@@ -86,7 +86,7 @@ public abstract class TemplateStructureBase extends Village
 
     /** (abstract) Helper method to write subclass data to NBT */
     @Override
-    protected void writeStructureToNBT(NBTTagCompound tagCompound)
+    protected void writeStructureToNBT(CompoundNBT tagCompound)
     {
         if (templatePosition == null)
         {
@@ -97,12 +97,12 @@ public abstract class TemplateStructureBase extends Village
         tagCompound.setInteger("TPX", this.templatePosition.getX());
         tagCompound.setInteger("TPY", this.templatePosition.getY());
         tagCompound.setInteger("TPZ", this.templatePosition.getZ());
-        tagCompound.setString("TN", ((PokecubeTemplate) getTemplate()).name);
+        tagCompound.putString("TN", ((PokecubeTemplate) getTemplate()).name);
         tagCompound.setByte("Rot", (byte) placeSettings.getRotation().ordinal());
     }
 
     /** (abstract) Helper method to read subclass data from NBT */
-    protected void readStructureFromNBT(NBTTagCompound tagCompound)
+    protected void readStructureFromNBT(CompoundNBT tagCompound)
     {
         this.templatePosition = new BlockPos(tagCompound.getInteger("TPX"), tagCompound.getInteger("TPY"),
                 tagCompound.getInteger("TPZ"));
@@ -198,7 +198,7 @@ public abstract class TemplateStructureBase extends Village
                         if (boxIn.isVecInside(blockpos))
                         {
                             averageGroundLevel = Math.max(worldIn.getTopSolidOrLiquidBlock(blockpos).getY(),
-                                    worldIn.provider.getAverageGroundLevel() - 1);
+                                    worldIn.dimension.getAverageGroundLevel() - 1);
                         }
                         break;
                     }
@@ -234,7 +234,7 @@ public abstract class TemplateStructureBase extends Village
     protected abstract void handleDataMarker(String marker, BlockPos pos, World world, Random rand,
             StructureBoundingBox box);
 
-    public void setBoundingBoxFromTemplate(EnumFacing dir)
+    public void setBoundingBoxFromTemplate(Direction dir)
     {
         BlockPos size = template.getSize();
         boundingBox = StructureBoundingBox.getComponentToAddBoundingBox(templatePosition.getX(),

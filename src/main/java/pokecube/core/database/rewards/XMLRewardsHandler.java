@@ -19,11 +19,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.translation.LanguageMap;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntryLoader.Drop;
@@ -61,17 +61,17 @@ public class XMLRewardsHandler
                 this.percent = percent;
             }
 
-            private boolean check(Entity entity, NBTTagCompound tag, ItemStack reward, int num, boolean giveReward)
+            private boolean check(Entity entity, CompoundNBT tag, ItemStack reward, int num, boolean giveReward)
             {
                 if (reward == null || tag.getBoolean(tagString)) return false;
                 if (matches(num))
                 {
                     if (giveReward)
                     {
-                        tag.setBoolean(tagString, true);
-                        entity.sendMessage(new TextComponentTranslation(message));
-                        EntityPlayer entityPlayer = (EntityPlayer) entity;
-                        Tools.giveItem(entityPlayer, reward.copy());
+                        tag.putBoolean(tagString, true);
+                        entity.sendMessage(new TranslationTextComponent(message));
+                        PlayerEntity PlayerEntity = (PlayerEntity) entity;
+                        Tools.giveItem(PlayerEntity, reward.copy());
                         PokecubePlayerDataHandler.saveCustomData(entity.getCachedUniqueIdString());
                     }
                     return true;
@@ -161,10 +161,10 @@ public class XMLRewardsHandler
                 if (giveReward)
                 {
                     ItemStack book = getInfoBook(lang);
-                    data.tag.setBoolean(key, true);
-                    entity.sendMessage(new TextComponentTranslation(message));
-                    EntityPlayer entityPlayer = (EntityPlayer) entity;
-                    Tools.giveItem(entityPlayer, book);
+                    data.tag.putBoolean(key, true);
+                    entity.sendMessage(new TranslationTextComponent(message));
+                    PlayerEntity PlayerEntity = (PlayerEntity) entity;
+                    Tools.giveItem(PlayerEntity, book);
                     PokecubePlayerDataHandler.saveCustomData(entity.getCachedUniqueIdString());
                 }
                 return true;
@@ -210,7 +210,7 @@ public class XMLRewardsHandler
                 ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
                 try
                 {
-                    stack.setTagCompound(JsonToNBT.getTagFromJson(name));
+                    stack.put(JsonToNBT.getTagFromJson(name));
                 }
                 catch (Exception e)
                 {

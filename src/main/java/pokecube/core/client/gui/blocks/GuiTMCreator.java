@@ -55,7 +55,7 @@ public class GuiTMCreator extends GuiContainer
         if (guibutton.id == 4 && !moves.isEmpty())
         {
             PacketTrade packet = new PacketTrade(PacketTrade.MAKETM);
-            packet.data.setString("M", moves.get(index));
+            packet.data.putString("M", moves.get(index));
             PokecubePacketHandler.sendToServer(packet);
         }
     }

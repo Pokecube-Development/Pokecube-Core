@@ -3,11 +3,11 @@ package pokecube.core.blocks.healtable;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.NonNullList;
@@ -38,7 +38,7 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     }
 
     @Override
-    public void closeInventory(EntityPlayer player)
+    public void closeInventory(PlayerEntity player)
     {
     }
 
@@ -104,10 +104,10 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        if (getWorld().isRemote) return new SPacketUpdateTileEntity(pos, 3, nbttagcompound);
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(pos, 3, nbttagcompound);
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        if (getWorld().isRemote) return new SPacketUpdateTileEntity(pos, 3, CompoundNBT);
+        this.writeToNBT(CompoundNBT);
+        return new SPacketUpdateTileEntity(pos, 3, CompoundNBT);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(PlayerEntity player)
     {
         return getWorld().getTileEntity(pos) == this && player.getDistanceSq(pos) < 64;
     }
@@ -153,24 +153,24 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     {
         if (getWorld().isRemote)
         {
-            NBTTagCompound nbt = pkt.getNbtCompound();
+            CompoundNBT nbt = pkt.getNbtCompound();
             readFromNBT(nbt);
         }
     }
 
     @Override
-    public void openInventory(EntityPlayer player)
+    public void openInventory(PlayerEntity player)
     {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound)
+    public void readFromNBT(CompoundNBT tagCompound)
     {
         super.readFromNBT(tagCompound);
-        NBTTagList tagList = (NBTTagList) tagCompound.getTag("Inventory");
-        if (tagList != null) for (int i = 0; i < tagList.tagCount(); i++)
+        ListNBT tagList = (ListNBT) tagCompound.getTag("Inventory");
+        if (tagList != null) for (int i = 0; i < tagList.size(); i++)
         {
-            NBTTagCompound tag = tagList.getCompoundTagAt(i);
+            CompoundNBT tag = tagList.getCompound(i);
             byte slot = tag.getByte("Slot");
             if (slot >= 0 && slot < inventory.size())
             {
@@ -224,23 +224,23 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT tagCompound)
     {
         super.writeToNBT(tagCompound);
-        NBTTagList itemList = new NBTTagList();
+        ListNBT itemList = new ListNBT();
         tagCompound.setInteger("time", ticks);
         for (int i = 0; i < inventory.size(); i++)
         {
             ItemStack stack = inventory.get(i);
             if (stack != ItemStack.EMPTY)
             {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundNBT tag = new CompoundNBT();
                 tag.setByte("Slot", (byte) i);
                 stack.writeToNBT(tag);
                 itemList.appendTag(tag);
             }
         }
-        tagCompound.setTag("Inventory", itemList);
+        tagCompound.put("Inventory", itemList);
         return tagCompound;
     }
 

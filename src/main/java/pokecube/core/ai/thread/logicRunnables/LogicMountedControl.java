@@ -3,9 +3,9 @@ package pokecube.core.ai.thread.logicRunnables;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -60,9 +60,9 @@ public class LogicMountedControl extends LogicBase
         boolean canSurf = pokemob.canUseSurf();
         boolean canDive = pokemob.canUseDive();
 
-        if (rider instanceof EntityPlayerMP)
+        if (rider instanceof ServerPlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) rider;
+            PlayerEntity player = (PlayerEntity) rider;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             PokedexEntry entry = pokemob.getPokedexEntry();
@@ -98,7 +98,7 @@ public class LogicMountedControl extends LogicBase
             }
         }
         if (canFly) for (int i = 0; i < PokecubeMod.core.getConfig().flyDimBlacklist.length; i++)
-            if (PokecubeMod.core.getConfig().flyDimBlacklist[i] == world.provider.getDimension())
+            if (PokecubeMod.core.getConfig().flyDimBlacklist[i] == world.dimension.getDimension())
             {
                 canFly = false;
                 break;
@@ -119,14 +119,14 @@ public class LogicMountedControl extends LogicBase
             vision.setCurativeItems(Lists.newArrayList(stack));
             for (Entity e : entity.getRecursivePassengers())
             {
-                if (e instanceof EntityLivingBase)
+                if (e instanceof LivingEntity)
                 {
                     if (entity.isInWater())
                     {
-                        ((EntityLivingBase) e).addPotionEffect(vision);
-                        ((EntityLivingBase) e).setAir(300);
+                        ((LivingEntity) e).addPotionEffect(vision);
+                        ((LivingEntity) e).setAir(300);
                     }
-                    else((EntityLivingBase) e).curePotionEffects(stack);
+                    else((LivingEntity) e).curePotionEffects(stack);
                 }
             }
         }

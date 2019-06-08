@@ -16,10 +16,10 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandSenderWrapper;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -53,12 +53,12 @@ public class MakeCommand extends CommandBase
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String text = "";
         ITextComponent message;
         boolean deobfuscated = PokecubeMod.isDeobfuscated() || server.isDedicatedServer();
-        boolean commandBlock = !(sender instanceof EntityPlayer);
+        boolean commandBlock = !(sender instanceof PlayerEntity);
         if (deobfuscated || commandBlock)
         {
             String name;
@@ -133,7 +133,7 @@ public class MakeCommand extends CommandBase
                 }
                 if (profile == null && ownerName != null && !ownerName.isEmpty())
                 {
-                    EntityPlayer player = getPlayer(server, sender, ownerName);
+                    PlayerEntity player = getPlayer(server, sender, ownerName);
                     profile = player.getGameProfile();
                 }
                 Vector3 temp = Vector3.getNewVector();
@@ -172,7 +172,7 @@ public class MakeCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/" + aliases.get(0) + "<pokemob name/number> <arguments>";
     }
@@ -185,7 +185,7 @@ public class MakeCommand extends CommandBase
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, BlockPos pos)
     {
         List<String> ret = new ArrayList<String>();
         if (args.length == 1)
@@ -310,7 +310,7 @@ public class MakeCommand extends CommandBase
 
                             try
                             {
-                                itemstack.setTagCompound(JsonToNBT.getTagFromJson(s));
+                                itemstack.put(JsonToNBT.getTagFromJson(s));
                             }
                             catch (NBTException nbtexception)
                             {
@@ -467,11 +467,11 @@ public class MakeCommand extends CommandBase
         return ownerName;
     }
 
-    public static EntityPlayerMP getPlayerBySender(ICommandSender sender) throws CommandException
+    public static ServerPlayerEntity getPlayerBySender(ICommandSource sender) throws CommandException
     {
-        if (sender instanceof EntityPlayerMP)
+        if (sender instanceof ServerPlayerEntity)
         {
-            return (EntityPlayerMP) sender;
+            return (ServerPlayerEntity) sender;
         }
         else if (sender instanceof CommandSenderWrapper)// if the command is
                                                         // sent by /execute
@@ -500,7 +500,7 @@ public class MakeCommand extends CommandBase
     {
         try
         {
-            EntityPlayer player = getPlayer(server, server, arg);
+            PlayerEntity player = getPlayer(server, server, arg);
             return player.getGameProfile();
         }
         catch (CommandException e1)

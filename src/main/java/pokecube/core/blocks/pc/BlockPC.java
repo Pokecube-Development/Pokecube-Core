@@ -4,12 +4,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -28,7 +28,7 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
         super(Material.GLASS);
         this.top = top;
         this.setLightOpacity(0);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, Direction.NORTH));
         this.setHardness(500);
         this.setResistance(100);
         this.setLightLevel(1f);
@@ -67,14 +67,14 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     /** Convert the given metadata into a BlockState for this Block */
     public IBlockState getStateFromMeta(int meta)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(meta & 7);
+        Direction Direction = Direction.getFront(meta & 7);
 
-        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
+        if (Direction.getAxis() == Direction.Axis.Y)
         {
-            enumfacing = EnumFacing.NORTH;
+            Direction = Direction.NORTH;
         }
 
-        return this.getDefaultState().withProperty(FACING, enumfacing);
+        return this.getDefaultState().withProperty(FACING, Direction);
     }
 
     @Override
@@ -90,8 +90,8 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         this.setLightLevel(1f);
         if (!top) { return false; }
@@ -112,8 +112,8 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     }
 
     @Override
-    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-            float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
+    public IBlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
+            float hitZ, int meta, LivingEntity placer, Hand hand)
     {
         TileEntity te = world.getTileEntity(pos);
         if (te instanceof TileEntityOwnable)

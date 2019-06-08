@@ -9,15 +9,15 @@ import net.minecraft.block.BlockStoneBrick;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
@@ -75,8 +75,8 @@ public class BlockNest extends Block implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         TileEntity tile_entity = worldIn.getTileEntity(pos);
         if (tile_entity instanceof TileEntityNest && playerIn.capabilities.isCreativeMode
@@ -87,7 +87,7 @@ public class BlockNest extends Block implements ITileEntityProvider
             TileEntityNest nest = (TileEntityNest) tile_entity;
             PokedexEntry entry = ItemPokemobEgg.getEntry(playerIn.getHeldItemMainhand());
             if (entry != null) nest.spawns.add(entry);
-            playerIn.sendMessage(new TextComponentString("Added " + entry));
+            playerIn.sendMessage(new StringTextComponent("Added " + entry));
             return true;
         }
         if (state.getValue(TYPE) == 1)

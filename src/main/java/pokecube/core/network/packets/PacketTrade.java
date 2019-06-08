@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -30,7 +30,7 @@ public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMess
     public static final byte SETMOVES  = 3;
 
     byte                     message;
-    public NBTTagCompound    data      = new NBTTagCompound();
+    public CompoundNBT    data      = new CompoundNBT();
 
     public PacketTrade()
     {
@@ -80,8 +80,8 @@ public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMess
 
     void processMessage(MessageContext ctx, PacketTrade message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }
@@ -121,7 +121,7 @@ public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMess
             }
             else
             {
-                player = (EntityPlayer) player.getEntityWorld().getEntityByID(message.data.getInteger("I"));
+                player = (PlayerEntity) player.getEntityWorld().getEntityByID(message.data.getInteger("I"));
                 int id = message.data.getByte("B");
                 if (id == 1)
                 {

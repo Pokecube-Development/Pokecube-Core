@@ -68,7 +68,7 @@ public class SpawnBiomeMatcher
             this.world = world;
             this.location = location;
             // TODO better way to choose current time.
-            double time = world.getWorldTime() / 24000;
+            double time = world.getDayTime() / 24000;
             day = PokedexEntry.day.contains(time);
             dusk = PokedexEntry.dusk.contains(time);
             dawn = PokedexEntry.dawn.contains(time);

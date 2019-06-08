@@ -4,8 +4,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagString;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
@@ -36,16 +36,16 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
     }
 
     @Override
-    public void readPokemobData(NBTTagCompound tag)
+    public void readPokemobData(CompoundNBT tag)
     {
-        NBTTagCompound ownerShipTag = tag.getCompoundTag(OWNERSHIPTAG);
-        NBTTagCompound statsTag = tag.getCompoundTag(STATSTAG);
-        NBTTagCompound movesTag = tag.getCompoundTag(MOVESTAG);
-        NBTTagCompound inventoryTag = tag.getCompoundTag(INVENTORYTAG);
-        NBTTagCompound breedingTag = tag.getCompoundTag(BREEDINGTAG);
-        NBTTagCompound visualsTag = tag.getCompoundTag(VISUALSTAG);
-        NBTTagCompound aiTag = tag.getCompoundTag(AITAG);
-        NBTTagCompound miscTag = tag.getCompoundTag(MISCTAG);
+        CompoundNBT ownerShipTag = tag.getCompound(OWNERSHIPTAG);
+        CompoundNBT statsTag = tag.getCompound(STATSTAG);
+        CompoundNBT movesTag = tag.getCompound(MOVESTAG);
+        CompoundNBT inventoryTag = tag.getCompound(INVENTORYTAG);
+        CompoundNBT breedingTag = tag.getCompound(BREEDINGTAG);
+        CompoundNBT visualsTag = tag.getCompound(VISUALSTAG);
+        CompoundNBT aiTag = tag.getCompound(AITAG);
+        CompoundNBT miscTag = tag.getCompound(MISCTAG);
         // Read Ownership Tag
         if (!ownerShipTag.hasNoTags())
         {
@@ -84,8 +84,8 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
             {
                 try
                 {
-                    NBTTagList newMoves = (NBTTagList) movesTag.getTag(NEWMOVES);
-                    for (int i = 0; i < newMoves.tagCount(); i++)
+                    ListNBT newMoves = (ListNBT) movesTag.getTag(NEWMOVES);
+                    for (int i = 0; i < newMoves.size(); i++)
                         if (!getMoveStats().newMoves.contains(newMoves.getStringTagAt(i)))
                             getMoveStats().newMoves.add(newMoves.getStringTagAt(i));
                 }
@@ -105,14 +105,14 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read Inventory tag
         if (!inventoryTag.hasNoTags())
         {
-            NBTTagList nbttaglist = inventoryTag.getTagList(ITEMS, 10);
-            for (int i = 0; i < nbttaglist.tagCount(); ++i)
+            ListNBT ListNBT = inventoryTag.getTagList(ITEMS, 10);
+            for (int i = 0; i < ListNBT.size(); ++i)
             {
-                NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
-                int j = nbttagcompound1.getByte("Slot") & 255;
+                CompoundNBT CompoundNBT1 = ListNBT.getCompound(i);
+                int j = CompoundNBT1.getByte("Slot") & 255;
                 if (j < this.getPokemobInventory().getSizeInventory())
                 {
-                    this.getPokemobInventory().setInventorySlotContents(j, new ItemStack(nbttagcompound1));
+                    this.getPokemobInventory().setInventorySlotContents(j, new ItemStack(CompoundNBT1));
                 }
                 this.setHeldItem(this.getPokemobInventory().getStackInSlot(1));
             }
@@ -134,7 +134,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
             }
             if (visualsTag.hasKey(POKECUBE))
             {
-                NBTTagCompound pokecubeTag = visualsTag.getCompoundTag(POKECUBE);
+                CompoundNBT pokecubeTag = visualsTag.getCompound(POKECUBE);
                 this.setPokecube(new ItemStack(pokecubeTag));
             }
         }
@@ -148,7 +148,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
             cleanLoadedAIStates();
 
             setHungerTime(aiTag.getInteger(HUNGER));
-            NBTTagCompound routines = aiTag.getCompoundTag(AIROUTINES);
+            CompoundNBT routines = aiTag.getCompound(AIROUTINES);
             for (String s : routines.getKeySet())
             {
                 // try/catch block incase addons add more routines to the enum.
@@ -173,38 +173,38 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
     }
 
     @Override
-    public NBTTagCompound writePokemobData()
+    public CompoundNBT writePokemobData()
     {
-        NBTTagCompound pokemobTag = new NBTTagCompound();
+        CompoundNBT pokemobTag = new CompoundNBT();
         pokemobTag.setInteger(VERSION, 1);
         // Write Ownership tag
-        NBTTagCompound ownerShipTag = new NBTTagCompound();
+        CompoundNBT ownerShipTag = new CompoundNBT();
         // This is still written for pokecubes to read from. Actual number is
         // stored in genes.
         ownerShipTag.setInteger(POKEDEXNB, this.getPokedexNb());
-        ownerShipTag.setString(NICKNAME, getPokemonNickname());
-        ownerShipTag.setBoolean(PLAYERS, isPlayerOwned());
-        ownerShipTag.setString(TEAM, getPokemobTeam());
-        if (getOriginalOwnerUUID() != null) ownerShipTag.setString(OT, getOriginalOwnerUUID().toString());
-        if (getPokemonOwnerID() != null) ownerShipTag.setString(OWNER, getPokemonOwnerID().toString());
+        ownerShipTag.putString(NICKNAME, getPokemonNickname());
+        ownerShipTag.putBoolean(PLAYERS, isPlayerOwned());
+        ownerShipTag.putString(TEAM, getPokemobTeam());
+        if (getOriginalOwnerUUID() != null) ownerShipTag.putString(OT, getOriginalOwnerUUID().toString());
+        if (getPokemonOwnerID() != null) ownerShipTag.putString(OWNER, getPokemonOwnerID().toString());
 
         // Write stats tag
-        NBTTagCompound statsTag = new NBTTagCompound();
+        CompoundNBT statsTag = new CompoundNBT();
         statsTag.setInteger(EXP, getExp());
         statsTag.setByte(STATUS, getStatus());
         statsTag.setInteger(HAPPY, bonusHappiness);
 
         // Write moves tag
-        NBTTagCompound movesTag = new NBTTagCompound();
+        CompoundNBT movesTag = new CompoundNBT();
         movesTag.setInteger(MOVEINDEX, getMoveIndex());
         if (!getMoveStats().newMoves.isEmpty())
         {
-            NBTTagList newMoves = new NBTTagList();
+            ListNBT newMoves = new ListNBT();
             for (String s : getMoveStats().newMoves)
             {
                 newMoves.appendTag(new NBTTagString(s));
             }
-            movesTag.setTag(NEWMOVES, newMoves);
+            movesTag.put(NEWMOVES, newMoves);
         }
         movesTag.setInteger(COOLDOWN, getAttackCooldown());
         int[] disables = new int[4];
@@ -216,78 +216,78 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         }
         if (tag)
         {
-            movesTag.setIntArray(DISABLED, disables);
+            movesTag.putIntArray(DISABLED, disables);
         }
 
         // Write Inventory tag
-        NBTTagCompound inventoryTag = new NBTTagCompound();
-        NBTTagList nbttaglist = new NBTTagList();
+        CompoundNBT inventoryTag = new CompoundNBT();
+        ListNBT ListNBT = new ListNBT();
         this.getPokemobInventory().setInventorySlotContents(1, this.getHeldItem());
         for (int i = 0; i < this.getPokemobInventory().getSizeInventory(); ++i)
         {
             ItemStack itemstack = this.getPokemobInventory().getStackInSlot(i);
             if (CompatWrapper.isValid(itemstack))
             {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte) i);
-                itemstack.writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
+                CompoundNBT CompoundNBT1 = new CompoundNBT();
+                CompoundNBT1.setByte("Slot", (byte) i);
+                itemstack.writeToNBT(CompoundNBT1);
+                ListNBT.appendTag(CompoundNBT1);
             }
         }
-        inventoryTag.setTag(ITEMS, nbttaglist);
+        inventoryTag.put(ITEMS, ListNBT);
 
         // Write Breeding tag
-        NBTTagCompound breedingTag = new NBTTagCompound();
+        CompoundNBT breedingTag = new CompoundNBT();
         breedingTag.setInteger(SEXETIME, loveTimer);
 
         // Write visuals tag
-        NBTTagCompound visualsTag = new NBTTagCompound();
+        CompoundNBT visualsTag = new CompoundNBT();
 
         // This is still written for pokecubes to read from. Actual form is
         // stored in genes.
-        visualsTag.setString(FORME, getPokedexEntry().getTrimmedName());
+        visualsTag.putString(FORME, getPokedexEntry().getTrimmedName());
         visualsTag.setInteger(SPECIALTAG, dataSync().get(params.SPECIALINFO));
         int[] flavourAmounts = new int[5];
         for (int i = 0; i < flavourAmounts.length; i++)
         {
             flavourAmounts[i] = getFlavourAmount(i);
         }
-        visualsTag.setIntArray(FLAVOURSTAG, flavourAmounts);
+        visualsTag.putIntArray(FLAVOURSTAG, flavourAmounts);
         if (CompatWrapper.isValid(getPokecube()))
         {
-            NBTTagCompound pokecubeTag = getPokecube().writeToNBT(new NBTTagCompound());
-            visualsTag.setTag(POKECUBE, pokecubeTag);
+            CompoundNBT pokecubeTag = getPokecube().writeToNBT(new CompoundNBT());
+            visualsTag.put(POKECUBE, pokecubeTag);
         }
         // Misc AI
-        NBTTagCompound aiTag = new NBTTagCompound();
+        CompoundNBT aiTag = new CompoundNBT();
 
         aiTag.setInteger(GENERALSTATE, getTotalGeneralState());
         aiTag.setInteger(LOGICSTATE, getTotalLogicState());
         aiTag.setInteger(COMBATSTATE, getTotalCombatState());
 
         aiTag.setInteger(HUNGER, getHungerTime());
-        NBTTagCompound aiRoutineTag = new NBTTagCompound();
+        CompoundNBT aiRoutineTag = new CompoundNBT();
         for (AIRoutine routine : AIRoutine.values())
         {
-            aiRoutineTag.setBoolean(routine.toString(), isRoutineEnabled(routine));
+            aiRoutineTag.putBoolean(routine.toString(), isRoutineEnabled(routine));
         }
-        aiTag.setTag(AIROUTINES, aiRoutineTag);
+        aiTag.put(AIROUTINES, aiRoutineTag);
 
         // Misc other
-        NBTTagCompound miscTag = new NBTTagCompound();
+        CompoundNBT miscTag = new CompoundNBT();
         miscTag.setInteger(RNGVAL, getRNGValue());
         miscTag.setInteger(UID, getPokemonUID());
-        miscTag.setBoolean(WASSHADOW, wasShadow);
+        miscTag.putBoolean(WASSHADOW, wasShadow);
 
         // Set tags to the pokemob tag.
-        pokemobTag.setTag(OWNERSHIPTAG, ownerShipTag);
-        pokemobTag.setTag(STATSTAG, statsTag);
-        pokemobTag.setTag(MOVESTAG, movesTag);
-        pokemobTag.setTag(INVENTORYTAG, inventoryTag);
-        pokemobTag.setTag(BREEDINGTAG, breedingTag);
-        pokemobTag.setTag(VISUALSTAG, visualsTag);
-        pokemobTag.setTag(AITAG, aiTag);
-        pokemobTag.setTag(MISCTAG, miscTag);
+        pokemobTag.put(OWNERSHIPTAG, ownerShipTag);
+        pokemobTag.put(STATSTAG, statsTag);
+        pokemobTag.put(MOVESTAG, movesTag);
+        pokemobTag.put(INVENTORYTAG, inventoryTag);
+        pokemobTag.put(BREEDINGTAG, breedingTag);
+        pokemobTag.put(VISUALSTAG, visualsTag);
+        pokemobTag.put(AITAG, aiTag);
+        pokemobTag.put(MISCTAG, miscTag);
         return pokemobTag;
     }
 

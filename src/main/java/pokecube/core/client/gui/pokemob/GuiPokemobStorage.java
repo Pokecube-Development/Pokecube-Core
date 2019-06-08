@@ -16,10 +16,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.ai.thread.aiRunnables.utility.AIStoreStuff;
 import pokecube.core.client.Resources;
 import pokecube.core.client.gui.GuiPokemob;
@@ -100,10 +100,10 @@ public class GuiPokemobStorage extends GuiContainer
             if (run instanceof AIStoreStuff)
             {
                 ai = (AIStoreStuff) run;
-                NBTTagCompound nbt = ai.serializeNBT();
-                NBTTagCompound berry = nbt.getCompoundTag("b");
-                NBTTagCompound storage = nbt.getCompoundTag("s");
-                NBTTagCompound empty = nbt.getCompoundTag("e");
+                CompoundNBT nbt = ai.serializeNBT();
+                CompoundNBT berry = nbt.getCompound("b");
+                CompoundNBT storage = nbt.getCompound("s");
+                CompoundNBT empty = nbt.getCompound("e");
                 if (!berry.hasNoTags())
                 {
                     this.berry
@@ -113,7 +113,7 @@ public class GuiPokemobStorage extends GuiContainer
                 {
                     this.storage.setText(
                             storage.getInteger("x") + " " + storage.getInteger("y") + " " + storage.getInteger("z"));
-                    storageFace.setText(EnumFacing.values()[storage.getByte("f")] + "");
+                    storageFace.setText(Direction.values()[storage.getByte("f")] + "");
                 }
                 else
                 {
@@ -123,7 +123,7 @@ public class GuiPokemobStorage extends GuiContainer
                 {
                     this.empty
                             .setText(empty.getInteger("x") + " " + empty.getInteger("y") + " " + empty.getInteger("z"));
-                    emptyFace.setText(EnumFacing.values()[empty.getByte("f")] + "");
+                    emptyFace.setText(Direction.values()[empty.getByte("f")] + "");
                 }
                 else
                 {
@@ -156,9 +156,9 @@ public class GuiPokemobStorage extends GuiContainer
             BlockPos newLink = null;
             InventoryPlayer inv = (InventoryPlayer) playerInventory;
             boolean effect = false;
-            if (CompatWrapper.isValid(inv.getItemStack()) && inv.getItemStack().hasTagCompound())
+            if (CompatWrapper.isValid(inv.getItemStack()) && inv.getItemStack().hasTag())
             {
-                NBTTagCompound link = inv.getItemStack().getTagCompound().getCompoundTag("link");
+                CompoundNBT link = inv.getItemStack().getTag().getCompound("link");
                 if (!link.hasNoTags())
                 {
                     Vector4 pos = new Vector4(link);
@@ -196,9 +196,9 @@ public class GuiPokemobStorage extends GuiContainer
         if (storageLoc == null) storage.setText("");
         BlockPos emptyInventory = posFromText(empty.getText());
         if (emptyInventory == null) empty.setText("");
-        EnumFacing storageFace = dirFromText(this.storageFace.getText());
+        Direction storageFace = dirFromText(this.storageFace.getText());
         this.storageFace.setText(storageFace + "");
-        EnumFacing emptyFace = dirFromText(this.emptyFace.getText());
+        Direction emptyFace = dirFromText(this.emptyFace.getText());
         this.emptyFace.setText(emptyFace + "");
         ai.berryLoc = berryLoc;
         ai.storageLoc = storageLoc;
@@ -208,7 +208,7 @@ public class GuiPokemobStorage extends GuiContainer
         PacketUpdateAI.sendUpdatePacket(pokemob, ai.getIdentifier(), null);
 
         // Send status message thingy
-        this.mc.player.sendStatusMessage(new TextComponentTranslation("pokemob.gui.updatestorage"), true);
+        this.mc.player.sendStatusMessage(new TranslationTextComponent("pokemob.gui.updatestorage"), true);
     }
 
     private BlockPos posFromText(String text)
@@ -238,10 +238,10 @@ public class GuiPokemobStorage extends GuiContainer
         return null;
     }
 
-    private EnumFacing dirFromText(String text)
+    private Direction dirFromText(String text)
     {
         text = text.toLowerCase(Locale.ENGLISH);
-        EnumFacing dir = EnumFacing.byName(text);
+        Direction dir = Direction.byName(text);
         if (dir == null)
         {
             if (!text.isEmpty())
@@ -249,7 +249,7 @@ public class GuiPokemobStorage extends GuiContainer
                 // Send status message about not working here.
                 System.err.println("Error with dir:" + text);
             }
-            dir = EnumFacing.UP;
+            dir = Direction.UP;
         }
         return dir;
     }

@@ -1,6 +1,6 @@
 package pokecube.core.events;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event.HasResult;
@@ -31,7 +31,7 @@ public class SpawnEvent extends Event
     public static class Post extends SpawnEvent
     {
         public final IPokemob     pokemob;
-        public final EntityLiving entity;
+        public final MobEntity entity;
 
         public Post(PokedexEntry entry, Vector3 location, World world, IPokemob pokemob)
         {
@@ -190,7 +190,7 @@ public class SpawnEvent extends Event
     public static class SendOut extends SpawnEvent
     {
         public final IPokemob     pokemob;
-        public final EntityLiving entity;
+        public final MobEntity entity;
 
         protected SendOut(PokedexEntry entry, Vector3 location, World world, IPokemob pokemob)
         {

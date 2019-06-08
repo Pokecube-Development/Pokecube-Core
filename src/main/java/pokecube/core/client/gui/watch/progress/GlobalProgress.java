@@ -8,7 +8,7 @@ import com.google.common.base.Predicate;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import pokecube.core.client.gui.watch.GuiPokeWatch;
@@ -56,7 +56,7 @@ public class GlobalProgress extends Progress
                     @Override
                     public boolean apply(Entity input)
                     {
-                        return input instanceof EntityAnimal && CapabilityPokemob.getPokemobFor(input) != null;
+                        return input instanceof AnimalEntity && CapabilityPokemob.getPokemobFor(input) != null;
                     }
                 });
         String nearbyLine = I18n.format("pokewatch.progress.global.nearby", otherMobs.size());

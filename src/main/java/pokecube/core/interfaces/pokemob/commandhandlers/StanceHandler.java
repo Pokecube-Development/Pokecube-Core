@@ -1,7 +1,7 @@
 package pokecube.core.interfaces.pokemob.commandhandlers;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.ai.properties.IGuardAICapability;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.interfaces.IPokemob;
@@ -58,7 +58,7 @@ public class StanceHandler extends DefaultHandler
         case BUTTONTOGGLEGUARD:
             if (PokecubeMod.core.getConfig().guardModeEnabled)
                 pokemob.setCombatState(CombatStates.GUARDING, !pokemob.getCombatState(CombatStates.GUARDING));
-            else pokemob.displayMessageToOwner(new TextComponentTranslation("pokecube.config.guarddisabled"));
+            else pokemob.displayMessageToOwner(new TranslationTextComponent("pokecube.config.guarddisabled"));
             break;
         case BUTTONTOGGLESIT:
             pokemob.setLogicState(LogicStates.SITTING, !pokemob.getLogicState(LogicStates.SITTING));

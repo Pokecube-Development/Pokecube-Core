@@ -5,13 +5,13 @@ import java.util.UUID;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.NonNullList;
@@ -43,8 +43,8 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
 
     private List<ItemStack> inventory    = NonNullList.<ItemStack> withSize(2, ItemStack.EMPTY);
 
-    public EntityPlayer     player1;
-    public EntityPlayer     player2;
+    public PlayerEntity     player1;
+    public PlayerEntity     player2;
 
     public int              time         = 0;
     public int              renderpass;
@@ -56,7 +56,7 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     }
 
     @Override
-    public void closeInventory(EntityPlayer player)
+    public void closeInventory(PlayerEntity player)
     {
         if (!player.getEntityWorld().isRemote)
         {
@@ -73,11 +73,11 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
         }
     }
 
-    private void dropCube(ItemStack cube, EntityPlayer player)
+    private void dropCube(ItemStack cube, PlayerEntity player)
     {
         if (!cube.isEmpty())
         {
-            EntityItem item = null;
+            ItemEntity item = null;
             if (player.isDead || player.getHealth() <= 0 || player.inventory.getFirstEmptyStack() == -1)
             {
                 ForgeHooks.onPlayerTossEvent(player, cube, true);
@@ -92,9 +92,9 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
             {
                 player.dropItem(cube, true);
             }
-            if (player instanceof EntityPlayerMP)
+            if (player instanceof ServerPlayerEntity)
             {
-                ((EntityPlayerMP) player).sendAllContents(player.inventoryContainer,
+                ((ServerPlayerEntity) player).sendAllContents(player.inventoryContainer,
                         player.inventoryContainer.inventoryItemStacks);
             }
         }
@@ -121,7 +121,7 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared()
     {
         return 65536.0D;
@@ -137,16 +137,16 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
+        this.writeToNBT(CompoundNBT);
+        return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
     }
 
     @Override
-    public NBTTagCompound getUpdateTag()
+    public CompoundNBT getUpdateTag()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundNBT nbt = new CompoundNBT();
         return writeToNBT(nbt);
     }
 
@@ -163,7 +163,7 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(PlayerEntity player)
     {
         return world.getTileEntity(getPos()) == this
                 && player.getDistanceSq(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5) < 64;
@@ -183,12 +183,12 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     {
         if (world.isRemote)
         {
-            NBTTagCompound nbt = pkt.getNbtCompound();
+            CompoundNBT nbt = pkt.getNbtCompound();
             readFromNBT(nbt);
         }
     }
 
-    public void openGUI(EntityPlayer player)
+    public void openGUI(PlayerEntity player)
     {
         player.openGui(PokecubeMod.core, Config.GUITRADINGTABLE_ID, world, getPos().getX(), getPos().getY(),
                 getPos().getZ());
@@ -196,25 +196,25 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
 
     public void pokeseal(ItemStack a, ItemStack b, IPokemob mob)
     {
-        if (b.hasTagCompound())
+        if (b.hasTag())
         {
-            NBTTagCompound tag = b.getTagCompound().getCompoundTag(TagNames.POKESEAL);
-            a.getTagCompound().setTag(TagNames.POKESEAL, tag.copy());
+            CompoundNBT tag = b.getTag().getCompound(TagNames.POKESEAL);
+            a.getTag().put(TagNames.POKESEAL, tag.copy());
         }
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound)
+    public void readFromNBT(CompoundNBT tagCompound)
     {
         super.readFromNBT(tagCompound);
-        NBTBase temp = tagCompound.getTag("Inventory");
+        INBT temp = tagCompound.getTag("Inventory");
         inventory = NonNullList.<ItemStack> withSize(2, ItemStack.EMPTY);
-        if (temp instanceof NBTTagList)
+        if (temp instanceof ListNBT)
         {
-            NBTTagList tagList = (NBTTagList) temp;
-            for (int i = 0; i < tagList.tagCount(); i++)
+            ListNBT tagList = (ListNBT) temp;
+            for (int i = 0; i < tagList.size(); i++)
             {
-                NBTTagCompound tag = tagList.getCompoundTagAt(i);
+                CompoundNBT tag = tagList.getCompound(i);
                 byte slot = tag.getByte("Slot");
 
                 if (slot >= 0 && slot < inventory.size())
@@ -229,8 +229,8 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     @Override
     public void setField(int id, int value)
     {
-        if (id == 0) player1 = (EntityPlayer) world.getEntityByID(value);
-        if (id == 1) player2 = (EntityPlayer) world.getEntityByID(value);
+        if (id == 0) player1 = (PlayerEntity) world.getEntityByID(value);
+        if (id == 1) player2 = (PlayerEntity) world.getEntityByID(value);
     }
 
     public void trade()
@@ -309,15 +309,15 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
             {
                 // Set the pokecube for the mob to the new one.
                 PokecubeManager.setOwner(first, player1.getUniqueID());
-                NBTTagCompound visualsTag = TagNames.getPokecubePokemobTag(first.getTagCompound())
-                        .getCompoundTag(TagNames.VISUALSTAG);
-                NBTTagCompound cube = new NBTTagCompound();
+                CompoundNBT visualsTag = TagNames.getPokecubePokemobTag(first.getTag())
+                        .getCompound(TagNames.VISUALSTAG);
+                CompoundNBT cube = new CompoundNBT();
                 stack = second.copy();
                 second.writeToNBT(cube);
-                if (!stack.hasTagCompound()) stack.setTagCompound(new NBTTagCompound());
-                visualsTag.setTag(TagNames.POKECUBE, cube);
-                stack.getTagCompound().setTag(TagNames.POKEMOB,
-                        first.getTagCompound().getCompoundTag(TagNames.POKEMOB).copy());
+                if (!stack.hasTag()) stack.put(new CompoundNBT());
+                visualsTag.put(TagNames.POKECUBE, cube);
+                stack.getTag().put(TagNames.POKEMOB,
+                        first.getTag().getCompound(TagNames.POKEMOB).copy());
             }
 
             // Extract and re-insert pokemob to ensure that the cube is properly
@@ -352,22 +352,22 @@ public class TileEntityTradingTable extends TileEntityOwnable implements Default
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT tagCompound)
     {
         super.writeToNBT(tagCompound);
-        NBTTagList itemList = new NBTTagList();
+        ListNBT itemList = new ListNBT();
         for (int i = 0; i < inventory.size(); i++)
         {
             ItemStack stack;
             if (CompatWrapper.isValid(stack = inventory.get(i)))
             {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundNBT tag = new CompoundNBT();
                 tag.setByte("Slot", (byte) i);
                 stack.writeToNBT(tag);
                 itemList.appendTag(tag);
             }
         }
-        tagCompound.setTag("Inventory", itemList);
+        tagCompound.put("Inventory", itemList);
         return tagCompound;
     }
 

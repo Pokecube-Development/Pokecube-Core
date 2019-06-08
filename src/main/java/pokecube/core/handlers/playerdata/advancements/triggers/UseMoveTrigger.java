@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.moves.MovePacket;
@@ -39,7 +39,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
             this.power = move.PWR;
         }
 
-        public boolean test(EntityPlayerMP player, MovePacket packet)
+        public boolean test(ServerPlayerEntity player, MovePacket packet)
         {
             return packet.attack.equals(attack);
         }
@@ -71,7 +71,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
             this.listeners.remove(listener);
         }
 
-        public void trigger(EntityPlayerMP player, MovePacket packet)
+        public void trigger(ServerPlayerEntity player, MovePacket packet)
         {
             List<ICriterionTrigger.Listener<UseMoveTrigger.Instance>> list = null;
 
@@ -158,7 +158,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
         return new UseMoveTrigger.Instance(packet);
     }
 
-    public void trigger(EntityPlayerMP player, MovePacket packet)
+    public void trigger(ServerPlayerEntity player, MovePacket packet)
     {
         UseMoveTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
         if (bredanimalstrigger$listeners != null)

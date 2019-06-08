@@ -5,11 +5,11 @@ package pokecube.core.entity.pokemobs.helper;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
@@ -23,7 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.api.distmarker.Dist;
@@ -56,7 +56,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     }
 
     @Override
-    public void attackEntityWithRangedAttack(EntityLivingBase p_82196_1_, float p_82196_2_)
+    public void attackEntityWithRangedAttack(LivingEntity p_82196_1_, float p_82196_2_)
     {
         // TODO decide if I want to do something here?
     }
@@ -206,7 +206,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
         // Add in the vanilla like AI methods.
         // Look at playerAI
-        this.tasks.addTask(8, new PokemobAILookAt(this, EntityPlayer.class, 8.0F, 1f));
+        this.tasks.addTask(8, new PokemobAILookAt(this, PlayerEntity.class, 8.0F, 1f));
         // Look randomly around AI.
         this.tasks.addTask(9, new PokemobAILookIdle(this, 8, 0.01f));
     }
@@ -215,7 +215,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     /** Checks if the entity is in range to render by using the past in distance
      * and comparing it to its average edge length * 64 * renderDistanceWeight
      * Args: distance */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean isInRangeToRenderDist(double distance)
     {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength();
@@ -498,7 +498,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
             if (pokemobCap.getGeneralState(GeneralStates.TAMED))
             {
                 HappinessType.applyHappiness(pokemobCap, HappinessType.FAINT);
-                ITextComponent mess = new TextComponentTranslation("pokemob.action.faint.own",
+                ITextComponent mess = new TranslationTextComponent("pokemob.action.faint.own",
                         pokemobCap.getPokemonDisplayName());
                 pokemobCap.displayMessageToOwner(mess);
                 pokemobCap.returnToPokecube();
@@ -551,7 +551,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     public void onUpdate()
     {
         if (pokemobCap.floats() || pokemobCap.flys()) fallDistance = 0;
-        dimension = getEntityWorld().provider.getDimension();
+        dimension = getEntityWorld().dimension.getDimension();
         // Ensure that these use the pokecube ones instead of vanilla
         this.navigator = getNavigator();
         this.moveHelper = getMoveHelper();

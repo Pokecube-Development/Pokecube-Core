@@ -1,6 +1,6 @@
 package pokecube.core.ai.thread.aiRunnables.utility;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -18,7 +18,7 @@ import thut.api.maths.Vector3;
 public class AIUseMove extends AIBase
 {
     final IPokemob     pokemob;
-    final EntityLiving entity;
+    final MobEntity entity;
     private boolean    running    = false;
     private boolean    checkRange = false;
     double             speed;

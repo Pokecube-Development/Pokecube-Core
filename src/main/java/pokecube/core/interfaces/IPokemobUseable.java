@@ -1,11 +1,11 @@
 package pokecube.core.interfaces;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -31,14 +31,14 @@ public interface IPokemobUseable
     {
 
         @Override
-        public NBTBase writeNBT(Capability<IPokemobUseable> capability, IPokemobUseable instance, EnumFacing side)
+        public INBT writeNBT(Capability<IPokemobUseable> capability, IPokemobUseable instance, Direction side)
         {
             return null;
         }
 
         @Override
-        public void readNBT(Capability<IPokemobUseable> capability, IPokemobUseable instance, EnumFacing side,
-                NBTBase nbt)
+        public void readNBT(Capability<IPokemobUseable> capability, IPokemobUseable instance, Direction side,
+                INBT nbt)
         {
         }
 
@@ -63,7 +63,7 @@ public interface IPokemobUseable
      * @param pokemob
      * @param stack
      * @return something happened */
-    public default ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+    public default ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
     {
         return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
     }

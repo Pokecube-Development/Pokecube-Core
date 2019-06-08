@@ -12,15 +12,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -57,10 +57,10 @@ public class AIGatherStuff extends AIBase
                                                                          return PokecubeTerrainChecker.isFruit(input);
                                                                      }
                                                                  };
-    private static final Predicate<EntityItem>  deaditemmatcher  = new Predicate<EntityItem>()
+    private static final Predicate<ItemEntity>  deaditemmatcher  = new Predicate<ItemEntity>()
                                                                  {
                                                                      @Override
-                                                                     public boolean apply(EntityItem input)
+                                                                     public boolean apply(ItemEntity input)
                                                                      {
                                                                          return input.isDead || !input.addedToChunk
                                                                                  || !input.isAddedToWorld();
@@ -93,10 +93,10 @@ public class AIGatherStuff extends AIBase
                 BlockPos down = pos.down();
                 if (world.isAirBlock(down)) return true;
                 // Use the fakeplayer to plant it
-                EntityPlayer player = PokecubeMod.getFakePlayer(world);
+                PlayerEntity player = PokecubeMod.getFakePlayer(world);
                 player.setPosition(pos.getX(), pos.getY(), pos.getZ());
-                player.setHeldItem(EnumHand.MAIN_HAND, seeds);
-                seeds.getItem().onItemUse(player, world, down, EnumHand.MAIN_HAND, EnumFacing.UP, 0.5f, 1, 0.5f);
+                player.setHeldItem(Hand.MAIN_HAND, seeds);
+                seeds.getItem().onItemUse(player, world, down, Hand.MAIN_HAND, Direction.UP, 0.5f, 1, 0.5f);
                 Entity mob = world.getEntityByID(entityID);
                 IPokemob pokemob;
                 // Attempt to plant it.
@@ -114,11 +114,11 @@ public class AIGatherStuff extends AIBase
         }
     }
 
-    final EntityLiving entity;
+    final MobEntity entity;
     final double       distance;
     IPokemob           pokemob;
     boolean            block           = false;
-    List<EntityItem>   stuff           = Lists.newArrayList();
+    List<ItemEntity>   stuff           = Lists.newArrayList();
     Vector3            stuffLoc        = Vector3.getNewVector();
     boolean            hasRoom         = true;
     int                collectCooldown = 0;
@@ -149,10 +149,10 @@ public class AIGatherStuff extends AIBase
             {
                 int num = stuff.size();
                 stuff.removeIf(deaditemmatcher);
-                Collections.sort(stuff, new Comparator<EntityItem>()
+                Collections.sort(stuff, new Comparator<ItemEntity>()
                 {
                     @Override
-                    public int compare(EntityItem o1, EntityItem o2)
+                    public int compare(ItemEntity o1, ItemEntity o2)
                     {
                         int dist1 = (int) o1.getDistanceSq(entity);
                         int dist2 = (int) o2.getDistanceSq(entity);
@@ -177,7 +177,7 @@ public class AIGatherStuff extends AIBase
             {
                 if (!stuff.isEmpty())
                 {
-                    EntityItem itemStuff = stuff.get(0);
+                    ItemEntity itemStuff = stuff.get(0);
                     if (itemStuff.isDead || !itemStuff.addedToChunk || !itemStuff.isAddedToWorld())
                     {
                         stuff.remove(0);
@@ -218,14 +218,14 @@ public class AIGatherStuff extends AIBase
         int distance = pokemob.getGeneralState(GeneralStates.TAMED) ? PokecubeMod.core.getConfig().tameGatherDistance
                 : PokecubeMod.core.getConfig().wildGatherDistance;
 
-        List<Entity> list = getEntitiesWithinDistance(entity, distance, EntityItem.class);
+        List<Entity> list = getEntitiesWithinDistance(entity, distance, ItemEntity.class);
         stuff.clear();
         double closest = 1000;
 
         // Check for items to possibly gather.
         for (Entity o : list)
         {
-            EntityItem e = (EntityItem) o;
+            ItemEntity e = (ItemEntity) o;
             double dist = e.getDistanceSqToCenter(pokemob.getHome());
             v.set(e);
             if (dist < closest && Vector3.isVisibleEntityFromEntity(entity, e))
@@ -237,10 +237,10 @@ public class AIGatherStuff extends AIBase
         // Found an item, return.
         if (!stuff.isEmpty())
         {
-            Collections.sort(stuff, new Comparator<EntityItem>()
+            Collections.sort(stuff, new Comparator<ItemEntity>()
             {
                 @Override
-                public int compare(EntityItem o1, EntityItem o2)
+                public int compare(ItemEntity o1, ItemEntity o2)
                 {
                     int dist1 = (int) o1.getDistanceSq(entity);
                     int dist2 = (int) o2.getDistanceSq(entity);

@@ -3,8 +3,8 @@ package pokecube.core.interfaces;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -116,7 +116,7 @@ public interface IPokecube
      * @return */
     double getCaptureModifier(IPokemob mob, ResourceLocation pokecubeId);
 
-    default double getCaptureModifier(EntityLivingBase mob, ResourceLocation pokecubeId)
+    default double getCaptureModifier(LivingEntity mob, ResourceLocation pokecubeId)
     {
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         return (pokemob != null) ? getCaptureModifier(pokemob, pokecubeId) : 0;
@@ -130,7 +130,7 @@ public interface IPokecube
      * @param direction
      * @param power
      * @return */
-    boolean throwPokecube(World world, EntityLivingBase thrower, ItemStack cube, Vector3 direction, float power);
+    boolean throwPokecube(World world, LivingEntity thrower, ItemStack cube, Vector3 direction, float power);
 
     /** Used to throw the pokecube at a specific target
      * 
@@ -140,10 +140,10 @@ public interface IPokecube
      * @param targetLocation
      * @param target
      * @return */
-    boolean throwPokecubeAt(World world, EntityLivingBase thrower, ItemStack cube, @Nullable Vector3 targetLocation,
+    boolean throwPokecubeAt(World world, LivingEntity thrower, ItemStack cube, @Nullable Vector3 targetLocation,
             @Nullable Entity target);
 
-    default boolean canCapture(EntityLiving hit, ItemStack cube)
+    default boolean canCapture(MobEntity hit, ItemStack cube)
     {
         return CapabilityPokemob.getPokemobFor(hit) != null;
     }

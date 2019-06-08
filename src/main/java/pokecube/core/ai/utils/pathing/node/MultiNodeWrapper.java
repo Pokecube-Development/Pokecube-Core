@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils.pathing.node;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
@@ -19,7 +19,7 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
-    public void init(IBlockAccess sourceIn, EntityLiving mob)
+    public void init(IBlockAccess sourceIn, MobEntity mob)
     {
         super.init(sourceIn, mob);
         navi.a.init(sourceIn, mob);
@@ -70,13 +70,13 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn,
+    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, MobEntity MobEntityIn,
             int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn)
     {
-        PathNodeType a = navi.a.getPathNodeType(blockaccessIn, x, y, z, entitylivingIn, xSize, ySize, zSize,
+        PathNodeType a = navi.a.getPathNodeType(blockaccessIn, x, y, z, MobEntityIn, xSize, ySize, zSize,
                 canBreakDoorsIn, canEnterDoorsIn);
         if (a == PathNodeType.WALKABLE || a == PathNodeType.OPEN) { return a; }
-        PathNodeType b = navi.b.getPathNodeType(blockaccessIn, x, y, z, entitylivingIn, xSize, ySize, zSize,
+        PathNodeType b = navi.b.getPathNodeType(blockaccessIn, x, y, z, MobEntityIn, xSize, ySize, zSize,
                 canBreakDoorsIn, canEnterDoorsIn);
         if (b == PathNodeType.WALKABLE || b == PathNodeType.OPEN) { return b; }
         return a;

@@ -8,11 +8,11 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
@@ -44,13 +44,13 @@ public class TileEntityNest extends TileEntity implements ITickable
     public boolean addForbiddenSpawningCoord()
     {
         BlockPos pos = getPos();
-        return SpawnHandler.addForbiddenSpawningCoord(pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimension(),
+        return SpawnHandler.addForbiddenSpawningCoord(pos.getX(), pos.getY(), pos.getZ(), world.dimension.getDimension(),
                 16, ForbidReason.NEST);
     }
 
     public boolean removeForbiddenSpawningCoord()
     {
-        return SpawnHandler.removeForbiddenSpawningCoord(getPos(), world.provider.getDimension());
+        return SpawnHandler.removeForbiddenSpawningCoord(getPos(), world.dimension.getDimension());
     }
 
     public void addResident(IPokemob resident)
@@ -87,14 +87,14 @@ public class TileEntityNest extends TileEntity implements ITickable
 
     /** Reads a tile entity from NBT. */
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void readFromNBT(CompoundNBT nbt)
     {
         super.readFromNBT(nbt);
         spawns.clear();
         if (nbt.hasKey("spawns"))
         {
-            NBTTagList spawnsTag = (NBTTagList) nbt.getTag("spawns");
-            for (int i = 0; i < spawnsTag.tagCount(); i++)
+            ListNBT spawnsTag = (ListNBT) nbt.getTag("spawns");
+            for (int i = 0; i < spawnsTag.size(); i++)
             {
                 String name = spawnsTag.getStringTagAt(i);
                 PokedexEntry entry = Database.getEntry(name);
@@ -113,7 +113,7 @@ public class TileEntityNest extends TileEntity implements ITickable
     public void update()
     {
         time++;
-        int power = world.getRedstonePower(getPos(), EnumFacing.DOWN);
+        int power = world.getRedstonePower(getPos(), Direction.DOWN);
         if (world.isRemote || (world.getDifficulty() == EnumDifficulty.PEACEFUL && power == 0)) return;
         if (spawns.isEmpty() && time >= 200)
         {
@@ -137,9 +137,9 @@ public class TileEntityNest extends TileEntity implements ITickable
         if (residents.size() < num)
         {
             ItemStack eggItem = ItemPokemobEgg.getEggStack(entry);
-            NBTTagCompound nbt = eggItem.getTagCompound();
-            nbt.setIntArray("nestLocation", new int[] { getPos().getX(), getPos().getY(), getPos().getZ() });
-            eggItem.setTagCompound(nbt);
+            CompoundNBT nbt = eggItem.getTag();
+            nbt.putIntArray("nestLocation", new int[] { getPos().getX(), getPos().getY(), getPos().getZ() });
+            eggItem.put(nbt);
             Random rand = new Random();
             EntityPokemobEgg egg = new EntityPokemobEgg(world, getPos().getX() + rand.nextGaussian(),
                     getPos().getY() + 1, getPos().getZ() + rand.nextGaussian(), eggItem, null);
@@ -163,15 +163,15 @@ public class TileEntityNest extends TileEntity implements ITickable
      * 
      * @return */
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt)
+    public CompoundNBT writeToNBT(CompoundNBT nbt)
     {
         super.writeToNBT(nbt);
-        NBTTagList spawnsTag = new NBTTagList();
+        ListNBT spawnsTag = new ListNBT();
         for (PokedexEntry entry : spawns)
         {
             spawnsTag.appendTag(new NBTTagString(entry.getTrimmedName()));
         }
-        nbt.setTag("spawns", spawnsTag);
+        nbt.put("spawns", spawnsTag);
         nbt.setInteger("time", time);
         return nbt;
     }

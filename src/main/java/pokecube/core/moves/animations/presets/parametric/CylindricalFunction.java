@@ -26,7 +26,7 @@ public class CylindricalFunction extends MoveAnimationBase
     {
         Vector3 source = info.source;
         Vector3 target = info.target;
-        initColour((info.attacker.getEntityWorld().getWorldTime()) * 20, 0, info.move);
+        initColour((info.attacker.getEntityWorld().getDayTime()) * 20, 0, info.move);
         double dist = source.distanceTo(target);
         double frac2 = info.currentTick / (float) getDuration();
         double frac = dist * frac2;

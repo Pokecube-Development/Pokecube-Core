@@ -6,10 +6,10 @@ import java.util.UUID;
 import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -33,22 +33,22 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
 
     public static final String OWNER      = "_owner_";
 
-    public static void sendInitialSyncMessage(EntityPlayer sendTo)
+    public static void sendInitialSyncMessage(PlayerEntity sendTo)
     {
         InventoryPC inv = InventoryPC.getPC(sendTo.getUniqueID());
         PacketPC packet = new PacketPC(PacketPC.PCINIT, sendTo.getUniqueID());
         packet.data.setInteger("N", inv.boxes.length);
-        packet.data.setBoolean("A", inv.autoToPC);
-        packet.data.setBoolean("O", inv.seenOwner);
+        packet.data.putBoolean("A", inv.autoToPC);
+        packet.data.putBoolean("O", inv.seenOwner);
         packet.data.setInteger("C", inv.getPage());
         for (int i = 0; i < inv.boxes.length; i++)
         {
-            packet.data.setString("N" + i, inv.boxes[i]);
+            packet.data.putString("N" + i, inv.boxes[i]);
         }
-        PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) sendTo);
+        PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) sendTo);
     }
 
-    public static void sendOpenPacket(EntityPlayer sendTo, UUID owner, BlockPos pcPos)
+    public static void sendOpenPacket(PlayerEntity sendTo, UUID owner, BlockPos pcPos)
     {
         InventoryPC inv = InventoryPC.getPC(owner);
         for (int i = 0; i < inv.boxes.length; i++)
@@ -56,14 +56,14 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             PacketPC packet = new PacketPC(PacketPC.PCOPEN, owner);
             packet.data = inv.serializeBox(i);
             packet.data.setUniqueId(OWNER, owner);
-            PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) sendTo);
+            PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) sendTo);
         }
         sendTo.openGui(PokecubeMod.core, Config.GUIPC_ID, sendTo.getEntityWorld(), pcPos.getX(), pcPos.getY(),
                 pcPos.getZ());
     }
 
     byte                  message;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketPC()
     {
@@ -119,8 +119,8 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
 
     void processMessage(MessageContext ctx, PacketPC message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }
@@ -202,7 +202,7 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             pc.autoToPC = message.data.getBoolean("A");
             break;
         case PCOPEN:
-            if (ctx.side == Side.CLIENT)
+            if (ctx.side == Dist.CLIENT)
             {
                 pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
                 pc.deserializeBox(message.data);

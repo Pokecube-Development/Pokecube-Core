@@ -52,7 +52,7 @@ public class MakeMegastone extends LootFunction
         if (nameMap.containsKey(arg))
         {
             ItemStack newStack = new ItemStack(ITEM, stack.getCount(), nameMap.get(arg));
-            newStack.setTagCompound(stack.getTagCompound());
+            newStack.put(stack.getTag());
             return newStack;
         }
         else

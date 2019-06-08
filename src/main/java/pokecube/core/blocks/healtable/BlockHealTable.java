@@ -7,17 +7,17 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.PokecubeCore;
@@ -34,7 +34,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     {
         super(Material.CLOTH);
         setHardness(1000);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(FIXED,
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, Direction.NORTH).withProperty(FIXED,
                 Boolean.FALSE));
         this.setCreativeTab(CreativeTabs.REDSTONE);
     }
@@ -79,11 +79,11 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
                 float rx = rand.nextFloat() * 0.6F + 0.1F;
                 float ry = rand.nextFloat() * 0.6F + 0.1F;
                 float rz = rand.nextFloat() * 0.6F + 0.1F;
-                EntityItem entity_item = new EntityItem(world, pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz,
+                ItemEntity entity_item = new ItemEntity(world, pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz,
                         new ItemStack(item.getItem(), item.getCount(), item.getItemDamage()));
-                if (item.hasTagCompound())
+                if (item.hasTag())
                 {
-                    entity_item.getItem().setTagCompound(item.getTagCompound().copy());
+                    entity_item.getItem().put(item.getTag().copy());
                 }
                 float factor = 0.005F;
                 entity_item.motionX = rand.nextGaussian() * factor;
@@ -107,26 +107,26 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(meta & 7);
+        Direction Direction = Direction.getFront(meta & 7);
         boolean top = (meta & 8) > 0;
-        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
+        if (Direction.getAxis() == Direction.Axis.Y)
         {
-            enumfacing = EnumFacing.NORTH;
+            Direction = Direction.NORTH;
         }
-        return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(FIXED, Boolean.valueOf(top));
+        return this.getDefaultState().withProperty(FACING, Direction).withProperty(FIXED, Boolean.valueOf(top));
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         TileEntity tile_entity = worldIn.getTileEntity(pos);
         if (tile_entity == null || playerIn.isSneaking())
         {
-            if (playerIn.capabilities.isCreativeMode && !worldIn.isRemote && hand == EnumHand.MAIN_HAND)
+            if (playerIn.capabilities.isCreativeMode && !worldIn.isRemote && hand == Hand.MAIN_HAND)
             {
                 state = state.cycleProperty(FIXED);
-                playerIn.sendMessage(new TextComponentString(
+                playerIn.sendMessage(new StringTextComponent(
                         "Set Block to " + (state.getValue(BlockHealTable.FIXED) ? "Breakable" : "Unbreakable")));
                 worldIn.setBlockState(pos, state);
             }
@@ -139,8 +139,8 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     @Override
     /** Called when a block is placed using its ItemBlock. Args: World, X, Y, Z,
      * side, hitX, hitY, hitZ, block metadata */
-    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-            float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
+            float hitZ, int meta, LivingEntity placer)
     {
         if (!world.isRemote) PokecubeSerializer.getInstance().addChunks(world, pos, placer);
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite())

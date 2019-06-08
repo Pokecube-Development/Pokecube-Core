@@ -1,6 +1,6 @@
 package pokecube.core.blocks.pc;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
@@ -16,7 +16,7 @@ public class SlotPC extends Slot
 
     /** Return whether this slot's stack can be taken from this slot. */
     @Override
-    public boolean canTakeStack(EntityPlayer par1EntityPlayer)
+    public boolean canTakeStack(PlayerEntity par1PlayerEntity)
     {
         return !release;
     }

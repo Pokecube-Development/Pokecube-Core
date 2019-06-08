@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatisticsManager;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -52,7 +52,7 @@ public abstract class CommonProxy
         return manager;
     }
 
-    public EntityPlayer getPlayer(UUID player)
+    public PlayerEntity getPlayer(UUID player)
     {
         return FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(player);
     }

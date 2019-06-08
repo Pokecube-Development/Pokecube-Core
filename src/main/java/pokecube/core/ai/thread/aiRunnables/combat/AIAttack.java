@@ -3,16 +3,16 @@ package pokecube.core.ai.thread.aiRunnables.combat;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.pathfinding.Path;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.FakePlayer;
@@ -41,10 +41,10 @@ import thut.api.maths.Vector3;
  * It is the one to queue the attack for the pokemob to perform. */
 public class AIAttack extends AIBase implements IAICombat
 {
-    public final EntityLiving attacker;
+    public final MobEntity attacker;
     public final IPokemob     pokemob;
     /** The target being attacked. */
-    EntityLivingBase          entityTarget;
+    LivingEntity          entityTarget;
     /** IPokemob version of entityTarget. */
     IPokemob                  pokemobTarget;
     /** Used to check whether we need to try swapping target, only check this
@@ -115,7 +115,7 @@ public class AIAttack extends AIBase implements IAICombat
         canSee = false;
         if (running)
         {
-            attacker.getEntityData().setLong("lastAttackTick", attacker.getEntityWorld().getTotalWorldTime());
+            attacker.getEntityData().putLong("lastAttackTick", attacker.getEntityWorld().getGameTime());
             if (entityTarget != null)
             {
                 double dist = this.attacker.getDistanceSq(this.entityTarget.posX, this.entityTarget.posY,
@@ -159,7 +159,7 @@ public class AIAttack extends AIBase implements IAICombat
             if (!(attack == null || ((attack.getAttackCategory() & IMoveConstants.CATEGORY_SELF) != 0))
                     && !pokemob.getGeneralState(GeneralStates.CONTROLLED))
             {
-                path = this.attacker.getNavigator().getPathToEntityLiving(entityTarget);
+                path = this.attacker.getNavigator().getPathToMobEntity(entityTarget);
                 addEntityPath(attacker, path, movementSpeed);
             }
             targetLoc.set(entityTarget);
@@ -172,12 +172,12 @@ public class AIAttack extends AIBase implements IAICombat
             /** Check if it should notify the player of agression, and do so if
              * it should. */
             if (!previousCaptureAttempt && PokecubeMod.core.getConfig().pokemobagresswarning
-                    && entityTarget instanceof EntityPlayerMP && !(entityTarget instanceof FakePlayer)
+                    && entityTarget instanceof ServerPlayerEntity && !(entityTarget instanceof FakePlayer)
                     && !pokemob.getGeneralState(GeneralStates.TAMED)
-                    && ((EntityPlayer) entityTarget).getRevengeTarget() != attacker
-                    && ((EntityPlayer) entityTarget).getLastAttackedEntity() != attacker)
+                    && ((PlayerEntity) entityTarget).getRevengeTarget() != attacker
+                    && ((PlayerEntity) entityTarget).getLastAttackedEntity() != attacker)
             {
-                ITextComponent message = new TextComponentTranslation("pokemob.agress",
+                ITextComponent message = new TranslationTextComponent("pokemob.agress",
                         pokemob.getPokemonDisplayName().getFormattedText());
                 try
                 {
@@ -215,7 +215,7 @@ public class AIAttack extends AIBase implements IAICombat
                 PokecubeMod.log(Level.INFO, "Too Long Chase, Forgetting Target: " + attacker + " " + entityTarget);
             }
             // Send deagress message and put mob on cooldown.
-            ITextComponent message = new TextComponentTranslation("pokemob.deagress.timeout",
+            ITextComponent message = new TranslationTextComponent("pokemob.deagress.timeout",
                     pokemob.getPokemonDisplayName().getFormattedText());
             try
             {
@@ -397,7 +397,7 @@ public class AIAttack extends AIBase implements IAICombat
             // Swing arm for effect.
             if (this.attacker.getHeldItemMainhand() != null)
             {
-                this.attacker.swingArm(EnumHand.MAIN_HAND);
+                this.attacker.swingArm(Hand.MAIN_HAND);
             }
             // Apply the move.
             float f = (float) targetLoc.distToEntity(attacker);
@@ -442,7 +442,7 @@ public class AIAttack extends AIBase implements IAICombat
     {
         world = TickHandler.getInstance().getWorldCache(attacker.dimension);
         if (world == null) return false;
-        EntityLivingBase target = attacker.getAttackTarget();
+        LivingEntity target = attacker.getAttackTarget();
         // No target, we can't do anything, so return false
         if (target == null)
         {

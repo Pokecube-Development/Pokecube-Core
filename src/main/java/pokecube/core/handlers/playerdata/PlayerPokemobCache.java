@@ -7,8 +7,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
@@ -76,34 +76,34 @@ public class PlayerPokemobCache extends PlayerData
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
+    public void writeToNBT(CompoundNBT tag)
     {
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (Integer id : cache.keySet())
         {
-            NBTTagCompound var = new NBTTagCompound();
+            CompoundNBT var = new CompoundNBT();
             var.setInteger("uid", id);
-            var.setBoolean("_in_pc_", inPC.contains(id));
-            var.setBoolean("_dead_", genesDeleted.contains(id));
+            var.putBoolean("_in_pc_", inPC.contains(id));
+            var.putBoolean("_dead_", genesDeleted.contains(id));
             ItemStack stack = cache.get(id);
             stack.writeToNBT(var);
             list.appendTag(var);
         }
-        tag.setTag("data", list);
+        tag.put("data", list);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public void readFromNBT(CompoundNBT tag)
     {
         cache.clear();
         inPC.clear();
         genesDeleted.clear();
         if (tag.hasKey("data"))
         {
-            NBTTagList list = (NBTTagList) tag.getTag("data");
-            for (int i = 0; i < list.tagCount(); i++)
+            ListNBT list = (ListNBT) tag.getTag("data");
+            for (int i = 0; i < list.size(); i++)
             {
-                NBTTagCompound var = list.getCompoundTagAt(i);
+                CompoundNBT var = list.getCompound(i);
                 Integer id = -1;
                 ItemStack stack = new ItemStack(var);
                 if (var.hasKey("uid"))

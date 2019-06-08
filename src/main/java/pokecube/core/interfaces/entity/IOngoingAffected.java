@@ -7,18 +7,18 @@ import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import pokecube.core.interfaces.PokecubeMod;
 
-public interface IOngoingAffected extends INBTSerializable<NBTTagList>
+public interface IOngoingAffected extends INBTSerializable<ListNBT>
 {
     public static Map<ResourceLocation, Class<? extends IOngoingEffect>> EFFECTS = Maps.newHashMap();
 
-    public static interface IOngoingEffect extends INBTSerializable<NBTTagCompound>
+    public static interface IOngoingEffect extends INBTSerializable<CompoundNBT>
     {
         public static enum AddType
         {
@@ -76,15 +76,15 @@ public interface IOngoingAffected extends INBTSerializable<NBTTagList>
         ResourceLocation getID();
 
         @Override
-        default NBTTagCompound serializeNBT()
+        default CompoundNBT serializeNBT()
         {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundNBT tag = new CompoundNBT();
             tag.setInteger("D", getDuration());
             return tag;
         }
 
         @Override
-        default void deserializeNBT(NBTTagCompound nbt)
+        default void deserializeNBT(CompoundNBT nbt)
         {
             setDuration(nbt.getInteger("D"));
         }
@@ -92,7 +92,7 @@ public interface IOngoingAffected extends INBTSerializable<NBTTagList>
     }
 
     /** @return The Entity to be affected. */
-    EntityLivingBase getEntity();
+    LivingEntity getEntity();
 
     /** @return a list of effects currently applying to this. */
     List<IOngoingEffect> getEffects();
@@ -110,14 +110,14 @@ public interface IOngoingAffected extends INBTSerializable<NBTTagList>
     void tick();
 
     @Override
-    default void deserializeNBT(NBTTagList nbt)
+    default void deserializeNBT(ListNBT nbt)
     {
         clearEffects();
-        for (int i = 0; i < nbt.tagCount(); i++)
+        for (int i = 0; i < nbt.size(); i++)
         {
-            NBTTagCompound tag = nbt.getCompoundTagAt(i);
+            CompoundNBT tag = nbt.getCompound(i);
             String key = tag.getString("K");
-            NBTTagCompound value = tag.getCompoundTag("V");
+            CompoundNBT value = tag.getCompound("V");
             ResourceLocation loc = new ResourceLocation(key);
             Class<? extends IOngoingEffect> effectClass = EFFECTS.get(loc);
             if (effectClass != null)
@@ -137,19 +137,19 @@ public interface IOngoingAffected extends INBTSerializable<NBTTagList>
     }
 
     @Override
-    default NBTTagList serializeNBT()
+    default ListNBT serializeNBT()
     {
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (IOngoingEffect effect : getEffects())
         {
             if (effect.onSavePersistant())
             {
-                NBTTagCompound tag = effect.serializeNBT();
+                CompoundNBT tag = effect.serializeNBT();
                 if (tag != null)
                 {
-                    NBTTagCompound nbt = new NBTTagCompound();
-                    nbt.setString("K", effect.getID() + "");
-                    nbt.setTag("V", tag);
+                    CompoundNBT nbt = new CompoundNBT();
+                    nbt.putString("K", effect.getID() + "");
+                    nbt.put("V", tag);
                     list.appendTag(nbt);
                 }
             }

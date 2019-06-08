@@ -8,7 +8,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import pokecube.core.ai.thread.logicRunnables.LogicMiscUpdate;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
@@ -22,14 +22,14 @@ import thut.core.client.render.tabula.components.Animation;
 import thut.core.client.render.tabula.components.ModelJson;
 import thut.core.client.render.wrappers.TabulaWrapper;
 
-public class TabulaModelRenderer<T extends EntityLiving> extends AbstractModelRenderer<T>
+public class TabulaModelRenderer<T extends MobEntity> extends AbstractModelRenderer<T>
 {
     public TabulaModelSet set;
     public TabulaWrapper  model;
 
     public TabulaModelRenderer(TabulaModelSet set)
     {
-        super(Minecraft.getMinecraft().getRenderManager(), null, 0);
+        super(Minecraft.getInstance().getRenderManager(), null, 0);
         this.set = set;
         this.model = new TabulaWrapper(set.model, set.parser, this);
         mainModel = model;

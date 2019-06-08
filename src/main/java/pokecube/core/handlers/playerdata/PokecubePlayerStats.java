@@ -6,10 +6,10 @@ import java.util.Set;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagString;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -45,10 +45,10 @@ public class PokecubePlayerStats extends PlayerData
         return inspected.contains(entry);
     }
 
-    public boolean inspect(EntityPlayer player, IPokemob pokemob)
+    public boolean inspect(PlayerEntity player, IPokemob pokemob)
     {
         if (inspected == null) initMaps();
-        if (player instanceof EntityPlayerMP) Triggers.INSPECTPOKEMOB.trigger((EntityPlayerMP) player, pokemob);
+        if (player instanceof ServerPlayerEntity) Triggers.INSPECTPOKEMOB.trigger((ServerPlayerEntity) player, pokemob);
         return inspected.add(pokemob.getPokedexEntry());
     }
 
@@ -70,10 +70,10 @@ public class PokecubePlayerStats extends PlayerData
         getHatches().put(entry, num + 1);
     }
 
-    public void setHasFirst(EntityPlayer player)
+    public void setHasFirst(PlayerEntity player)
     {
         hasFirst = true;
-        Triggers.FIRSTPOKEMOB.trigger((EntityPlayerMP) player);
+        Triggers.FIRSTPOKEMOB.trigger((ServerPlayerEntity) player);
     }
 
     public boolean hasFirst()
@@ -94,39 +94,39 @@ public class PokecubePlayerStats extends PlayerData
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag_)
+    public void writeToNBT(CompoundNBT tag_)
     {
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
         for (PokedexEntry e : getKills().keySet())
         {
             tag.setInteger(e.getName(), getKills().get(e));
         }
-        tag_.setTag("kills", tag);
-        tag = new NBTTagCompound();
+        tag_.put("kills", tag);
+        tag = new CompoundNBT();
         for (PokedexEntry e : getCaptures().keySet())
         {
             tag.setInteger(e.getName(), getCaptures().get(e));
         }
-        tag_.setTag("captures", tag);
-        tag = new NBTTagCompound();
+        tag_.put("captures", tag);
+        tag = new CompoundNBT();
         for (PokedexEntry e : getHatches().keySet())
         {
             tag.setInteger(e.getName(), getHatches().get(e));
         }
-        tag_.setTag("hatches", tag);
-        NBTTagList list = new NBTTagList();
+        tag_.put("hatches", tag);
+        ListNBT list = new ListNBT();
         for (PokedexEntry e : inspected)
         {
             list.appendTag(new NBTTagString(e.getName()));
         }
-        tag_.setTag("inspected", list);
-        tag_.setBoolean("F", hasFirst);
+        tag_.put("inspected", list);
+        tag_.putBoolean("F", hasFirst);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public void readFromNBT(CompoundNBT tag)
     {
-        NBTTagCompound temp = tag.getCompoundTag("kills");
+        CompoundNBT temp = tag.getCompound("kills");
         PokedexEntry entry;
         initMaps();
         hasFirst = tag.getBoolean("F");
@@ -139,7 +139,7 @@ public class PokecubePlayerStats extends PlayerData
                     addKill(entry);
             }
         }
-        temp = tag.getCompoundTag("captures");
+        temp = tag.getCompound("captures");
         for (String s : temp.getKeySet())
         {
             int num = temp.getInteger(s);
@@ -149,7 +149,7 @@ public class PokecubePlayerStats extends PlayerData
                     addCapture(entry);
             }
         }
-        temp = tag.getCompoundTag("hatches");
+        temp = tag.getCompound("hatches");
         for (String s : temp.getKeySet())
         {
             int num = temp.getInteger(s);
@@ -161,9 +161,9 @@ public class PokecubePlayerStats extends PlayerData
         }
         if (tag.hasKey("inspected"))
         {
-            NBTTagList list = (NBTTagList) tag.getTag("inspected");
+            ListNBT list = (ListNBT) tag.getTag("inspected");
             if (inspected == null) initMaps();
-            for (int i = 0; i < list.tagCount(); i++)
+            for (int i = 0; i < list.size(); i++)
             {
                 String s = list.getStringTagAt(i);
                 entry = Database.getEntry(s);

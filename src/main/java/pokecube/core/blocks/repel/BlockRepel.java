@@ -4,13 +4,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import pokecube.core.items.ItemPokedex;
 import pokecube.core.items.berries.ItemBerry;
@@ -45,8 +45,8 @@ public class BlockRepel extends Block implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         ItemStack heldStack = playerIn.getHeldItem(hand);
         TileEntity te = worldIn.getTileEntity(pos);
@@ -58,13 +58,13 @@ public class BlockRepel extends Block implements ITileEntityProvider
             repel.distance = (byte) Math.max(5, berry.index);
             repel.validate();
             if (!worldIn.isRemote)
-                playerIn.sendMessage(new TextComponentTranslation("repel.info.setrange", repel.distance));
+                playerIn.sendMessage(new TranslationTextComponent("repel.info.setrange", repel.distance));
         }
         if (te instanceof TileEntityRepel && heldStack != null && heldStack.getItem() instanceof ItemPokedex
                 && !worldIn.isRemote)
         {
             TileEntityRepel repel = (TileEntityRepel) te;
-            playerIn.sendMessage(new TextComponentTranslation("repel.info.getrange", repel.distance));
+            playerIn.sendMessage(new TranslationTextComponent("repel.info.getrange", repel.distance));
         }
         return true;
     }

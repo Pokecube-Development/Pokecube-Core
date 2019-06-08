@@ -10,10 +10,10 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,12 +43,12 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
 {
     private static class GuiOpener
     {
-        final EntityPlayer   player;
+        final PlayerEntity   player;
         final PokedexEntry[] starters;
         final boolean        special;
         final boolean        pick;
 
-        public GuiOpener(EntityPlayer player, PokedexEntry[] starters, boolean special, boolean pick)
+        public GuiOpener(PlayerEntity player, PokedexEntry[] starters, boolean special, boolean pick)
         {
             this.player = player;
             this.special = special;
@@ -57,7 +57,7 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
             if (player.getEntityWorld().isRemote) MinecraftForge.EVENT_BUS.register(this);
         }
 
-        @SideOnly(Side.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         @SubscribeEvent
         public void tick(ClientTickEvent event)
         {
@@ -72,7 +72,7 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
     public static final byte OPENGUI = 0;
     public static final byte CHOOSE  = 1;
 
-    private static void handleChooseFirstClient(PacketChoose packet, EntityPlayer player)
+    private static void handleChooseFirstClient(PacketChoose packet, PlayerEntity player)
     {
         if (player == null) { throw new NullPointerException("Null Player while recieving starter packet"); }
         boolean openGui = packet.data.getBoolean("C");
@@ -81,8 +81,8 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
             boolean special = packet.data.getBoolean("S");
             boolean pick = packet.data.getBoolean("P");
             ArrayList<PokedexEntry> starters = new ArrayList<PokedexEntry>();
-            NBTTagList starterList = packet.data.getTagList("L", 8);
-            for (int i = 0; i < starterList.tagCount(); i++)
+            ListNBT starterList = packet.data.getTagList("L", 8);
+            for (int i = 0; i < starterList.size(); i++)
             {
                 PokedexEntry entry = Database.getEntry(starterList.getStringTagAt(i));
                 if (entry != null) starters.add(entry);
@@ -95,7 +95,7 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
         }
     }
 
-    private static void handleChooseFirstServer(PacketChoose packet, EntityPlayer player)
+    private static void handleChooseFirstServer(PacketChoose packet, PlayerEntity player)
     {
         /** Ignore this packet if the player already has a starter. */
         if (PokecubeSerializer.getInstance().hasStarter(player)) { return; }
@@ -172,8 +172,8 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
 
         // Send Packt to client to notifiy about having a starter now.
         packet = new PacketChoose(OPENGUI);
-        packet.data.setBoolean("C", false);
-        packet.data.setBoolean("H", true);
+        packet.data.putBoolean("C", false);
+        packet.data.putBoolean("H", true);
         PokecubePacketHandler.sendToClient(packet, player);
     }
 
@@ -194,20 +194,20 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
     public static PacketChoose createOpenPacket(boolean special, boolean pick, PokedexEntry... starts)
     {
         PacketChoose packet = new PacketChoose(OPENGUI);
-        packet.data.setBoolean("C", true);
-        packet.data.setBoolean("S", special);
-        packet.data.setBoolean("P", pick);
-        NBTTagList starters = new NBTTagList();
+        packet.data.putBoolean("C", true);
+        packet.data.putBoolean("S", special);
+        packet.data.putBoolean("P", pick);
+        ListNBT starters = new ListNBT();
         for (PokedexEntry e : starts)
         {
             starters.appendTag(new NBTTagString(e.getTrimmedName()));
         }
-        packet.data.setTag("L", starters);
+        packet.data.put("L", starters);
         return packet;
     }
 
     byte                  message;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketChoose()
     {
@@ -257,8 +257,8 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
 
     void processMessage(MessageContext ctx, PacketChoose message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }

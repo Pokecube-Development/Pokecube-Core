@@ -68,7 +68,7 @@ public class XMLRecipeHandler
             {
                 e.printStackTrace();
                 System.err.println("Error with Recipe for " + output);
-                if (output != null && output.hasTagCompound()) System.err.println(output.getTagCompound());
+                if (output != null && output.hasTag()) System.err.println(output.getTag());
             }
             else RecipeJsonHelper.addShapedRecipe(group, output, inputs.toArray());
             RecipeJsonHelper.generateConstants();

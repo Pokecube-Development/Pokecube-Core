@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import pokecube.core.blocks.tradingTable.BlockTradingTable;
 import pokecube.core.blocks.tradingTable.TileEntityTradingTable;
 import pokecube.core.interfaces.IPokecube;
@@ -49,7 +49,7 @@ public class RenderTradingTable extends TileEntitySpecialRenderer
 
         glPopMatrix();
 
-        EnumFacing dir = state.getValue(BlockRotatable.FACING);
+        Direction dir = state.getValue(BlockRotatable.FACING);
         switch (dir)
         {
         case EAST:
@@ -76,8 +76,8 @@ public class RenderTradingTable extends TileEntitySpecialRenderer
             glTranslatef(0.5F, 0.8f, 0.5F);
             glScalef(0.15f, 0.15f, 0.15f);
             glRotatef(-90, 0, 1, 0);
-            if (table.getStackInSlot(0).getItem() instanceof IPokecube) Minecraft.getMinecraft().getItemRenderer()
-                    .renderItem(Minecraft.getMinecraft().player, table.getStackInSlot(0), TransformType.NONE);
+            if (table.getStackInSlot(0).getItem() instanceof IPokecube) Minecraft.getInstance().getItemRenderer()
+                    .renderItem(Minecraft.getInstance().player, table.getStackInSlot(0), TransformType.NONE);
             glPopMatrix();
         }
         if (!table.getStackInSlot(1).isEmpty())
@@ -87,8 +87,8 @@ public class RenderTradingTable extends TileEntitySpecialRenderer
             glTranslatef(0.5F, 0.8f, 0.5F);
             glScalef(0.15f, 0.15f, 0.15f);
             glRotatef(90, 0, 1, 0);
-            if (table.getStackInSlot(1).getItem() instanceof IPokecube) Minecraft.getMinecraft().getItemRenderer()
-                    .renderItem(Minecraft.getMinecraft().player, table.getStackInSlot(1), TransformType.NONE);
+            if (table.getStackInSlot(1).getItem() instanceof IPokecube) Minecraft.getInstance().getItemRenderer()
+                    .renderItem(Minecraft.getInstance().player, table.getStackInSlot(1), TransformType.NONE);
             glPopMatrix();
         }
 

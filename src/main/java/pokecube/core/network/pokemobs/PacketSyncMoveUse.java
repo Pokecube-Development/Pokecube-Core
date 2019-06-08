@@ -4,8 +4,8 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
@@ -18,7 +18,7 @@ public class PacketSyncMoveUse implements IMessage, IMessageHandler<PacketSyncMo
 
     private static void processMessage(MessageContext ctx, PacketSyncMoveUse message)
     {
-        EntityPlayer player = PokecubeCore.getPlayer(null);
+        PlayerEntity player = PokecubeCore.getPlayer(null);
         int id = message.entityId;
         int index = message.index;
         Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
@@ -31,12 +31,12 @@ public class PacketSyncMoveUse implements IMessage, IMessageHandler<PacketSyncMo
 
     public static void sendUpdate(IPokemob pokemob)
     {
-        if (pokemob.getEntity().getEntityWorld().isRemote || !(pokemob.getPokemonOwner() instanceof EntityPlayer))
+        if (pokemob.getEntity().getEntityWorld().isRemote || !(pokemob.getPokemonOwner() instanceof PlayerEntity))
             return;
         PacketSyncMoveUse packet = new PacketSyncMoveUse();
         packet.entityId = pokemob.getEntity().getEntityId();
         packet.index = pokemob.getMoveIndex();
-        PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) pokemob.getPokemonOwner());
+        PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) pokemob.getPokemonOwner());
     }
 
     int entityId;

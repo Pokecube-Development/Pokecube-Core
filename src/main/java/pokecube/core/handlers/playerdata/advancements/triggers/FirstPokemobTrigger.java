@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.interfaces.PokecubeMod;
 
@@ -60,7 +60,7 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
             this.listeners.remove(listener);
         }
 
-        public void trigger(EntityPlayerMP player)
+        public void trigger(ServerPlayerEntity player)
         {
             List<ICriterionTrigger.Listener<FirstPokemobTrigger.Instance>> list = null;
 
@@ -144,7 +144,7 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
         return new FirstPokemobTrigger.Instance();
     }
 
-    public void trigger(EntityPlayerMP player)
+    public void trigger(ServerPlayerEntity player)
     {
         FirstPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
         if (bredanimalstrigger$listeners != null)

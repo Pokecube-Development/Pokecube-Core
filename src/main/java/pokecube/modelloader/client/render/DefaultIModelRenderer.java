@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import thut.api.maths.Vector3;
@@ -19,7 +19,7 @@ import thut.core.client.render.model.ModelFactory;
 import thut.core.client.render.tabula.components.Animation;
 import thut.core.client.render.wrappers.ModelWrapper;
 
-public class DefaultIModelRenderer<T extends EntityLiving> extends AbstractModelRenderer<T>
+public class DefaultIModelRenderer<T extends MobEntity> extends AbstractModelRenderer<T>
 {
     public String                           name;
     public HashMap<String, PartInfo>        parts        = Maps.newHashMap();
@@ -36,7 +36,7 @@ public class DefaultIModelRenderer<T extends EntityLiving> extends AbstractModel
 
     public DefaultIModelRenderer(HashMap<String, ArrayList<Vector5>> global, ModelHolder model)
     {
-        super(Minecraft.getMinecraft().getRenderManager(), null, 0);
+        super(Minecraft.getInstance().getRenderManager(), null, 0);
         name = model.name;
         this.model = new ModelWrapper(model, this);
         ModelWrapperEvent evt = new ModelWrapperEvent(this.model, name);

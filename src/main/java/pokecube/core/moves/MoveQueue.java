@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
@@ -56,13 +56,13 @@ public class MoveQueue
         @SubscribeEvent
         public void tick(WorldTickEvent evt)
         {
-            if (evt.phase == Phase.END && evt.side == Side.SERVER)
+            if (evt.phase == Phase.END && evt.side == Dist.DEDICATED_SERVER)
             {
                 MoveQueue queue = queues.get(evt.world);
                 if (queue == null)
                 {
                     if (PokecubeMod.debug) PokecubeMod.log(Level.SEVERE,
-                            "Critical Error with world for dimension " + evt.world.provider.getDimension()
+                            "Critical Error with world for dimension " + evt.world.dimension.getDimension()
                                     + " It is somehow ticking when not loaded, this should not happen.",
                             new Exception());
                     return;
@@ -107,9 +107,9 @@ public class MoveQueue
             {
                 if (move.getUser() == null || move.getUser().isDead) continue;
                 boolean toUse = true;
-                if (move.getUser() instanceof EntityLivingBase)
+                if (move.getUser() instanceof LivingEntity)
                 {
-                    toUse = ((EntityLivingBase) move.getUser()).getHealth() >= 1;
+                    toUse = ((LivingEntity) move.getUser()).getHealth() >= 1;
                 }
                 if (toUse)
                 {

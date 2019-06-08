@@ -3,8 +3,8 @@ package pokecube.core.interfaces.capabilities.impl;
 import java.util.Vector;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
@@ -23,10 +23,10 @@ public abstract class PokemobSexed extends PokemobStats
 {
 
     @Override
-    public boolean canMate(EntityAnimal entityAnimal)
+    public boolean canMate(AnimalEntity AnimalEntity)
     {
         if (!isRoutineEnabled(AIRoutine.MATE)) return false;
-        IPokemob otherMob = CapabilityPokemob.getPokemobFor(entityAnimal);
+        IPokemob otherMob = CapabilityPokemob.getPokemobFor(AnimalEntity);
         if (otherMob != null)
         {
             PokedexEntry thisEntry = getPokedexEntry();
@@ -111,7 +111,7 @@ public abstract class PokemobSexed extends PokemobStats
         if (PokecubeMod.debug) PokecubeMod.log(this + " lay()");
         if (getEntity().getEntityWorld().isRemote) { return; }
         int num = Tools.countPokemon(getEntity().getEntityWorld(), here, PokecubeMod.core.getConfig().maxSpawnRadius);
-        if (!(getOwner() instanceof EntityPlayer) && num > PokecubeMod.core.getConfig().mobSpawnNumber * 1.25) return;
+        if (!(getOwner() instanceof PlayerEntity) && num > PokecubeMod.core.getConfig().mobSpawnNumber * 1.25) return;
         Vector3 pos = here.set(getEntity()).addTo(0, Math.max(getPokedexEntry().height * getSize() / 4, 0.5f), 0);
         if (pos.isClearOfBlocks(getEntity().getEntityWorld()))
         {

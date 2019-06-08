@@ -12,7 +12,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.watch.util.WatchPage;
@@ -63,10 +63,10 @@ public class GuiPokeWatch extends GuiScreen
 
     final List<WatchPage>     pages    = Lists.newArrayList();
     public final IPokemob     pokemob;
-    public final EntityPlayer player;
+    public final PlayerEntity player;
     int                       index    = 0;
 
-    public GuiPokeWatch(EntityPlayer player, int startPage)
+    public GuiPokeWatch(PlayerEntity player, int startPage)
     {
         this(player);
         if (startPage >= 0 && startPage < pages.size()) index = startPage;
@@ -74,7 +74,7 @@ public class GuiPokeWatch extends GuiScreen
         PacketPokedex.sendLocationSpawnsRequest();
     }
 
-    public GuiPokeWatch(EntityPlayer player)
+    public GuiPokeWatch(PlayerEntity player)
     {
         Entity entityHit = Tools.getPointedEntity(player, 16);
         pokemob = CapabilityPokemob.getPokemobFor(entityHit);

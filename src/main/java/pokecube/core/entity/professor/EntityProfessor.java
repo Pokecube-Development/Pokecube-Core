@@ -5,7 +5,7 @@ import java.io.IOException;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -17,11 +17,11 @@ import net.minecraft.entity.ai.EntityAIRestrictOpenDoor;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAIWatchClosest2;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -78,8 +78,8 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
         this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
         this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
         this.tasks.addTask(5, new EntityAILookIdle(this));
-        this.tasks.addTask(9, new EntityAIWatchClosest2(this, EntityPlayer.class, 5.0F, 1.0F));
-        this.tasks.addTask(10, new EntityAIWatchClosest(this, EntityLivingBase.class, 8.0F, 1.0f));
+        this.tasks.addTask(9, new EntityAIWatchClosest2(this, PlayerEntity.class, 5.0F, 1.0F));
+        this.tasks.addTask(10, new EntityAIWatchClosest(this, LivingEntity.class, 8.0F, 1.0f));
         this.guardAI = new GuardAI(this, this.getCapability(EventsHandler.GUARDAI_CAP, null));
         this.tasks.addTask(1, guardAI);
         if (location != null)
@@ -93,9 +93,9 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     public boolean attackEntityFrom(DamageSource source, float i)
     {
         Entity e = source.getTrueSource();
-        if (e instanceof EntityPlayer && ((EntityPlayer) e).capabilities.isCreativeMode)
+        if (e instanceof PlayerEntity && ((PlayerEntity) e).capabilities.isCreativeMode)
         {
-            EntityPlayer player = (EntityPlayer) e;
+            PlayerEntity player = (PlayerEntity) e;
             if (player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() instanceof ItemLuckyEgg)
             {
                 if (!this.getEntityWorld().isRemote)
@@ -125,9 +125,9 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     }
 
     @Override
-    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    public boolean processInteract(PlayerEntity player, Hand hand)
     {
-        if (!getEntityWorld().isRemote && hand == EnumHand.MAIN_HAND)
+        if (!getEntityWorld().isRemote && hand == Hand.MAIN_HAND)
         {
             if (!SpawnHandler.canSpawnInWorld(player.getEntityWorld())) return false;
             if (type == ProfessorType.PROFESSOR)
@@ -139,8 +139,8 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
                     boolean hasStarter = PokecubeSerializer.getInstance().hasStarter(player);
                     if (hasStarter)
                     {
-                        packet.data.setBoolean("C", false);
-                        packet.data.setBoolean("H", hasStarter);
+                        packet.data.putBoolean("C", false);
+                        packet.data.putBoolean("H", hasStarter);
                     }
                     else
                     {
@@ -173,7 +173,7 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbt)
+    public void readEntityFromNBT(CompoundNBT nbt)
     {
         super.readEntityFromNBT(nbt);
         stationary = nbt.getBoolean("stationary");
@@ -218,20 +218,20 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound nbt)
+    public void writeEntityToNBT(CompoundNBT nbt)
     {
         super.writeEntityToNBT(nbt);
-        nbt.setBoolean("gender", male);
-        nbt.setString("name", name);
-        nbt.setBoolean("stationary", stationary);
-        nbt.setString("playerName", playerName);
-        nbt.setString("type", type.toString());
+        nbt.putBoolean("gender", male);
+        nbt.putString("name", name);
+        nbt.putBoolean("stationary", stationary);
+        nbt.putString("playerName", playerName);
+        nbt.putString("type", type.toString());
     }
 
     @Override
     public void writeSpawnData(ByteBuf buffer)
     {
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
         this.writeEntityToNBT(tag);
         new PacketBuffer(buffer).writeCompoundTag(tag);
     }
@@ -241,7 +241,7 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
     {
         try
         {
-            NBTTagCompound tag = new PacketBuffer(additionalData).readCompoundTag();
+            CompoundNBT tag = new PacketBuffer(additionalData).readCompoundTag();
             this.readEntityFromNBT(tag);
         }
         catch (IOException e)

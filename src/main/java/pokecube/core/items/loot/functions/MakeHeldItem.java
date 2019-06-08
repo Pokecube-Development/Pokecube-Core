@@ -36,7 +36,7 @@ public class MakeHeldItem extends LootFunction
         {
             ItemStack newStack = PokecubeItems.getStack(arg);
             newStack.setCount(stack.getCount());
-            newStack.setTagCompound(stack.getTagCompound());
+            newStack.put(stack.getTag());
             return newStack;
         }
         else

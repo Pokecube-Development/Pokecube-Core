@@ -12,8 +12,8 @@ import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -86,11 +86,11 @@ public class Moves extends ListPage
                 ITextComponent moveName = MovesUtils.getMoveName(s);
                 moveName.setStyle(new Style());
                 moveName.getStyle().setColor(TextFormatting.RED);
-                ITextComponent main = new TextComponentTranslation("pokewatch.moves.lvl", i, moveName);
+                ITextComponent main = new TranslationTextComponent("pokewatch.moves.lvl", i, moveName);
                 main.setStyle(new Style());
                 main.getStyle().setColor(TextFormatting.GREEN);
                 main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
-                main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(s)));
+                main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
                 entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
             }
         }
@@ -100,11 +100,11 @@ public class Moves extends ListPage
             ITextComponent moveName = MovesUtils.getMoveName(s);
             moveName.setStyle(new Style());
             moveName.getStyle().setColor(TextFormatting.RED);
-            ITextComponent main = new TextComponentTranslation("pokewatch.moves.tm", moveName);
+            ITextComponent main = new TranslationTextComponent("pokewatch.moves.tm", moveName);
             main.setStyle(new Style());
             main.getStyle().setColor(TextFormatting.GREEN);
             main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
-            main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(s)));
+            main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
             entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
         }
         list = new ScrollGui(mc, width, height, fontRenderer.FONT_HEIGHT, offsetX, offsetY, entries);

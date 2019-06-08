@@ -38,7 +38,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ProgressManager;
@@ -433,13 +433,13 @@ public class CommonProxy implements IGuiHandler
     }
 
     @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
+    public Object getClientGuiElement(int ID, PlayerEntity player, World world, int x, int y, int z)
     {
         return null;
     }
 
     @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
+    public Object getServerGuiElement(int ID, PlayerEntity player, World world, int x, int y, int z)
     {
         return null;
     }

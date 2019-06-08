@@ -8,7 +8,7 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -28,7 +28,7 @@ import thut.core.client.render.model.IModel;
 import thut.core.client.render.model.IModelRenderer;
 import thut.core.client.render.model.IPartTexturer;
 
-public abstract class AbstractModelRenderer<T extends EntityLiving> extends RenderLivingBase<T>
+public abstract class AbstractModelRenderer<T extends MobEntity> extends RenderLivingBase<T>
         implements IModelRenderer<T>
 {
     final Vector3             rotPoint          = Vector3.getNewVector();
@@ -54,18 +54,18 @@ public abstract class AbstractModelRenderer<T extends EntityLiving> extends Rend
     }
 
     @Override
-    protected void applyRotations(T par1EntityLiving, float par2, float par3, float par4)
+    protected void applyRotations(T par1MobEntity, float par2, float par3, float par4)
     {
-        super.applyRotations(par1EntityLiving, par2, par3, par4);
+        super.applyRotations(par1MobEntity, par2, par3, par4);
         if (!checkedForSleep)
         {
             checkedForSleep = true;
-            hasSleepAnimation = hasAnimation("sleeping", par1EntityLiving) || hasAnimation("sleep", par1EntityLiving)
-                    || hasAnimation("asleep", par1EntityLiving);
+            hasSleepAnimation = hasAnimation("sleeping", par1MobEntity) || hasAnimation("sleep", par1MobEntity)
+                    || hasAnimation("asleep", par1MobEntity);
         }
-        if (par1EntityLiving.getHealth() <= 0)
+        if (par1MobEntity.getHealth() <= 0)
         {
-            float f = (par1EntityLiving.deathTime + par4 - 1.0F) / 20.0F * 1.6F;
+            float f = (par1MobEntity.deathTime + par4 - 1.0F) / 20.0F * 1.6F;
             f = MathHelper.sqrt(f);
 
             if (f > 1.0F)
@@ -73,12 +73,12 @@ public abstract class AbstractModelRenderer<T extends EntityLiving> extends Rend
                 f = 1.0F;
             }
 
-            GlStateManager.rotate(f * this.getDeathMaxRotation(par1EntityLiving), 0.0F, 0.0F, 1.0F);
+            GlStateManager.rotate(f * this.getDeathMaxRotation(par1MobEntity), 0.0F, 0.0F, 1.0F);
             return;
         }
         if (!hasSleepAnimation)
         {
-            IPokemob pokemob = CapabilityPokemob.getPokemobFor(par1EntityLiving);
+            IPokemob pokemob = CapabilityPokemob.getPokemobFor(par1MobEntity);
             boolean status = pokemob.getStatus() == IMoveConstants.STATUS_SLP;
             if (status || pokemob.getLogicState(LogicStates.SLEEPING))
             {

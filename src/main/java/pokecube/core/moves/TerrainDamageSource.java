@@ -1,9 +1,9 @@
 package pokecube.core.moves;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class TerrainDamageSource extends DamageSource
 {
@@ -22,9 +22,9 @@ public class TerrainDamageSource extends DamageSource
 
     @Override
     /** Gets the death message that is displayed when the player dies */
-    public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn)
+    public ITextComponent getDeathMessage(LivingEntity LivingEntityIn)
     {
         String s = "death.attack." + this.damageType;
-        return new TextComponentTranslation(s, entityLivingBaseIn.getDisplayName());
+        return new TranslationTextComponent(s, LivingEntityIn.getDisplayName());
     }
 }

@@ -1,6 +1,6 @@
 package pokecube.core.blocks.tradingTable;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import pokecube.core.items.pokecubes.PokecubeManager;
@@ -15,7 +15,7 @@ public class SlotTrade extends Slot
 
     /** Return whether this slot's stack can be taken from this slot. */
     @Override
-    public boolean canTakeStack(EntityPlayer player)
+    public boolean canTakeStack(PlayerEntity player)
     {
         if (!(PokecubeManager.isFilled(getStack()))) return true;
         String name = PokecubeManager.getOwner(getStack());

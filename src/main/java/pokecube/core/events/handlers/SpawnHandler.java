@@ -22,11 +22,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLiving.SpawnPlacementType;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.MobEntity.SpawnPlacementType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
@@ -204,11 +204,11 @@ public final class SpawnHandler
     public static boolean canSpawnInWorld(World world)
     {
         if (world == null) return true;
-        if (dimensionBlacklist.contains(world.provider.getDimension())
+        if (dimensionBlacklist.contains(world.dimension.getDimension())
                 || world.provider instanceof DimensionSecretBase)
             return false;
         if (PokecubeMod.core.getConfig().whiteListEnabled
-                && !dimensionWhitelist.contains(world.provider.getDimension()))
+                && !dimensionWhitelist.contains(world.dimension.getDimension()))
             return false;
         return true;
     }
@@ -242,7 +242,7 @@ public final class SpawnHandler
         if (!temp.set(location).addTo(-entry.width / 2, 0, 0).clearOfBlocks(world)) return false;
         IBlockState state = temp.set(location).addTo(0, -1, 0).getBlockState(world);
         Block down = state.getBlock();
-        net.minecraft.entity.EntityLiving.SpawnPlacementType type = SpawnPlacementType.ON_GROUND;
+        net.minecraft.entity.MobEntity.SpawnPlacementType type = SpawnPlacementType.ON_GROUND;
         if (entry.flys())
         {
             type = SpawnPlacementType.IN_AIR;
@@ -291,17 +291,17 @@ public final class SpawnHandler
             int tolerance = entry.range;
             if (x >= coord.getX() - tolerance && z >= coord.getZ() - tolerance && y >= coord.getY() - tolerance
                     && y <= coord.getY() + tolerance && x <= coord.getX() + tolerance && z <= coord.getZ() + tolerance
-                    && world.provider.getDimension() == coord.dim) { return entry; }
+                    && world.dimension.getDimension() == coord.dim) { return entry; }
         }
         return null;
     }
 
-    public static EntityLiving creatureSpecificInit(EntityLiving entityliving, World world, double posX, double posY,
+    public static MobEntity creatureSpecificInit(MobEntity MobEntity, World world, double posX, double posY,
             double posZ, Vector3 spawnPoint, int overrideLevel, Variance variance)
     {
-        if (ForgeEventFactory.doSpecialSpawn(entityliving, world, (float) posX, (float) posY, (float) posZ,
+        if (ForgeEventFactory.doSpecialSpawn(MobEntity, world, (float) posX, (float) posY, (float) posZ,
                 null)) { return null; }
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(entityliving);
+        IPokemob pokemob = CapabilityPokemob.getPokemobFor(MobEntity);
         if (pokemob != null)
         {
 
@@ -354,8 +354,8 @@ public final class SpawnHandler
             state = loc.getBlockState(world);
             if (state.getMaterial() == Material.WATER) return loc;
             boolean clear = loc.isClearOfBlocks(world);
-            if (clear && !loc.isClearOfBlocks(world)) { return loc.offset(EnumFacing.UP); }
-            loc.offsetBy(EnumFacing.DOWN);
+            if (clear && !loc.isClearOfBlocks(world)) { return loc.offset(Direction.UP); }
+            loc.offsetBy(Direction.DOWN);
         }
         return loc.copy();
     }
@@ -399,7 +399,7 @@ public final class SpawnHandler
     {
         Vector3 spawn = temp.set(world.getSpawnPoint());
         JEP toUse;
-        int type = world.provider.getDimension();
+        int type = world.dimension.getDimension();
         boolean isNew = false;
         Function function;
         if (functions.containsKey(type))
@@ -628,7 +628,7 @@ public final class SpawnHandler
      * @param player
      * @param world
      * @return number of mobs spawned. */
-    public int doSpawnForPlayer(EntityPlayer player, World world)
+    public int doSpawnForPlayer(PlayerEntity player, World world)
     {
         long time = System.nanoTime();
         Vector3 v = getRandomPointNear(player, PokecubeMod.core.getConfig().maxSpawnRadius);
@@ -674,9 +674,9 @@ public final class SpawnHandler
         int num = 0;
         int height = world.getActualHeight();
         AxisAlignedBB box = v.getAABB();
-        List<EntityLivingBase> list = world.getEntitiesWithinAABB(EntityLivingBase.class,
+        List<LivingEntity> list = world.getEntitiesWithinAABB(LivingEntity.class,
                 box.grow(radius, Math.max(height, radius), radius));
-        for (EntityLivingBase o : list)
+        for (LivingEntity o : list)
         {
             if (CapabilityPokemob.getPokemobFor(o) != null) num++;
         }
@@ -751,7 +751,7 @@ public final class SpawnHandler
             if (player) continue;
             if (distFromSpawnPoint >= 256.0F)
             {
-                EntityLiving entityliving = null;
+                MobEntity MobEntity = null;
                 try
                 {
                     if (dbe.getPokedexNb() > 0)
@@ -759,16 +759,16 @@ public final class SpawnHandler
                         SpawnEvent.Pick.Final event = new SpawnEvent.Pick.Final(dbe, point, world);
                         MinecraftForge.EVENT_BUS.post(event);
                         if (event.getPicked() == null) continue;
-                        entityliving = (EntityLiving) PokecubeMod.core.createPokemob(event.getPicked(), world);
-                        entityliving.setHealth(entityliving.getMaxHealth());
-                        entityliving.setLocationAndAngles((double) x + 0.5F, (double) y + 0.5F, (double) z + 0.5F,
+                        MobEntity = (MobEntity) PokecubeMod.core.createPokemob(event.getPicked(), world);
+                        MobEntity.setHealth(MobEntity.getMaxHealth());
+                        MobEntity.setLocationAndAngles((double) x + 0.5F, (double) y + 0.5F, (double) z + 0.5F,
                                 world.rand.nextFloat() * 360.0F, 0.0F);
-                        if (entityliving.getCanSpawnHere())
+                        if (MobEntity.getCanSpawnHere())
                         {
-                            if ((entityliving = creatureSpecificInit(entityliving, world, x, y, z, v3.set(entityliving),
+                            if ((MobEntity = creatureSpecificInit(MobEntity, world, x, y, z, v3.set(MobEntity),
                                     entry.getLevel(matcher), entry.getVariance(matcher))) != null)
                             {
-                                IPokemob pokemob = CapabilityPokemob.getPokemobFor(entityliving);
+                                IPokemob pokemob = CapabilityPokemob.getPokemobFor(MobEntity);
                                 if (!event.getSpawnArgs().isEmpty())
                                 {
                                     String[] args = event.getSpawnArgs().split(" ");
@@ -782,21 +782,21 @@ public final class SpawnHandler
                                 }
                                 SpawnEvent.Post evt = new SpawnEvent.Post(dbe, v3, world, pokemob);
                                 MinecraftForge.EVENT_BUS.post(evt);
-                                world.spawnEntity(entityliving);
+                                world.spawnEntity(MobEntity);
                                 totalSpawnCount++;
                             }
                         }
                         else
                         {
-                            entityliving.setDead();
+                            MobEntity.setDead();
                         }
                     }
                 }
                 catch (Throwable e)
                 {
-                    if (entityliving != null)
+                    if (MobEntity != null)
                     {
-                        entityliving.setDead();
+                        MobEntity.setDead();
                     }
 
                     System.err.println("Wrong Id while spawn: " + dbe.getName());
@@ -813,12 +813,12 @@ public final class SpawnHandler
     public void spawn(World world)
     {
         if (world.getDifficulty() == EnumDifficulty.PEACEFUL || !doSpawns) return;
-        List<EntityPlayer> players = Lists.newArrayList(world.playerEntities);
+        List<PlayerEntity> players = Lists.newArrayList(world.playerEntities);
         if (players.isEmpty()) return;
         Collections.shuffle(players);
         for (int i = 0; i < players.size(); i++)
         {
-            if (players.get(i).dimension != world.provider.getDimension()) continue;
+            if (players.get(i).dimension != world.dimension.getDimension()) continue;
             doSpawnForPlayer(players.get(i), world);
         }
     }
@@ -852,8 +852,8 @@ public final class SpawnHandler
     public void doMeteor(World world)
     {
         if (!PokecubeMod.core.getConfig().meteors) return;
-        if (!world.provider.isSurfaceWorld()) return;
-        if (world.provider.isNether()) return;
+        if (!world.dimension.isSurfaceWorld()) return;
+        if (world.dimension.isNether()) return;
         List<Object> players = new ArrayList<Object>(world.playerEntities);
         if (players.size() < 1) return;
         if (new Random().nextInt(100) == 0)
@@ -888,7 +888,7 @@ public final class SpawnHandler
         try
         {
             int rate = PokecubeMod.core.getConfig().spawnRate;
-            if (world.getTotalWorldTime() % rate == 0)
+            if (world.getGameTime() % rate == 0)
             {
                 long time = System.nanoTime();
                 spawn(world);
@@ -920,6 +920,6 @@ public final class SpawnHandler
             boom.doExplosion();
         }
         PokecubeSerializer.getInstance()
-                .addMeteorLocation(new Vector4(location.x, location.y, location.z, world.provider.getDimension()));
+                .addMeteorLocation(new Vector4(location.x, location.y, location.z, world.dimension.getDimension()));
     }
 }

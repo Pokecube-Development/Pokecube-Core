@@ -12,7 +12,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.biome.Biome;
 import pokecube.core.client.gui.watch.util.LineEntry.IClickListener;
@@ -207,7 +207,7 @@ public class SpawnListEntry
         int n = 0;
         for (String s : output)
         {
-            ITextComponent comp = new TextComponentString(s);
+            ITextComponent comp = new StringTextComponent(s);
             if (n++ == 0)
             {
                 PokedexEntry e = Database.getEntry(comp.getUnformattedComponentText());

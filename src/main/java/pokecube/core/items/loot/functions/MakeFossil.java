@@ -36,7 +36,7 @@ public class MakeFossil extends LootFunction
         {
             ItemStack newStack = PokecubeItems.getStack("fossil_" + arg);
             newStack.setCount(stack.getCount());
-            newStack.setTagCompound(stack.getTagCompound());
+            newStack.put(stack.getTag());
             return newStack;
         }
         else

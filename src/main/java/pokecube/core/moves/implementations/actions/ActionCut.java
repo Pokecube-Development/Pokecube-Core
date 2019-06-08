@@ -2,7 +2,7 @@ package pokecube.core.moves.implementations.actions;
 
 import java.util.Random;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import pokecube.core.events.handlers.MoveEventsHandler;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
@@ -33,7 +33,7 @@ public class ActionCut implements IMoveAction
             int index = new Random().nextInt(6);
             for (int i = 0; i < 6; i++)
             {
-                EnumFacing dir = EnumFacing.VALUES[(i + index) % 6];
+                Direction dir = Direction.VALUES[(i + index) % 6];
                 remover = new TreeRemover(user.getEntity().getEntityWorld(), location.offset(dir));
                 cut = remover.cut(true);
                 if (cut != 0) break;

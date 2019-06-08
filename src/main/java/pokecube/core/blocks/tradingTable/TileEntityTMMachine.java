@@ -10,14 +10,14 @@ import java.util.logging.Level;
 import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -66,7 +66,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     }
 
     @Override
-    public void closeInventory(EntityPlayer player)
+    public void closeInventory(PlayerEntity player)
     {
 
     }
@@ -109,7 +109,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared()
     {
         return 65536.0D;
@@ -182,16 +182,16 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
+        this.writeToNBT(CompoundNBT);
+        return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
     }
 
     @Override
-    public NBTTagCompound getUpdateTag()
+    public CompoundNBT getUpdateTag()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundNBT nbt = new CompoundNBT();
         return writeToNBT(nbt);
     }
 
@@ -205,7 +205,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     {
         boolean pc = false;
         this.pc = null;
-        for (EnumFacing side : EnumFacing.values())
+        for (Direction side : Direction.values())
         {
             Vector3 here = Vector3.getNewVector().set(this);
             Block id = here.offset(side).getBlock(world);
@@ -231,13 +231,13 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(PlayerEntity player)
     {
         return world.getTileEntity(getPos()) == this
                 && player.getDistanceSq(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5) < 64;
     }
 
-    public ArrayList<String> moves(EntityPlayer player)
+    public ArrayList<String> moves(PlayerEntity player)
     {
         if (!player.getEntityWorld().isRemote)
         {
@@ -251,7 +251,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
             packet.data.setInteger("N", moves.size());
             for (int i = 0; i < moves.size(); i++)
             {
-                packet.data.setString("M" + i, moves.get(i));
+                packet.data.putString("M" + i, moves.get(i));
             }
             PokecubePacketHandler.sendToClient(packet, player);
             this.moves.put(player.getName(), moves);
@@ -275,29 +275,29 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     {
         if (world.isRemote)
         {
-            NBTTagCompound nbt = pkt.getNbtCompound();
+            CompoundNBT nbt = pkt.getNbtCompound();
             readFromNBT(nbt);
         }
     }
 
-    public void openGUI(EntityPlayer player)
+    public void openGUI(PlayerEntity player)
     {
         player.openGui(PokecubeMod.core, Config.GUITMTABLE_ID, world, getPos().getX(), getPos().getY(),
                 getPos().getZ());
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound)
+    public void readFromNBT(CompoundNBT tagCompound)
     {
         super.readFromNBT(tagCompound);
-        NBTBase temp = tagCompound.getTag("Inventory");
+        INBT temp = tagCompound.getTag("Inventory");
         inventory = NonNullList.<ItemStack> withSize(1, ItemStack.EMPTY);
-        if (temp instanceof NBTTagList)
+        if (temp instanceof ListNBT)
         {
-            NBTTagList tagList = (NBTTagList) temp;
-            for (int i = 0; i < tagList.tagCount(); i++)
+            ListNBT tagList = (ListNBT) temp;
+            for (int i = 0; i < tagList.size(); i++)
             {
-                NBTTagCompound tag = tagList.getCompoundTagAt(i);
+                CompoundNBT tag = tagList.getCompound(i);
                 byte slot = tag.getByte("Slot");
 
                 if (slot >= 0 && slot < inventory.size())
@@ -315,22 +315,22 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT tagCompound)
     {
         super.writeToNBT(tagCompound);
-        NBTTagList itemList = new NBTTagList();
+        ListNBT itemList = new ListNBT();
         for (int i = 0; i < inventory.size(); i++)
         {
             ItemStack stack;
             if (CompatWrapper.isValid(stack = inventory.get(i)))
             {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundNBT tag = new CompoundNBT();
                 tag.setByte("Slot", (byte) i);
                 stack.writeToNBT(tag);
                 itemList.appendTag(tag);
             }
         }
-        tagCompound.setTag("Inventory", itemList);
+        tagCompound.put("Inventory", itemList);
         return tagCompound;
     }
 

@@ -28,8 +28,8 @@ import net.minecraft.client.gui.GuiUtilRenderComponents;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -58,7 +58,7 @@ public class GuiPokedex extends GuiScreen
 
     public static PokedexEntry pokedexEntry     = null;
     public IPokemob            pokemob          = null;
-    protected EntityPlayer     entityPlayer     = null;
+    protected PlayerEntity     PlayerEntity     = null;
     protected ScrollGui        list;
     protected GuiTextField     pokemobTextField;
     /** The X size of the inventory window in pixels. */
@@ -77,12 +77,12 @@ public class GuiPokedex extends GuiScreen
     /**
      *
      */
-    public GuiPokedex(IPokemob pokemob, EntityPlayer entityPlayer)
+    public GuiPokedex(IPokemob pokemob, PlayerEntity PlayerEntity)
     {
         xSize = 256;
         ySize = 197;
         this.pokemob = pokemob;
-        this.entityPlayer = entityPlayer;
+        this.PlayerEntity = PlayerEntity;
 
         if (pokemob != null)
         {
@@ -90,7 +90,7 @@ public class GuiPokedex extends GuiScreen
         }
         else
         {
-            String name = PokecubePlayerDataHandler.getCustomDataTag(entityPlayer).getString("WEntry");
+            String name = PokecubePlayerDataHandler.getCustomDataTag(PlayerEntity).getString("WEntry");
             pokedexEntry = Database.getEntry(name);
             if (pokedexEntry == null)
             {
@@ -121,10 +121,10 @@ public class GuiPokedex extends GuiScreen
 
         // Draw mob
         GL11.glPushMatrix();
-        IPokemob renderMob = EventsHandlerClient.getRenderMob(pokedexEntry, entityPlayer.getEntityWorld());
+        IPokemob renderMob = EventsHandlerClient.getRenderMob(pokedexEntry, PlayerEntity.getEntityWorld());
         if (!renderMob.getEntity().addedToChunk)
         {
-            EntityTools.copyEntityTransforms(renderMob.getEntity(), entityPlayer);
+            EntityTools.copyEntityTransforms(renderMob.getEntity(), PlayerEntity);
         }
         GlStateManager.enableDepth();
         renderMob(renderMob.getEntity(), mc, 0, 0, 1f, height, width, xSize, ySize, xHeadRenderAngle, yHeadRenderAngle,
@@ -427,7 +427,7 @@ public class GuiPokedex extends GuiScreen
         }
     }
 
-    public static void renderMob(EntityLiving entity, Minecraft mc, int dx, int dy, float scale, int height, int width,
+    public static void renderMob(MobEntity entity, Minecraft mc, int dx, int dy, float scale, int height, int width,
             int xSize, int ySize, float xHeadRenderAngle, float yHeadRenderAngle, float yaw)
     {
         try
@@ -440,24 +440,24 @@ public class GuiPokedex extends GuiScreen
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
             if (pokemob == null) { return; }
             PokedexEntry pokedexEntry = pokemob.getPokedexEntry();
-            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getMinecraft().player)
+            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getInstance().player)
                     .getData(PokecubePlayerStats.class);
             IMobColourable colourable = pokemob.getEntity() instanceof IMobColourable
                     ? (IMobColourable) pokemob.getEntity()
                     : pokemob instanceof IMobColourable ? (IMobColourable) pokemob : null;
             if (colourable != null)
             {
-                boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
-                        || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
+                boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getInstance().player) > 0
+                        || StatsCollector.getHatched(pokedexEntry, Minecraft.getInstance().player) > 0)
                         || mc.player.capabilities.isCreativeMode;
 
                 // Megas Inherit colouring from the base form.
                 if (!fullColour && pokedexEntry.isMega)
                 {
                     fullColour = (StatsCollector.getCaptured(pokedexEntry.getBaseForme(),
-                            Minecraft.getMinecraft().player) > 0
+                            Minecraft.getInstance().player) > 0
                             || StatsCollector.getHatched(pokedexEntry.getBaseForme(),
-                                    Minecraft.getMinecraft().player) > 0);
+                                    Minecraft.getInstance().player) > 0);
                 }
 
                 // Set colouring accordingly.
@@ -523,7 +523,7 @@ public class GuiPokedex extends GuiScreen
             GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
             RenderHelper.enableStandardItemLighting();
-            Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0, 0, false);
+            Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0, 0, false);
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
             GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);

@@ -59,7 +59,7 @@ public class BerryGenManager
             int y = pos.getY();
             int z = pos.getZ();
             int x = pos.getX();
-            if (y >= 1 && y + l + 1 <= world.provider.getActualHeight())
+            if (y >= 1 && y + l + 1 <= world.dimension.getActualHeight())
             {
                 int i1;
                 byte b0;
@@ -84,7 +84,7 @@ public class BerryGenManager
                     {
                         for (j1 = z - b0; j1 <= z + b0 && flag; ++j1)
                         {
-                            if (i1 >= 0 && i1 < world.provider.getActualHeight())
+                            if (i1 >= 0 && i1 < world.dimension.getActualHeight())
                             {
                                 temp = new BlockPos(l1, i1, j1);
                                 Block block = world.getBlockState(temp).getBlock();
@@ -109,10 +109,10 @@ public class BerryGenManager
                 boolean isSoil = true;// (soil != null &&
                                       // soil.canSustainPlant(par1World,
                                       // par3,
-                                      // par4 - 1, par5, EnumFacing.UP,
+                                      // par4 - 1, par5, Direction.UP,
                                       // (BlockSapling)Block.sapling));
 
-                if (isSoil && y < world.provider.getActualHeight() - l - 1)
+                if (isSoil && y < world.dimension.getActualHeight() - l - 1)
                 {
                     soil.onPlantGrow(world.getBlockState(temp), world, temp, pos);
                     b0 = 3;
@@ -187,7 +187,7 @@ public class BerryGenManager
         {
             int l = world.rand.nextInt(1) + 5;
             BlockPos temp;
-            if (pos.getY() >= 1 && pos.getY() + l + 1 <= world.provider.getActualHeight())
+            if (pos.getY() >= 1 && pos.getY() + l + 1 <= world.dimension.getActualHeight())
             {
                 boolean stopped = false;
                 // Trunk

@@ -13,11 +13,11 @@ import net.minecraft.client.renderer.entity.layers.LayerEntityOnShoulder;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.EntityParrot;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,19 +31,19 @@ import pokecube.modelloader.client.ClientProxy;
 import pokecube.modelloader.client.render.AnimationLoader;
 import thut.core.client.render.model.IModelRenderer;
 
-@SideOnly(Side.CLIENT)
-public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
+@OnlyIn(Dist.CLIENT)
+public class RenderPokemobOnShoulder implements LayerRenderer<PlayerEntity>
 {
     private final RenderManager                            renderManager;
     private final LayerEntityOnShoulder                    parent;
-    protected RenderLivingBase<? extends EntityLivingBase> leftRenderer;
+    protected RenderLivingBase<? extends LivingEntity> leftRenderer;
     protected IPokemob                                     leftMob;
     private ModelBase                                      leftModel;
     private PokedexEntry                                   leftEntry;
     private ResourceLocation                               leftResource;
     private UUID                                           leftUniqueId;
     private Class<?>                                       leftEntityClass;
-    protected RenderLivingBase<? extends EntityLivingBase> rightRenderer;
+    protected RenderLivingBase<? extends LivingEntity> rightRenderer;
     protected IPokemob                                     rightMob;
     private ModelBase                                      rightModel;
     private PokedexEntry                                   rightEntry;
@@ -58,22 +58,22 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
     }
 
     @Override
-    public void doRenderLayer(EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks,
+    public void doRenderLayer(PlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks,
             float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
         if (player.getLeftShoulderEntity() != null || player.getRightShoulderEntity() != null)
         {
             GlStateManager.enableRescaleNormal();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            NBTTagCompound nbttagcompound = player.getLeftShoulderEntity();
+            CompoundNBT CompoundNBT = player.getLeftShoulderEntity();
 
             boolean left = true;
             boolean right = true;
 
-            if (!nbttagcompound.hasNoTags())
+            if (!CompoundNBT.hasNoTags())
             {
                 RenderPokemobOnShoulder.DataHolder holder = this.renderEntityOnShoulder(player, this.leftUniqueId,
-                        nbttagcompound, this.leftRenderer, this.leftModel, this.leftResource, this.leftEntityClass,
+                        CompoundNBT, this.leftRenderer, this.leftModel, this.leftResource, this.leftEntityClass,
                         leftEntry, leftMob, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch,
                         scale, true);
                 if (holder == null)
@@ -102,12 +102,12 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
                 this.leftMob = null;
             }
 
-            NBTTagCompound nbttagcompound1 = player.getRightShoulderEntity();
+            CompoundNBT CompoundNBT1 = player.getRightShoulderEntity();
 
-            if (!nbttagcompound1.hasNoTags())
+            if (!CompoundNBT1.hasNoTags())
             {
                 RenderPokemobOnShoulder.DataHolder holder = this.renderEntityOnShoulder(player, this.rightUniqueId,
-                        nbttagcompound1, this.rightRenderer, this.rightModel, this.rightResource, this.rightEntityClass,
+                        CompoundNBT1, this.rightRenderer, this.rightModel, this.rightResource, this.rightEntityClass,
                         rightEntry, rightMob, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw,
                         headPitch, scale, false);
                 if (holder == null)
@@ -139,18 +139,18 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
             GlStateManager.disableRescaleNormal();
             if (!left || !right)
             {
-                NBTTagCompound bakLeft = nbttagcompound.copy();
-                NBTTagCompound bakRight = nbttagcompound1.copy();
+                CompoundNBT bakLeft = CompoundNBT.copy();
+                CompoundNBT bakRight = CompoundNBT1.copy();
                 if (right)
                 {
                     for (String s : bakLeft.getKeySet())
-                        nbttagcompound.removeTag(s);
+                        CompoundNBT.remove(s);
                 }
 
                 if (left)
                 {
                     for (String s : bakRight.getKeySet())
-                        nbttagcompound1.removeTag(s);
+                        CompoundNBT1.remove(s);
                 }
 
                 parent.doRenderLayer(player, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw,
@@ -159,13 +159,13 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
                 if (right)
                 {
                     for (String s : bakLeft.getKeySet())
-                        nbttagcompound.setTag(s, bakLeft.getTag(s));
+                        CompoundNBT.put(s, bakLeft.getTag(s));
                 }
 
                 if (left)
                 {
                     for (String s : bakRight.getKeySet())
-                        nbttagcompound1.setTag(s, bakRight.getTag(s));
+                        CompoundNBT1.put(s, bakRight.getTag(s));
                 }
 
             }
@@ -173,8 +173,8 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
     }
 
     @SuppressWarnings("unchecked")
-    private RenderPokemobOnShoulder.DataHolder renderEntityOnShoulder(EntityPlayer player, @Nullable UUID mobUUID,
-            NBTTagCompound mobNBTTag, RenderLivingBase<? extends EntityLivingBase> mobRenderer, ModelBase mobModelBase,
+    private RenderPokemobOnShoulder.DataHolder renderEntityOnShoulder(PlayerEntity player, @Nullable UUID mobUUID,
+            CompoundNBT mobNBTTag, RenderLivingBase<? extends LivingEntity> mobRenderer, ModelBase mobModelBase,
             ResourceLocation texture, Class<?> mobClass, PokedexEntry entry, IPokemob mob, float limbSwing,
             float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch,
             float scaleFactor, boolean left)
@@ -196,11 +196,11 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
             if (mobModelBase == null)
             {
                 IModelRenderer<?> model = RenderAdvancedPokemobModel
-                        .getRenderer(mob.getPokedexEntry().getTrimmedName(), (EntityLiving) entity);
+                        .getRenderer(mob.getPokedexEntry().getTrimmedName(), (MobEntity) entity);
                 if (model == null && mob.getPokedexEntry().getBaseForme() != null)
                 {
                     model = RenderAdvancedPokemobModel
-                            .getRenderer(mob.getPokedexEntry().getBaseForme().getTrimmedName(), (EntityLiving) entity);
+                            .getRenderer(mob.getPokedexEntry().getBaseForme().getTrimmedName(), (MobEntity) entity);
                     AnimationLoader.modelMaps.put(mob.getPokedexEntry().getTrimmedName(), model);
                 }
                 if (model != null && model instanceof RenderLivingBase)
@@ -232,7 +232,7 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
         {
             ageInTicks = 0.0F;
         }
-        EntityLivingBase living = mob.getEntity();
+        LivingEntity living = mob.getEntity();
         EntityTools.copyEntityTransforms(living, player);
         mobModelBase.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor,
                 living);
@@ -249,18 +249,18 @@ public class RenderPokemobOnShoulder implements LayerRenderer<EntityPlayer>
         return false;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     class DataHolder
     {
         public UUID                                         entityId;
-        public RenderLivingBase<? extends EntityLivingBase> renderer;
+        public RenderLivingBase<? extends LivingEntity> renderer;
         public ModelBase                                    model;
         public ResourceLocation                             textureLocation;
         public Class<?>                                     clazz;
         public IPokemob                                     mob;
         public PokedexEntry                                 entry;
 
-        public DataHolder(UUID uuid, RenderLivingBase<? extends EntityLivingBase> renderer, ModelBase model,
+        public DataHolder(UUID uuid, RenderLivingBase<? extends LivingEntity> renderer, ModelBase model,
                 ResourceLocation texture, Class<?> clazz, PokedexEntry entry, IPokemob mob)
         {
             this.entityId = uuid;

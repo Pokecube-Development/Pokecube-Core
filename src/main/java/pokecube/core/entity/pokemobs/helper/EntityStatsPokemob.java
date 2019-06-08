@@ -6,11 +6,11 @@ package pokecube.core.entity.pokemobs.helper;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.IMobEntityData;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -79,7 +79,7 @@ public abstract class EntityStatsPokemob extends EntityGeneticsPokemob
                     && PokecubeMod.core.getConfig().onlyPokemobsDamagePokemobs)
                 return false;
 
-            if (source.getTrueSource() instanceof EntityPlayer && !(source instanceof PokemobDamageSource))
+            if (source.getTrueSource() instanceof PlayerEntity && !(source instanceof PokemobDamageSource))
                 amount *= PokecubeMod.core.getConfig().playerToPokemobDamageScale;
 
             if (this.getHealth() <= 0.0F)
@@ -117,15 +117,15 @@ public abstract class EntityStatsPokemob extends EntityGeneticsPokemob
 
                 if (entity != null && source.getTrueSource() != this.getOwner())
                 {
-                    if (entity instanceof EntityLivingBase)
+                    if (entity instanceof LivingEntity)
                     {
-                        this.setRevengeTarget((EntityLivingBase) entity);
+                        this.setRevengeTarget((LivingEntity) entity);
                     }
 
-                    if (entity instanceof EntityPlayer)
+                    if (entity instanceof PlayerEntity)
                     {
                         this.recentlyHit = 100;
-                        this.attackingPlayer = (EntityPlayer) entity;
+                        this.attackingPlayer = (PlayerEntity) entity;
                     }
                     else if (entity instanceof IEntityOwnable)
                     {
@@ -225,10 +225,10 @@ public abstract class EntityStatsPokemob extends EntityGeneticsPokemob
 
     @Override
     @Nullable
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
+    public IMobEntityData onInitialSpawn(DifficultyInstance difficulty, @Nullable IMobEntityData livingdata)
     {
 
-        getEntityData().setBoolean("initSpawn", true);
+        getEntityData().putBoolean("initSpawn", true);
         IPokemob pokemob = pokemobCap.specificSpawnInit();
         SpawnEvent.Post evt = new SpawnEvent.Post(pokemob.getPokedexEntry(), Vector3.getNewVector().set(this),
                 getEntityWorld(), pokemob);

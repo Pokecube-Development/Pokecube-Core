@@ -8,7 +8,7 @@ import java.util.Vector;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -201,7 +201,7 @@ public abstract class PokemobBase implements IPokemob
     protected Vector3              here             = Vector3.getNewVector();
 
     /** The Entity this IPokemob is attached to. */
-    protected EntityLiving         entity;
+    protected MobEntity         entity;
     /** RNG used, should be entity.getRNG() */
     protected Random               rand             = new Random();
     /** Data manager used for syncing data */
@@ -233,7 +233,7 @@ public abstract class PokemobBase implements IPokemob
     protected ResourceLocation[]   textures;
 
     @Override
-    public void setEntity(EntityLiving entityIn)
+    public void setEntity(MobEntity entityIn)
     {
         rand = entityIn.getRNG();
         entity = entityIn;
@@ -253,7 +253,7 @@ public abstract class PokemobBase implements IPokemob
     }
 
     @Override
-    public EntityLiving getEntity()
+    public MobEntity getEntity()
     {
         return entity;
     }

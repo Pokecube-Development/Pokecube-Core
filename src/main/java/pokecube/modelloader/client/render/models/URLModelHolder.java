@@ -49,7 +49,7 @@ public class URLModelHolder extends ModelHolder
 
         this.texture = new URLSkinTexture(new File(CommonProxy.CACHEPATH + File.separator + name + ".png"), texture,
                 null, new URLSkinImageBuffer());
-        TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
+        TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
         texturemanager.loadTexture(resource, this.texture);
 
         // This handles telling AnimationLoader to parse.

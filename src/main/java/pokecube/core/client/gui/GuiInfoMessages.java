@@ -36,7 +36,7 @@ public class GuiInfoMessages
             return;
         }
         instance.messages.push(message.getFormattedText());
-        instance.time = Minecraft.getMinecraft().player.ticksExisted;
+        instance.time = Minecraft.getInstance().player.ticksExisted;
         instance.recent.addFirst(message.getFormattedText());
         if (instance.messages.size() > 100)
         {
@@ -65,12 +65,12 @@ public class GuiInfoMessages
         instance = this;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
     public void draw(RenderMoveMessages event)
     {
         if (PokecubeMod.core.getConfig().battleLogInChat) { return; }
-        Minecraft minecraft = Minecraft.getMinecraft();
+        Minecraft minecraft = Minecraft.getInstance();
         if (event.getType() == ElementType.CHAT && !(minecraft.currentScreen instanceof GuiChat)) return;
         if (event.getType() != ElementType.CHAT && (minecraft.currentScreen instanceof GuiChat)) return;
 

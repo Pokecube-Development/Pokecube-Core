@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
@@ -58,7 +58,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
         return Blocks.LEAVES.getDefaultState();
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public BlockRenderLayer getBlockLayer()
     {
@@ -130,7 +130,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
-            EntityPlayer player)
+            PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
         return BerryManager.getBerryItem(tile.getBerryId());

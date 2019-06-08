@@ -15,12 +15,12 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.Database;
@@ -48,14 +48,14 @@ public class ItemModelReloader extends Item
 
     // 1.11
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
     {
         return onItemRightClick(player.getHeldItem(hand), world, player, hand);
     }
 
     // 1.10
-    public ActionResult<ItemStack> onItemRightClick(ItemStack itemstack, World world, EntityPlayer player,
-            EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(ItemStack itemstack, World world, PlayerEntity player,
+            Hand hand)
     {
         if (itemstack.getItemDamage() != 0)
         {
@@ -134,9 +134,9 @@ public class ItemModelReloader extends Item
                                         {
                                             Item item = d.item.getItem();
                                             Key key = new Key();
-                                            if (d.item.hasTagCompound())
+                                            if (d.item.hasTag())
                                             {
-                                                key.values.put(new QName("tag"), d.item.getTagCompound().toString());
+                                                key.values.put(new QName("tag"), d.item.getTag().toString());
                                             }
                                             key.values.put(new QName("id"), item.getRegistryName().toString());
                                             if (d.item.getItemDamage() != 0)
@@ -216,9 +216,9 @@ public class ItemModelReloader extends Item
                                             {
                                                 Item item = stack.getItem();
                                                 Key key = new Key();
-                                                if (stack.hasTagCompound())
+                                                if (stack.hasTag())
                                                 {
-                                                    key.values.put(new QName("tag"), stack.getTagCompound().toString());
+                                                    key.values.put(new QName("tag"), stack.getTag().toString());
                                                 }
                                                 key.values.put(new QName("id"), item.getRegistryName().toString());
                                                 if (stack.getItemDamage() != 0)

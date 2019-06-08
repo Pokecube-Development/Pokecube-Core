@@ -6,9 +6,9 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -42,8 +42,8 @@ public class SpawnEventsHandler
     @SubscribeEvent
     public void StructureSpawn(StructureEvent.SpawnEntity event)
     {
-        if (!(event.getEntity() instanceof EntityLiving)) return;
-        EntityLiving v = (EntityLiving) event.getEntity();
+        if (!(event.getEntity() instanceof MobEntity)) return;
+        MobEntity v = (MobEntity) event.getEntity();
         Vector3 pos = Vector3.getNewVector().set(v);
         IGuardAICapability capability = null;
         for (Object o2 : v.tasks.taskEntries)
@@ -91,7 +91,7 @@ public class SpawnEventsHandler
                     v = Vector3.getNextSurfacePoint2(world, vbak, Vector3.secondAxisNeg, 20);
                     if (v != null)
                     {
-                        v.offsetBy(EnumFacing.UP);
+                        v.offsetBy(Direction.UP);
                         weight = dbe.getSpawnData().getWeight(dbe.getSpawnData().getMatcher(world, v));
                     }
                     else weight = 0;

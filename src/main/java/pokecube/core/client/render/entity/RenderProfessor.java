@@ -15,15 +15,15 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.entity.RenderBiped;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.entity.professor.EntityProfessor;
 import pokecube.core.entity.professor.EntityProfessor.ProfessorType;
 import pokecube.core.interfaces.PokecubeMod;
 
-public class RenderProfessor<T extends EntityLiving> extends RenderBiped<T>
+public class RenderProfessor<T extends MobEntity> extends RenderBiped<T>
 {
     private static Map<String, ResourceLocation> players   = Maps.newHashMap();
     private static final ResourceLocation        PROFESSOR = new ResourceLocation(
@@ -65,7 +65,7 @@ public class RenderProfessor<T extends EntityLiving> extends RenderBiped<T>
         {
             if (players.containsKey(((EntityProfessor) entity).playerName))
                 return players.get(((EntityProfessor) entity).playerName);
-            Minecraft minecraft = Minecraft.getMinecraft();
+            Minecraft minecraft = Minecraft.getInstance();
             GameProfile profile = new GameProfile((UUID) null, ((EntityProfessor) entity).playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             Map<Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(profile);
@@ -76,7 +76,7 @@ public class RenderProfessor<T extends EntityLiving> extends RenderBiped<T>
             }
             else
             {
-                UUID uuid = EntityPlayer.getUUID(profile);
+                UUID uuid = PlayerEntity.getUUID(profile);
                 resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
             }
             players.put(((EntityProfessor) entity).playerName, resourcelocation);

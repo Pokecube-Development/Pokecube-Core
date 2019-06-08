@@ -28,9 +28,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.SoundEvents;
 
 
@@ -46,7 +46,7 @@ import net.minecraft.util.SoundEvents;
  */
 public class GuiNBTTree extends Gui {
 
-	private Minecraft mc = Minecraft.getMinecraft();
+	private Minecraft mc = Minecraft.getInstance();
 
 	private NBTTree tree;
 	private List<GuiNBTNode> nodes;
@@ -54,7 +54,7 @@ public class GuiNBTTree extends Gui {
 	private GuiNBTButton[] buttons;
 
 	private final int X_GAP = 10, START_X = 10, START_Y = 30;
-	private final int Y_GAP = Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT+2;
+	private final int Y_GAP = Minecraft.getInstance().fontRenderer.FONT_HEIGHT+2;
 
 	private int y, yClick, bottom, width, height, heightDiff, offset;
 
@@ -118,23 +118,23 @@ public class GuiNBTTree extends Gui {
 			for (GuiNBTButton b: buttons)
 				b.setEnabled(false);
 		}
-		else if (toFocus.getObject().getNBT() instanceof NBTTagCompound){
+		else if (toFocus.getObject().getNBT() instanceof CompoundNBT){
 			for (GuiNBTButton b: buttons)
 				b.setEnabled(true);
 			buttons[12].setEnabled(toFocus != tree.getRoot());
-			buttons[11].setEnabled(toFocus.hasParent() && !(toFocus.getParent().getObject().getNBT() instanceof NBTTagList));
+			buttons[11].setEnabled(toFocus.hasParent() && !(toFocus.getParent().getObject().getNBT() instanceof ListNBT));
 			buttons[13].setEnabled(true);
 			buttons[14].setEnabled(toFocus != tree.getRoot());
 			buttons[15].setEnabled(NBTEdit.clipboard != null);
 		}
-		else if (toFocus.getObject().getNBT() instanceof NBTTagList){
+		else if (toFocus.getObject().getNBT() instanceof ListNBT){
 			if (toFocus.hasChildren()){
 				byte type = toFocus.getChildren().get(0).getObject().getNBT().getId();
 				for (GuiNBTButton b: buttons)
 					b.setEnabled(false);
 				buttons[type-1].setEnabled(true);
 				buttons[12].setEnabled(true);
-				buttons[11].setEnabled(! (toFocus.getParent().getObject().getNBT() instanceof NBTTagList));
+				buttons[11].setEnabled(! (toFocus.getParent().getObject().getNBT() instanceof ListNBT));
 				buttons[13].setEnabled(true);
 				buttons[14].setEnabled(true);
 				buttons[15].setEnabled(NBTEdit.clipboard != null && NBTEdit.clipboard.getNBT().getId() == type);
@@ -142,7 +142,7 @@ public class GuiNBTTree extends Gui {
 			else
 				for (GuiNBTButton b: buttons)
 					b.setEnabled(true);
-			buttons[11].setEnabled(! (toFocus.getParent().getObject().getNBT() instanceof NBTTagList));
+			buttons[11].setEnabled(! (toFocus.getParent().getObject().getNBT() instanceof ListNBT));
 			buttons[13].setEnabled(true);
 			buttons[14].setEnabled(true);
 			buttons[15].setEnabled(NBTEdit.clipboard != null);
@@ -395,42 +395,42 @@ public class GuiNBTTree extends Gui {
 	private void saveButtonClicked(GuiSaveSlotButton button){
 		if (button.save.tag.hasNoTags()){ //Copy into save slot
 			Node<NamedNBT> obj = (focused == null) ? tree.getRoot() : focused;
-			NBTBase base = obj.getObject().getNBT();
+			INBT base = obj.getObject().getNBT();
 			String name = obj.getObject().getName();
-			if (base instanceof NBTTagList){
-				NBTTagList list = new NBTTagList();
+			if (base instanceof ListNBT){
+				ListNBT list = new ListNBT();
 				tree.addChildrenToList(obj, list);
-				button.save.tag.setTag(name, list);
+				button.save.tag.put(name, list);
 			}
-			else if (base instanceof NBTTagCompound){
-				NBTTagCompound compound = new NBTTagCompound();
+			else if (base instanceof CompoundNBT){
+				CompoundNBT compound = new CompoundNBT();
 				tree.addChildrenToTag(obj, compound);
-				button.save.tag.setTag(name, compound);
+				button.save.tag.put(name, compound);
 			}
 
 			else
-				button.save.tag.setTag(name, base.copy());
+				button.save.tag.put(name, base.copy());
 			button.saved();
 			NBTEdit.getSaveStates().save();
 			mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		}
 		else{ //Paste into
-			Map<String, NBTBase> nbtMap = NBTHelper.getMap(button.save.tag);
+			Map<String, INBT> nbtMap = NBTHelper.getMap(button.save.tag);
 			if (nbtMap.isEmpty()){
 				NBTEdit.log(Level.WARN, "Unable to copy from save \"" + button.save.name +"\".");
-				NBTEdit.log(Level.WARN, "The save is invalid - a valid save must only contain 1 core NBTBase");
+				NBTEdit.log(Level.WARN, "The save is invalid - a valid save must only contain 1 core INBT");
 			}
 			else{
 				if (focused == null)
 					setFocused(tree.getRoot());
 				
-				Entry<String, NBTBase> firstEntry =  nbtMap.entrySet().iterator().next();
+				Entry<String, INBT> firstEntry =  nbtMap.entrySet().iterator().next();
 				assert firstEntry != null;
 				String name = firstEntry.getKey();
-				NBTBase nbt = firstEntry.getValue().copy();
-				if (focused == tree.getRoot() && nbt instanceof NBTTagCompound && name.equals("ROOT")){
+				INBT nbt = firstEntry.getValue().copy();
+				if (focused == tree.getRoot() && nbt instanceof CompoundNBT && name.equals("ROOT")){
 					setFocused(null);
-					tree = new NBTTree((NBTTagCompound)nbt);
+					tree = new NBTTree((CompoundNBT)nbt);
 					initGUI();
 					mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 				}
@@ -469,8 +469,8 @@ public class GuiNBTTree extends Gui {
 			List<Node<NamedNBT>> children = focused.getChildren();
 			String type = NBTStringHelper.getButtonName(button.getId());
 
-			if (focused.getObject().getNBT() instanceof NBTTagList){
-				NBTBase nbt = NBTStringHelper.newTag(button.getId());
+			if (focused.getObject().getNBT() instanceof ListNBT){
+				INBT nbt = NBTStringHelper.newTag(button.getId());
 				if (nbt != null){
 					Node<NamedNBT> newNode = new Node<>(focused, new NamedNBT("",nbt));
 					children.add(newNode);
@@ -523,7 +523,7 @@ public class GuiNBTTree extends Gui {
 	}
 
 	private Node<NamedNBT> insert(String name, byte type){
-		NBTBase nbt = NBTStringHelper.newTag(type);
+		INBT nbt = NBTStringHelper.newTag(type);
 		if (nbt != null)
 			return insert(new NamedNBT(name, nbt));
 		return null;
@@ -544,8 +544,8 @@ public class GuiNBTTree extends Gui {
 
 	public void editSelected() {
 		if (focused != null){
-			NBTBase base = focused.getObject().getNBT();
-			if (focused.hasChildren() &&  (base instanceof NBTTagCompound || base instanceof NBTTagList)){
+			INBT base = focused.getObject().getNBT();
+			if (focused.hasChildren() &&  (base instanceof CompoundNBT || base instanceof ListNBT)){
 				focused.setDrawChildren(!focused.shouldDrawChildren());
 				int index;
 				
@@ -563,12 +563,12 @@ public class GuiNBTTree extends Gui {
 		}
 	}
 
-	private boolean canAddToParent(NBTBase parent, NBTBase child) {
-		if (parent instanceof NBTTagCompound)
+	private boolean canAddToParent(INBT parent, INBT child) {
+		if (parent instanceof CompoundNBT)
 			return true;
-		if (parent instanceof NBTTagList){
-			NBTTagList list = (NBTTagList) parent;
-			return list.tagCount() == 0 || list.getTagType() == child.getId();
+		if (parent instanceof ListNBT){
+			ListNBT list = (ListNBT) parent;
+			return list.size() == 0 || list.getTagType() == child.getId();
 		}
 		return false;
 	}
@@ -582,7 +582,7 @@ public class GuiNBTTree extends Gui {
 			focused.setDrawChildren(true);
 			
 			NamedNBT namedNBT = NBTEdit.clipboard.copy();
-			if (focused.getObject().getNBT() instanceof NBTTagList){
+			if (focused.getObject().getNBT() instanceof ListNBT){
 				namedNBT.setName("");
 				Node<NamedNBT> node = new Node<>(focused, namedNBT);
 				focused.addChild(node);
@@ -615,13 +615,13 @@ public class GuiNBTTree extends Gui {
 	private void copy(){
 		if (focused != null){
 			NamedNBT namedNBT = focused.getObject();
-			if (namedNBT.getNBT() instanceof NBTTagList){
-				NBTTagList list = new NBTTagList();
+			if (namedNBT.getNBT() instanceof ListNBT){
+				ListNBT list = new ListNBT();
 				tree.addChildrenToList(focused, list);
 				NBTEdit.clipboard = new NamedNBT(namedNBT.getName(), list);
 			}
-			else if (namedNBT.getNBT() instanceof NBTTagCompound){
-				NBTTagCompound compound = new NBTTagCompound();
+			else if (namedNBT.getNBT() instanceof CompoundNBT){
+				CompoundNBT compound = new CompoundNBT();
 				tree.addChildrenToTag(focused, compound);
 				NBTEdit.clipboard = new NamedNBT(namedNBT.getName(), compound);
 			}
@@ -637,9 +637,9 @@ public class GuiNBTTree extends Gui {
 	}
 
 	private void edit(){
-		NBTBase base = focused.getObject().getNBT();
-		NBTBase parent = focused.getParent().getObject().getNBT();
-		window = new GuiEditNBT(this, focused, !(parent instanceof NBTTagList), !(base instanceof NBTTagCompound || base instanceof NBTTagList));
+		INBT base = focused.getObject().getNBT();
+		INBT parent = focused.getParent().getObject().getNBT();
+		window = new GuiEditNBT(this, focused, !(parent instanceof ListNBT), !(base instanceof CompoundNBT || base instanceof ListNBT));
 		window.initGUI((width-GuiEditNBT.WIDTH)/2, (height-GuiEditNBT.HEIGHT)/2);
 	}
 

@@ -8,9 +8,9 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.SoundCategory;
@@ -54,7 +54,7 @@ public abstract class AIBase implements IAIRunnable
         @Override
         public boolean run(World world)
         {
-            if (dim != world.provider.getDimension()) return false;
+            if (dim != world.dimension.getDimension()) return false;
             world.playSound(null, loc.x, loc.y, loc.z, sound, cat, volume, pitch);
             return true;
         }
@@ -90,7 +90,7 @@ public abstract class AIBase implements IAIRunnable
         @Override
         public boolean run(World world)
         {
-            if (dim != world.provider.getDimension()) return false;
+            if (dim != world.dimension.getDimension()) return false;
             Entity e = world.getEntityByID(entity);
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
             if (e == null || pokemob == null) return false;
@@ -134,11 +134,11 @@ public abstract class AIBase implements IAIRunnable
         @Override
         public boolean run(World world)
         {
-            if (dim != world.provider.getDimension()) return false;
+            if (dim != world.dimension.getDimension()) return false;
             Entity e = world.getEntityByID(attacker);
-            if (e == null || !(e instanceof EntityLiving)) return false;
+            if (e == null || !(e instanceof MobEntity)) return false;
 
-            EntityLiving mob = (EntityLiving) e;
+            MobEntity mob = (MobEntity) e;
             List<?> unloadedMobs = world.unloadedEntityList;
             if (!mob.getEntityWorld().loadedEntityList.contains(mob) || unloadedMobs.contains(mob)) return false;
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
@@ -171,10 +171,10 @@ public abstract class AIBase implements IAIRunnable
         @Override
         public boolean run(World world)
         {
-            if (dim != world.provider.getDimension()) return false;
+            if (dim != world.dimension.getDimension()) return false;
             Entity e = world.getEntityByID(pather);
-            if (e == null || !(e instanceof EntityLiving)) { return false; }
-            EntityLiving mob = (EntityLiving) e;
+            if (e == null || !(e instanceof MobEntity)) { return false; }
+            MobEntity mob = (MobEntity) e;
             List<?> unloadedMobs = world.unloadedEntityList;
             if (!mob.getEntityWorld().loadedEntityList.contains(mob) || unloadedMobs.contains(mob)) { return false; }
 
@@ -205,25 +205,25 @@ public abstract class AIBase implements IAIRunnable
         @Override
         public boolean run(World world)
         {
-            if (dim != world.provider.getDimension()) return false;
+            if (dim != world.dimension.getDimension()) return false;
             Entity e = world.getEntityByID(attacker);
             Entity e1 = world.getEntityByID(target);
-            if (e == null || !(e instanceof EntityLiving)) { return false; }
-            if (!(e1 instanceof EntityLivingBase))
+            if (e == null || !(e instanceof MobEntity)) { return false; }
+            if (!(e1 instanceof LivingEntity))
             {
                 e1 = null;
             }
-            EntityLiving mob = (EntityLiving) e;
+            MobEntity mob = (MobEntity) e;
             List<?> unloadedMobs = world.unloadedEntityList;
 
             boolean mobExists = !(unloadedMobs.contains(e));
 
-            if (!mobExists || (!(e1 instanceof EntityPlayer)
+            if (!mobExists || (!(e1 instanceof PlayerEntity)
                     && ((e1 != null && !e1.getEntityWorld().loadedEntityList.contains(e1))
                             || (e1 != null && unloadedMobs.contains(e1))))) { return false; }
             if (!(mob.isDead || mob.getHealth() <= 0))
             {
-                mob.setAttackTarget((EntityLivingBase) e1);
+                mob.setAttackTarget((LivingEntity) e1);
             }
             return true;
         }
@@ -362,10 +362,10 @@ public abstract class AIBase implements IAIRunnable
         }
     }
 
-    protected List<EntityPlayer> getPlayersWithinDistance(Entity source, float distance)
+    protected List<PlayerEntity> getPlayersWithinDistance(Entity source, float distance)
     {
         Vector<Object> entities = AIThreadManager.worldPlayers.get(source.dimension);
-        List<EntityPlayer> list = new ArrayList<EntityPlayer>();
+        List<PlayerEntity> list = new ArrayList<PlayerEntity>();
         double dsq = distance * distance;
         if (entities != null)
         {
@@ -374,16 +374,16 @@ public abstract class AIBase implements IAIRunnable
             {
                 if (source.getDistanceSq((Entity) o) < dsq)
                 {
-                    list.add((EntityPlayer) o);
+                    list.add((PlayerEntity) o);
                 }
             }
         }
         final BlockPos pos = source.getPosition();
-        Collections.sort(list, new Comparator<EntityPlayer>()
+        Collections.sort(list, new Comparator<PlayerEntity>()
         {
 
             @Override
-            public int compare(EntityPlayer o1, EntityPlayer o2)
+            public int compare(PlayerEntity o1, PlayerEntity o2)
             {
                 return (int) (o1.getDistanceSq(pos) - o2.getDistanceSq(pos));
             }

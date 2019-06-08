@@ -1,7 +1,7 @@
 package pokecube.core.events;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
@@ -23,7 +23,7 @@ public class StructureEvent extends Event
             this.structure = name;
             this.world = world;
             this.settings = settings;
-            EnumFacing dir = EnumFacing.SOUTH;
+            Direction dir = Direction.SOUTH;
             if (settings.getMirror() != null) dir = settings.getMirror().mirror(dir);
             if (settings.getRotation() != null) dir = settings.getRotation().rotate(dir);
             this.bounds = StructureBoundingBox.getComponentToAddBoundingBox(pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0,

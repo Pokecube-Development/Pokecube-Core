@@ -147,7 +147,7 @@ public class PokecubeTerrainChecker implements ISubBiomeChecker
                     }
                 }
             }
-            if (world.provider.doesWaterVaporize() || chunk.canSeeSky(v.getPos())
+            if (world.dimension.doesWaterVaporize() || chunk.canSeeSky(v.getPos())
                     || !PokecubeMod.core.getConfig().autoDetectSubbiomes)
                 return -1;
             boolean sky = false;

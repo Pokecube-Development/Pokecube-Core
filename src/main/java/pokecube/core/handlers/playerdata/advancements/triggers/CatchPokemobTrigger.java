@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -41,7 +41,7 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
             this.sign = sign;
         }
 
-        public boolean test(EntityPlayerMP player, IPokemob pokemob)
+        public boolean test(ServerPlayerEntity player, IPokemob pokemob)
         {
             PokedexEntry entry = this.entry;
             PokedexEntry testEntry = pokemob.getPokedexEntry();
@@ -96,7 +96,7 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
             this.listeners.remove(listener);
         }
 
-        public void trigger(EntityPlayerMP player, IPokemob pokemob)
+        public void trigger(ServerPlayerEntity player, IPokemob pokemob)
         {
             List<ICriterionTrigger.Listener<CatchPokemobTrigger.Instance>> list = null;
 
@@ -184,7 +184,7 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
         return new CatchPokemobTrigger.Instance(Database.getEntry(name), lenient, number, sign);
     }
 
-    public void trigger(EntityPlayerMP player, IPokemob pokemob)
+    public void trigger(ServerPlayerEntity player, IPokemob pokemob)
     {
         CatchPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
         if (bredanimalstrigger$listeners != null)

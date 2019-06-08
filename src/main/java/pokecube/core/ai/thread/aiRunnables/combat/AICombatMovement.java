@@ -1,7 +1,7 @@
 package pokecube.core.ai.thread.aiRunnables.combat;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.pathfinding.Path;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
@@ -17,7 +17,7 @@ import thut.api.maths.Vector3;
  * dodging of attacks. */
 public class AICombatMovement extends AIBase implements IAICombat
 {
-    final EntityLiving attacker;
+    final MobEntity attacker;
     final IPokemob     pokemob;
     Entity             target;
     Vector3            centre;

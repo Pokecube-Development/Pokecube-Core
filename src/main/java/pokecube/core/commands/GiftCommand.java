@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
@@ -32,15 +32,15 @@ public class GiftCommand extends CommandBase
     }
 
     @Override
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSource sender)
     {
         return true;
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
-        if (sender instanceof EntityPlayer)
+        if (sender instanceof PlayerEntity)
         {
             if (!PokecubeMod.core.getConfig().mysterygift)
             {
@@ -53,7 +53,7 @@ public class GiftCommand extends CommandBase
                 String giftSt = PokecubeMod.gifts.get(code);
                 if (giftSt != null)
                 {
-                    EntityPlayer player = (EntityPlayer) sender;
+                    PlayerEntity player = (PlayerEntity) sender;
 
                     if (player.getEntityData().getString("code:" + code).equals(code))
                     {
@@ -75,7 +75,7 @@ public class GiftCommand extends CommandBase
                     mob.getEntity().setHealth(mob.getEntity().getMaxHealth());
                     mob.returnToPokecube();
                     CommandTools.sendMessage(sender, "pokecube.command.gift");
-                    player.getEntityData().setString("code:" + code, code);
+                    player.getEntityData().putString("code:" + code, code);
 
                     return;
                 }
@@ -100,7 +100,7 @@ public class GiftCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/" + aliases.get(0) + "<giftCode>";
     }

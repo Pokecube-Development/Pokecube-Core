@@ -2,7 +2,7 @@ package pokecube.modelloader;
 
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,14 +27,14 @@ public interface IMobProvider
      * locating the modid */
     Object getMod();
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     default void registerModel(PokedexEntry entry)
     {
-        PokecubeCore.proxy.registerPokemobRenderer(entry.getTrimmedName(), new IRenderFactory<EntityLiving>()
+        PokecubeCore.proxy.registerPokemobRenderer(entry.getTrimmedName(), new IRenderFactory<MobEntity>()
         {
             @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
-            public Render<? super EntityLiving> createRenderFor(RenderManager manager)
+            public Render<? super MobEntity> createRenderFor(RenderManager manager)
             {
                 RenderAdvancedPokemobModel<?> renderer = new RenderAdvancedPokemobModel(entry.getTrimmedName(), manager,
                         1);
@@ -43,7 +43,7 @@ public interface IMobProvider
                 {
                     renderer.preload();
                 }
-                return (Render<? super EntityLiving>) renderer;
+                return (Render<? super MobEntity>) renderer;
             }
         }, getMod());
     }

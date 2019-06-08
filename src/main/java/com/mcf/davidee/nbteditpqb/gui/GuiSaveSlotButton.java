@@ -7,7 +7,7 @@ import com.mcf.davidee.nbteditpqb.nbt.SaveStates;
 import net.java.games.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
@@ -30,7 +30,7 @@ public class GuiSaveSlotButton extends Gui {
 		this.save = save;
 		this.rightX = rightX;
 		this.y = y;
-		mc = Minecraft.getMinecraft();
+		mc = Minecraft.getInstance();
 		xVisible = !save.tag.hasNoTags();
 		text = (save.tag.hasNoTags() ? "Save " : "Load ") + save.name;
 		tickCount = -1;
@@ -94,7 +94,7 @@ public class GuiSaveSlotButton extends Gui {
 
 	public void reset(){
 		xVisible = false;
-		save.tag = new NBTTagCompound();
+		save.tag = new CompoundNBT();
 		text =  "Save " + save.name;
 		updatePosition();
 	}

@@ -6,11 +6,11 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -25,23 +25,23 @@ import pokecube.core.interfaces.PokecubeMod;
 public class PacketSyncRoutes implements IMessage, IMessageHandler<PacketSyncRoutes, IMessage>
 {
     public int            entityId;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
-    public static void sendUpdateClientPacket(Entity mob, EntityPlayerMP player, boolean gui)
+    public static void sendUpdateClientPacket(Entity mob, ServerPlayerEntity player, boolean gui)
     {
         IGuardAICapability guard = mob.getCapability(EventsHandler.GUARDAI_CAP, null);
         PacketSyncRoutes packet = new PacketSyncRoutes();
-        packet.data.setTag("R", guard.serializeTasks());
-        packet.data.setBoolean("O", gui);
+        packet.data.put("R", guard.serializeTasks());
+        packet.data.putBoolean("O", gui);
         packet.entityId = mob.getEntityId();
         PokecubeMod.packetPipeline.sendTo(packet, player);
     }
 
-    public static void sendServerPacket(Entity mob, NBTBase tag)
+    public static void sendServerPacket(Entity mob, INBT tag)
     {
         PacketSyncRoutes packet = new PacketSyncRoutes();
         packet.entityId = mob.getEntityId();
-        if (tag instanceof NBTTagCompound) packet.data = (NBTTagCompound) tag;
+        if (tag instanceof CompoundNBT) packet.data = (CompoundNBT) tag;
         PokecubeMod.packetPipeline.sendToServer(packet);
     }
 
@@ -88,10 +88,10 @@ public class PacketSyncRoutes implements IMessage, IMessageHandler<PacketSyncRou
 
     void processMessage(MessageContext ctx, PacketSyncRoutes message)
     {
-        EntityPlayer player;
+        PlayerEntity player;
         int id = message.entityId;
-        NBTTagCompound data = message.data;
-        if (ctx.side == Side.CLIENT)
+        CompoundNBT data = message.data;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }
@@ -105,9 +105,9 @@ public class PacketSyncRoutes implements IMessage, IMessageHandler<PacketSyncRou
 
         if (guard != null)
         {
-            if (ctx.side == Side.CLIENT)
+            if (ctx.side == Dist.CLIENT)
             {
-                guard.loadTasks((NBTTagList) data.getTag("R"));
+                guard.loadTasks((ListNBT) data.getTag("R"));
                 if (data.getBoolean("O"))
                 {
                     sendServerPacket(e, null);

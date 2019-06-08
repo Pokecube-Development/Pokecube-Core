@@ -12,7 +12,7 @@ public class AnimalChest extends InventoryBasic
         super(inventoryName, false, slotCount);
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AnimalChest(ITextComponent invTitle, int slotCount)
     {
         super(invTitle, slotCount);

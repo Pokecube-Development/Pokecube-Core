@@ -49,7 +49,7 @@ public abstract class MoveAnimationBase implements IMoveAnimation
         return duration;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void initColour(long time, float partialTicks, Move_Base move)
     {
         reallyInitRGBA();
@@ -89,7 +89,7 @@ public abstract class MoveAnimationBase implements IMoveAnimation
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void reallyInitRGBA()
     {
         if (rgbaVal == null) return;

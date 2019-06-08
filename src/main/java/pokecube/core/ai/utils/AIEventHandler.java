@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -31,17 +31,17 @@ public class AIEventHandler
     {
         IPokemob pokemob;
         if (evt.getSource() instanceof TerrainDamageSource
-                && (pokemob = CapabilityPokemob.getPokemobFor(evt.getEntityLiving())) != null)
+                && (pokemob = CapabilityPokemob.getPokemobFor(evt.getMobEntity())) != null)
         {
             if (!pokemob.getCombatState(CombatStates.ANGRY)
-                    && ((EntityLiving) evt.getEntityLiving()).getNavigator().noPath())
+                    && ((MobEntity) evt.getMobEntity()).getNavigator().noPath())
             {
                 Vector3 v = AIIdle.getRandomPointNear(evt.getEntity().getEntityWorld(), pokemob,
                         Vector3.getNewVector().set(pokemob.getEntity()), 8);
                 if (v != null)
                 {
-                    ((EntityLiving) evt.getEntityLiving()).getNavigator().tryMoveToXYZ(v.x, v.y, v.z,
-                            evt.getEntityLiving().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED)
+                    ((MobEntity) evt.getMobEntity()).getNavigator().tryMoveToXYZ(v.x, v.y, v.z,
+                            evt.getMobEntity().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED)
                                     .getAttributeValue());
                 }
             }

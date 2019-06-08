@@ -13,11 +13,11 @@ import com.mcf.davidee.nbteditpqb.packets.MouseOverPacket;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import thut.core.common.handlers.PlayerDataHandler;
@@ -34,17 +34,17 @@ public class CommandNBTEdit extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender par1ICommandSender)
+    public String getUsage(ICommandSource par1ICommandSource)
     {
         return "/pcedit OR /pcedit <EntityId> OR /pcedit <TileX> <TileY> <TileZ>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
-        if (sender instanceof EntityPlayerMP)
+        if (sender instanceof ServerPlayerEntity)
         {
-            EntityPlayerMP player = (EntityPlayerMP) sender;
+            ServerPlayerEntity player = (ServerPlayerEntity) sender;
 
             if (args.length == 3)
             {
@@ -76,7 +76,7 @@ public class CommandNBTEdit extends CommandBase
 
                 try
                 {
-                    EntityPlayer target = getPlayer(server, sender, args[0]);
+                    PlayerEntity target = getPlayer(server, sender, args[0]);
                     NBTEdit.NETWORK.sendCustomTag(player, target.getEntityId(), value);
                 }
                 catch (PlayerNotFoundException e)
@@ -102,18 +102,18 @@ public class CommandNBTEdit extends CommandBase
     }
 
     @Override
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSource sender)
     {
-        return sender instanceof EntityPlayer && NBTEdit.proxy.checkPermission((EntityPlayer) sender);
+        return sender instanceof PlayerEntity && NBTEdit.proxy.checkPermission((PlayerEntity) sender);
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args,
             @Nullable BlockPos pos)
     {
         try
         {
-            EntityPlayer player = getCommandSenderAsPlayer(sender);
+            PlayerEntity player = getCommandSenderAsPlayer(sender);
 
             if (args.length == 2)
             {

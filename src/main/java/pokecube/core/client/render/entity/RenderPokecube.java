@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -26,7 +26,7 @@ import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.items.pokecubes.EntityPokecube;
 import pokecube.core.items.pokecubes.PokecubeManager;
 
-public class RenderPokecube<T extends EntityLiving> extends RenderLiving<T>
+public class RenderPokecube<T extends MobEntity> extends RenderLiving<T>
 {
     public static class ModelPokecube extends ModelBase
     {
@@ -64,7 +64,7 @@ public class RenderPokecube<T extends EntityLiving> extends RenderLiving<T>
 
             if (PokecubeManager.getTilt(cube.getItem()) > 0)
             {
-                float rotateY = MathHelper.cos(MathHelper.abs((float) (Math.PI * f2) / 12)) * (180F / (float) Math.PI);// getRotationX(entityItem);
+                float rotateY = MathHelper.cos(MathHelper.abs((float) (Math.PI * f2) / 12)) * (180F / (float) Math.PI);// getRotationX(ItemEntity);
                 GL11.glRotatef(rotateY, 0.0F, 0.0F, 1.0F);
             }
             ItemStack renderStack = cube.getItem();
@@ -73,8 +73,8 @@ public class RenderPokecube<T extends EntityLiving> extends RenderLiving<T>
                 renderStack = PokecubeItems.getStack("pokecube");
             }
 
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            Minecraft.getMinecraft().getItemRenderer().renderItem(player, renderStack, TransformType.NONE);
+            PlayerEntity player = Minecraft.getInstance().player;
+            Minecraft.getInstance().getItemRenderer().renderItem(player, renderStack, TransformType.NONE);
 
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDisable(GL11.GL_CULL_FACE);
@@ -105,7 +105,7 @@ public class RenderPokecube<T extends EntityLiving> extends RenderLiving<T>
         EntityPokecube pokecube = (EntityPokecube) entity;
 
         long time = pokecube.reset;
-        long world = pokecube.getEntityWorld().getTotalWorldTime();
+        long world = pokecube.getEntityWorld().getGameTime();
         if (time > world) return;
 
         ResourceLocation num = PokecubeItems.getCubeId(pokecube.getItem());

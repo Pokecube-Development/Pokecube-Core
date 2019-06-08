@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 //import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -34,7 +34,7 @@ public class RenderPokecubeTable extends TileEntitySpecialRenderer {
             GL11.glPushMatrix();
             GL11.glScaled(0.25, 0.25, 0.25);
             
-            EntityPlayer player = Minecraft.getMinecraft().player;
+            PlayerEntity player = Minecraft.getInstance().player;
             
             boolean starter = PokecubeSerializer.getInstance().hasStarter(player);
             
@@ -43,7 +43,7 @@ public class RenderPokecubeTable extends TileEntitySpecialRenderer {
                 try
                 {
                     ItemStack item = new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE));
-                    Minecraft.getMinecraft().getItemRenderer().renderItem(player, item, TransformType.NONE);
+                    Minecraft.getInstance().getItemRenderer().renderItem(player, item, TransformType.NONE);
                 }
                 catch (Exception e)
                 {

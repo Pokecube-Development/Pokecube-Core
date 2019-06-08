@@ -1,8 +1,8 @@
 package pokecube.core.blocks.healtable;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.ItemStack;
@@ -28,7 +28,7 @@ public class ContainerHealTable extends Container implements IHealer
      * @return true if the id is a filled pokecube one, false otherwise */
     protected static boolean isItemValid(ItemStack itemstack)
     {
-        return PokecubeManager.isFilled(itemstack) && itemstack.hasTagCompound();
+        return PokecubeManager.isFilled(itemstack) && itemstack.hasTag();
     }
 
     InventoryHealTable inventoryHealTable;
@@ -72,7 +72,7 @@ public class ContainerHealTable extends Container implements IHealer
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer player)
+    public boolean canInteractWith(PlayerEntity player)
     {
         return true;
     }
@@ -101,7 +101,7 @@ public class ContainerHealTable extends Container implements IHealer
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer player)
+    public void onContainerClosed(PlayerEntity player)
     {
         super.onContainerClosed(player);
         // TODO test what happens if server crashes while this is open.
@@ -116,11 +116,11 @@ public class ContainerHealTable extends Container implements IHealer
         inventoryHealTable.closeInventory(player);
     }
 
-    private void dropCube(ItemStack cube, EntityPlayer player)
+    private void dropCube(ItemStack cube, PlayerEntity player)
     {
         if (!cube.isEmpty())
         {
-            EntityItem item = null;
+            ItemEntity item = null;
             if (player.isDead || player.getHealth() <= 0 || player.inventory.getFirstEmptyStack() == -1)
             {
                 ForgeHooks.onPlayerTossEvent(player, cube, true);
@@ -135,9 +135,9 @@ public class ContainerHealTable extends Container implements IHealer
             {
                 player.dropItem(cube, true);
             }
-            if (player instanceof EntityPlayerMP)
+            if (player instanceof ServerPlayerEntity)
             {
-                ((EntityPlayerMP) player).sendAllContents(player.inventoryContainer,
+                ((ServerPlayerEntity) player).sendAllContents(player.inventoryContainer,
                         player.inventoryContainer.inventoryItemStacks);
             }
         }
@@ -164,7 +164,7 @@ public class ContainerHealTable extends Container implements IHealer
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int index)
+    public ItemStack transferStackInSlot(PlayerEntity player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
@@ -190,7 +190,7 @@ public class ContainerHealTable extends Container implements IHealer
     }
 
     @Override
-    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player)
+    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player)
     {
         return super.slotClick(slotId, dragType, clickTypeIn, player);
     }

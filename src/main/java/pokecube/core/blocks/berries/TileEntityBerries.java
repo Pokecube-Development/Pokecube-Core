@@ -5,7 +5,7 @@ import java.util.HashMap;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -71,16 +71,16 @@ public class TileEntityBerries extends TileEntity
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        if (world.isRemote) return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
+        this.writeToNBT(CompoundNBT);
+        return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
     }
 
     @Override
-    public NBTTagCompound getUpdateTag()
+    public CompoundNBT getUpdateTag()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundNBT nbt = new CompoundNBT();
         return writeToNBT(nbt);
     }
 
@@ -89,14 +89,14 @@ public class TileEntityBerries extends TileEntity
     {
         if (world.isRemote)
         {
-            NBTTagCompound nbt = pkt.getNbtCompound();
+            CompoundNBT nbt = pkt.getNbtCompound();
             readFromNBT(nbt);
         }
     }
 
     /** Reads a tile entity from NBT. */
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void readFromNBT(CompoundNBT nbt)
     {
         super.readFromNBT(nbt);
         berryId = nbt.getInteger("berry");
@@ -119,12 +119,12 @@ public class TileEntityBerries extends TileEntity
      * 
      * @return */
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt)
+    public CompoundNBT writeToNBT(CompoundNBT nbt)
     {
         super.writeToNBT(nbt);
         nbt.setInteger("berry", berryId);
         nbt.setInteger("stage", stage);
-        nbt.setString("type", type.toString());
+        nbt.putString("type", type.toString());
         return nbt;
     }
 

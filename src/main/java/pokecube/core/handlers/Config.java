@@ -562,7 +562,7 @@ public class Config extends ConfigBase
     @Configure(category = advanced)
     String[]                             mystLocs                     = {};
     @Configure(category = advanced)
-    boolean                              resetTags                    = false;
+    boolean                              reputs                    = false;
     @Configure(category = advanced)
     // TODO find more internal variables to add to this.
     String[]                             extraVars                    = { "jc:" + EventsHandler.juiceChance,
@@ -863,8 +863,8 @@ public class Config extends ConfigBase
             }
         }
 
-        PokecubeItems.resetTimeTags = resetTags;
-        if (resetTags) get(advanced, "resetTags", false).set(false);
+        PokecubeItems.resetTimeTags = reputs;
+        if (reputs) get(advanced, "reputs", false).set(false);
 
         Database.FORCECOPY = forceDatabase;
         Database.FORCECOPYRECIPES = forceRecipes;

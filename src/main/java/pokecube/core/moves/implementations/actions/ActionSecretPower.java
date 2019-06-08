@@ -6,8 +6,8 @@ import java.util.UUID;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import pokecube.core.events.handlers.MoveEventsHandler;
 import pokecube.core.interfaces.IMoveAction;
@@ -29,20 +29,20 @@ public class ActionSecretPower implements IMoveAction
     public boolean applyEffect(IPokemob attacker, Vector3 location)
     {
         if (attacker.getCombatState(CombatStates.ANGRY)) return false;
-        if (!(attacker.getPokemonOwner() instanceof EntityPlayerMP)) return false;
+        if (!(attacker.getPokemonOwner() instanceof ServerPlayerEntity)) return false;
         if (!MoveEventsHandler.canEffectBlock(attacker, location)) return false;
         long time = attacker.getEntity().getEntityData().getLong("lastAttackTick");
-        if (time + (20 * 3) > attacker.getEntity().getEntityWorld().getTotalWorldTime()) return false;
-        EntityPlayerMP owner = (EntityPlayerMP) attacker.getPokemonOwner();
+        if (time + (20 * 3) > attacker.getEntity().getEntityWorld().getGameTime()) return false;
+        ServerPlayerEntity owner = (ServerPlayerEntity) attacker.getPokemonOwner();
         IBlockState state = location.getBlockState(owner.getEntityWorld());
         if (!(PokecubeTerrainChecker.isTerrain(state) || PokecubeTerrainChecker.isWood(state)))
         {
-            TextComponentTranslation message = new TextComponentTranslation("pokemob.createbase.deny.wrongloc");
+            TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.deny.wrongloc");
             owner.sendMessage(message);
             return false;
         }
         pendingBaseLocations.put(owner.getUniqueID(), new Vector4(location.x, location.y, location.z, owner.dimension));
-        TextComponentTranslation message = new TextComponentTranslation("pokemob.createbase.confirm",
+        TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.confirm",
                 location.set(location.getPos()));
         message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                 "/pokebase confirm " + owner.posX + " " + owner.posY + " " + owner.posZ));

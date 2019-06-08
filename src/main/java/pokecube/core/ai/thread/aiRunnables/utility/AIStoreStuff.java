@@ -1,13 +1,13 @@
 package pokecube.core.ai.thread.aiRunnables.utility;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -30,12 +30,12 @@ import thut.lib.ItemStackTools;
  * into an inventory near its home location. This, along with AIGatherStuff
  * allows using pokemobs for automatic harvesting and storage of berries and
  * dropped items. */
-public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompound>
+public class AIStoreStuff extends AIBase implements INBTSerializable<CompoundNBT>
 {
     public static int  COOLDOWN                = 10;
     public static int  MAXSIZE                 = 100;
 
-    final EntityLiving entity;
+    final MobEntity entity;
     final IPokemob     pokemob;
     // Inventory to store stuff in.
     public BlockPos    storageLoc              = null;
@@ -44,9 +44,9 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
     // Inventory to pull stuff out of
     public BlockPos    emptyInventory          = null;
     // Side to store stuff in.
-    public EnumFacing  storageFace             = EnumFacing.UP;
+    public Direction  storageFace             = Direction.UP;
     // Side to emtpy things from.
-    public EnumFacing  emptyFace               = EnumFacing.UP;
+    public Direction  emptyFace               = Direction.UP;
     int                searchInventoryCooldown = 0;
     int                doStorageCooldown       = 0;
 
@@ -56,7 +56,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         this.pokemob = entity;
     }
 
-    private BlockPos checkDir(IBlockAccess world, EnumFacing dir, BlockPos centre, EnumFacing side)
+    private BlockPos checkDir(IBlockAccess world, Direction dir, BlockPos centre, Direction side)
     {
         if (centre == null) return null;
         if (dir != null)
@@ -67,12 +67,12 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         return null;
     }
 
-    private IItemHandlerModifiable getInventory(IBlockAccess world, BlockPos pos, EnumFacing side)
+    private IItemHandlerModifiable getInventory(IBlockAccess world, BlockPos pos, Direction side)
     {
         if (pos == null) return null;
-        if (pokemob.getOwner() instanceof EntityPlayer)
+        if (pokemob.getOwner() instanceof PlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) pokemob.getOwner();
+            PlayerEntity player = (PlayerEntity) pokemob.getOwner();
             BreakEvent evt = new BreakEvent(player.getEntityWorld(), pos, world.getBlockState(pos), player);
             MinecraftForge.EVENT_BUS.post(evt);
             if (evt.isCanceled()) { return null; }
@@ -99,7 +99,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         if (emptyInventory != null && refresh)
         {
             BlockPos found = checkDir(world, null, emptyInventory, emptyFace);
-            if (found == null) for (EnumFacing dir : EnumFacing.HORIZONTALS)
+            if (found == null) for (Direction dir : Direction.HORIZONTALS)
             {
                 found = checkDir(world, dir, emptyInventory, emptyFace);
                 if (found != null)
@@ -107,8 +107,8 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
                     break;
                 }
             }
-            if (found == null) found = checkDir(world, EnumFacing.DOWN, emptyInventory, emptyFace);
-            if (found == null) found = checkDir(world, EnumFacing.UP, emptyInventory, emptyFace);
+            if (found == null) found = checkDir(world, Direction.DOWN, emptyInventory, emptyFace);
+            if (found == null) found = checkDir(world, Direction.UP, emptyInventory, emptyFace);
             emptyInventory = found;
         }
         return emptyInventory != null && emptyInventory.distanceSq(pokemob.getHome()) < 256;
@@ -120,7 +120,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         if (berryLoc != null && refresh)
         {
             BlockPos found = checkDir(world, null, berryLoc, null);
-            if (found == null) for (EnumFacing dir : EnumFacing.HORIZONTALS)
+            if (found == null) for (Direction dir : Direction.HORIZONTALS)
             {
                 found = checkDir(world, dir, berryLoc, null);
                 if (found != null)
@@ -128,8 +128,8 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
                     break;
                 }
             }
-            if (found == null) found = checkDir(world, EnumFacing.DOWN, berryLoc, null);
-            if (found == null) found = checkDir(world, EnumFacing.UP, berryLoc, null);
+            if (found == null) found = checkDir(world, Direction.DOWN, berryLoc, null);
+            if (found == null) found = checkDir(world, Direction.UP, berryLoc, null);
             berryLoc = found;
         }
         return berryLoc != null;
@@ -141,7 +141,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         if (storageLoc != null && refresh)
         {
             BlockPos found = checkDir(world, null, storageLoc, storageFace);
-            if (found == null) for (EnumFacing dir : EnumFacing.HORIZONTALS)
+            if (found == null) for (Direction dir : Direction.HORIZONTALS)
             {
                 found = checkDir(world, dir, storageLoc, storageFace);
                 if (found != null)
@@ -149,8 +149,8 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
                     break;
                 }
             }
-            if (found == null) found = checkDir(world, EnumFacing.DOWN, storageLoc, storageFace);
-            if (found == null) found = checkDir(world, EnumFacing.UP, storageLoc, storageFace);
+            if (found == null) found = checkDir(world, Direction.DOWN, storageLoc, storageFace);
+            if (found == null) found = checkDir(world, Direction.UP, storageLoc, storageFace);
             storageLoc = found;
         }
         return storageLoc != null;
@@ -394,12 +394,12 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound berry = new NBTTagCompound();
-        NBTTagCompound storage = new NBTTagCompound();
-        NBTTagCompound empty = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
+        CompoundNBT berry = new CompoundNBT();
+        CompoundNBT storage = new CompoundNBT();
+        CompoundNBT empty = new CompoundNBT();
         if (berryLoc != null)
         {
             berry.setInteger("x", berryLoc.getX());
@@ -420,18 +420,18 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
             empty.setInteger("z", emptyInventory.getZ());
             empty.setByte("f", (byte) emptyFace.ordinal());
         }
-        tag.setTag("b", berry);
-        tag.setTag("s", storage);
-        tag.setTag("e", empty);
+        tag.put("b", berry);
+        tag.put("s", storage);
+        tag.put("e", empty);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
-        NBTTagCompound berry = nbt.getCompoundTag("b");
-        NBTTagCompound storage = nbt.getCompoundTag("s");
-        NBTTagCompound empty = nbt.getCompoundTag("e");
+        CompoundNBT berry = nbt.getCompound("b");
+        CompoundNBT storage = nbt.getCompound("s");
+        CompoundNBT empty = nbt.getCompound("e");
         if (!berry.hasNoTags())
         {
             berryLoc = new BlockPos(berry.getInteger("x"), berry.getInteger("y"), berry.getInteger("z"));
@@ -440,13 +440,13 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<NBTTagCompo
         if (!storage.hasNoTags())
         {
             storageLoc = new BlockPos(storage.getInteger("x"), storage.getInteger("y"), storage.getInteger("z"));
-            storageFace = EnumFacing.values()[storage.getByte("f")];
+            storageFace = Direction.values()[storage.getByte("f")];
         }
         else storageLoc = null;
         if (!empty.hasNoTags())
         {
             emptyInventory = new BlockPos(empty.getInteger("x"), empty.getInteger("y"), empty.getInteger("z"));
-            emptyFace = EnumFacing.values()[empty.getByte("f")];
+            emptyFace = Direction.values()[empty.getByte("f")];
         }
         else emptyInventory = null;
     }

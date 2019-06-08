@@ -7,9 +7,9 @@ import java.util.logging.Level;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IMoveConstants;
@@ -69,27 +69,27 @@ public abstract class PokemobMoves extends PokemobSexed
 
         // Check ranged vs contact and set cooldown accordinly.
         boolean distanced = (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0;
-        this.setAttackCooldown(MovesUtils.getAttackDelay(this, attack, distanced, target instanceof EntityPlayer));
+        this.setAttackCooldown(MovesUtils.getAttackDelay(this, attack, distanced, target instanceof PlayerEntity));
         // Syncs that the move has at least been attempted, this is used for the
         // graphical indicator of move cooldowns
         PacketSyncMoveUse.sendUpdate(this);
 
         if (target != getEntity())
         {
-            if (target instanceof EntityLiving)
+            if (target instanceof MobEntity)
             {
-                EntityLiving t = (EntityLiving) target;
+                MobEntity t = (MobEntity) target;
                 if (t.getAttackTarget() != getEntity())
                 {
                     t.setAttackTarget(getEntity());
                 }
             }
-            if (target instanceof EntityLivingBase)
+            if (target instanceof LivingEntity)
             {
-                if (((EntityLivingBase) target).getRevengeTarget() != getEntity())
+                if (((LivingEntity) target).getRevengeTarget() != getEntity())
                 {
-                    ((EntityLivingBase) target).setRevengeTarget(getEntity());
-                    getEntity().setRevengeTarget((EntityLivingBase) target);
+                    ((LivingEntity) target).setRevengeTarget(getEntity());
+                    getEntity().setRevengeTarget((LivingEntity) target);
                 }
             }
         }

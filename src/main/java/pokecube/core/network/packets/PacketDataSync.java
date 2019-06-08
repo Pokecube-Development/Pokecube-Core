@@ -10,15 +10,15 @@ import javax.xml.ws.handler.MessageContext;
 import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.PacketBuffer;
@@ -39,42 +39,42 @@ import thut.core.common.handlers.PlayerDataHandler.PlayerDataManager;
 
 public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync, IMessage>
 {
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
-    public static void sendInitPacket(EntityPlayer player, String dataType)
+    public static void sendInitPacket(PlayerEntity player, String dataType)
     {
         PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
         PlayerData data = manager.getData(dataType);
         PacketDataSync packet = new PacketDataSync();
-        packet.data.setString("type", dataType);
-        NBTTagCompound tag1 = new NBTTagCompound();
+        packet.data.putString("type", dataType);
+        CompoundNBT tag1 = new CompoundNBT();
         data.writeToNBT(tag1);
-        packet.data.setTag("data", tag1);
-        PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+        packet.data.put("data", tag1);
+        PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
         PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
     }
 
-    public static void sendInitHandshake(EntityPlayer player)
+    public static void sendInitHandshake(PlayerEntity player)
     {
         PacketDataSync packet = new PacketDataSync();
-        packet.data.setBoolean("I", true);
+        packet.data.putBoolean("I", true);
         if (FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer())
-            packet.data.setTag("C", writeConfigs());
-        PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+            packet.data.put("C", writeConfigs());
+        PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
     }
 
-    private static NBTTagCompound writeConfigs()
+    private static CompoundNBT writeConfigs()
     {
-        NBTTagCompound ret = new NBTTagCompound();
+        CompoundNBT ret = new CompoundNBT();
         Config defaults = PokecubeCore.instance.getConfig();
-        NBTTagCompound longs = new NBTTagCompound();
-        NBTTagCompound ints = new NBTTagCompound();
-        NBTTagCompound bools = new NBTTagCompound();
-        NBTTagCompound floats = new NBTTagCompound();
-        NBTTagCompound doubles = new NBTTagCompound();
-        NBTTagCompound strings = new NBTTagCompound();
-        NBTTagCompound intarrs = new NBTTagCompound();
-        NBTTagCompound stringarrs = new NBTTagCompound();
+        CompoundNBT longs = new CompoundNBT();
+        CompoundNBT ints = new CompoundNBT();
+        CompoundNBT bools = new CompoundNBT();
+        CompoundNBT floats = new CompoundNBT();
+        CompoundNBT doubles = new CompoundNBT();
+        CompoundNBT strings = new CompoundNBT();
+        CompoundNBT intarrs = new CompoundNBT();
+        CompoundNBT stringarrs = new CompoundNBT();
         for (Field f : Config.class.getDeclaredFields())
         {
             SyncConfig c = f.getAnnotation(SyncConfig.class);
@@ -90,32 +90,32 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                     if ((f.getType() == Long.TYPE) || (f.getType() == Long.class))
                     {
                         long defaultValue = f.getLong(defaults);
-                        longs.setTag(f.getName(), new NBTTagLong(defaultValue));
+                        longs.put(f.getName(), new NBTTagLong(defaultValue));
                     }
                     else if (f.getType() == String.class)
                     {
                         String defaultValue = (String) f.get(defaults);
-                        strings.setTag(f.getName(), new NBTTagString(defaultValue));
+                        strings.put(f.getName(), new NBTTagString(defaultValue));
                     }
                     else if ((f.getType() == Integer.TYPE) || (f.getType() == Integer.class))
                     {
                         int defaultValue = f.getInt(defaults);
-                        ints.setTag(f.getName(), new NBTTagInt(defaultValue));
+                        ints.put(f.getName(), new NBTTagInt(defaultValue));
                     }
                     else if ((f.getType() == Float.TYPE) || (f.getType() == Float.class))
                     {
                         float defaultValue = f.getFloat(defaults);
-                        floats.setTag(f.getName(), new NBTTagFloat(defaultValue));
+                        floats.put(f.getName(), new NBTTagFloat(defaultValue));
                     }
                     else if ((f.getType() == Double.TYPE) || (f.getType() == Double.class))
                     {
                         double defaultValue = f.getDouble(defaults);
-                        doubles.setTag(f.getName(), new NBTTagDouble(defaultValue));
+                        doubles.put(f.getName(), new NBTTagDouble(defaultValue));
                     }
                     else if ((f.getType() == Boolean.TYPE) || (f.getType() == Boolean.class))
                     {
                         boolean defaultValue = f.getBoolean(defaults);
-                        bools.setTag(f.getName(), new NBTTagByte((byte) (defaultValue ? 1 : 0)));
+                        bools.put(f.getName(), new NBTTagByte((byte) (defaultValue ? 1 : 0)));
                     }
                     else
                     {
@@ -123,15 +123,15 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                         if (o instanceof String[])
                         {
                             String[] defaultValue = (String[]) o;
-                            NBTTagList arr = new NBTTagList();
+                            ListNBT arr = new ListNBT();
                             for (String s : defaultValue)
                                 arr.appendTag(new NBTTagString(s));
-                            stringarrs.setTag(f.getName(), arr);
+                            stringarrs.put(f.getName(), arr);
                         }
                         else if (o instanceof int[])
                         {
                             int[] defaultValue = (int[]) o;
-                            intarrs.setTag(f.getName(), new NBTTagIntArray(defaultValue));
+                            intarrs.put(f.getName(), new NBTTagIntArray(defaultValue));
                         }
                         else System.err.println("Unknown Type " + f.getType() + " " + f.getName() + " " + o.getClass());
                     }
@@ -146,14 +146,14 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                 }
             }
         }
-        if (!longs.hasNoTags()) ret.setTag("L", longs);
-        if (!ints.hasNoTags()) ret.setTag("I", ints);
-        if (!bools.hasNoTags()) ret.setTag("B", bools);
-        if (!floats.hasNoTags()) ret.setTag("F", floats);
-        if (!doubles.hasNoTags()) ret.setTag("D", doubles);
-        if (!strings.hasNoTags()) ret.setTag("S", strings);
-        if (!intarrs.hasNoTags()) ret.setTag("A", intarrs);
-        if (!stringarrs.hasNoTags()) ret.setTag("R", stringarrs);
+        if (!longs.hasNoTags()) ret.put("L", longs);
+        if (!ints.hasNoTags()) ret.put("I", ints);
+        if (!bools.hasNoTags()) ret.put("B", bools);
+        if (!floats.hasNoTags()) ret.put("F", floats);
+        if (!doubles.hasNoTags()) ret.put("D", doubles);
+        if (!strings.hasNoTags()) ret.put("S", strings);
+        if (!intarrs.hasNoTags()) ret.put("A", intarrs);
+        if (!stringarrs.hasNoTags()) ret.put("R", stringarrs);
         return ret;
     }
 
@@ -198,8 +198,8 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
 
     void processMessage(MessageContext ctx, PacketDataSync message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
             if (message.data.getBoolean("I"))
@@ -209,28 +209,28 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                 try
                 {
                     if (FMLCommonHandler.instance().getMinecraftServerInstance() == null)
-                        syncConfigs(message.data.getCompoundTag("C"));
+                        syncConfigs(message.data.getCompound("C"));
                 }
                 catch (Exception e)
                 {
-                    PokecubeMod.log(Level.WARNING, "Error with config Sync: " + message.data.getCompoundTag("C"), e);
+                    PokecubeMod.log(Level.WARNING, "Error with config Sync: " + message.data.getCompound("C"), e);
                 }
             }
             else
             {
                 PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
-                manager.getData(message.data.getString("type")).readFromNBT(message.data.getCompoundTag("data"));
+                manager.getData(message.data.getString("type")).readFromNBT(message.data.getCompound("data"));
             }
         }
     }
 
-    private void syncConfigs(NBTTagCompound tag) throws Exception
+    private void syncConfigs(CompoundNBT tag) throws Exception
     {
         Config defaults = PokecubeCore.instance.getConfig();
         Field f;
         if (tag.hasKey("L"))
         {
-            NBTTagCompound longs = tag.getCompoundTag("L");
+            CompoundNBT longs = tag.getCompound("L");
             for (String s : longs.getKeySet())
             {
                 try
@@ -248,7 +248,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("I"))
         {
-            NBTTagCompound ints = tag.getCompoundTag("I");
+            CompoundNBT ints = tag.getCompound("I");
             for (String s : ints.getKeySet())
             {
                 try
@@ -266,7 +266,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("B"))
         {
-            NBTTagCompound bools = tag.getCompoundTag("B");
+            CompoundNBT bools = tag.getCompound("B");
             for (String s : bools.getKeySet())
             {
                 try
@@ -284,7 +284,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("F"))
         {
-            NBTTagCompound floats = tag.getCompoundTag("F");
+            CompoundNBT floats = tag.getCompound("F");
             for (String s : floats.getKeySet())
             {
                 try
@@ -302,7 +302,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("D"))
         {
-            NBTTagCompound doubles = tag.getCompoundTag("D");
+            CompoundNBT doubles = tag.getCompound("D");
             for (String s : doubles.getKeySet())
             {
                 try
@@ -320,7 +320,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("S"))
         {
-            NBTTagCompound strings = tag.getCompoundTag("S");
+            CompoundNBT strings = tag.getCompound("S");
             for (String s : strings.getKeySet())
             {
                 try
@@ -338,7 +338,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("A"))
         {
-            NBTTagCompound intarrs = tag.getCompoundTag("A");
+            CompoundNBT intarrs = tag.getCompound("A");
             for (String s : intarrs.getKeySet())
             {
                 try
@@ -356,14 +356,14 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
         }
         if (tag.hasKey("R"))
         {
-            NBTTagCompound stringarrs = tag.getCompoundTag("R");
+            CompoundNBT stringarrs = tag.getCompound("R");
             for (String s : stringarrs.getKeySet())
             {
                 try
                 {
-                    NBTTagList list = (NBTTagList) stringarrs.getTag(s);
+                    ListNBT list = (ListNBT) stringarrs.getTag(s);
                     List<String> vars = Lists.newArrayList();
-                    for (int i = 0; i < list.tagCount(); i++)
+                    for (int i = 0; i < list.size(); i++)
                         vars.add(list.getStringTagAt(i));
                     String[] arr = vars.toArray(new String[0]);
                     f = defaults.getClass().getDeclaredField(s);

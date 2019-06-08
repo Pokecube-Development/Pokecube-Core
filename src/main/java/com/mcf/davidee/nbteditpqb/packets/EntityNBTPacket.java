@@ -9,8 +9,8 @@ import com.mcf.davidee.nbteditpqb.NBTHelper;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.util.text.TextFormatting;
@@ -23,12 +23,12 @@ public class EntityNBTPacket implements IMessage {
 	/** The id of the entity being edited. */
 	protected int entityID;
 	/** The nbt data of the entity. */
-	protected NBTTagCompound tag;
+	protected CompoundNBT tag;
 
 	/** Required default constructor. */
 	public EntityNBTPacket() {}
 
-	public EntityNBTPacket(int entityID, NBTTagCompound tag) {
+	public EntityNBTPacket(int entityID, CompoundNBT tag) {
 		this.entityID = entityID;
 		this.tag = tag;
 	}
@@ -49,8 +49,8 @@ public class EntityNBTPacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(final EntityNBTPacket packet, MessageContext ctx) {
-			if (ctx.side == Side.SERVER) {
-				final EntityPlayerMP player = ctx.getServerHandler().player;
+			if (ctx.side == Dist.DEDICATED_SERVER) {
+				final ServerPlayerEntity player = ctx.getServerHandler().player;
 				player.getServerWorld().addScheduledTask(new Runnable() {
 					@Override
 					public void run() {

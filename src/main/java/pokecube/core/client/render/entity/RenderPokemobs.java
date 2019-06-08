@@ -10,13 +10,13 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.ClientPlayerEntity;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import pokecube.core.database.Database;
@@ -52,10 +52,10 @@ public class RenderPokemobs extends RenderPokemob
 
     public static RenderPokemobs getInstance()
     {
-        if (instance == null) instance = new RenderPokemobs(Minecraft.getMinecraft().getRenderManager());
+        if (instance == null) instance = new RenderPokemobs(Minecraft.getInstance().getRenderManager());
         if (instance.renderManager == null)
         {
-            System.out.println(Minecraft.getMinecraft().getRenderManager());
+            System.out.println(Minecraft.getInstance().getRenderManager());
             new Exception().printStackTrace();
         }
         return instance;
@@ -66,7 +66,7 @@ public class RenderPokemobs extends RenderPokemob
         if (instance == null) instance = new RenderPokemobs(manager);
         if (instance.renderManager == null)
         {
-            System.out.println(Minecraft.getMinecraft().getRenderManager());
+            System.out.println(Minecraft.getInstance().getRenderManager());
             new Exception().printStackTrace();
         }
         return instance;
@@ -94,7 +94,7 @@ public class RenderPokemobs extends RenderPokemob
         return ret;
     }
 
-    public static boolean shouldRender(EntityLiving entity, double x, double y, double z, float par8, float par9)
+    public static boolean shouldRender(MobEntity entity, double x, double y, double z, float par8, float par9)
     {
         IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
         if (mob == null) return false;
@@ -103,18 +103,18 @@ public class RenderPokemobs extends RenderPokemob
             System.err.println("attempting to render an un-registed pokemon " + entity);
             return false;
         }
-        if(mob.getOwner() instanceof EntityPlayer)
-        if (mob.getTransformedTo() != null && mob.getTransformedTo() instanceof EntityLivingBase)
+        if(mob.getOwner() instanceof PlayerEntity)
+        if (mob.getTransformedTo() != null && mob.getTransformedTo() instanceof LivingEntity)
         {
-            EntityLivingBase from = (EntityLivingBase) mob.getTransformedTo();
+            LivingEntity from = (LivingEntity) mob.getTransformedTo();
             try
             {
-                Class<? extends EntityLivingBase> claz = from.getClass();
-                EntityLivingBase to;
-                if (claz == EntityPlayerSP.class || claz == EntityOtherPlayerMP.class )
+                Class<? extends LivingEntity> claz = from.getClass();
+                LivingEntity to;
+                if (claz == ClientPlayerEntity.class || claz == EntityOtherPlayerMP.class )
                 {
                     claz = EntityOtherPlayerMP.class;
-                    to = new EntityOtherPlayerMP(entity.getEntityWorld(), (((EntityPlayer) from).getGameProfile()));
+                    to = new EntityOtherPlayerMP(entity.getEntityWorld(), (((PlayerEntity) from).getGameProfile()));
                 }
                 else
                 {
@@ -122,7 +122,7 @@ public class RenderPokemobs extends RenderPokemob
                 }
                 EntityTools.copyEntityData(to, from);
                 EntityTools.copyEntityTransforms(to, entity);
-                Minecraft.getMinecraft().getRenderManager().renderEntity(to, x, y, z, par8, par9, false);
+                Minecraft.getInstance().getRenderManager().renderEntity(to, x, y, z, par8, par9, false);
             }
             catch (Exception e1)
             {
@@ -146,7 +146,7 @@ public class RenderPokemobs extends RenderPokemob
      * f1). But JAD is pre 1.5 so doesn't do that. */
     @SuppressWarnings("unchecked")
     @Override
-    public void doRender(EntityLiving entity, double x, double y, double z, float yaw, float partialTick)
+    public void doRender(MobEntity entity, double x, double y, double z, float yaw, float partialTick)
     {
         if (!RenderPokemobs.shouldRender(entity, x, y, z, yaw, partialTick)) return;
         IPokemob mob = CapabilityPokemob.getPokemobFor(entity);

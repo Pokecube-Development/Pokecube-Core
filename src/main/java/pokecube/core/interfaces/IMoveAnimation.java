@@ -34,7 +34,7 @@ public interface IMoveAnimation
      * @param info
      * @param world
      * @param partialTick */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     default public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
     {
     }
@@ -42,7 +42,7 @@ public interface IMoveAnimation
     /** Used if you need to spawn in something like thunder effects.
      * 
      * @param info */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     default public void spawnClientEntities(MovePacketInfo info)
     {
     }
@@ -62,7 +62,7 @@ public interface IMoveAnimation
      * @param duration */
     public void setDuration(int duration);
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     /** Initialise colours for the move. */
     default void reallyInitRGBA()
     {

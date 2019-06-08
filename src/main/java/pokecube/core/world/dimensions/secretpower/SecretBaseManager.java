@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SecretBaseManager
 {
@@ -54,9 +54,9 @@ public class SecretBaseManager
                     : this.y - other.y;
         }
 
-        public NBTTagCompound writeToNBT()
+        public CompoundNBT writeToNBT()
         {
-            NBTTagCompound ret = new NBTTagCompound();
+            CompoundNBT ret = new CompoundNBT();
             ret.setInteger("x", x);
             ret.setInteger("y", y);
             ret.setInteger("z", z);
@@ -64,7 +64,7 @@ public class SecretBaseManager
             return ret;
         }
 
-        public static Coordinate readNBT(NBTTagCompound tag)
+        public static Coordinate readNBT(CompoundNBT tag)
         {
             if (!tag.hasKey("x")) return null;
             return new Coordinate(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"), tag.getInteger("w"));

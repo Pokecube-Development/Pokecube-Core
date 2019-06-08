@@ -18,7 +18,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.java.games.input.Keyboard;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.ClientPlayerEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -31,11 +31,11 @@ import net.minecraft.client.renderer.entity.layers.LayerEntityOnShoulder;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -78,7 +78,7 @@ import pokecube.core.utils.Tools;
 import thut.api.entity.genetics.IMobGenetics;
 import thut.core.client.ClientProxy;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class EventsHandlerClient
 {
     public static class UpdateNotifier
@@ -146,13 +146,13 @@ public class EventsHandlerClient
     private static Map<PokedexEntry, ResourceLocation[]> icons      = Maps.newHashMap();
     static boolean                                       notifier   = false;
 
-    public static void setFromNBT(IPokemob pokemob, NBTTagCompound tag)
+    public static void setFromNBT(IPokemob pokemob, CompoundNBT tag)
     {
-        NBTTagCompound pokemobTag = TagNames.getPokecubePokemobTag(tag);
-        NBTBase genesTag = TagNames.getPokecubeGenesTag(tag);
-        pokemobTag.removeTag(TagNames.INVENTORYTAG);
-        pokemobTag.removeTag(TagNames.AITAG);
-        pokemobTag.removeTag(TagNames.MOVESTAG);
+        CompoundNBT pokemobTag = TagNames.getPokecubePokemobTag(tag);
+        INBT genesTag = TagNames.getPokecubeGenesTag(tag);
+        pokemobTag.remove(TagNames.INVENTORYTAG);
+        pokemobTag.remove(TagNames.AITAG);
+        pokemobTag.remove(TagNames.MOVESTAG);
         pokemob.readPokemobData(pokemobTag);
         if (pokemob instanceof DefaultPokemob)
         {
@@ -171,7 +171,7 @@ public class EventsHandlerClient
 
     public static IPokemob getPokemobForRender(ItemStack itemStack, World world)
     {
-        if (!itemStack.hasTagCompound()) return null;
+        if (!itemStack.hasTag()) return null;
 
         int num = PokecubeManager.getPokedexNb(itemStack);
         if (num != 0)
@@ -179,7 +179,7 @@ public class EventsHandlerClient
             PokedexEntry entry = Database.getEntry(num);
             IPokemob pokemob = getRenderMob(entry, world);
             if (pokemob == null) return null;
-            NBTTagCompound pokeTag = itemStack.getTagCompound();
+            CompoundNBT pokeTag = itemStack.getTag();
             setFromNBT(pokemob, pokeTag);
             pokemob.setPokecube(itemStack);
             pokemob.setHealth(Tools.getHealth((int) pokemob.getMaxHealth(), itemStack.getItemDamage()));
@@ -214,7 +214,7 @@ public class EventsHandlerClient
     public static void renderMob(IPokemob pokemob, float tick, boolean rotates)
     {
         if (pokemob == null) return;
-        EntityLiving entity = pokemob.getEntity();
+        MobEntity entity = pokemob.getEntity();
         float size = 0;
         float mobScale = pokemob.getSize();
         Vector3f dims = pokemob.getPokedexEntry().getModelSize();
@@ -226,7 +226,7 @@ public class EventsHandlerClient
         long time = Minecraft.getSystemTime();
         if (rotates) GL11.glRotatef((time + tick) / 20f, 0, 1, 0);
         RenderHelper.enableStandardItemLighting();
-        Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0, 1.5F, false);
+        Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0, 1.5F, false);
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableRescaleNormal();
         GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
@@ -255,7 +255,7 @@ public class EventsHandlerClient
     @SubscribeEvent
     public void clientTick(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == Phase.START || event.player != Minecraft.getMinecraft().player) return;
+        if (event.phase == Phase.START || event.player != Minecraft.getInstance().player) return;
         IPokemob pokemob = GuiDisplayPokecubeInfo.instance().getCurrentPokemob();
         if (pokemob != null && PokecubeMod.core.getConfig().autoSelectMoves)
         {
@@ -275,7 +275,7 @@ public class EventsHandlerClient
             }
         }
         control:
-        if (event.player.isRiding() && Minecraft.getMinecraft().currentScreen == null)
+        if (event.player.isPassenger() && Minecraft.getInstance().currentScreen == null)
         {
             Entity e = event.player.getRidingEntity();
             pokemob = CapabilityPokemob.getPokemobFor(e);
@@ -283,10 +283,10 @@ public class EventsHandlerClient
             {
                 LogicMountedControl controller = pokemob.getController();
                 if (controller == null) break control;
-                controller.backInputDown = ((EntityPlayerSP) event.player).movementInput.backKeyDown;
-                controller.forwardInputDown = ((EntityPlayerSP) event.player).movementInput.forwardKeyDown;
-                controller.leftInputDown = ((EntityPlayerSP) event.player).movementInput.leftKeyDown;
-                controller.rightInputDown = ((EntityPlayerSP) event.player).movementInput.rightKeyDown;
+                controller.backInputDown = ((ClientPlayerEntity) event.player).movementInput.backKeyDown;
+                controller.forwardInputDown = ((ClientPlayerEntity) event.player).movementInput.forwardKeyDown;
+                controller.leftInputDown = ((ClientPlayerEntity) event.player).movementInput.leftKeyDown;
+                controller.rightInputDown = ((ClientPlayerEntity) event.player).movementInput.rightKeyDown;
 
                 boolean up = false;
                 if (ClientProxyPokecube.mobUp.getKeyCode() == Keyboard.KEY_NONE)
@@ -326,12 +326,12 @@ public class EventsHandlerClient
         lastSetTime = System.currentTimeMillis() + 500;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void FogRenderTick(EntityViewRenderEvent.FogDensity evt)
     {
         IPokemob mount;
-        if (evt.getEntity() instanceof EntityPlayer && evt.getEntity().getRidingEntity() != null
+        if (evt.getEntity() instanceof PlayerEntity && evt.getEntity().getRidingEntity() != null
                 && (mount = CapabilityPokemob.getPokemobFor(evt.getEntity().getRidingEntity())) != null)
         {
             if (evt.getEntity().isInWater() && mount.canUseDive())
@@ -441,7 +441,7 @@ public class EventsHandlerClient
         addedLayers.add(event.getRenderer());
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderGUIScreenPre(GuiScreenEvent.DrawScreenEvent.Pre event)
     {
@@ -486,15 +486,15 @@ public class EventsHandlerClient
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderHotbar(RenderGameOverlayEvent.Post event)
     {
         if (event.getType() == ElementType.HOTBAR)
         {
-            EntityPlayer player = Minecraft.getMinecraft().player;
+            PlayerEntity player = Minecraft.getInstance().player;
             if (player == null || !GuiScreen.isAltKeyDown()
-                    || Minecraft.getMinecraft().currentScreen != null) { return; }
+                    || Minecraft.getInstance().currentScreen != null) { return; }
 
             int w = event.getResolution().getScaledWidth();
             int h = event.getResolution().getScaledHeight();
@@ -570,11 +570,11 @@ public class EventsHandlerClient
             texs[0] = tex;
             try
             {
-                Minecraft.getMinecraft().getResourceManager().getResource(tex).getInputStream().close();
+                Minecraft.getInstance().getResourceManager().getResource(tex).getInputStream().close();
                 try
                 {
                     ResourceLocation tex2 = new ResourceLocation(textureS);
-                    Minecraft.getMinecraft().getResourceManager().getResource(tex2).getInputStream().close();
+                    Minecraft.getInstance().getResourceManager().getResource(tex2).getInputStream().close();
                     texs[1] = tex2;
                 }
                 catch (IOException e)
@@ -605,7 +605,7 @@ public class EventsHandlerClient
             top = bottom;
             bottom = j1;
         }
-        Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
+        Minecraft.getInstance().getTextureManager().bindTexture(tex);
         float f3 = (colour >> 24 & 255) / 255.0F;
         float f = (colour >> 16 & 255) / 255.0F;
         float f1 = (colour >> 8 & 255) / 255.0F;

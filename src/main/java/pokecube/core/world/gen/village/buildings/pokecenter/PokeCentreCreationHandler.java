@@ -3,7 +3,7 @@ package pokecube.core.world.gen.village.buildings.pokecenter;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -16,7 +16,7 @@ public class PokeCentreCreationHandler implements IVillageCreationHandler
 
     @Override
     public Village buildComponent(PieceWeight villagePiece, Start startPiece, List<StructureComponent> pieces,
-            Random random, int minX, int minY, int minZ, EnumFacing facing, int componentType)
+            Random random, int minX, int minY, int minZ, Direction facing, int componentType)
     {
         BlockPos pos = new BlockPos(minX, minY, minZ);
         TemplateStructureBase component = new TemplatePokecenter(pos, facing);

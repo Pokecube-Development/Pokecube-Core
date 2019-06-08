@@ -16,9 +16,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ItemDye;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -39,8 +39,8 @@ import thut.api.maths.Vector3;
 import thut.core.client.render.model.IModelRenderer;
 import thut.core.client.render.model.IPartTexturer;
 
-@SideOnly(Side.CLIENT)
-public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
+@OnlyIn(Dist.CLIENT)
+public class RenderPokemob<T extends MobEntity> extends RenderPokemobInfos<T>
 {
     public static final ResourceLocation FRZ = Resources.STATUS_FRZ;
     public static final ResourceLocation PAR = Resources.STATUS_PAR;
@@ -57,7 +57,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
     {
         if (!pokemob.getGeneralState(GeneralStates.EXITINGCUBE)) return;
         Entity entity = pokemob.getEntity();
-        NBTTagCompound sealTag = PokecubeManager.getSealTag(entity);
+        CompoundNBT sealTag = PokecubeManager.getSealTag(entity);
         if (sealTag != null && !sealTag.hasNoTags())
         {
             Random rand = new Random();
@@ -181,7 +181,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
         RenderHelper.enableStandardItemLighting();
     }
 
-    public static <V extends EntityLiving> void renderStatus(IModelRenderer<V> renderer, V entity, double d, double d1,
+    public static <V extends MobEntity> void renderStatus(IModelRenderer<V> renderer, V entity, double d, double d1,
             double d2, float f, float partialTick)
     {
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
@@ -298,12 +298,12 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
         }
     }
 
-    /** Returns an ARGB int color back. Args: entityLiving, lightBrightness,
+    /** Returns an ARGB int color back. Args: MobEntity, lightBrightness,
      * partialTickTime */
     @Override
-    protected int getColorMultiplier(T par1EntityLiving, float par2, float par3)
+    protected int getColorMultiplier(T par1MobEntity, float par2, float par3)
     {
-        return super.getColorMultiplier(par1EntityLiving, par2, par3);
+        return super.getColorMultiplier(par1MobEntity, par2, par3);
     }
 
     @Override
@@ -396,7 +396,7 @@ public class RenderPokemob<T extends EntityLiving> extends RenderPokemobInfos<T>
         float f5 = 0.0F;
         float f6 = 0.0F;
 
-        if (!entity.isRiding())
+        if (!entity.isPassenger())
         {
             f5 = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTick;
             f6 = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTick);

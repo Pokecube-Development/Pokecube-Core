@@ -2,7 +2,7 @@ package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import pokecube.core.events.handlers.MoveEventsHandler;
@@ -35,10 +35,10 @@ public class ActionHydropump implements IMoveAction
             temp.set(dir).scalarMultBy(i).addTo(source);
             IBlockState state = temp.getBlockState(player.getEntityWorld());
             if (!state.getMaterial().isReplaceable()) continue;
-            if (user.getPokemonOwner() instanceof EntityPlayer)
+            if (user.getPokemonOwner() instanceof PlayerEntity)
             {
                 BreakEvent evt = new BreakEvent(player.getEntityWorld(), temp.getPos(), state,
-                        (EntityPlayer) user.getPokemonOwner());
+                        (PlayerEntity) user.getPokemonOwner());
                 MinecraftForge.EVENT_BUS.post(evt);
                 if (evt.isCanceled()) continue;
             }

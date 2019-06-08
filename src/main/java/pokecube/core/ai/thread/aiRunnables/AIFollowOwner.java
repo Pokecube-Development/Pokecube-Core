@@ -1,7 +1,7 @@
 package pokecube.core.ai.thread.aiRunnables;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
@@ -17,8 +17,8 @@ import thut.api.maths.Vector3;
 public class AIFollowOwner extends AIBase
 {
     final IPokemob             pokemob;
-    final private EntityLiving thePet;
-    private EntityLivingBase   theOwner;
+    final private MobEntity thePet;
+    private LivingEntity   theOwner;
 
     private double             speed;
     private PathNavigate       petPathfinder;
@@ -53,7 +53,7 @@ public class AIFollowOwner extends AIBase
     {
         if (theOwner == null)
         {
-            theOwner = (EntityLivingBase) pokemob.getOwner();
+            theOwner = (LivingEntity) pokemob.getOwner();
             this.cooldown = 0;
             ownerPos.set(theOwner);
             pathing = true;
@@ -86,7 +86,7 @@ public class AIFollowOwner extends AIBase
             ownerPos.set(theOwner);
             this.speed = Math.sqrt(theOwner.motionX * theOwner.motionX + theOwner.motionZ * theOwner.motionZ);
             this.speed = Math.max(0.6, speed);
-            Path path = this.petPathfinder.getPathToEntityLiving(theOwner);
+            Path path = this.petPathfinder.getPathToMobEntity(theOwner);
             if (path != null) addEntityPath(thePet, path, speed);
         }
     }
@@ -95,10 +95,10 @@ public class AIFollowOwner extends AIBase
     public boolean shouldRun()
     {
         if (!pokemob.isRoutineEnabled(AIRoutine.FOLLOW)) return false;
-        EntityLivingBase entitylivingbase = (EntityLivingBase) pokemob.getOwner();
+        LivingEntity LivingEntity = (LivingEntity) pokemob.getOwner();
         this.petPathfinder = thePet.getNavigator();
         // Nothing to follow
-        if (entitylivingbase == null)
+        if (LivingEntity == null)
         {
             return false;
         }
@@ -113,7 +113,7 @@ public class AIFollowOwner extends AIBase
             return false;
         }
         // Pathing and too far away, should follow.
-        else if (pathing && this.thePet.getDistanceSq(entitylivingbase) > this.maxDist * this.maxDist)
+        else if (pathing && this.thePet.getDistanceSq(LivingEntity) > this.maxDist * this.maxDist)
         {
             return true;
         }
@@ -123,12 +123,12 @@ public class AIFollowOwner extends AIBase
             return false;
         }
         // Too close, shouldn't follow
-        else if (this.thePet.getDistanceSq(entitylivingbase) < this.minDist * this.minDist)
+        else if (this.thePet.getDistanceSq(LivingEntity) < this.minDist * this.minDist)
         {
             return false;
         }
         // Owner hasn't moved very far since last attmept, shouldn't follow.
-        else if ((Vector3.getNewVector().set(entitylivingbase)).distToSq(ownerPos) < this.minDist * this.minDist)
+        else if ((Vector3.getNewVector().set(LivingEntity)).distToSq(ownerPos) < this.minDist * this.minDist)
         {
             return false;
         }
@@ -136,7 +136,7 @@ public class AIFollowOwner extends AIBase
         else if (!petPathfinder.noPath())
         {
             Vector3 p = v1.set(petPathfinder.getPath().getFinalPathPoint());
-            v.set(entitylivingbase);
+            v.set(LivingEntity);
             if (p.distToSq(v) <= 2) { return false; }
             return true;
         }

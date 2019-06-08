@@ -16,11 +16,11 @@ import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.ai.properties.GuardAICapability;
 import pokecube.core.ai.properties.GuardAICapability.GuardTask;
 import pokecube.core.ai.properties.IGuardAICapability;
@@ -44,13 +44,13 @@ public class RouteEditHelper
         final GuiButton                                confirm;
         final GuiButton                                moveUp;
         final GuiButton                                moveDown;
-        final Function<NBTTagCompound, NBTTagCompound> function;
+        final Function<CompoundNBT, CompoundNBT> function;
         final int                                      guiX;
         final int                                      guiY;
         final int                                      guiHeight;
 
         public GuardEntry(int index, IGuardAICapability guard, Entity entity, GuiScreen parent, GuiTextField location,
-                GuiTextField timeperiod, GuiTextField variation, Function<NBTTagCompound, NBTTagCompound> function,
+                GuiTextField timeperiod, GuiTextField variation, Function<CompoundNBT, CompoundNBT> function,
                 int dx, int dy, int dh)
         {
             this.guard = guard;
@@ -215,11 +215,11 @@ public class RouteEditHelper
 
         private void delete()
         {
-            NBTTagCompound data = new NBTTagCompound();
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setBoolean("GU", true);
+            CompoundNBT data = new CompoundNBT();
+            CompoundNBT tag = new CompoundNBT();
+            tag.putBoolean("GU", true);
             tag.setInteger("I", index);
-            data.setTag("T", tag);
+            data.put("T", tag);
             data.setInteger("I", entity.getEntityId());
             if (index < guard.getTasks().size()) guard.getTasks().remove(index);
             function.apply(data);
@@ -227,12 +227,12 @@ public class RouteEditHelper
 
         private void reOrder(int dir)
         {
-            NBTTagCompound data = new NBTTagCompound();
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setBoolean("GU", true);
+            CompoundNBT data = new CompoundNBT();
+            CompoundNBT tag = new CompoundNBT();
+            tag.putBoolean("GU", true);
             tag.setInteger("I", index);
             tag.setInteger("N", dir);
-            data.setTag("T", tag);
+            data.put("T", tag);
             data.setInteger("I", entity.getEntityId());
             int index1 = tag.getInteger("I");
             int index2 = index1 + tag.getInteger("N");
@@ -253,15 +253,15 @@ public class RouteEditHelper
             }
             catch (NumberFormatException e)
             {
-                ITextComponent mess = new TextComponentTranslation("traineredit.info.dist.formatinfo");
+                ITextComponent mess = new TranslationTextComponent("traineredit.info.dist.formatinfo");
                 parent.mc.player.sendStatusMessage(mess, true);
                 return;
             }
             if (loc != null && time != null)
             {
-                NBTTagCompound data = new NBTTagCompound();
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setBoolean("GU", true);
+                CompoundNBT data = new CompoundNBT();
+                CompoundNBT tag = new CompoundNBT();
+                tag.putBoolean("GU", true);
                 tag.setInteger("I", index);
                 // TODO generalize this maybe?
                 IGuardTask task = index < guard.getTasks().size() ? guard.getTasks().get(index)
@@ -270,9 +270,9 @@ public class RouteEditHelper
                 task.setPos(loc);
                 task.setActiveTime(time);
                 task.setRoamDistance(dist);
-                NBTBase var = task.serialze();
-                tag.setTag("V", var);
-                data.setTag("T", tag);
+                INBT var = task.serialze();
+                tag.put("V", var);
+                data.put("T", tag);
                 data.setInteger("I", entity.getEntityId());
                 function.apply(data);
             }
@@ -293,14 +293,14 @@ public class RouteEditHelper
                 catch (NumberFormatException e)
                 {
                     // Send status message about not working here.
-                    ITextComponent mess = new TextComponentTranslation("traineredit.info.time.formaterror");
+                    ITextComponent mess = new TranslationTextComponent("traineredit.info.time.formaterror");
                     parent.mc.player.sendStatusMessage(mess, true);
                 }
             }
             else if (args.length != 0)
             {
                 // Send status message about not working here.
-                ITextComponent mess = new TextComponentTranslation("traineredit.info.time.formatinfo");
+                ITextComponent mess = new TranslationTextComponent("traineredit.info.time.formatinfo");
                 parent.mc.player.sendStatusMessage(mess, true);
             }
             return null;
@@ -322,23 +322,23 @@ public class RouteEditHelper
                 catch (NumberFormatException e)
                 {
                     // Send status message about not working here.
-                    ITextComponent mess = new TextComponentTranslation("traineredit.info.pos.formaterror");
+                    ITextComponent mess = new TranslationTextComponent("traineredit.info.pos.formaterror");
                     parent.mc.player.sendStatusMessage(mess, true);
                 }
             }
             else if (args.length != 0)
             {
                 // Send status message about not working here.
-                ITextComponent mess = new TextComponentTranslation("traineredit.info.pos.formatinfo");
+                ITextComponent mess = new TranslationTextComponent("traineredit.info.pos.formatinfo");
                 parent.mc.player.sendStatusMessage(mess, true);
             }
             return null;
         }
     }
 
-    public static void applyServerPacket(NBTBase tag, Entity mob, IGuardAICapability guard)
+    public static void applyServerPacket(INBT tag, Entity mob, IGuardAICapability guard)
     {
-        NBTTagCompound nbt = ((NBTTagCompound) tag);
+        CompoundNBT nbt = ((CompoundNBT) tag);
         int index = nbt.getInteger("I");
         if (nbt.hasKey("V"))
         {
@@ -364,10 +364,10 @@ public class RouteEditHelper
     }
 
     public static void getGuiList(List<IGuiListEntry> entries, IGuardAICapability guard,
-            Function<NBTTagCompound, NBTTagCompound> function, Entity entity, GuiScreen parent, int width, int dx,
+            Function<CompoundNBT, CompoundNBT> function, Entity entity, GuiScreen parent, int width, int dx,
             int dy, int height)
     {
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
         int num = 0;
         for (IGuardTask task : guard.getTasks())
         {

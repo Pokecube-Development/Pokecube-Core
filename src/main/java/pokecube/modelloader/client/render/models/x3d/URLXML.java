@@ -70,7 +70,7 @@ public class URLXML
                 try
                 {
                     connection = (HttpURLConnection) (new URL(URLXML.this.modelUrl))
-                            .openConnection(Minecraft.getMinecraft().getProxy());
+                            .openConnection(Minecraft.getInstance().getProxy());
                     connection.setDoInput(true);
                     connection.setDoOutput(false);
                     connection.setRequestProperty("User-Agent",

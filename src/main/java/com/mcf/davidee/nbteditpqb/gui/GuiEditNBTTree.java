@@ -13,7 +13,7 @@ import net.java.games.input.Mouse;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
 public class GuiEditNBTTree extends GuiScreen
@@ -25,7 +25,7 @@ public class GuiEditNBTTree extends GuiScreen
     private String     customName = "";
     private GuiNBTTree guiTree;
 
-    public GuiEditNBTTree(int entity, NBTTagCompound tag)
+    public GuiEditNBTTree(int entity, CompoundNBT tag)
     {
         this.entity = true;
         entityOrX = entity;
@@ -35,7 +35,7 @@ public class GuiEditNBTTree extends GuiScreen
         guiTree = new GuiNBTTree(new NBTTree(tag));
     }
 
-    public GuiEditNBTTree(BlockPos pos, NBTTagCompound tag)
+    public GuiEditNBTTree(BlockPos pos, CompoundNBT tag)
     {
         this.entity = false;
         entityOrX = pos.getX();
@@ -45,7 +45,7 @@ public class GuiEditNBTTree extends GuiScreen
         guiTree = new GuiNBTTree(new NBTTree(tag));
     }
 
-    public GuiEditNBTTree(int entity, String customName, NBTTagCompound tag)
+    public GuiEditNBTTree(int entity, String customName, CompoundNBT tag)
     {
         this.entity = true;
         entityOrX = entity;
@@ -142,12 +142,12 @@ public class GuiEditNBTTree extends GuiScreen
         if (entity)
         {
             if (customName.isEmpty()) NBTEdit.NETWORK.INSTANCE
-                    .sendToServer(new EntityNBTPacket(entityOrX, guiTree.getNBTTree().toNBTTagCompound()));
+                    .sendToServer(new EntityNBTPacket(entityOrX, guiTree.getNBTTree().toCompoundNBT()));
             else NBTEdit.NETWORK.INSTANCE
-                    .sendToServer(new CustomNBTPacket(entityOrX, customName, guiTree.getNBTTree().toNBTTagCompound()));
+                    .sendToServer(new CustomNBTPacket(entityOrX, customName, guiTree.getNBTTree().toCompoundNBT()));
         }
         else NBTEdit.NETWORK.INSTANCE.sendToServer(
-                new TileNBTPacket(new BlockPos(entityOrX, y, z), guiTree.getNBTTree().toNBTTagCompound()));
+                new TileNBTPacket(new BlockPos(entityOrX, y, z), guiTree.getNBTTree().toCompoundNBT()));
         mc.displayGuiScreen(null);
         mc.setIngameFocus();
 

@@ -21,8 +21,8 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import pokecube.core.PokecubeCore;
@@ -60,7 +60,7 @@ public class GuiChooseFirstPokemob extends GuiScreen
     private float                yHeadRenderAngle = 10;
 
     private float                xHeadRenderAngle = 0;
-    protected EntityPlayer       entityPlayer     = null;
+    protected PlayerEntity       PlayerEntity     = null;
     protected PokedexEntry       pokedexEntry     = null;
     int                          index            = 0;
 
@@ -89,7 +89,7 @@ public class GuiChooseFirstPokemob extends GuiScreen
             _starters = starters;
         }
         starters = _starters;
-        entityPlayer = FMLClientHandler.instance().getClientPlayerEntity();
+        PlayerEntity = FMLClientHandler.instance().getClientPlayerEntity();
     }
 
     @Override
@@ -141,8 +141,8 @@ public class GuiChooseFirstPokemob extends GuiScreen
     private void sendMessage(PokedexEntry entry)
     {
         PacketChoose packet = new PacketChoose(PacketChoose.CHOOSE);
-        packet.data.setBoolean("S", gotSpecial);
-        if (entry != null) packet.data.setString("N", entry.getTrimmedName());
+        packet.data.putBoolean("S", gotSpecial);
+        if (entry != null) packet.data.putString("N", entry.getTrimmedName());
         PokecubeMod.packetPipeline.sendToServer(packet);
     }
 
@@ -252,7 +252,7 @@ public class GuiChooseFirstPokemob extends GuiScreen
         GL11.glPopMatrix();
     }
 
-    private EntityLiving getEntityToDisplay()
+    private MobEntity getEntityToDisplay()
     {
         IPokemob pokemob = EventsHandlerClient.getRenderMob(pokedexEntry, PokecubeCore.proxy.getWorld());
         if (pokemob == null) return null;
@@ -322,14 +322,14 @@ public class GuiChooseFirstPokemob extends GuiScreen
             glPushMatrix();
             glTranslatef(0.5F, 1.0f, 0.5F);
             glRotatef(-180, 1.0F, 0.0F, 0.0F);
-            glRotatef(entityPlayer.getEntityWorld().getWorldTime() * 2, 0.0F, 1.0F, 0.0F);
+            glRotatef(PlayerEntity.getEntityWorld().getDayTime() * 2, 0.0F, 1.0F, 0.0F);
             glScalef(50f, 50f, 50f);
 
             GL11.glRotatef(yRenderAngle, 0.0F, 1.0F, 0.0F);
             GL11.glRotatef(xRenderAngle, 1.0F, 0.0F, 0.0F);
             RenderHelper.disableStandardItemLighting();
 
-            Minecraft.getMinecraft().getItemRenderer().renderItem(entityPlayer, item, TransformType.GUI);
+            Minecraft.getInstance().getItemRenderer().renderItem(PlayerEntity, item, TransformType.GUI);
 
             glPopMatrix();
             GL11.glDisable(GL11.GL_BLEND);
@@ -342,7 +342,7 @@ public class GuiChooseFirstPokemob extends GuiScreen
     {
         try
         {
-            EntityLiving entity = getEntityToDisplay();
+            MobEntity entity = getEntityToDisplay();
 
             float size = 0;
             int j = 0;
@@ -385,7 +385,7 @@ public class GuiChooseFirstPokemob extends GuiScreen
             entity.limbSwingAmount = 0;
             PokeType flying = PokeType.getType("flying");
             entity.onGround = !pokemob.isType(flying);
-            Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0, POKEDEX_RENDER, false);
+            Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0, POKEDEX_RENDER, false);
             RenderHelper.disableStandardItemLighting();
             GL11.glDisable(GL11.GL_COLOR_MATERIAL);
             GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);

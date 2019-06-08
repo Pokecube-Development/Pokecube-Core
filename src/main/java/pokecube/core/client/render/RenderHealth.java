@@ -23,16 +23,16 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -55,7 +55,7 @@ import thut.lib.CompatWrapper;
 public class RenderHealth
 {
 
-    List<EntityLivingBase> renderedEntities = new ArrayList<>();
+    List<LivingEntity> renderedEntities = new ArrayList<>();
 
     boolean                blend;
     boolean                normalize;
@@ -93,7 +93,7 @@ public class RenderHealth
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event)
     {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
 
         if (!PokecubeMod.core.getConfig().doHealthBars
                 || (!PokecubeMod.core.getConfig().renderInF1 && !Minecraft.isGuiEnabled()))
@@ -112,9 +112,9 @@ public class RenderHealth
         if (PokecubeMod.core.getConfig().showOnlyFocused)
         {
             Entity focused = getEntityLookedAt(mc.player);
-            if (focused != null && focused instanceof EntityLivingBase && focused.isEntityAlive()) try
+            if (focused != null && focused instanceof LivingEntity && focused.isEntityAlive()) try
             {
-                renderHealthBar((EntityLivingBase) focused, partialTicks, cameraEntity);
+                renderHealthBar((LivingEntity) focused, partialTicks, cameraEntity);
             }
             catch (Exception e)
             {
@@ -128,7 +128,7 @@ public class RenderHealth
             List<Entity> entities = client.loadedEntityList;
             for (Entity entity : entities)
             {
-                if (entity != null && entity instanceof EntityLivingBase && entity != mc.player
+                if (entity != null && entity instanceof LivingEntity && entity != mc.player
                         && entity.isInRangeToRender3d(renderingVector.getX(), renderingVector.getY(),
                                 renderingVector.getZ())
                         && (entity.ignoreFrustumCheck || frustum.isBoundingBoxInFrustum(entity.getEntityBoundingBox()))
@@ -136,7 +136,7 @@ public class RenderHealth
                 {
                     try
                     {
-                        renderHealthBar((EntityLivingBase) entity, partialTicks, cameraEntity);
+                        renderHealthBar((LivingEntity) entity, partialTicks, cameraEntity);
                     }
                     catch (Exception e)
                     {
@@ -148,25 +148,25 @@ public class RenderHealth
         }
     }
 
-    public void renderHealthBar(EntityLivingBase passedEntity, float partialTicks, Entity viewPoint)
+    public void renderHealthBar(LivingEntity passedEntity, float partialTicks, Entity viewPoint)
     {
-        Stack<EntityLivingBase> ridingStack = new Stack<>();
+        Stack<LivingEntity> ridingStack = new Stack<>();
 
-        EntityLivingBase entity = passedEntity;
+        LivingEntity entity = passedEntity;
 
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
         if (pokemob == null) return;
         Config config = PokecubeMod.core.getConfig();
-        Minecraft mc = Minecraft.getMinecraft();
-        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+        Minecraft mc = Minecraft.getInstance();
+        RenderManager renderManager = Minecraft.getInstance().getRenderManager();
         if (renderManager == null || renderManager.renderViewEntity == null) return;
         UUID viewerID = renderManager.renderViewEntity.getUniqueID();
 
         ridingStack.push(entity);
 
-        while (entity.getRidingEntity() != null && entity.getRidingEntity() instanceof EntityLivingBase)
+        while (entity.getRidingEntity() != null && entity.getRidingEntity() instanceof LivingEntity)
         {
-            entity = (EntityLivingBase) entity.getRidingEntity();
+            entity = (LivingEntity) entity.getRidingEntity();
             ridingStack.push(entity);
         }
 
@@ -228,19 +228,19 @@ public class RenderHealth
                 ITextComponent nameComp = pokemob.getPokemonDisplayName();
                 boolean nametag = pokemob.getGeneralState(GeneralStates.TAMED);
                 PokecubePlayerStats stats = PlayerDataHandler.getInstance()
-                        .getPlayerData(Minecraft.getMinecraft().player).getData(PokecubePlayerStats.class);
+                        .getPlayerData(Minecraft.getInstance().player).getData(PokecubePlayerStats.class);
                 boolean captureOrHatch = StatsCollector.getCaptured(pokemob.getPokedexEntry(),
-                        Minecraft.getMinecraft().player) > 0
-                        || StatsCollector.getHatched(pokemob.getPokedexEntry(), Minecraft.getMinecraft().player) > 0;
+                        Minecraft.getInstance().player) > 0
+                        || StatsCollector.getHatched(pokemob.getPokedexEntry(), Minecraft.getInstance().player) > 0;
                 boolean scanned = false;
                 nametag = nametag || captureOrHatch || (scanned = stats.hasInspected(pokemob.getPokedexEntry()));
                 if (!nametag)
                 {
                     nameComp.getStyle().setObfuscated(true);
                 }
-                if (entity instanceof EntityLiving && ((EntityLiving) entity).hasCustomName())
-                    nameComp = new TextComponentString(
-                            TextFormatting.ITALIC + ((EntityLiving) entity).getCustomNameTag());
+                if (entity instanceof MobEntity && ((MobEntity) entity).hasCustomName())
+                    nameComp = new StringTextComponent(
+                            TextFormatting.ITALIC + ((MobEntity) entity).getCustomNameTag());
                 float s = 0.5F;
                 String name = I18n.format(nameComp.getFormattedText());
                 float namel = mc.fontRenderer.getStringWidth(name) * s;
@@ -405,10 +405,10 @@ public class RenderHealth
     {
         try
         {
-            IBakedModel iBakedModel = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(stack);
-            TextureAtlasSprite textureAtlasSprite = Minecraft.getMinecraft().getTextureMapBlocks()
+            IBakedModel iBakedModel = Minecraft.getInstance().getRenderItem().getItemModelMesher().getItemModel(stack);
+            TextureAtlasSprite textureAtlasSprite = Minecraft.getInstance().getTextureMapBlocks()
                     .getAtlasSprite(iBakedModel.getParticleTexture().getIconName());
-            Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder buffer = tessellator.getBuffer();
             buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -436,12 +436,12 @@ public class RenderHealth
         RayTraceResult pos = raycast(e, finalDistance);
 
         Vec3d positionVector = e.getPositionVector();
-        if (e instanceof EntityPlayer) positionVector = positionVector.addVector(0, e.getEyeHeight(), 0);
+        if (e instanceof PlayerEntity) positionVector = positionVector.add(0, e.getEyeHeight(), 0);
 
         if (pos != null) distance = pos.hitVec.distanceTo(positionVector);
 
         Vec3d lookVector = e.getLookVec();
-        Vec3d reachVector = positionVector.addVector(lookVector.x * finalDistance, lookVector.y * finalDistance,
+        Vec3d reachVector = positionVector.add(lookVector.x * finalDistance, lookVector.y * finalDistance,
                 lookVector.z * finalDistance);
 
         Entity lookedEntity = null;
@@ -489,7 +489,7 @@ public class RenderHealth
     public static RayTraceResult raycast(Entity e, double len)
     {
         Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);
-        if (e instanceof EntityPlayer) vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
+        if (e instanceof PlayerEntity) vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
 
         Vec3d look = e.getLookVec();
         if (look == null) return null;

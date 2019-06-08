@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.BlockPos;
 import pokecube.core.ai.properties.IGuardAICapability;
@@ -31,13 +31,13 @@ public class GuardAI extends EntityAIBase
     }
 
     public final IGuardAICapability capability;
-    private final EntityLiving      entity;
+    private final MobEntity      entity;
     public int                      cooldownTicks;
     public ShouldRun                shouldRun = new ShouldRun()
                                               {
                                               };
 
-    public GuardAI(EntityLiving entity, IGuardAICapability capability)
+    public GuardAI(MobEntity entity, IGuardAICapability capability)
     {
         this.entity = entity;
         this.capability = capability;
@@ -47,7 +47,7 @@ public class GuardAI extends EntityAIBase
     public boolean shouldContinueExecuting()
     {
         if (!shouldRun.shouldRun()) return false;
-        if (!capability.hasActiveTask(entity.getEntityWorld().getWorldTime(), 24000)) return false;
+        if (!capability.hasActiveTask(entity.getEntityWorld().getDayTime(), 24000)) return false;
         capability.getActiveTask().continueTask(entity);
         switch (capability.getState())
         {
@@ -83,14 +83,14 @@ public class GuardAI extends EntityAIBase
 
     public void setPos(BlockPos pos)
     {
-        if (capability.hasActiveTask(entity.getEntityWorld().getWorldTime(), 24000))
+        if (capability.hasActiveTask(entity.getEntityWorld().getDayTime(), 24000))
             capability.getActiveTask().setPos(pos);
         else capability.getPrimaryTask().setPos(pos);
     }
 
     public void setTimePeriod(TimePeriod time)
     {
-        if (capability.hasActiveTask(entity.getEntityWorld().getWorldTime(), 24000))
+        if (capability.hasActiveTask(entity.getEntityWorld().getDayTime(), 24000))
             capability.getActiveTask().setActiveTime(time);
         else capability.getPrimaryTask().setActiveTime(time);
     }
@@ -106,7 +106,7 @@ public class GuardAI extends EntityAIBase
           // like
           // AR support.
         if (null == entity || entity.isDead
-                || !capability.hasActiveTask(entity.getEntityWorld().getWorldTime(), 24000)) { return false; }
+                || !capability.hasActiveTask(entity.getEntityWorld().getDayTime(), 24000)) { return false; }
         BlockPos pos = capability.getActiveTask().getPos();
         if (pos == null || pos.equals(BlockPos.ORIGIN)) return false;
         double distanceToGuardPointSq = entity.getDistanceSq(capability.getActiveTask().getPos());

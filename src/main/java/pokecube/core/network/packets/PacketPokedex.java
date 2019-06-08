@@ -22,15 +22,15 @@ import com.google.gson.stream.JsonWriter;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -94,8 +94,8 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         String name = PokecubePlayerDataHandler.getCustomDataTag(PokecubeCore.getPlayer(null)).getString("WEntry");
         if (Database.getEntry(name) == entry) return;
         PacketPokedex packet = new PacketPokedex(PacketPokedex.SETWATCHPOKE);
-        PokecubePlayerDataHandler.getCustomDataTag(PokecubeCore.getPlayer(null)).setString("WEntry", entry.getName());
-        packet.data.setString("V", entry.getName());
+        PokecubePlayerDataHandler.getCustomDataTag(PokecubeCore.getPlayer(null)).putString("WEntry", entry.getName());
+        packet.data.putString("V", entry.getName());
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -110,7 +110,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         selectedMob.clear();
         PacketPokedex packet = new PacketPokedex(PacketPokedex.REQUESTMOB);
-        packet.data.setString("V", entry.getName());
+        packet.data.putString("V", entry.getName());
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -118,7 +118,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         PacketPokedex packet = new PacketPokedex();
         packet.message = RENAME;
-        packet.data.setString("N", newName);
+        packet.data.putString("N", newName);
         packet.data.setInteger("I", index);
         PokecubePacketHandler.sendToServer(packet);
     }
@@ -145,8 +145,8 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         PacketPokedex packet = new PacketPokedex();
         packet.message = page;
-        packet.data.setBoolean("M", mode);
-        if (selected != null) packet.data.setString("F", selected.getName());
+        packet.data.putBoolean("M", mode);
+        if (selected != null) packet.data.putString("F", selected.getName());
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -154,23 +154,23 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         PacketPokedex packet = new PacketPokedex();
         packet.message = INSPECT;
-        packet.data.setBoolean("R", reward);
-        packet.data.setString("L", lang);
+        packet.data.putBoolean("R", reward);
+        packet.data.putString("L", lang);
         PokecubePacketHandler.sendToServer(packet);
     }
 
-    public static void sendSecretBaseInfoPacket(EntityPlayer player, boolean watch)
+    public static void sendSecretBaseInfoPacket(PlayerEntity player, boolean watch)
     {
         PacketPokedex packet = new PacketPokedex();
         BlockPos pos = player.getPosition();
         Coordinate here = new Coordinate(pos.getX(), pos.getY(), pos.getZ(), player.dimension);
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (Coordinate c : SecretBaseManager.getNearestBases(here, PokecubeMod.core.getConfig().baseRadarRange))
         {
             list.appendTag(c.writeToNBT());
         }
-        packet.data.setTag("B", list);
-        packet.data.setBoolean("M", watch);
+        packet.data.put("B", list);
+        packet.data.putBoolean("M", watch);
         packet.data.setInteger("R", PokecubeMod.core.getConfig().baseRadarRange);
         List<Vector4> meteors = PokecubeSerializer.getInstance().meteors;
         if (!meteors.isEmpty())
@@ -191,9 +191,9 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             }
             if (closest != null)
             {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundNBT tag = new CompoundNBT();
                 closest.writeToNBT(tag);
-                packet.data.setTag("V", tag);
+                packet.data.put("V", tag);
             }
         }
         packet.message = BASERADAR;
@@ -201,7 +201,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     }
 
     byte                  message;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketPokedex()
     {
@@ -257,8 +257,8 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
 
     void processMessage(MessageContext ctx, PacketPokedex message)
     {
-        final EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        final PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }
@@ -268,7 +268,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         }
         if (message.message == INSPECTMOB)
         {
-            if (ctx.side == Side.SERVER)
+            if (ctx.side == Dist.DEDICATED_SERVER)
             {
                 Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(),
                         message.data.getInteger("V"), true);
@@ -281,11 +281,11 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
 
         if (message.message == SETWATCHPOKE)
         {
-            if (ctx.side == Side.SERVER)
+            if (ctx.side == Dist.DEDICATED_SERVER)
             {
                 PokedexEntry entry = Database.getEntry(message.data.getString("V"));
                 if (entry != null)
-                    PokecubePlayerDataHandler.getCustomDataTag(player).setString("WEntry", entry.getName());
+                    PokecubePlayerDataHandler.getCustomDataTag(player).putString("WEntry", entry.getName());
             }
             return;
         }
@@ -337,7 +337,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
 
         if (message.message == REQUESTLOC)
         {
-            if (ctx.side == Side.SERVER)
+            if (ctx.side == Dist.DEDICATED_SERVER)
             {
                 final Map<PokedexEntry, Float> rates = Maps.newHashMap();
                 final Vector3 pos = Vector3.getNewVector().set(player);
@@ -371,26 +371,26 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                 }
                 PacketPokedex packet = new PacketPokedex(REQUESTLOC);
                 int n = 0;
-                NBTTagCompound data = new NBTTagCompound();
+                CompoundNBT data = new CompoundNBT();
                 for (PokedexEntry e : names)
                 {
                     SpawnBiomeMatcher matcher = matchers.get(e);
                     matcher.spawnRule.values.put(new QName("Local_Rate"), rates.get(e) + "");
-                    data.setString("e" + n, e.getName());
-                    data.setString("" + n, gson.toJson(matcher));
+                    data.putString("e" + n, e.getName());
+                    data.putString("" + n, gson.toJson(matcher));
                     n++;
                 }
-                packet.data.setTag("V", data);
+                packet.data.put("V", data);
 
                 PokedexEntry entry = Database
                         .getEntry(PokecubePlayerDataHandler.getCustomDataTag(player).getString("WEntry"));
-                if (entry != null) packet.data.setString("E", entry.getName());
-                PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+                if (entry != null) packet.data.putString("E", entry.getName());
+                PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
             }
             else
             {
                 selectedLoc.clear();
-                NBTTagCompound data = message.data.getCompoundTag("V");
+                CompoundNBT data = message.data.getCompound("V");
                 int n = data.getKeySet().size() / 2;
                 for (int i = 0; i < n; i++)
                 {
@@ -399,14 +399,14 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                 }
                 if (message.data.hasKey("E"))
                 {
-                    PokecubePlayerDataHandler.getCustomDataTag(player).setString("WEntry", message.data.getString("E"));
+                    PokecubePlayerDataHandler.getCustomDataTag(player).putString("WEntry", message.data.getString("E"));
                 }
             }
             return;
         }
         else if (message.message == REQUESTMOB)
         {
-            if (ctx.side == Side.SERVER)
+            if (ctx.side == Dist.DEDICATED_SERVER)
             {
                 PacketPokedex packet = new PacketPokedex(REQUESTMOB);
                 PokedexEntry entry = Database.getEntry(message.data.getString("V"));
@@ -426,10 +426,10 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                     for (SpawnBiomeMatcher matcher : data.matchers.keySet())
                     {
                         String value = gson.toJson(matcher);
-                        packet.data.setString("" + n++, value);
+                        packet.data.putString("" + n++, value);
                     }
                 }
-                PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+                PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
             }
             else
             {
@@ -443,9 +443,9 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             return;
         }
 
-        if (message.message == REQUEST || (ctx.side == Side.SERVER && message.message >= 0))
+        if (message.message == REQUEST || (ctx.side == Dist.DEDICATED_SERVER && message.message >= 0))
         {
-            if (ctx.side == Side.CLIENT)
+            if (ctx.side == Dist.CLIENT)
             {
                 values.clear();
                 int n = message.data.getKeySet().size();
@@ -500,12 +500,12 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                         rates.put(e, val);
                     }
                     int biome = TerrainManager.getInstance().getTerrainForEntity(player).getBiome(pos);
-                    packet.data.setString("0", "" + biome);
-                    packet.data.setString("1", BiomeDatabase.getReadableNameFromType(biome));
+                    packet.data.putString("0", "" + biome);
+                    packet.data.putString("1", BiomeDatabase.getReadableNameFromType(biome));
                     for (int i = 0; i < names.size(); i++)
                     {
                         PokedexEntry e = names.get(i);
-                        packet.data.setString("" + (i + 2), e.getUnlocalizedName() + "`" + rates.get(e));
+                        packet.data.putString("" + (i + 2), e.getUnlocalizedName() + "`" + rates.get(e));
                     }
                 }
                 else
@@ -572,11 +572,11 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                         }
                         for (int i = 0; i < biomes.size(); i++)
                         {
-                            packet.data.setString("" + i, biomes.get(i));
+                            packet.data.putString("" + i, biomes.get(i));
                         }
                     }
                 }
-                PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+                PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
             }
             if (message.message == REQUEST) return;
         }
@@ -594,7 +594,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             int index = message.data.getInteger("I");
             TeleDest loc = TeleportHandler.getTeleport(player.getCachedUniqueIdString(), index);
             TeleportHandler.unsetTeleport(index, player.getCachedUniqueIdString());
-            player.sendMessage(new TextComponentString("Deleted " + loc.getName()));
+            player.sendMessage(new StringTextComponent("Deleted " + loc.getName()));
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
@@ -604,7 +604,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             String name = message.data.getString("N");
             int index = message.data.getInteger("I");
             TeleportHandler.renameTeleport(player.getCachedUniqueIdString(), index, name);
-            player.sendMessage(new TextComponentString("Set teleport as " + name));
+            player.sendMessage(new StringTextComponent("Set teleport as " + name));
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             PacketDataSync.sendInitPacket(player, "pokecube-data");
             return;
@@ -616,14 +616,14 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                     player.getEntityWorld(), 0, 0, 0);
             if (message.data.hasKey("V"))
                 pokecube.core.client.gui.watch.SecretBaseRadarPage.closestMeteor = new Vector4(
-                        message.data.getCompoundTag("V"));
+                        message.data.getCompound("V"));
             else pokecube.core.client.gui.watch.SecretBaseRadarPage.closestMeteor = null;
-            if (!message.data.hasKey("B") || !(message.data.getTag("B") instanceof NBTTagList)) return;
-            NBTTagList list = (NBTTagList) message.data.getTag("B");
+            if (!message.data.hasKey("B") || !(message.data.getTag("B") instanceof ListNBT)) return;
+            ListNBT list = (ListNBT) message.data.getTag("B");
             pokecube.core.client.gui.watch.SecretBaseRadarPage.bases.clear();
-            for (int i = 0; i < list.tagCount(); i++)
+            for (int i = 0; i < list.size(); i++)
             {
-                NBTTagCompound tag = list.getCompoundTagAt(i);
+                CompoundNBT tag = list.getCompound(i);
                 Coordinate c = Coordinate.readNBT(tag);
                 pokecube.core.client.gui.watch.SecretBaseRadarPage.bases.add(c);
             }
@@ -634,33 +634,33 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         {
             boolean reward = message.data.getBoolean("R");
             String lang = message.data.getString("L");
-            PokecubePlayerDataHandler.getCustomDataTag(player).setString("lang", lang);
+            PokecubePlayerDataHandler.getCustomDataTag(player).putString("lang", lang);
             boolean inspected = PokedexInspector.inspect(player, reward);
 
             if (!reward)
             {
                 if (inspected)
                 {
-                    player.sendMessage(new TextComponentTranslation("pokedex.inspect.available"));
+                    player.sendMessage(new TranslationTextComponent("pokedex.inspect.available"));
                 }
             }
             else
             {
                 if (!inspected)
                 {
-                    player.sendMessage(new TextComponentTranslation("pokedex.inspect.nothing"));
+                    player.sendMessage(new TranslationTextComponent("pokedex.inspect.nothing"));
                 }
                 player.closeScreen();
             }
             return;
         }
         boolean mode = message.data.getBoolean("M");
-        if (!player.getHeldItemMainhand().hasTagCompound())
+        if (!player.getHeldItemMainhand().hasTag())
         {
-            player.getHeldItemMainhand().setTagCompound(new NBTTagCompound());
+            player.getHeldItemMainhand().put(new CompoundNBT());
         }
-        player.getHeldItemMainhand().getTagCompound().setBoolean("M", mode);
-        player.getHeldItemMainhand().getTagCompound().setString("F", message.data.getString("F"));
+        player.getHeldItemMainhand().getTag().putBoolean("M", mode);
+        player.getHeldItemMainhand().getTag().putString("F", message.data.getString("F"));
         player.getHeldItemMainhand().setItemDamage(message.message);
     }
 }

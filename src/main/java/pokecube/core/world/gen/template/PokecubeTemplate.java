@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +34,7 @@ public class PokecubeTemplate extends Template
 
     public PokecubeTemplate(Template from, String name)
     {
-        this.read(from.writeToNBT(new NBTTagCompound()));
+        this.read(from.writeToNBT(new CompoundNBT()));
         this.name = name;
     }
 
@@ -63,20 +63,20 @@ public class PokecubeTemplate extends Template
 
             if (aabb == null || aabb.isVecInside(blockpos))
             {
-                NBTTagCompound nbttagcompound = template$entityinfo.entityData;
+                CompoundNBT CompoundNBT = template$entityinfo.entityData;
                 Vec3d vec3d = transformedVec3d(template$entityinfo.pos, mirrorIn, rotationIn);
-                Vec3d vec3d1 = vec3d.addVector(pos.getX(), pos.getY(), pos.getZ());
-                NBTTagList nbttaglist = new NBTTagList();
-                nbttaglist.appendTag(new NBTTagDouble(vec3d1.x));
-                nbttaglist.appendTag(new NBTTagDouble(vec3d1.y));
-                nbttaglist.appendTag(new NBTTagDouble(vec3d1.z));
-                nbttagcompound.setTag("Pos", nbttaglist);
-                nbttagcompound.setUniqueId("UUID", UUID.randomUUID());
+                Vec3d vec3d1 = vec3d.add(pos.getX(), pos.getY(), pos.getZ());
+                ListNBT ListNBT = new ListNBT();
+                ListNBT.appendTag(new NBTTagDouble(vec3d1.x));
+                ListNBT.appendTag(new NBTTagDouble(vec3d1.y));
+                ListNBT.appendTag(new NBTTagDouble(vec3d1.z));
+                CompoundNBT.put("Pos", ListNBT);
+                CompoundNBT.setUniqueId("UUID", UUID.randomUUID());
                 Entity entity;
 
                 try
                 {
-                    entity = EntityList.createEntityFromNBT(nbttagcompound, worldIn);
+                    entity = EntityList.createEntityFromNBT(CompoundNBT, worldIn);
                 }
                 catch (Exception var15)
                 {

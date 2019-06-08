@@ -3,7 +3,7 @@ package pokecube.core.ai.thread.logicRunnables;
 import java.util.Calendar;
 import java.util.Random;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -123,7 +123,7 @@ public class LogicMiscUpdate extends LogicBase
 
         if (!entity.getEntityWorld().isRemote)
         {
-            EntityLivingBase targ = entity.getAttackTarget();
+            LivingEntity targ = entity.getAttackTarget();
             if (targ != null && !targ.isDead)
             {
                 pokemob.setTargetID(targ.getEntityId());
@@ -135,7 +135,7 @@ public class LogicMiscUpdate extends LogicBase
 
         if (id >= 0 && entity.getAttackTarget() == null)
         {
-            entity.setAttackTarget((EntityLivingBase) PokecubeMod.core.getEntityProvider().getEntity(world, id, false));
+            entity.setAttackTarget((LivingEntity) PokecubeMod.core.getEntityProvider().getEntity(world, id, false));
         }
         if (id < 0 && entity.getAttackTarget() != null)
         {

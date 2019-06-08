@@ -1,8 +1,8 @@
 package pokecube.core.ai.pokemob;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.EntityAIBase;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -11,7 +11,7 @@ import pokecube.core.interfaces.pokemob.ai.LogicStates;
 
 public class PokemobAILookIdle extends EntityAIBase
 {
-    protected EntityLiving theWatcher;
+    protected MobEntity theWatcher;
     /** The closest entity which is being watched by this one. */
     protected Entity       closestEntity;
     /** the watcher casted to a pokemob. */
@@ -30,9 +30,9 @@ public class PokemobAILookIdle extends EntityAIBase
 
     private float          chance;
 
-    public PokemobAILookIdle(EntityLiving entitylivingIn, float maxDistance, float idleChance)
+    public PokemobAILookIdle(MobEntity MobEntityIn, float maxDistance, float idleChance)
     {
-        this.theWatcher = entitylivingIn;
+        this.theWatcher = MobEntityIn;
         this.maxDistanceForPlayer = maxDistance;
         this.chance = idleChance;
         this.pokemob = CapabilityPokemob.getPokemobFor(theWatcher);
@@ -79,7 +79,7 @@ public class PokemobAILookIdle extends EntityAIBase
         {
             this.closestEntity = this.theWatcher.getAttackTarget();
         }
-        this.closestEntity = this.theWatcher.getEntityWorld().findNearestEntityWithinAABB(EntityLivingBase.class,
+        this.closestEntity = this.theWatcher.getEntityWorld().findNearestEntityWithinAABB(LivingEntity.class,
                 this.theWatcher.getEntityBoundingBox().grow(this.maxDistanceForPlayer, 3.0D, this.maxDistanceForPlayer),
                 this.theWatcher);
         if (closestEntity != null && closestEntity.getRidingEntity() == theWatcher) closestEntity = null;

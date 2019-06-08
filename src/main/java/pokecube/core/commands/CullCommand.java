@@ -5,10 +5,10 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -32,13 +32,13 @@ public class CullCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokecull";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         boolean specific = args.length > 1;
 
@@ -69,6 +69,6 @@ public class CullCommand extends CommandBase
                 }
             }
         }
-        cSender.sendMessage(new TextComponentString("Culled " + n));
+        cSender.sendMessage(new StringTextComponent("Culled " + n));
     }
 }

@@ -2,12 +2,12 @@ package pokecube.core.ai.properties;
 
 import java.util.List;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import pokecube.core.utils.TimePeriod;
@@ -20,11 +20,11 @@ public interface IGuardAICapability
 
         void setActiveTime(TimePeriod active);
 
-        void startTask(EntityLiving entity);
+        void startTask(MobEntity entity);
 
-        void continueTask(EntityLiving entity);
+        void continueTask(MobEntity entity);
 
-        void endTask(EntityLiving entity);
+        void endTask(MobEntity entity);
 
         BlockPos getPos();
 
@@ -34,27 +34,27 @@ public interface IGuardAICapability
 
         void setRoamDistance(float roam);
 
-        default NBTBase serialze()
+        default INBT serialze()
         {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundNBT tag = new CompoundNBT();
             if (getPos() != null)
             {
-                tag.setTag("pos", NBTUtil.createPosTag(getPos()));
+                tag.put("pos", NBTUtil.createPosTag(getPos()));
             }
-            tag.setFloat("d", getRoamDistance());
+            tag.putFloat("d", getRoamDistance());
             TimePeriod time;
             if ((time = getActiveTime()) != null)
             {
-                tag.setLong("start", time.startTick);
-                tag.setLong("end", time.endTick);
+                tag.putLong("start", time.startTick);
+                tag.putLong("end", time.endTick);
             }
             return tag;
         }
 
-        default void load(NBTBase tag)
+        default void load(INBT tag)
         {
-            NBTTagCompound nbt = (NBTTagCompound) tag;
-            if (nbt.hasKey("pos")) setPos(NBTUtil.getPosFromTag(nbt.getCompoundTag("pos")));
+            CompoundNBT nbt = (CompoundNBT) tag;
+            if (nbt.hasKey("pos")) setPos(NBTUtil.getPosFromTag(nbt.getCompound("pos")));
             setRoamDistance(nbt.getFloat("d"));
             setActiveTime(new TimePeriod((int) nbt.getLong("start"), (int) nbt.getLong("end")));
         }
@@ -68,27 +68,27 @@ public interface IGuardAICapability
     public static class Storage implements Capability.IStorage<IGuardAICapability>
     {
         @Override
-        public void readNBT(Capability<IGuardAICapability> capability, IGuardAICapability instance, EnumFacing side,
-                NBTBase nbt)
+        public void readNBT(Capability<IGuardAICapability> capability, IGuardAICapability instance, Direction side,
+                INBT nbt)
         {
-            if (nbt instanceof NBTTagCompound)
+            if (nbt instanceof CompoundNBT)
             {
-                NBTTagCompound data = (NBTTagCompound) nbt;
+                CompoundNBT data = (CompoundNBT) nbt;
                 instance.setState(GuardState.values()[data.getInteger("state")]);
                 if (data.hasKey("tasks"))
                 {
-                    NBTTagList tasks = (NBTTagList) data.getTag("tasks");
+                    ListNBT tasks = (ListNBT) data.getTag("tasks");
                     instance.loadTasks(tasks);
                 }
             }
         }
 
         @Override
-        public NBTBase writeNBT(Capability<IGuardAICapability> capability, IGuardAICapability instance, EnumFacing side)
+        public INBT writeNBT(Capability<IGuardAICapability> capability, IGuardAICapability instance, Direction side)
         {
-            NBTTagCompound ret = new NBTTagCompound();
+            CompoundNBT ret = new CompoundNBT();
             ret.setInteger("state", instance.getState().ordinal());
-            ret.setTag("tasks", instance.serializeTasks());
+            ret.put("tasks", instance.serializeTasks());
             return ret;
         }
     }
@@ -108,7 +108,7 @@ public interface IGuardAICapability
     // getTasks().get(0)
     IGuardTask getPrimaryTask();
 
-    void loadTasks(NBTTagList list);
+    void loadTasks(ListNBT list);
 
-    NBTTagList serializeTasks();
+    ListNBT serializeTasks();
 }

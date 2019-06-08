@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityDispatcher;
@@ -98,7 +98,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
         {
             this.mob = evolver.getEntity();
             this.world = mob.getEntityWorld();
-            this.evoTime = this.world.getTotalWorldTime() + evoTime;
+            this.evoTime = this.world.getGameTime() + evoTime;
             this.message = message;
             this.mega = mega;
             this.pokemob = evolver;
@@ -120,10 +120,10 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 MinecraftForge.EVENT_BUS.unregister(this);
                 return;
             }
-            if (evt.world.getTotalWorldTime() >= evoTime)
+            if (evt.world.getGameTime() >= evoTime)
             {
-                if (pokemob.getCombatState(CombatStates.MEGAFORME) && pokemob.getOwner() instanceof EntityPlayerMP)
-                    Triggers.MEGAEVOLVEPOKEMOB.trigger((EntityPlayerMP) pokemob.getOwner(), pokemob);
+                if (pokemob.getCombatState(CombatStates.MEGAFORME) && pokemob.getOwner() instanceof ServerPlayerEntity)
+                    Triggers.MEGAEVOLVEPOKEMOB.trigger((ServerPlayerEntity) pokemob.getOwner(), pokemob);
                 int evoTicks = pokemob.getEvolutionTicks();
                 float hp = pokemob.getHealth();
                 pokemob = pokemob.megaEvolve(mega);
@@ -161,7 +161,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
     default void cancelEvolve()
     {
         if (!isEvolving()) return;
-        EntityLivingBase entity = getEntity();
+        LivingEntity entity = getEntity();
         if (getEntity().getEntityWorld().isRemote)
         {
             MessageServer message = new MessageServer(MessageServer.CANCELEVOLVE, entity.getEntityId());
@@ -170,7 +170,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
         }
         setEvolutionTicks(-1);
         this.setGeneralState(GeneralStates.EVOLVING, false);
-        this.displayMessageToOwner(new TextComponentTranslation("pokemob.evolution.cancel",
+        this.displayMessageToOwner(new TranslationTextComponent("pokemob.evolution.cancel",
                 CapabilityPokemob.getPokemobFor(entity).getPokemonDisplayName()));
     }
 
@@ -205,13 +205,13 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
      *            the new level */
     default IPokemob levelUp(int level)
     {
-        EntityLivingBase theEntity = getEntity();
+        LivingEntity theEntity = getEntity();
         IPokemob theMob = CapabilityPokemob.getPokemobFor(theEntity);
         List<String> moves = Database.getLevelUpMoves(theMob.getPokedexEntry(), level, theMob.getMoveStats().oldLevel);
         Collections.shuffle(moves);
         if (!theEntity.getEntityWorld().isRemote)
         {
-            ITextComponent mess = new TextComponentTranslation("pokemob.info.levelup", theMob.getPokemonDisplayName(),
+            ITextComponent mess = new TranslationTextComponent("pokemob.info.levelup", theMob.getPokemonDisplayName(),
                     level + "");
             theMob.displayMessageToOwner(mess);
         }
@@ -237,8 +237,8 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                     }
                     for (String s : moves)
                     {
-                        ITextComponent move = new TextComponentTranslation(MovesUtils.getUnlocalizedMove(s));
-                        ITextComponent mess = new TextComponentTranslation("pokemob.move.notify.learn",
+                        ITextComponent move = new TranslationTextComponent(MovesUtils.getUnlocalizedMove(s));
+                        ITextComponent mess = new TranslationTextComponent("pokemob.move.notify.learn",
                                 theMob.getPokemonDisplayName(), move);
                         theMob.displayMessageToOwner(mess);
                         if (!theMob.getMoveStats().newMoves.contains(s))
@@ -266,7 +266,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
      * @return the new pokemob, return this if it fails */
     default IPokemob megaEvolve(PokedexEntry newEntry)
     {
-        EntityLivingBase thisEntity = getEntity();
+        LivingEntity thisEntity = getEntity();
         IPokemob thisMob = CapabilityPokemob.getPokemobFor(thisEntity);
         Entity evolution = thisEntity;
         IPokemob evoMob = thisMob;
@@ -296,9 +296,9 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             caps_new.deserializeNBT(caps_old.serializeNBT());
 
             // Sync tags besides the ones that define species and form.
-            NBTTagCompound tag = thisMob.writePokemobData();
-            tag.getCompoundTag(TagNames.OWNERSHIPTAG).removeTag(TagNames.POKEDEXNB);
-            tag.getCompoundTag(TagNames.VISUALSTAG).removeTag(TagNames.FORME);
+            CompoundNBT tag = thisMob.writePokemobData();
+            tag.getCompound(TagNames.OWNERSHIPTAG).remove(TagNames.POKEDEXNB);
+            tag.getCompound(TagNames.VISUALSTAG).remove(TagNames.FORME);
             evoMob.readPokemobData(tag);
 
             // Sync held item
@@ -322,7 +322,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             if (getCombatState(CombatStates.MEGAFORME))
             {
                 if (thisMob.getAbility() != null)
-                    evolution.getEntityData().setString("Ability", thisMob.getAbility().toString());
+                    evolution.getEntityData().putString("Ability", thisMob.getAbility().toString());
                 Ability ability = newEntry.getAbility(0, evoMob);
                 if (PokecubeMod.debug) PokecubeMod.log("Mega Evolving, changing ability to " + ability);
                 if (ability != null) evoMob.setAbility(ability);
@@ -332,7 +332,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 if (thisEntity.getEntityData().hasKey("Ability"))
                 {
                     String ability = thisEntity.getEntityData().getString("Ability");
-                    evolution.getEntityData().removeTag("Ability");
+                    evolution.getEntityData().remove("Ability");
                     if (!ability.isEmpty()) evoMob.setAbility(AbilityManager.getAbility(ability));
                     if (PokecubeMod.debug) PokecubeMod.log("Un Mega Evolving, changing ability back to " + ability);
                 }
@@ -355,7 +355,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 List<Entity> riders = thisEntity.getPassengers();
                 for (Entity e : riders)
                 {
-                    e.dismountRidingEntity();
+                    e.stopRiding();
                     e.startRiding(evolution);
                 }
 
@@ -373,7 +373,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
      * @return the evolution or this if the evolution failed */
     default IPokemob evolve(boolean delayed, boolean init)
     {
-        EntityLivingBase thisEntity = getEntity();
+        LivingEntity thisEntity = getEntity();
         IPokemob thisMob = CapabilityPokemob.getPokemobFor(thisEntity);
         return evolve(delayed, init, thisMob.getHeldItem());
     }
@@ -390,7 +390,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
      *         evolution succeeded, but delayed. */
     default IPokemob evolve(boolean delayed, boolean init, ItemStack stack)
     {
-        EntityLivingBase thisEntity = getEntity();
+        LivingEntity thisEntity = getEntity();
         IPokemob thisMob = CapabilityPokemob.getPokemobFor(thisEntity);
         // If Init, then don't bother about getting ready for animations and
         // such, just evolve directly.
@@ -474,7 +474,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                     this.setGeneralState(GeneralStates.EVOLVING, true);
                     // Send the message about evolving, to let user cancel.
                     this.displayMessageToOwner(
-                            new TextComponentTranslation("pokemob.evolution.start", thisMob.getPokemonDisplayName()));
+                            new TranslationTextComponent("pokemob.evolution.start", thisMob.getPokemonDisplayName()));
                     return thisMob;
                 }
                 // Evolve the mob.

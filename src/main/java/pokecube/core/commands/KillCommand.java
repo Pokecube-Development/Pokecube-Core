@@ -5,11 +5,11 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -31,13 +31,13 @@ public class KillCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokekill <optional:all|id>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         boolean all = args.length > 0 && args[0].equalsIgnoreCase("all");
 
@@ -80,12 +80,12 @@ public class KillCommand extends CommandBase
                 count++;
                 o.setDead();
             }
-            else if (items && o instanceof EntityItem)
+            else if (items && o instanceof ItemEntity)
             {
                 count++;
                 o.setDead();
             }
         }
-        cSender.sendMessage(new TextComponentString("Killed " + count));
+        cSender.sendMessage(new StringTextComponent("Killed " + count));
     }
 }

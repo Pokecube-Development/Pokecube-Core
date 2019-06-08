@@ -2,13 +2,13 @@ package pokecube.core.interfaces.capabilities;
 
 import java.util.logging.Level;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IEntityOwnable;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -43,9 +43,9 @@ import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import thut.api.entity.ai.AIThreadManager.AIStuff;
 import thut.api.entity.ai.EntityAIBaseManager;
 
-public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializable<NBTTagCompound>, IPokemob
+public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializable<CompoundNBT>, IPokemob
 {
-    public DefaultPokemob(EntityLiving mob)
+    public DefaultPokemob(MobEntity mob)
     {
         this();
         this.setEntity(mob);
@@ -60,22 +60,22 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(Capability<?> capability, Direction facing)
     {
         return capability == POKEMOB_CAP;
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(Capability<T> capability, Direction facing)
     {
         if (hasCapability(capability, facing)) return POKEMOB_CAP.cast(this);
         return null;
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound tag;
+        CompoundNBT tag;
         try
         {
             tag = writePokemobData();
@@ -83,13 +83,13 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
         catch (Exception e)
         {
             PokecubeMod.log(Level.WARNING, "Error Saving Pokemob", e);
-            tag = new NBTTagCompound();
+            tag = new CompoundNBT();
         }
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         try
         {
@@ -102,13 +102,13 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
     }
 
     @Override
-    public void onSetTarget(EntityLivingBase entity)
+    public void onSetTarget(LivingEntity entity)
     {
         boolean remote = getEntity().getEntityWorld().isRemote;
         if (entity == null && !remote)
         {
             setTargetID(-1);
-            getEntity().getEntityData().setString("lastMoveHitBy", "");
+            getEntity().getEntityData().putString("lastMoveHitBy", "");
         }
         else if (entity != null)
         {
@@ -183,7 +183,7 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
     @Override
     public void initAI()
     {
-        EntityLiving entity = getEntity();
+        MobEntity entity = getEntity();
         PokedexEntry entry = getPokedexEntry();
         // If the mob was constructed without a world somehow (during init for
         // JEI, etc), do not bother with AI stuff.
@@ -251,7 +251,7 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
         // Mate with things
         this.getAI().addAITask(new AIMate(this).setPathManager(manager).setPriority(300));
         // Eat things
-        this.getAI().addAITask(new AIHungry(this, new EntityItem(entity.getEntityWorld()), 16).setPathManager(manager)
+        this.getAI().addAITask(new AIHungry(this, new ItemEntity(entity.getEntityWorld()), 16).setPathManager(manager)
                 .setPriority(300));
         // Wander around
         this.getAI().addAITask(new AIIdle(this).setPathManager(manager).setPriority(500));

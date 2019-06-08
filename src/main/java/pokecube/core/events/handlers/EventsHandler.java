@@ -19,36 +19,36 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.IAnimals;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -159,9 +159,9 @@ public class EventsHandler
         @SubscribeEvent
         public void tickEvent(WorldTickEvent evt)
         {
-            if (evt.phase == Phase.END && evt.side != Side.CLIENT)
+            if (evt.phase == Phase.END && evt.side != Dist.CLIENT)
             {
-                List<BlockPos> thisTick = toProcess.get(evt.world.provider.getDimension());
+                List<BlockPos> thisTick = toProcess.get(evt.world.dimension.getDimension());
                 if (thisTick == null || thisTick.isEmpty()) return;
                 int i = 0;
                 int num = 0;
@@ -194,9 +194,9 @@ public class EventsHandler
 
     public static class ChooseFirst
     {
-        final EntityPlayer player;
+        final PlayerEntity player;
 
-        public ChooseFirst(EntityPlayer player)
+        public ChooseFirst(PlayerEntity player)
         {
             this.player = player;
             if (!SpawnHandler.canSpawnInWorld(player.getEntityWorld())) return;
@@ -213,8 +213,8 @@ public class EventsHandler
                 boolean hasStarter = PokecubeSerializer.getInstance().hasStarter(player);
                 if (hasStarter)
                 {
-                    packet.data.setBoolean("C", false);
-                    packet.data.setBoolean("H", hasStarter);
+                    packet.data.putBoolean("C", false);
+                    packet.data.putBoolean("H", hasStarter);
                 }
                 else
                 {
@@ -261,15 +261,15 @@ public class EventsHandler
      * @param owner
      * @param distance
      * @return */
-    public static List<IPokemob> getPokemobs(EntityLivingBase owner, double distance)
+    public static List<IPokemob> getPokemobs(LivingEntity owner, double distance)
     {
         List<IPokemob> ret = new ArrayList<IPokemob>();
 
         AxisAlignedBB box = new AxisAlignedBB(owner.posX, owner.posY, owner.posZ, owner.posX, owner.posY, owner.posZ)
                 .grow(distance, distance, distance);
 
-        List<EntityLivingBase> pokemobs = owner.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, box);
-        for (EntityLivingBase o : pokemobs)
+        List<LivingEntity> pokemobs = owner.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class, box);
+        for (LivingEntity o : pokemobs)
         {
             IPokemob mob = CapabilityPokemob.getPokemobFor(o);
             if (mob != null)
@@ -284,7 +284,7 @@ public class EventsHandler
         return ret;
     }
 
-    public static void recallAllPokemobsExcluding(EntityPlayer player, IPokemob excluded)
+    public static void recallAllPokemobsExcluding(PlayerEntity player, IPokemob excluded)
     {
         List<Entity> pokemobs = new ArrayList<Entity>(player.getEntityWorld().loadedEntityList);
         for (Entity o : pokemobs)
@@ -313,7 +313,7 @@ public class EventsHandler
                     if (name != null && (name.equalsIgnoreCase(player.getName())
                             || name.equals(player.getCachedUniqueIdString())))
                     {
-                        EntityLivingBase out = mob.sendOut();
+                        LivingEntity out = mob.sendOut();
                         IPokemob poke = CapabilityPokemob.getPokemobFor(out);
                         if (poke != null) poke.returnToPokecube();
                     }
@@ -334,14 +334,14 @@ public class EventsHandler
         CapabilityManager.INSTANCE.register(IMegaCapability.class, new Capability.IStorage<IMegaCapability>()
         {
             @Override
-            public NBTBase writeNBT(Capability<IMegaCapability> capability, IMegaCapability instance, EnumFacing side)
+            public INBT writeNBT(Capability<IMegaCapability> capability, IMegaCapability instance, Direction side)
             {
                 return null;
             }
 
             @Override
-            public void readNBT(Capability<IMegaCapability> capability, IMegaCapability instance, EnumFacing side,
-                    NBTBase nbt)
+            public void readNBT(Capability<IMegaCapability> capability, IMegaCapability instance, Direction side,
+                    INBT nbt)
             {
             }
         }, MegaCapability.Default::new);
@@ -362,14 +362,14 @@ public class EventsHandler
      * @param evt */
     public void breakSpeedCheck(PlayerEvent.BreakSpeed evt)
     {
-        Entity ridden = evt.getEntityLiving().getRidingEntity();
+        Entity ridden = evt.getMobEntity().getRidingEntity();
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(ridden);
         if (pokemob != null)
         {
-            boolean aqua = evt.getEntityPlayer().isInWater();
+            boolean aqua = evt.getPlayerEntity().isInWater();
             if (aqua)
             {
-                aqua = !EnchantmentHelper.getAquaAffinityModifier(evt.getEntityPlayer());
+                aqua = !EnchantmentHelper.getAquaAffinityModifier(evt.getPlayerEntity());
             }
             if (aqua)
             {
@@ -394,7 +394,7 @@ public class EventsHandler
         {
             ItemStack stack = PokecubeItems.getRandomSpawnerDrop();
             if (!CompatWrapper.isValid(stack)) return;
-            EntityItem item = new EntityItem(evt.getWorld(), evt.getPos().getX() + 0.5, evt.getPos().getY() + 0.5,
+            ItemEntity item = new ItemEntity(evt.getWorld(), evt.getPos().getX() + 0.5, evt.getPos().getY() + 0.5,
                     evt.getPos().getZ() + 0.5, stack);
             evt.getWorld().spawnEntity(item);
         }
@@ -453,7 +453,7 @@ public class EventsHandler
         if (evt.getEntity() instanceof IPokemob && evt.getEntity().getEntityData().getBoolean("onShoulder"))
         {
             ((IPokemob) evt.getEntity()).setLogicState(LogicStates.SITTING, false);
-            evt.getEntity().getEntityData().removeTag("onShoulder");
+            evt.getEntity().getEntityData().remove("onShoulder");
         }
         if (evt.getEntity() instanceof EntityCreeper)
         {
@@ -484,15 +484,15 @@ public class EventsHandler
             {
                 PokecubeMod.log(Level.INFO, "Adding " + evt.getAffectedBlocks().size() + " for meteor processing.");
             }
-            meteorprocessor.addBlocks(evt.getAffectedBlocks(), evt.getWorld().provider.getDimension());
+            meteorprocessor.addBlocks(evt.getAffectedBlocks(), evt.getWorld().dimension.getDimension());
         }
     }
 
     @SubscribeEvent
     public void interactEventLeftClick(PlayerInteractEvent.LeftClickBlock evt)
     {
-        if (CompatWrapper.isValid(evt.getEntityPlayer().getHeldItemMainhand())
-                && evt.getEntityPlayer().getHeldItemMainhand().getItem() == Items.STICK)
+        if (CompatWrapper.isValid(evt.getPlayerEntity().getHeldItemMainhand())
+                && evt.getPlayerEntity().getHeldItemMainhand().getItem() == Items.STICK)
         {
             TileEntity te = evt.getWorld().getTileEntity(evt.getPos());
             if (te instanceof TileEntityOwnable)
@@ -513,8 +513,8 @@ public class EventsHandler
     public void interactEvent(PlayerInteractEvent.RightClickBlock evt)
     {
         String ID = "LastSuccessInteractEvent";
-        long time = evt.getEntityPlayer().getEntityData().getLong(ID);
-        if (time == evt.getEntityPlayer().getEntityWorld().getTotalWorldTime())
+        long time = evt.getPlayerEntity().getEntityData().getLong(ID);
+        if (time == evt.getPlayerEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
@@ -525,8 +525,8 @@ public class EventsHandler
     public void interactEvent(PlayerInteractEvent.RightClickItem evt)
     {
         String ID = "LastSuccessInteractEvent";
-        long time = evt.getEntityPlayer().getEntityData().getLong(ID);
-        if (time == evt.getEntityPlayer().getEntityWorld().getTotalWorldTime())
+        long time = evt.getPlayerEntity().getEntityData().getLong(ID);
+        if (time == evt.getPlayerEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
@@ -537,8 +537,8 @@ public class EventsHandler
     public void interactEvent(PlayerInteractEvent.EntityInteractSpecific evt)
     {
         String ID = "LastSuccessInteractEvent";
-        long time = evt.getEntityPlayer().getEntityData().getLong(ID);
-        if (time == evt.getEntityPlayer().getEntityWorld().getTotalWorldTime())
+        long time = evt.getPlayerEntity().getEntityData().getLong(ID);
+        if (time == evt.getPlayerEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
@@ -546,8 +546,8 @@ public class EventsHandler
         processInteract(evt, evt.getTarget());
         if (evt.isCanceled())
         {
-            evt.getEntityPlayer().getEntityData().setLong(ID,
-                    evt.getEntityPlayer().getEntityWorld().getTotalWorldTime());
+            evt.getPlayerEntity().getEntityData().putLong(ID,
+                    evt.getPlayerEntity().getEntityWorld().getGameTime());
         }
     }
 
@@ -555,8 +555,8 @@ public class EventsHandler
     public void interactEvent(PlayerInteractEvent.EntityInteract evt)
     {
         String ID = "LastSuccessInteractEvent";
-        long time = evt.getEntityPlayer().getEntityData().getLong(ID);
-        if (time == evt.getEntityPlayer().getEntityWorld().getTotalWorldTime())
+        long time = evt.getPlayerEntity().getEntityData().getLong(ID);
+        if (time == evt.getPlayerEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
@@ -564,8 +564,8 @@ public class EventsHandler
         processInteract(evt, evt.getTarget());
         if (evt.isCanceled())
         {
-            evt.getEntityPlayer().getEntityData().setLong(ID,
-                    evt.getEntityPlayer().getEntityWorld().getTotalWorldTime());
+            evt.getPlayerEntity().getEntityData().putLong(ID,
+                    evt.getPlayerEntity().getEntityWorld().getGameTime());
         }
     }
 
@@ -574,10 +574,10 @@ public class EventsHandler
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(target);
         if (pokemob != null && !evt.getWorld().isRemote)
         {
-            EntityPlayer player = evt.getEntityPlayer();
-            EnumHand hand = evt.getHand();
+            PlayerEntity player = evt.getPlayerEntity();
+            Hand hand = evt.getHand();
             ItemStack held = player.getHeldItem(hand);
-            EntityLiving entity = pokemob.getEntity();
+            MobEntity entity = pokemob.getEntity();
 
             InteractEvent event = new InteractEvent(pokemob, player, evt);
             MinecraftForge.EVENT_BUS.post(event);
@@ -699,7 +699,7 @@ public class EventsHandler
             if (deny)
             {
                 // Add message here about cannot use items right now
-                player.sendMessage(new TextComponentTranslation("pokemob.action.cannotuse"));
+                player.sendMessage(new TranslationTextComponent("pokemob.action.cannotuse"));
                 return;
             }
 
@@ -832,9 +832,9 @@ public class EventsHandler
         if (!entry.ridable || pokemob.getCombatState(CombatStates.GUARDING)) return false;
         if (!CompatWrapper.isValid(pokemob.getPokemobInventory().getStackInSlot(0))) return false;
 
-        if (rider instanceof EntityPlayerMP && rider == pokemob.getOwner())
+        if (rider instanceof ServerPlayerEntity && rider == pokemob.getOwner())
         {
-            EntityPlayer player = (EntityPlayer) rider;
+            PlayerEntity player = (PlayerEntity) rider;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             Config config = PokecubeMod.core.getConfig();
@@ -849,11 +849,11 @@ public class EventsHandler
         return (dims.y * scale + dims.x * scale) > rider.width && Math.max(dims.x, dims.z) * scale > rider.width * 1.8;
     }
 
-    private boolean handleHmAndSaddle(EntityPlayer entityplayer, IPokemob pokemob)
+    private boolean handleHmAndSaddle(PlayerEntity PlayerEntity, IPokemob pokemob)
     {
-        if (isRidable(entityplayer, pokemob))
+        if (isRidable(PlayerEntity, pokemob))
         {
-            if (entityplayer.isServerWorld()) entityplayer.startRiding(pokemob.getEntity());
+            if (PlayerEntity.isServerWorld()) PlayerEntity.startRiding(pokemob.getEntity());
             return true;
         }
         return false;
@@ -864,7 +864,7 @@ public class EventsHandler
         ItemStack toDrop = dropper.getHeldItem();
         if (!CompatWrapper.isValid(toDrop)) return;
         Entity entity = dropper.getEntity();
-        EntityItem drop = new EntityItem(entity.getEntityWorld(), entity.posX, entity.posY + 0.5, entity.posZ, toDrop);
+        ItemEntity drop = new ItemEntity(entity.getEntityWorld(), entity.posX, entity.posY + 0.5, entity.posZ, toDrop);
         entity.getEntityWorld().spawnEntity(drop);
         dropper.setHeldItem(ItemStack.EMPTY);
     }
@@ -875,13 +875,13 @@ public class EventsHandler
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(event.getEntity());
         if (pokemob != null)
         {
-            event.getEntityLiving().captureDrops = true;
+            event.getMobEntity().captureDrops = true;
             if (!pokemob.getGeneralState(GeneralStates.TAMED))
             {
                 for (int i = 0; i < pokemob.getPokemobInventory().getSizeInventory(); i++)
                 {
                     ItemStack stack = pokemob.getPokemobInventory().getStackInSlot(i);
-                    if (!stack.isEmpty()) event.getEntityLiving().entityDropItem(stack.copy(), 0.0f);
+                    if (!stack.isEmpty()) event.getMobEntity().entityDropItem(stack.copy(), 0.0f);
                     pokemob.getPokemobInventory().setInventorySlotContents(i, ItemStack.EMPTY);
                 }
                 if (pokemob.getPokedexEntry().lootTable == null)
@@ -889,12 +889,12 @@ public class EventsHandler
                     List<ItemStack> drops = pokemob.getPokedexEntry().getRandomDrops(event.getLootingLevel());
                     for (ItemStack stack : drops)
                     {
-                        if (event.getEntityLiving().isBurning() && stack != ItemStack.EMPTY)
+                        if (event.getMobEntity().isBurning() && stack != ItemStack.EMPTY)
                         {
                             ItemStack newDrop = FurnaceRecipes.instance().getSmeltingResult(stack);
                             if (!newDrop.isEmpty()) stack = newDrop.copy();
                         }
-                        if (!stack.isEmpty()) event.getEntityLiving().entityDropItem(stack, 0.5f);
+                        if (!stack.isEmpty()) event.getMobEntity().entityDropItem(stack, 0.5f);
                     }
                 }
             }
@@ -902,7 +902,7 @@ public class EventsHandler
             {
                 event.getDrops().clear();
             }
-            event.getEntityLiving().captureDrops = false;
+            event.getMobEntity().captureDrops = false;
         }
     }
 
@@ -914,7 +914,7 @@ public class EventsHandler
 
         if (killer != null && evt.giveExp)
         {
-            EntityLivingBase owner = killer.getPokemonOwner();
+            LivingEntity owner = killer.getPokemonOwner();
             ItemStack stack = killer.getHeldItem();
             if (Tools.isStack(stack, "luckyegg"))
             {
@@ -958,9 +958,9 @@ public class EventsHandler
 
         // Prevent suffocating the player if they are in wall while riding
         // pokemob.
-        if (evt.getEntityLiving() instanceof EntityPlayer && evt.getSource() == DamageSource.IN_WALL)
+        if (evt.getMobEntity() instanceof PlayerEntity && evt.getSource() == DamageSource.IN_WALL)
         {
-            IPokemob pokemob = CapabilityPokemob.getPokemobFor(evt.getEntityLiving().getRidingEntity());
+            IPokemob pokemob = CapabilityPokemob.getPokemobFor(evt.getMobEntity().getRidingEntity());
             if (pokemob != null) evt.setCanceled(true);
         }
     }
@@ -971,12 +971,12 @@ public class EventsHandler
         DamageSource damageSource = evt.getSource();
         if (damageSource instanceof PokemobDamageSource)
         {
-            damageSource.getImmediateSource().onKillEntity(evt.getEntityLiving());
+            damageSource.getImmediateSource().onKillEntity(evt.getMobEntity());
         }
         IPokemob attacker = CapabilityPokemob.getPokemobFor(damageSource.getImmediateSource());
-        if (attacker != null && damageSource.getImmediateSource() instanceof EntityLiving)
+        if (attacker != null && damageSource.getImmediateSource() instanceof MobEntity)
         {
-            handleExp((EntityLiving) damageSource.getImmediateSource(), attacker, evt.getEntityLiving());
+            handleExp((MobEntity) damageSource.getImmediateSource(), attacker, evt.getMobEntity());
         }
     }
 
@@ -985,22 +985,22 @@ public class EventsHandler
     {
         if (evt.getEntity().getEntityWorld().isRemote || evt.getEntity().isDead) return;
         int tick = Math.max(PokecubeMod.core.getConfig().attackCooldown, 1);
-        if (evt.getEntityLiving().ticksExisted % tick == 0)
+        if (evt.getMobEntity().ticksExisted % tick == 0)
         {
-            IOngoingAffected affected = CapabilityAffected.getAffected(evt.getEntityLiving());
+            IOngoingAffected affected = CapabilityAffected.getAffected(evt.getMobEntity());
             if (affected != null) affected.tick();
         }
 
-        if (evt.getEntityLiving() instanceof EntityPlayer)
+        if (evt.getMobEntity() instanceof PlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) evt.getEntityLiving();
+            PlayerEntity player = (PlayerEntity) evt.getMobEntity();
             BlockPos here;
             BlockPos old;
             here = new BlockPos(MathHelper.floor(player.chasingPosX) >> 4, MathHelper.floor(player.chasingPosY) >> 4,
                     MathHelper.floor(player.chasingPosZ) >> 4);
             old = new BlockPos(MathHelper.floor(player.prevChasingPosX) >> 4,
                     MathHelper.floor(player.prevChasingPosY) >> 4, MathHelper.floor(player.prevChasingPosZ) >> 4);
-            if (!here.equals(old)) SpawnHandler.refreshTerrain(Vector3.getNewVector().set(evt.getEntityLiving()),
+            if (!here.equals(old)) SpawnHandler.refreshTerrain(Vector3.getNewVector().set(evt.getMobEntity()),
                     evt.getEntity().getEntityWorld());
         }
     }
@@ -1018,7 +1018,7 @@ public class EventsHandler
         Entity mob = event.getEntity();
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         if (pokemob == null) { return; }
-        pokemob.setEntity((EntityLiving) mob);
+        pokemob.setEntity((MobEntity) mob);
         pokemob.initAI();
         IAIMob ai = mob.getCapability(IAIMob.THUTMOBAI, null);
         if (ai instanceof AICapWrapper)
@@ -1031,13 +1031,13 @@ public class EventsHandler
     @SubscribeEvent
     public void onEntityCapabilityAttach(AttachCapabilitiesEvent<Entity> event)
     {
-        if (event.getObject() instanceof EntityLivingBase && !event.getCapabilities().containsKey(AFFECTEDCAP))
+        if (event.getObject() instanceof LivingEntity && !event.getCapabilities().containsKey(AFFECTEDCAP))
         {
-            DefaultAffected affected = new DefaultAffected((EntityLivingBase) event.getObject());
+            DefaultAffected affected = new DefaultAffected((LivingEntity) event.getObject());
             event.addCapability(AFFECTEDCAP, affected);
         }
         boolean isPokemob = false;
-        if (PokemobGenes.isRegistered((Class<? extends EntityLiving>) event.getObject().getClass())
+        if (PokemobGenes.isRegistered((Class<? extends MobEntity>) event.getObject().getClass())
                 && !event.getCapabilities().containsKey(POKEMOBCAP))
         {
             DefaultPokemob pokemob = new DefaultPokemob();
@@ -1045,7 +1045,7 @@ public class EventsHandler
             AICapWrapper aiCap = new AICapWrapper(pokemob);
             DataSync_Impl data = new DataSync_Impl();
             pokemob.setDataSync(data);
-            pokemob.setEntity((EntityLiving) event.getObject());
+            pokemob.setEntity((MobEntity) event.getObject());
             pokemob.genes = genes.getCapability(IMobGenetics.GENETICS_CAP, null);
             event.addCapability(GeneticsManager.POKECUBEGENETICS, genes);
             event.addCapability(POKEMOBCAP, pokemob);
@@ -1056,31 +1056,31 @@ public class EventsHandler
 
         if (isPokemob || event.getObject() instanceof EntityProfessor)
         {
-            class Provider extends GuardAICapability implements ICapabilitySerializable<NBTTagCompound>
+            class Provider extends GuardAICapability implements ICapabilitySerializable<CompoundNBT>
             {
                 @Override
-                public void deserializeNBT(NBTTagCompound nbt)
+                public void deserializeNBT(CompoundNBT nbt)
                 {
                     storage.readNBT(GUARDAI_CAP, this, null, nbt);
                 }
 
                 @Override
-                public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+                public <T> T getCapability(Capability<T> capability, Direction facing)
                 {
                     if (GUARDAI_CAP != null && capability == GUARDAI_CAP) return GUARDAI_CAP.cast(this);
                     return null;
                 }
 
                 @Override
-                public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+                public boolean hasCapability(Capability<?> capability, Direction facing)
                 {
                     return GUARDAI_CAP != null && capability == GUARDAI_CAP;
                 }
 
                 @Override
-                public NBTTagCompound serializeNBT()
+                public CompoundNBT serializeNBT()
                 {
-                    return (NBTTagCompound) storage.writeNBT(GUARDAI_CAP, this, null);
+                    return (CompoundNBT) storage.writeNBT(GUARDAI_CAP, this, null);
                 }
             }
             event.addCapability(new ResourceLocation("pokecube:guardai"), new Provider());
@@ -1090,12 +1090,12 @@ public class EventsHandler
     @SubscribeEvent
     public void PlayerLoggin(PlayerLoggedInEvent evt)
     {
-        EntityPlayer entityPlayer = evt.player;
+        PlayerEntity PlayerEntity = evt.player;
         if (!evt.player.getEntityWorld().isRemote)
         {
-            PacketDataSync.sendInitHandshake(entityPlayer);
-            PacketDataSync.sendInitPacket(entityPlayer, "pokecube-data");
-            PacketDataSync.sendInitPacket(entityPlayer, "pokecube-stats");
+            PacketDataSync.sendInitHandshake(PlayerEntity);
+            PacketDataSync.sendInitPacket(PlayerEntity, "pokecube-data");
+            PacketDataSync.sendInitPacket(PlayerEntity, "pokecube-stats");
         }
 
         if (evt.player != null)
@@ -1113,7 +1113,7 @@ public class EventsHandler
     @SubscribeEvent
     public void TickEvent(WorldTickEvent evt)
     {
-        if (evt.phase == Phase.END && evt.side != Side.CLIENT && !Database.spawnables.isEmpty())
+        if (evt.phase == Phase.END && evt.side != Dist.CLIENT && !Database.spawnables.isEmpty())
         {
             PokecubeCore.instance.spawner.tick(evt.world);
         }
@@ -1153,7 +1153,7 @@ public class EventsHandler
     @SubscribeEvent
     public void WorldSave(WorldEvent.Save evt)
     {
-        if (FMLCommonHandler.instance().getSide() == Side.SERVER && evt.getWorld().provider.getDimension() == 0)
+        if (FMLCommonHandler.instance().getSide() == Dist.DEDICATED_SERVER && evt.getWorld().dimension.getDimension() == 0)
         {
             long time = System.nanoTime();
             PokecubeSerializer.getInstance().save();
@@ -1165,18 +1165,18 @@ public class EventsHandler
     @SubscribeEvent
     public void PokecubeWatchEvent(StartTracking event)
     {
-        if (event.getTarget() instanceof EntityPokecube && event.getEntityPlayer() instanceof EntityPlayerMP)
+        if (event.getTarget() instanceof EntityPokecube && event.getPlayerEntity() instanceof ServerPlayerEntity)
         {
             EntityPokecube pokecube = (EntityPokecube) event.getTarget();
-            if (pokecube.isLoot && pokecube.cannotCollect(event.getEntityPlayer()))
+            if (pokecube.isLoot && pokecube.cannotCollect(event.getPlayerEntity()))
             {
-                PacketPokecube.sendMessage(event.getEntityPlayer(), pokecube.getEntityId(),
-                        pokecube.world.getTotalWorldTime() + pokecube.resetTime);
+                PacketPokecube.sendMessage(event.getPlayerEntity(), pokecube.getEntityId(),
+                        pokecube.world.getGameTime() + pokecube.resetTime);
             }
         }
     }
 
-    private void handleExp(EntityLiving pokemob, IPokemob attacker, EntityLivingBase attacked)
+    private void handleExp(MobEntity pokemob, IPokemob attacker, LivingEntity attacked)
     {
         IPokemob attackedMob = CapabilityPokemob.getPokemobFor(attacked);
         if (PokecubeMod.core.getConfig().nonPokemobExp && attackedMob == null)
@@ -1201,7 +1201,7 @@ public class EventsHandler
         {
             boolean giveExp = !attackedMob.isShadow();
             boolean pvp = attackedMob.getGeneralState(GeneralStates.TAMED)
-                    && (attackedMob.getPokemonOwner() instanceof EntityPlayer);
+                    && (attackedMob.getPokemonOwner() instanceof PlayerEntity);
             if (pvp && !PokecubeMod.core.getConfig().pvpExp)
             {
                 giveExp = false;
@@ -1228,10 +1228,10 @@ public class EventsHandler
             }
             Entity targetOwner = attackedMob.getPokemonOwner();
             attacker.displayMessageToOwner(
-                    new TextComponentTranslation("pokemob.action.faint.enemy", attackedMob.getPokemonDisplayName()));
-            if (targetOwner instanceof EntityPlayer && attacker.getPokemonOwner() != targetOwner)
+                    new TranslationTextComponent("pokemob.action.faint.enemy", attackedMob.getPokemonDisplayName()));
+            if (targetOwner instanceof PlayerEntity && attacker.getPokemonOwner() != targetOwner)
             {
-                pokemob.setAttackTarget((EntityLivingBase) targetOwner);
+                pokemob.setAttackTarget((LivingEntity) targetOwner);
             }
             else
             {

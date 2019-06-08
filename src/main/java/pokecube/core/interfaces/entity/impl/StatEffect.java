@@ -1,7 +1,7 @@
 package pokecube.core.interfaces.entity.impl;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
@@ -70,7 +70,7 @@ public class StatEffect extends BaseEffect
             return;
         }
         boolean up = amount > 0;
-        EntityLivingBase entity = target.getEntity();
+        LivingEntity entity = target.getEntity();
         int duration = PokecubeMod.core.getConfig().attackCooldown + 10;
         switch (stat)
         {
@@ -138,7 +138,7 @@ public class StatEffect extends BaseEffect
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         this.stat = Stats.values()[nbt.getByte("S")];
         this.amount = nbt.getByte("A");
@@ -146,9 +146,9 @@ public class StatEffect extends BaseEffect
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound tag = super.serializeNBT();
+        CompoundNBT tag = super.serializeNBT();
         tag.setByte("S", (byte) stat.ordinal());
         tag.setByte("A", amount);
         return tag;

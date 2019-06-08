@@ -6,7 +6,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -19,7 +19,7 @@ import pokecube.core.network.PokecubePacketHandler;
 
 public class PacketPokemobMessage implements IMessage, IMessageHandler<PacketPokemobMessage, IMessage>
 {
-    public static void sendMessage(EntityPlayer sendTo, int senderId, ITextComponent message)
+    public static void sendMessage(PlayerEntity sendTo, int senderId, ITextComponent message)
     {
         PacketPokemobMessage toSend = new PacketPokemobMessage(message, senderId);
         PokecubePacketHandler.sendToClient(toSend, sendTo);
@@ -77,7 +77,7 @@ public class PacketPokemobMessage implements IMessage, IMessageHandler<PacketPok
 
     void processMessage(MessageContext ctx, PacketPokemobMessage message)
     {
-        EntityPlayer player = PokecubeCore.getPlayer(null);
+        PlayerEntity player = PokecubeCore.getPlayer(null);
         int id = message.senderId;
         ITextComponent component = message.message;
         Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, false);

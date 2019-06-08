@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -23,7 +23,7 @@ import thut.api.maths.Vector3;
 
 public class AIDodge extends AIBase implements IAICombat
 {
-    final EntityLiving attacker;
+    final MobEntity attacker;
     final IPokemob     pokemob;
     Entity             target;
     double             movementSpeed;

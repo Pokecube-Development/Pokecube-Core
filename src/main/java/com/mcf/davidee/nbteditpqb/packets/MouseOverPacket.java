@@ -26,7 +26,7 @@ public class MouseOverPacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(MouseOverPacket message, MessageContext ctx) {
-			RayTraceResult pos = Minecraft.getMinecraft().objectMouseOver;
+			RayTraceResult pos = Minecraft.getInstance().objectMouseOver;
 			if (pos != null) {
 				if (pos.entityHit != null) {
 					return new EntityRequestPacket(pos.entityHit.getEntityId());

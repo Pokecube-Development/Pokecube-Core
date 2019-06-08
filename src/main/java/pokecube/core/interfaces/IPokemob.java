@@ -3,18 +3,18 @@
  */
 package pokecube.core.interfaces;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.api.distmarker.Dist;
@@ -166,8 +166,8 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     default ITextComponent getPokemonDisplayName()
     {
         if (this.getPokemonNickname().isEmpty())
-            return new TextComponentTranslation(getPokedexEntry().getUnlocalizedName());
-        return new TextComponentString(this.getPokemonNickname());
+            return new TranslationTextComponent(getPokedexEntry().getUnlocalizedName());
+        return new StringTextComponent(this.getPokemonNickname());
     }
 
     /** Note: This only returns a unique number for player owned pokemobs. All
@@ -205,7 +205,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     /** Returns the texture path.
      * 
      * @return */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     ResourceLocation getTexture();
 
     boolean hasHomeArea();
@@ -216,7 +216,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     /** Returns modified texture to account for shininess, animation, etc.
      * 
      * @return */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     ResourceLocation modifyTexture(ResourceLocation texture);
 
     /** This method should only be used to update any Alleles objects that are
@@ -254,7 +254,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
 
     default void setHeldItem(ItemStack stack)
     {
-        getEntity().setHeldItem(EnumHand.MAIN_HAND, stack);
+        getEntity().setHeldItem(Hand.MAIN_HAND, stack);
     }
 
     default ItemStack getHeldItem()
@@ -293,7 +293,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
      * 
      * @param mob
      * @return */
-    default ItemStack wildHeldItem(EntityLiving mob)
+    default ItemStack wildHeldItem(MobEntity mob)
     {
         return this.getPokedexEntry().getRandomHeldItem(mob);
     }
@@ -325,9 +325,9 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
      * @param amount */
     void setFlavourAmount(int index, int amount);
 
-    void readPokemobData(NBTTagCompound tag);
+    void readPokemobData(CompoundNBT tag);
 
-    NBTTagCompound writePokemobData();
+    CompoundNBT writePokemobData();
 
     /** If this is larger than 0, the pokemob shouldn't be allowed to attack. */
     @Override
@@ -337,7 +337,7 @@ public interface IPokemob extends IHasMobAIStates, IHasMoves, ICanEvolve, IHasOw
     @Override
     void setAttackCooldown(int timer);
 
-    default boolean moveToShoulder(EntityPlayer player)
+    default boolean moveToShoulder(PlayerEntity player)
     {
         return false;
     }

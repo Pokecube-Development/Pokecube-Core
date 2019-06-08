@@ -1,9 +1,9 @@
 package pokecube.core.interfaces.pokemob;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.events.pokemob.combat.MoveUse;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -117,7 +117,7 @@ public interface IHasMoves extends IHasStats
     /** Called to notify the pokemob that a new target has been set.
      * 
      * @param entity */
-    void onSetTarget(EntityLivingBase entity);
+    void onSetTarget(LivingEntity entity);
 
     /** @return entityId of our target. */
     int getTargetID();
@@ -209,7 +209,7 @@ public interface IHasMoves extends IHasStats
         if (moveName == null || getEntity().getEntityWorld() == null || getEntity().getEntityWorld().isRemote) return;
         if (!MovesUtils.isMoveImplemented(moveName)) { return; }
         String[] moves = getMoves();
-        EntityLivingBase thisEntity = getEntity();
+        LivingEntity thisEntity = getEntity();
         IPokemob thisMob = CapabilityPokemob.getPokemobFor(thisEntity);
         // check it's not already known or forgotten
         for (String move : moves)
@@ -219,8 +219,8 @@ public interface IHasMoves extends IHasStats
 
         if (thisMob.getPokemonOwner() != null && !thisEntity.isDead)
         {
-            ITextComponent move = new TextComponentTranslation(MovesUtils.getUnlocalizedMove(moveName));
-            ITextComponent mess = new TextComponentTranslation("pokemob.move.notify.learn",
+            ITextComponent move = new TranslationTextComponent(MovesUtils.getUnlocalizedMove(moveName));
+            ITextComponent mess = new TranslationTextComponent("pokemob.move.notify.learn",
                     thisMob.getPokemonDisplayName(), move);
             thisMob.displayMessageToOwner(mess);
         }
@@ -253,7 +253,7 @@ public interface IHasMoves extends IHasStats
                     }
                     ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.move.notify.learn", "",
                             thisMob.getPokemonDisplayName().getFormattedText(),
-                            new TextComponentTranslation(MovesUtils.getUnlocalizedMove(moveName)));
+                            new TranslationTextComponent(MovesUtils.getUnlocalizedMove(moveName)));
                     thisMob.displayMessageToOwner(mess);
                     if (!getMoveStats().newMoves.contains(moveName))
                     {

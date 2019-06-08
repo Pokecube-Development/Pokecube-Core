@@ -14,7 +14,7 @@ import net.java.games.input.Keyboard;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import pokecube.core.client.gui.watch.GuiPokeWatch;
 import pokecube.core.database.Database;
@@ -80,7 +80,7 @@ public class PerMobProgress extends Progress
                     public boolean apply(Entity input)
                     {
                         IPokemob pokemob;
-                        if (!(input instanceof EntityAnimal
+                        if (!(input instanceof AnimalEntity
                                 && (pokemob = CapabilityPokemob.getPokemobFor(input)) != null))
                             return false;
                         return pokemob.getPokedexEntry() == entry;

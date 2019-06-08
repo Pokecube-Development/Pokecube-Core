@@ -4,7 +4,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
@@ -13,7 +13,7 @@ import pokecube.core.network.PokecubePacketHandler;
 
 public class PacketPokecube implements IMessage, IMessageHandler<PacketPokecube, IMessage>
 {
-    public static void sendMessage(EntityPlayer player, int id, long renderTime)
+    public static void sendMessage(PlayerEntity player, int id, long renderTime)
     {
         PacketPokecube toSend = new PacketPokecube(id, renderTime);
         PokecubePacketHandler.sendToClient(toSend, player);

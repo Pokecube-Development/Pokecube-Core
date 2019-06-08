@@ -10,12 +10,12 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -39,8 +39,8 @@ public class WearablesCompat
 {
     public abstract static class WearablesRenderer
     {
-        @SideOnly(Side.CLIENT)
-        public abstract void renderWearable(thut.wearables.EnumWearable slot, EntityLivingBase wearer, ItemStack stack,
+        @OnlyIn(Dist.CLIENT)
+        public abstract void renderWearable(thut.wearables.EnumWearable slot, LivingEntity wearer, ItemStack stack,
                 float partialTicks);
     }
 
@@ -53,16 +53,16 @@ public class WearablesCompat
         renderers.put("pokewatch", new WearablesRenderer()
         {
             // 2 layers of belt rendering for the different colours.
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             private X3dModel         model;
 
             // Textures for each belt layer.
             private ResourceLocation strap;
             private ResourceLocation watch;
 
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             @Override
-            public void renderWearable(EnumWearable slot, EntityLivingBase wearer, ItemStack stack, float partialTicks)
+            public void renderWearable(EnumWearable slot, LivingEntity wearer, ItemStack stack, float partialTicks)
             {
                 if (slot != EnumWearable.WRIST) return;
                 if (model == null)
@@ -85,11 +85,11 @@ public class WearablesCompat
                 GL11.glTranslatef(dx, dy, dz);
                 GL11.glScalef(sx * 0.75f, sy, sz);
                 GL11.glRotatef(-90, 1, 0, 0);
-                Minecraft.getMinecraft().renderEngine.bindTexture(strap);
+                Minecraft.getInstance().renderEngine.bindTexture(strap);
                 EnumDyeColor ret = EnumDyeColor.GRAY;
-                if (stack.hasTagCompound() && stack.getTagCompound().hasKey("dyeColour"))
+                if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
                 {
-                    int damage = stack.getTagCompound().getInteger("dyeColour");
+                    int damage = stack.getTag().getInteger("dyeColour");
                     ret = EnumDyeColor.byDyeDamage(damage);
                 }
                 Color colour = new Color(ret.getColorValue() + 0xFF000000);
@@ -103,7 +103,7 @@ public class WearablesCompat
                 GL11.glTranslatef(dx, dy, dz);
                 GL11.glScalef(sx, sy, sz);
                 GL11.glRotatef(-90, 1, 0, 0);
-                Minecraft.getMinecraft().renderEngine.bindTexture(watch);
+                Minecraft.getInstance().renderEngine.bindTexture(watch);
                 model.renderOnly("watch");
                 GL11.glPopMatrix();
 
@@ -113,12 +113,12 @@ public class WearablesCompat
         {
             // rings use own model, so only 1 layer here, ring model handles own
             // textures.
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             private ModelRing ring;
 
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             @Override
-            public void renderWearable(EnumWearable slot, EntityLivingBase wearer, ItemStack stack, float partialTicks)
+            public void renderWearable(EnumWearable slot, LivingEntity wearer, ItemStack stack, float partialTicks)
             {
                 if (slot != EnumWearable.FINGER) return;
                 if (ring == null) ring = new ModelRing();
@@ -129,16 +129,16 @@ public class WearablesCompat
         renderers.put("belt", new WearablesRenderer()
         {
             // 2 layers of belt rendering for the different colours.
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             private X3dModel         belt;
 
             // Textures for each belt layer.
             private ResourceLocation keystone;
             private ResourceLocation belt_2;
 
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             @Override
-            public void renderWearable(EnumWearable slot, EntityLivingBase wearer, ItemStack stack, float partialTicks)
+            public void renderWearable(EnumWearable slot, LivingEntity wearer, ItemStack stack, float partialTicks)
             {
                 if (slot != EnumWearable.WAIST) return;
                 if (belt == null)
@@ -160,7 +160,7 @@ public class WearablesCompat
                 GL11.glScalef(s, s, s);
                 GL11.glRotatef(90, 1, 0, 0);
                 GL11.glRotatef(180, 0, 1, 0);
-                Minecraft.getMinecraft().renderEngine.bindTexture(keystone);
+                Minecraft.getInstance().renderEngine.bindTexture(keystone);
                 GL11.glRotatef(90, 1, 0, 0);
                 belt.renderOnly("stone");
                 GL11.glPopMatrix();
@@ -170,11 +170,11 @@ public class WearablesCompat
                 GL11.glScalef(s, s, s);
                 GL11.glRotatef(90, 1, 0, 0);
                 GL11.glRotatef(180, 0, 1, 0);
-                Minecraft.getMinecraft().renderEngine.bindTexture(belt_2);
+                Minecraft.getInstance().renderEngine.bindTexture(belt_2);
                 EnumDyeColor ret = EnumDyeColor.GRAY;
-                if (stack.hasTagCompound() && stack.getTagCompound().hasKey("dyeColour"))
+                if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
                 {
-                    int damage = stack.getTagCompound().getInteger("dyeColour");
+                    int damage = stack.getTag().getInteger("dyeColour");
                     ret = EnumDyeColor.byDyeDamage(damage);
                 }
                 Color colour = new Color(ret.getColorValue() + 0xFF000000);
@@ -189,16 +189,16 @@ public class WearablesCompat
         renderers.put("hat", new WearablesRenderer()
         {
             // 2 layers of hat rendering for the different colours.
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             X3dModel                 hat;
 
             // Textures for each hat layer.
             private ResourceLocation hat_1 = new ResourceLocation(PokecubeCore.ID, "textures/worn/hat.png");
             private ResourceLocation hat_2 = new ResourceLocation(PokecubeCore.ID, "textures/worn/hat2.png");
 
-            @SideOnly(Side.CLIENT)
+            @OnlyIn(Dist.CLIENT)
             @Override
-            public void renderWearable(EnumWearable slot, EntityLivingBase wearer, ItemStack stack, float partialTicks)
+            public void renderWearable(EnumWearable slot, LivingEntity wearer, ItemStack stack, float partialTicks)
             {
                 if (slot != EnumWearable.HAT) return;
 
@@ -207,7 +207,7 @@ public class WearablesCompat
                     hat = new X3dModel(new ResourceLocation(PokecubeMod.ID, "models/worn/hat.x3d"));
                 }
 
-                Minecraft minecraft = Minecraft.getMinecraft();
+                Minecraft minecraft = Minecraft.getInstance();
                 GlStateManager.pushMatrix();
                 float s = 0.285f;
                 GL11.glScaled(s, -s, -s);
@@ -224,9 +224,9 @@ public class WearablesCompat
                 GL11.glScaled(s * 0.995f, -s * 0.995f, -s * 0.995f);
                 minecraft.renderEngine.bindTexture(hat_2);
                 EnumDyeColor ret = EnumDyeColor.RED;
-                if (stack.hasTagCompound() && stack.getTagCompound().hasKey("dyeColour"))
+                if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
                 {
-                    int damage = stack.getTagCompound().getInteger("dyeColour");
+                    int damage = stack.getTag().getInteger("dyeColour");
                     ret = EnumDyeColor.byDyeDamage(damage);
                 }
                 Color colour = new Color(ret.getColorValue() + 0xFF000000);
@@ -249,7 +249,7 @@ public class WearablesCompat
         MegaCapability.checker = new RingChecker()
         {
             @Override
-            public boolean canMegaEvolve(EntityPlayer player, PokedexEntry toEvolve)
+            public boolean canMegaEvolve(PlayerEntity player, PokedexEntry toEvolve)
             {
                 Set<ItemStack> worn = thut.wearables.ThutWearables.getWearables(player).getWearables();
                 for (ItemStack stack : worn)
@@ -305,9 +305,9 @@ public class WearablesCompat
             return thut.wearables.EnumWearable.valueOf(getSlotSt(stack));
         }
 
-        @SideOnly(Side.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         @Override
-        public void renderWearable(thut.wearables.EnumWearable slot, EntityLivingBase wearer, ItemStack stack,
+        public void renderWearable(thut.wearables.EnumWearable slot, LivingEntity wearer, ItemStack stack,
                 float partialTicks)
         {
             WearablesRenderer renderer = renderers.get(getVariant(stack));
@@ -315,13 +315,13 @@ public class WearablesCompat
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == WEARABLE_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? IActiveWearable.WEARABLE_CAP.cast(this) : null;
         }
@@ -342,9 +342,9 @@ public class WearablesCompat
             return thut.wearables.EnumWearable.WRIST;
         }
 
-        @SideOnly(Side.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         @Override
-        public void renderWearable(thut.wearables.EnumWearable slot, EntityLivingBase wearer, ItemStack stack,
+        public void renderWearable(thut.wearables.EnumWearable slot, LivingEntity wearer, ItemStack stack,
                 float partialTicks)
         {
             WearablesRenderer renderer = renderers.get("pokewatch");
@@ -352,13 +352,13 @@ public class WearablesCompat
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == WEARABLE_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? IActiveWearable.WEARABLE_CAP.cast(this) : null;
         }

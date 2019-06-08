@@ -19,7 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import pokecube.core.client.gui.GuiPokedex;
 import pokecube.core.client.gui.watch.pokemob.Breeding;
 import pokecube.core.client.gui.watch.pokemob.Description;
@@ -368,18 +368,18 @@ public class PokemobInfoPage extends PageWithSubPages
             // Draw the icon indicating capture/inspect status.
             watch.mc.renderEngine.bindTexture(GuiPokeWatch.TEXTURE);
             PokedexEntry pokedexEntry = pokemob.getPokedexEntry();
-            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getMinecraft().player)
+            PokecubePlayerStats stats = PlayerDataHandler.getInstance().getPlayerData(Minecraft.getInstance().player)
                     .getData(PokecubePlayerStats.class);
-            boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getMinecraft().player) > 0
-                    || StatsCollector.getHatched(pokedexEntry, Minecraft.getMinecraft().player) > 0)
+            boolean fullColour = (StatsCollector.getCaptured(pokedexEntry, Minecraft.getInstance().player) > 0
+                    || StatsCollector.getHatched(pokedexEntry, Minecraft.getInstance().player) > 0)
                     || mc.player.capabilities.isCreativeMode;
 
             // Megas Inherit colouring from the base form.
             if (!fullColour && pokedexEntry.isMega)
             {
                 fullColour = (StatsCollector.getCaptured(pokedexEntry.getBaseForme(),
-                        Minecraft.getMinecraft().player) > 0
-                        || StatsCollector.getHatched(pokedexEntry.getBaseForme(), Minecraft.getMinecraft().player) > 0);
+                        Minecraft.getInstance().player) > 0
+                        || StatsCollector.getHatched(pokedexEntry.getBaseForme(), Minecraft.getInstance().player) > 0);
             }
 
             // Select which box to draw via position.
@@ -404,7 +404,7 @@ public class PokemobInfoPage extends PageWithSubPages
 
             if (!pokemob.getEntity().addedToChunk)
             {
-                EntityLivingBase player = watch.player;
+                LivingEntity player = watch.player;
                 EntityTools.copyEntityTransforms(pokemob.getEntity(), player);
             }
 

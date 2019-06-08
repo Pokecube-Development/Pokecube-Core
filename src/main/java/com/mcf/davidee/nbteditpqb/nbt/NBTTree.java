@@ -11,17 +11,17 @@ import com.mcf.davidee.nbteditpqb.NBTEdit;
 import com.mcf.davidee.nbteditpqb.NBTHelper;
 import com.mcf.davidee.nbteditpqb.NBTStringHelper;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 
 public class NBTTree {
 	
-	private NBTTagCompound baseTag;
+	private CompoundNBT baseTag;
 	
 	private Node<NamedNBT> root;
 	
-	public NBTTree (NBTTagCompound tag){
+	public NBTTree (CompoundNBT tag){
 		baseTag = tag;
 		construct();
 	}
@@ -66,21 +66,21 @@ public class NBTTree {
 	}
 	
 	public void addChildrenToTree(Node<NamedNBT> parent){
-		NBTBase tag = parent.getObject().getNBT();
-		if (tag instanceof NBTTagCompound){
-			Map<String,NBTBase> map =  NBTHelper.getMap((NBTTagCompound)tag);
-			for (Entry<String,NBTBase> entry : map.entrySet()){
-				NBTBase base = entry.getValue();
+		INBT tag = parent.getObject().getNBT();
+		if (tag instanceof CompoundNBT){
+			Map<String,INBT> map =  NBTHelper.getMap((CompoundNBT)tag);
+			for (Entry<String,INBT> entry : map.entrySet()){
+				INBT base = entry.getValue();
 				Node<NamedNBT> child = new Node<>(parent, new NamedNBT(entry.getKey(), base));
 				parent.addChild(child);
 				addChildrenToTree(child);
 			}
 			
 		}
-		else if (tag instanceof NBTTagList){
-			NBTTagList list = (NBTTagList)tag;
-			for (int i =0; i < list.tagCount(); ++ i){
-				NBTBase base = NBTHelper.getTagAt(list, i);
+		else if (tag instanceof ListNBT){
+			ListNBT list = (ListNBT)tag;
+			for (int i =0; i < list.size(); ++ i){
+				INBT base = NBTHelper.getTagAt(list, i);
 				Node<NamedNBT> child = new Node<>(parent, new NamedNBT(base));
 				parent.addChild(child);
 				addChildrenToTree(child);
@@ -88,41 +88,41 @@ public class NBTTree {
 		}
 	}
 	
-	public NBTTagCompound toNBTTagCompound(){
-		NBTTagCompound tag = new NBTTagCompound();
+	public CompoundNBT toCompoundNBT(){
+		CompoundNBT tag = new CompoundNBT();
 		addChildrenToTag(root, tag);
 		return tag;
 	}
 	
-	public void addChildrenToTag (Node<NamedNBT> parent, NBTTagCompound tag){
+	public void addChildrenToTag (Node<NamedNBT> parent, CompoundNBT tag){
 		for (Node<NamedNBT> child : parent.getChildren()){
-			NBTBase base = child.getObject().getNBT();
+			INBT base = child.getObject().getNBT();
 			String name = child.getObject().getName();
-			if (base instanceof NBTTagCompound){
-				NBTTagCompound newTag = new NBTTagCompound();
+			if (base instanceof CompoundNBT){
+				CompoundNBT newTag = new CompoundNBT();
 				addChildrenToTag(child, newTag);
-				tag.setTag(name, newTag);
+				tag.put(name, newTag);
 			}
-			else if (base instanceof NBTTagList){
-				NBTTagList list = new NBTTagList();
+			else if (base instanceof ListNBT){
+				ListNBT list = new ListNBT();
 				addChildrenToList(child, list);
-				tag.setTag(name, list);
+				tag.put(name, list);
 			}
 			else
-				tag.setTag(name, base.copy());
+				tag.put(name, base.copy());
 		}
 	}
 	
-	public void addChildrenToList(Node<NamedNBT> parent, NBTTagList list){
+	public void addChildrenToList(Node<NamedNBT> parent, ListNBT list){
 		for (Node<NamedNBT> child: parent.getChildren()){
-			NBTBase base = child.getObject().getNBT();
-			if (base instanceof NBTTagCompound){
-				NBTTagCompound newTag = new NBTTagCompound();
+			INBT base = child.getObject().getNBT();
+			if (base instanceof CompoundNBT){
+				CompoundNBT newTag = new CompoundNBT();
 				addChildrenToTag(child, newTag);
 				list.appendTag(newTag);
 			}
-			else if (base instanceof NBTTagList){
-				NBTTagList newList = new NBTTagList();
+			else if (base instanceof ListNBT){
+				ListNBT newList = new ListNBT();
 				addChildrenToList(child, newList);
 				list.appendTag(newList);
 			}

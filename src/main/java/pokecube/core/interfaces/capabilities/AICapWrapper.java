@@ -1,8 +1,8 @@
 package pokecube.core.interfaces.capabilities;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -13,12 +13,12 @@ import thut.api.entity.ai.IAIMob;
 import thut.api.entity.ai.IAIRunnable;
 import thut.api.entity.ai.ILogicRunnable;
 
-public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompound>
+public class AICapWrapper implements IAIMob, ICapabilitySerializable<CompoundNBT>
 {
     public static final ResourceLocation AICAP = new ResourceLocation(PokecubeCore.ID, "ai");
 
     final DefaultPokemob                 wrapped;
-    private NBTTagCompound               read  = null;
+    private CompoundNBT               read  = null;
 
     public AICapWrapper(DefaultPokemob wrapped)
     {
@@ -29,10 +29,10 @@ public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompo
     public void init()
     {
         if (read == null) return;
-        NBTTagCompound nbt = read;
+        CompoundNBT nbt = read;
         read = null;
-        NBTTagCompound aiTag = nbt.getCompoundTag("ai");
-        NBTTagCompound logicTag = nbt.getCompoundTag("logic");
+        CompoundNBT aiTag = nbt.getCompound("ai");
+        CompoundNBT logicTag = nbt.getCompound("logic");
         for (IAIRunnable runnable : getAI().aiTasks)
         {
             if (runnable instanceof INBTSerializable)
@@ -74,42 +74,42 @@ public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompo
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(Capability<?> capability, Direction facing)
     {
         return capability == THUTMOBAI;
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(Capability<T> capability, Direction facing)
     {
         if (hasCapability(capability, facing)) return THUTMOBAI.cast(this);
         return null;
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound savedAI = new NBTTagCompound();
-        NBTTagCompound savedLogic = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
+        CompoundNBT savedAI = new CompoundNBT();
+        CompoundNBT savedLogic = new CompoundNBT();
         for (IAIRunnable runnable : getAI().aiTasks)
         {
             if (runnable instanceof INBTSerializable<?>)
             {
-                NBTBase base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedAI.setTag(runnable.getIdentifier(), base);
+                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
+                savedAI.put(runnable.getIdentifier(), base);
             }
         }
         for (ILogicRunnable runnable : getAI().aiLogic)
         {
             if (runnable instanceof INBTSerializable<?>)
             {
-                NBTBase base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedLogic.setTag(runnable.getIdentifier(), base);
+                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
+                savedLogic.put(runnable.getIdentifier(), base);
             }
         }
-        tag.setTag("ai", savedAI);
-        tag.setTag("logic", savedLogic);
+        tag.put("ai", savedAI);
+        tag.put("logic", savedLogic);
         if (read != null && savedAI.hasNoTags() && savedLogic.hasNoTags())
         {
             tag = read;
@@ -118,7 +118,7 @@ public class AICapWrapper implements IAIMob, ICapabilitySerializable<NBTTagCompo
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         read = nbt;
     }

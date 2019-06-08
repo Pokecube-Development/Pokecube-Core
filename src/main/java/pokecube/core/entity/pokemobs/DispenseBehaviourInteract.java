@@ -11,13 +11,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.RegistryDefaulted;
@@ -47,13 +47,13 @@ public class DispenseBehaviourInteract implements IBehaviorDispenseItem
     @Override
     public ItemStack dispense(IBlockSource source, ItemStack stack)
     {
-        EnumFacing dir = null;
+        Direction dir = null;
         IBlockState state = source.getBlockState();
         for (IProperty<?> prop : state.getPropertyKeys())
         {
-            if (prop.getValueClass() == EnumFacing.class)
+            if (prop.getValueClass() == Direction.class)
             {
-                dir = (EnumFacing) state.getValue(prop);
+                dir = (Direction) state.getValue(prop);
                 break;
             }
         }
@@ -65,23 +65,23 @@ public class DispenseBehaviourInteract implements IBehaviorDispenseItem
 
         Vector3 loc = Vector3.getNewVector().set(source.getBlockPos().offset(dir));
         AxisAlignedBB box = loc.getAABB().grow(2);
-        List<EntityLiving> mobs = source.getWorld().getEntitiesWithinAABB(EntityLiving.class, box);
+        List<MobEntity> mobs = source.getWorld().getEntitiesWithinAABB(MobEntity.class, box);
         Collections.shuffle(mobs);
         if (!mobs.isEmpty())
         {
             player.inventory.clear();
-            player.setHeldItem(EnumHand.MAIN_HAND, stack);
+            player.setHeldItem(Hand.MAIN_HAND, stack);
 
             EnumActionResult cancelResult = net.minecraftforge.common.ForgeHooks.onInteractEntityAt(player, mobs.get(0),
-                    new Vec3d(0, 0, 0), EnumHand.MAIN_HAND);
+                    new Vec3d(0, 0, 0), Hand.MAIN_HAND);
             if (cancelResult == null) cancelResult = net.minecraftforge.common.ForgeHooks.onInteractEntity(player,
-                    mobs.get(0), EnumHand.MAIN_HAND);
+                    mobs.get(0), Hand.MAIN_HAND);
 
-            boolean interacted = cancelResult != null || mobs.get(0).processInitialInteract(player, EnumHand.MAIN_HAND);
+            boolean interacted = cancelResult != null || mobs.get(0).processInitialInteract(player, Hand.MAIN_HAND);
             boolean result = false;
             if (!interacted)
             {
-                result = stack.interactWithEntity(player, mobs.get(0), EnumHand.MAIN_HAND);
+                result = stack.interactWithEntity(player, mobs.get(0), Hand.MAIN_HAND);
             }
             for (ItemStack stack3 : player.inventory.mainInventory)
                 if (CompatWrapper.isValid(stack3))

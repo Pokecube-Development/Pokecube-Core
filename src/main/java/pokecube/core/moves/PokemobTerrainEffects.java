@@ -10,8 +10,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.client.event.EntityViewRenderEvent.RenderFogEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -73,9 +73,9 @@ public class PokemobTerrainEffects implements ITerrainEffect
         chunkZ = z;
     }
 
-    public void doEffect(EntityLivingBase entity)
+    public void doEffect(LivingEntity entity)
     {
-        if (entity.getEntityWorld().getTotalWorldTime() % (2 * PokecubeMod.core.getConfig().attackCooldown) != 0)
+        if (entity.getEntityWorld().getGameTime() % (2 * PokecubeMod.core.getConfig().attackCooldown) != 0)
             return;
         if (!AIFindTarget.validTargets.apply(entity)) return;
         IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
@@ -136,7 +136,7 @@ public class PokemobTerrainEffects implements ITerrainEffect
     }
 
     @Override
-    public void doEffect(EntityLivingBase entity, boolean firstEntry)
+    public void doEffect(LivingEntity entity, boolean firstEntry)
     {
         if (firstEntry)
         {
@@ -148,7 +148,7 @@ public class PokemobTerrainEffects implements ITerrainEffect
         }
     }
 
-    public void doEntryEffect(EntityLivingBase entity)
+    public void doEntryEffect(LivingEntity entity)
     {
         IPokemob mob = CapabilityPokemob.getPokemobFor(entity);
         if (mob != null)
@@ -186,7 +186,7 @@ public class PokemobTerrainEffects implements ITerrainEffect
 
     private void dropDurations(Entity e)
     {
-        long time = e.getEntityWorld().getTotalWorldTime();
+        long time = e.getEntityWorld().getGameTime();
         boolean send = false;
         for (int i = 0; i < effects.length; i++)
         {
@@ -202,7 +202,7 @@ public class PokemobTerrainEffects implements ITerrainEffect
         }
         if (send)
         {
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
             {
                 PacketSyncTerrain.sendTerrainEffects(e, chunkX, chunkY, chunkZ, this);
             }
@@ -225,7 +225,7 @@ public class PokemobTerrainEffects implements ITerrainEffect
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void readFromNBT(CompoundNBT nbt)
     {
     }
 
@@ -282,17 +282,17 @@ public class PokemobTerrainEffects implements ITerrainEffect
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void writeToNBT(CompoundNBT nbt)
     {
 
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void renderTerrainEffects(RenderFogEvent event)
     {
         if (this.hasEffects())
         {
-            int time = Minecraft.getMinecraft().player.ticksExisted;
+            int time = Minecraft.getInstance().player.ticksExisted;
             Vector3 direction = Vector3.getNewVector().set(0, -1, 0);
             float tick = (float) (time + event.getRenderPartialTicks()) / 2f;
             if (effects[EFFECT_WEATHER_RAIN] > 0)
@@ -314,13 +314,13 @@ public class PokemobTerrainEffects implements ITerrainEffect
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private void renderEffect(Vector3 direction, float tick)
     {
         GlStateManager.disableTexture2D();
         Vector3 temp = Vector3.getNewVector();
         Vector3 temp2 = Vector3.getNewVector();
-        Random rand = new Random(Minecraft.getMinecraft().player.ticksExisted / 200);
+        Random rand = new Random(Minecraft.getInstance().player.ticksExisted / 200);
         GlStateManager.translate(-direction.x * 8, -direction.y * 8, -direction.z * 8);
         for (int i = 0; i < 1000; i++)
         {

@@ -9,8 +9,8 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.TextureOffset;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
@@ -73,7 +73,7 @@ public class ModelWrapper extends ModelBase
     }
 
     @Override
-    public void setLivingAnimations(EntityLivingBase entity, float limbSwing, float limbSwingAmount,
+    public void setLivingAnimations(LivingEntity entity, float limbSwing, float limbSwingAmount,
             float partialTickTime)
     {
         checkWrapped();
@@ -125,7 +125,7 @@ public class ModelWrapper extends ModelBase
         wrapped.setModelAttributes(model);
     }
 
-    private String getPhase(EntityLiving entity, IPokemob pokemob, float partialTick)
+    private String getPhase(MobEntity entity, IPokemob pokemob, float partialTick)
     {
         String phase = "idle";
         if (model == null) return phase;

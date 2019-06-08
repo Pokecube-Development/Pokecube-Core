@@ -24,12 +24,12 @@ import com.google.common.collect.ListMultimap;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.ISnooperInfo;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -53,7 +53,7 @@ import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLModIdMappingEvent;
@@ -174,8 +174,8 @@ public class PokecubeCore extends PokecubeMod
      * not null, returns the requested player.
      * 
      * @param playerName
-     * @return the {@link EntityPlayer} wanted */
-    public static EntityPlayer getPlayer(String playerName)
+     * @return the {@link PlayerEntity} wanted */
+    public static PlayerEntity getPlayer(String playerName)
     {
         return getProxy().getPlayer(playerName);
     }
@@ -331,7 +331,7 @@ public class PokecubeCore extends PokecubeMod
         return currentConfig;
     }
 
-    /** Returns the class of the {@link EntityLiving} for the given pokedexNb.
+    /** Returns the class of the {@link MobEntity} for the given pokedexNb.
      * If no Pokemob has been registered for this pokedex entry, it returns
      * <code>null</code>.
      * 
@@ -359,7 +359,7 @@ public class PokecubeCore extends PokecubeMod
     }
 
     @Override
-    public Configuration getPokecubeConfig(FMLPreInitializationEvent evt)
+    public Configuration getPokecubeConfig(FMLCommonSetupEvent evt)
     {
         File file = evt.getSuggestedConfigurationFile();
         String seperator = System.getProperty("file.separator");
@@ -482,7 +482,7 @@ public class PokecubeCore extends PokecubeMod
 
     // TODO swap this to proper events for 1.11.2/1.12
     @EventHandler
-    public void registerMobs(FMLPreInitializationEvent evt)
+    public void registerMobs(FMLCommonSetupEvent evt)
     {
         if (PokecubeMod.debug) PokecubeMod.log("Regstering Mobs");
         CompatWrapper.registerModEntity(EntityPokemob.class, "genericMob", getUniqueEntityId(this), this, 80, 1, true);
@@ -496,7 +496,7 @@ public class PokecubeCore extends PokecubeMod
     }
 
     @EventHandler
-    private void preInit(FMLPreInitializationEvent evt)
+    private void preInit(FMLCommonSetupEvent evt)
     {
         spawner = new SpawnHandler();
         if (!config.defaultMobs.equals(""))
@@ -523,7 +523,7 @@ public class PokecubeCore extends PokecubeMod
                         ForgeChunkManager.releaseTicket(ticket);
                         continue;
                     }
-                    NBTTagCompound posTag = ticket.getModData().getCompoundTag("pos");
+                    CompoundNBT posTag = ticket.getModData().getCompound("pos");
                     BlockPos pos = new BlockPos(posTag.getInteger("x"), posTag.getInteger("y"), posTag.getInteger("z"));
                     TileEntity tile = world.getTileEntity(pos);
                     if (!(tile instanceof TileHealTable))
@@ -769,7 +769,7 @@ public class PokecubeCore extends PokecubeMod
 
     @Method(modid = "thut_wearables")
     @EventHandler
-    public void preInitWearables(FMLPreInitializationEvent event)
+    public void preInitWearables(FMLCommonSetupEvent event)
     {
         MinecraftForge.EVENT_BUS.register(new pokecube.core.items.megastuff.WearablesCompat());
     }

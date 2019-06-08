@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -52,9 +52,9 @@ public interface IHasOwner extends IEntityOwnable, IHasMobAIStates
     /** @return the String nickname */
     String getPokemonNickname();
 
-    /** Gets the owner as an EntityLivingBase, may be null if not in world, or
+    /** Gets the owner as an LivingEntity, may be null if not in world, or
      * if no owner. */
-    EntityLivingBase getPokemonOwner();
+    LivingEntity getPokemonOwner();
 
     /** Gets the UUID of the owner, might be null */
     UUID getPokemonOwnerID();
@@ -82,7 +82,7 @@ public interface IHasOwner extends IEntityOwnable, IHasMobAIStates
     void setPokemonNickname(String nickname);
 
     /** sets owner by specific entity. */
-    void setPokemonOwner(EntityLivingBase e);
+    void setPokemonOwner(LivingEntity e);
 
     /** sets owner by UUID */
     void setPokemonOwner(UUID id);

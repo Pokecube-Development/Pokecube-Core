@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils.pathing;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -11,7 +11,7 @@ public class LadderWalkNavigator extends PathNavigate2
 {
     private final boolean canFly;
 
-    public LadderWalkNavigator(EntityLiving entityIn, World worldIn, boolean canFly)
+    public LadderWalkNavigator(MobEntity entityIn, World worldIn, boolean canFly)
     {
         super(entityIn, worldIn);
         this.canFly = canFly;

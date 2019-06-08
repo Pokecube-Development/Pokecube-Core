@@ -6,14 +6,14 @@ import java.util.Random;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -64,7 +64,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    /** Spawns EntityItem in the world for the given ItemStack if the world is
+    /** Spawns ItemEntity in the world for the given ItemStack if the world is
      * not remote. */
     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
     {
@@ -89,10 +89,10 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
                     double d0 = worldIn.rand.nextFloat() * f + (1.0F - f) * 0.5D;
                     double d1 = worldIn.rand.nextFloat() * f + (1.0F - f) * 0.5D;
                     double d2 = worldIn.rand.nextFloat() * f + (1.0F - f) * 0.5D;
-                    EntityItem entityitem = new EntityItem(worldIn, pos.getX() + d0, pos.getY() + d1, pos.getZ() + d2,
+                    ItemEntity ItemEntity = new ItemEntity(worldIn, pos.getX() + d0, pos.getY() + d1, pos.getZ() + d2,
                             stack);
-                    entityitem.setDefaultPickupDelay();
-                    worldIn.spawnEntity(entityitem);
+                    ItemEntity.setDefaultPickupDelay();
+                    worldIn.spawnEntity(ItemEntity);
                 }
             }
         }
@@ -165,15 +165,15 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
-            EntityPlayer player)
+            PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
         return BerryManager.getBerryItem(tile.getBerryId());
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         this.onBlockHarvested(worldIn, pos, state, playerIn);
         worldIn.setBlockToAir(pos);
@@ -181,7 +181,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
+    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, PlayerEntity player)
     {
         Random rand = worldIn != null ? worldIn.rand : RANDOM;
 

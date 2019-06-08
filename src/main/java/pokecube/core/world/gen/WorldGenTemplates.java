@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -51,7 +51,7 @@ public class WorldGenTemplates implements IWorldGenerator
 
             public boolean[]            cornersDone   = new boolean[4];
             public BlockPos             origin;
-            public EnumFacing           dir;
+            public Direction           dir;
             protected TemplateStructure building;
             public String               biomeType     = null;
 
@@ -64,7 +64,7 @@ public class WorldGenTemplates implements IWorldGenerator
             /** Used by MultiTemplates */
             public BlockPos             size;
 
-            protected void build(BlockPos offset, EnumFacing dir, Random random, int chunkX, int chunkZ, World world)
+            protected void build(BlockPos offset, Direction dir, Random random, int chunkX, int chunkZ, World world)
             {
                 if (done) return;
                 getTemplate(dir, offset, chunkX, chunkZ, world);
@@ -86,7 +86,7 @@ public class WorldGenTemplates implements IWorldGenerator
                 return cornersDone[0] && cornersDone[1] && cornersDone[2] && cornersDone[3];
             }
 
-            protected void getTemplate(EnumFacing dir, BlockPos offset, int chunkX, int chunkZ, World world)
+            protected void getTemplate(Direction dir, BlockPos offset, int chunkX, int chunkZ, World world)
             {
                 if (building != null) return;
                 building = new TemplateStructure(template, offset, dir);
@@ -143,7 +143,7 @@ public class WorldGenTemplates implements IWorldGenerator
         public final int                 offset;
         public final SpawnBiomeMatcher   spawnRule;
         public BlockPos                  origin;
-        public EnumFacing                dir;
+        public Direction                dir;
 
         protected final Set<TemplateSet> templates = Sets.newHashSet();
 
@@ -169,7 +169,7 @@ public class WorldGenTemplates implements IWorldGenerator
             BlockPos offset = new BlockPos(rX, world.getHeight(rX, rZ), rZ);
             if (!spawnRule.matches(new SpawnCheck(Vector3.getNewVector().set(offset), world))) return;
             offset = new BlockPos(rX, 255, rZ);
-            EnumFacing dir = EnumFacing.HORIZONTALS[random.nextInt(EnumFacing.HORIZONTALS.length)];
+            Direction dir = Direction.HORIZONTALS[random.nextInt(Direction.HORIZONTALS.length)];
             TemplateSet tSet = new TemplateSet(template, this.offset);
             tSet.dir = this.dir == null ? dir : this.dir;
             tSet.origin = this.origin == null ? offset : this.origin;
@@ -244,7 +244,7 @@ public class WorldGenTemplates implements IWorldGenerator
             {
                 start = new TemplateSet(PokecubeTemplates.POKECENTER, -2);
                 start.origin = world.getSpawnPoint();
-                start.dir = EnumFacing.HORIZONTALS[random.nextInt(EnumFacing.HORIZONTALS.length)];
+                start.dir = Direction.HORIZONTALS[random.nextInt(Direction.HORIZONTALS.length)];
                 templates.add(start);
             }
         }

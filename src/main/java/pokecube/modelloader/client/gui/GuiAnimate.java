@@ -20,7 +20,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.render.entity.RenderAdvancedPokemobModel;
 import pokecube.core.database.Database;
@@ -388,7 +388,7 @@ public class GuiAnimate extends GuiScreen
             }
         }
 
-        EntityLiving entity = pokemob.getEntity();
+        MobEntity entity = pokemob.getEntity();
         entity.renderYawOffset = 0F;
         entity.prevRenderYawOffset = 0F;
         entity.rotationYaw = 0;
@@ -418,7 +418,7 @@ public class GuiAnimate extends GuiScreen
         Render<Entity> rend = null;
         try
         {
-            rend = Minecraft.getMinecraft().getRenderManager().<Entity> getEntityRenderObject(pokemob.getEntity());
+            rend = Minecraft.getInstance().getRenderManager().<Entity> getEntityRenderObject(pokemob.getEntity());
         }
         catch (Exception e)
         {
@@ -486,7 +486,7 @@ public class GuiAnimate extends GuiScreen
 
         // TODO better state selector, for the custom textures by them
 
-        String name = PokecubePlayerDataHandler.getCustomDataTag(Minecraft.getMinecraft().player).getString("WEntry");
+        String name = PokecubePlayerDataHandler.getCustomDataTag(Minecraft.getInstance().player).getString("WEntry");
         pokeentry = Database.getEntry(name);
         if (pokeentry == null) pokeentry = Pokedex.getInstance().getFirstEntry();
         anim = new GuiTextField(0, fontRenderer, width - 101, yOffset + 43 - yOffset / 2, 100, 10);

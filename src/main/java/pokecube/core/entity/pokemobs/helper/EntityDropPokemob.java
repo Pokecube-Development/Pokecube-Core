@@ -5,7 +5,7 @@ package pokecube.core.entity.pokemobs.helper;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import pokecube.core.interfaces.PokecubeMod;
@@ -31,7 +31,7 @@ public abstract class EntityDropPokemob extends EntityMovesPokemob
 
     @Override
     /** Get the experience points the entity currently has. */
-    protected int getExperiencePoints(EntityPlayer player)
+    protected int getExperiencePoints(PlayerEntity player)
     {
         float scale = PokecubeMod.core.getConfig().expFromDeathDropScale;
         int exp = (int) Math.max(1, pokemobCap.getBaseXP() * scale * 0.01 * Math.sqrt(pokemobCap.getLevel()));

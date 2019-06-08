@@ -2,9 +2,9 @@ package pokecube.core.moves.templates;
 
 import java.util.Random;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -21,9 +21,9 @@ public class Move_Ongoing extends Move_Basic
         super(name);
     }
 
-    protected DamageSource getOngoingDamage(EntityLivingBase mob)
+    protected DamageSource getOngoingDamage(LivingEntity mob)
     {
-        EntityLivingBase target = mob.getAttackingEntity();
+        LivingEntity target = mob.getAttackingEntity();
         if (target == null) target = mob.getRevengeTarget();
         if (target == null) target = mob.getLastAttackedEntity();
         if (target == null) target = mob;
@@ -36,9 +36,9 @@ public class Move_Ongoing extends Move_Basic
         return source;
     }
 
-    protected float damageTarget(EntityLivingBase mob, DamageSource source, float damage)
+    protected float damageTarget(LivingEntity mob, DamageSource source, float damage)
     {
-        EntityLivingBase target = mob.getAttackingEntity();
+        LivingEntity target = mob.getAttackingEntity();
         if (target == null) target = mob.getRevengeTarget();
         if (target == null) target = mob.getLastAttackedEntity();
         if (target == null) target = mob;
@@ -58,7 +58,7 @@ public class Move_Ongoing extends Move_Basic
         }
         else
         {
-            if (mob instanceof EntityPlayer)
+            if (mob instanceof PlayerEntity)
             {
                 scale = (float) (user != null && user.isPlayerOwned()
                         ? PokecubeMod.core.getConfig().ownedPlayerDamageRatio

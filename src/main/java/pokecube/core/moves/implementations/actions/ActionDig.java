@@ -2,8 +2,8 @@ package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -53,11 +53,11 @@ public class ActionDig implements IMoveAction
     {
         int ret = 0;
 
-        EntityLivingBase owner = digger.getPokemonOwner();
-        EntityPlayer player = null;
-        if (owner instanceof EntityPlayer)
+        LivingEntity owner = digger.getPokemonOwner();
+        PlayerEntity player = null;
+        if (owner instanceof PlayerEntity)
         {
-            player = (EntityPlayer) owner;
+            player = (PlayerEntity) owner;
 
             BreakEvent evt = new BreakEvent(player.getEntityWorld(), v.getPos(),
                     v.getBlockState(player.getEntityWorld()), player);

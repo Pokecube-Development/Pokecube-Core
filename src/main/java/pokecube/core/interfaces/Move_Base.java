@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import pokecube.core.PokecubeCore;
@@ -405,7 +405,7 @@ public abstract class Move_Base
                     }
                     move.baseEntry.soundEffectTarget = null;
                 }
-                if (soundTarget != null) attacker.getEntityWorld().playSound((EntityPlayer) null, targetPos.x,
+                if (soundTarget != null) attacker.getEntityWorld().playSound((PlayerEntity) null, targetPos.x,
                         targetPos.y, targetPos.z, soundTarget, attacker.getSoundCategory(), 1f, 1);
             }
         }

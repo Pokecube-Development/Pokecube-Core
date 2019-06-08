@@ -5,15 +5,15 @@ import java.util.Random;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
@@ -34,7 +34,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
         this.tradingTable = tradingtable;
         // this.setBlockBounds(0, 0, 0, 1, 0.75f, 1);
         this.setCreativeTab(PokecubeMod.creativeTabPokecube);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, Direction.NORTH));
         this.setHardness(100);
         this.setResistance(100);
         this.setLightOpacity(0);
@@ -85,11 +85,11 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
                 float rx = rand.nextFloat() * 0.6F + 0.1F;
                 float ry = rand.nextFloat() * 0.6F + 0.1F;
                 float rz = rand.nextFloat() * 0.6F + 0.1F;
-                EntityItem entity_item = new EntityItem(world, pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz,
+                ItemEntity entity_item = new ItemEntity(world, pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz,
                         new ItemStack(item.getItem(), item.getCount(), item.getItemDamage()));
-                if (item.hasTagCompound())
+                if (item.hasTag())
                 {
-                    entity_item.getItem().setTagCompound(item.getTagCompound().copy());
+                    entity_item.getItem().put(item.getTag().copy());
                 }
                 if (PokecubeManager.isFilled(item))
                 {
@@ -123,12 +123,12 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     /** Convert the given metadata into a BlockState for this Block */
     public IBlockState getStateFromMeta(int meta)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(meta);
-        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
+        Direction Direction = Direction.getFront(meta);
+        if (Direction.getAxis() == Direction.Axis.Y)
         {
-            enumfacing = EnumFacing.NORTH;
+            Direction = Direction.NORTH;
         }
-        return this.getDefaultState().withProperty(FACING, enumfacing);
+        return this.getDefaultState().withProperty(FACING, Direction);
     }
 
     @Override
@@ -144,8 +144,8 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-            EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+            Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
 
         if (tradingTable)
@@ -163,8 +163,8 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     }
 
     @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-            float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, Direction facing, float hitX, float hitY,
+            float hitZ, int meta, LivingEntity placer)
     {
         return this.getStateFromMeta(meta).withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }

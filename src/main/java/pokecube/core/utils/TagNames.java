@@ -1,56 +1,56 @@
 package pokecube.core.utils;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
 import pokecube.core.events.handlers.EventsHandler;
 
 public interface TagNames
 {
-    public static NBTTagCompound getEntityPokemobTag(NBTTagCompound entityRootTag)
+    public static CompoundNBT getEntityPokemobTag(CompoundNBT entityRootTag)
     {
-        NBTTagCompound ret = new NBTTagCompound();
+        CompoundNBT ret = new CompoundNBT();
         if (entityRootTag.hasKey(POKEMOBTAG))
         {
-            return entityRootTag.getCompoundTag(POKEMOBTAG);
+            return entityRootTag.getCompound(POKEMOBTAG);
         }
         else if (entityRootTag.hasKey(FORGECAPS))
         {
-            NBTTagCompound caps = entityRootTag.getCompoundTag(FORGECAPS);
-            if (caps.hasKey(POKEMOBCAP)) { return caps.getCompoundTag(POKEMOBCAP); }
+            CompoundNBT caps = entityRootTag.getCompound(FORGECAPS);
+            if (caps.hasKey(POKEMOBCAP)) { return caps.getCompound(POKEMOBCAP); }
         }
         return ret;
     }
 
-    public static NBTTagCompound getPokecubePokemobTag(NBTTagCompound itemRootTag)
+    public static CompoundNBT getPokecubePokemobTag(CompoundNBT itemRootTag)
     {
-        NBTTagCompound ret = new NBTTagCompound();
+        CompoundNBT ret = new CompoundNBT();
         if (itemRootTag.hasKey(POKEMOB))
         {
-            NBTTagCompound entityRootTag = itemRootTag.getCompoundTag(POKEMOB);
+            CompoundNBT entityRootTag = itemRootTag.getCompound(POKEMOB);
             if (entityRootTag.hasKey(POKEMOBTAG))
             {
-                return entityRootTag.getCompoundTag(POKEMOBTAG);
+                return entityRootTag.getCompound(POKEMOBTAG);
             }
             else if (entityRootTag.hasKey(FORGECAPS))
             {
-                NBTTagCompound caps = entityRootTag.getCompoundTag(FORGECAPS);
-                if (caps.hasKey(POKEMOBCAP)) { return caps.getCompoundTag(POKEMOBCAP); }
+                CompoundNBT caps = entityRootTag.getCompound(FORGECAPS);
+                if (caps.hasKey(POKEMOBCAP)) { return caps.getCompound(POKEMOBCAP); }
             }
         }
         return ret;
     }
 
-    public static NBTBase getPokecubeGenesTag(NBTTagCompound itemRootTag)
+    public static INBT getPokecubeGenesTag(CompoundNBT itemRootTag)
     {
-        NBTTagCompound ret = new NBTTagCompound();
+        CompoundNBT ret = new CompoundNBT();
         if (itemRootTag.hasKey(POKEMOB))
         {
-            NBTTagCompound entityRootTag = itemRootTag.getCompoundTag(POKEMOB);
+            CompoundNBT entityRootTag = itemRootTag.getCompound(POKEMOB);
             if (entityRootTag.hasKey(FORGECAPS))
             {
-                NBTTagCompound caps = entityRootTag.getCompoundTag(FORGECAPS);
-                if (caps.hasKey(GENESCAP)) { return caps.getCompoundTag(GENESCAP).getTag("V"); }
+                CompoundNBT caps = entityRootTag.getCompound(FORGECAPS);
+                if (caps.hasKey(GENESCAP)) { return caps.getCompound(GENESCAP).getTag("V"); }
             }
         }
         return ret;

@@ -1,6 +1,6 @@
 package pokecube.core.database.abilities;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.pokemob.moves.MovePacket;
@@ -47,7 +47,7 @@ public abstract class Ability
      * 
      * @param mob
      * @param target */
-    public void onAgress(IPokemob mob, EntityLivingBase target)
+    public void onAgress(IPokemob mob, LivingEntity target)
     {
     }
 

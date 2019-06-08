@@ -3,16 +3,16 @@ package com.mcf.davidee.nbteditpqb;
 import com.google.common.base.Strings;
 import com.mcf.davidee.nbteditpqb.nbt.NamedNBT;
 
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagEnd;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
@@ -23,7 +23,7 @@ public class NBTStringHelper {
 
 	public static String getNBTName(NamedNBT namedNBT){
 		String name = namedNBT.getName();
-		NBTBase obj = namedNBT.getNBT();
+		INBT obj = namedNBT.getNBT();
 
 		String s = toString(obj);
 		return Strings.isNullOrEmpty(name) ? "" + s : name + ": " + s;
@@ -31,13 +31,13 @@ public class NBTStringHelper {
 
 	public static String getNBTNameSpecial(NamedNBT namedNBT){
 		String name = namedNBT.getName();
-		NBTBase obj = namedNBT.getNBT();
+		INBT obj = namedNBT.getNBT();
 
 		String s = toString(obj);
 		return Strings.isNullOrEmpty(name) ? "" + s : name + ": " + s + SECTION_SIGN + 'r';
 	}
 
-	public static NBTBase newTag(byte type){
+	public static INBT newTag(byte type){
 		switch (type)
 		{
 		case 0:
@@ -59,9 +59,9 @@ public class NBTStringHelper {
 		case 8:
 			return new NBTTagString("");
 		case 9:
-			return new NBTTagList();
+			return new ListNBT();
 		case 10:
-			return new NBTTagCompound();
+			return new CompoundNBT();
 		case 11:
 			return new NBTTagIntArray(new int[0]);
 		default:
@@ -69,7 +69,7 @@ public class NBTStringHelper {
 		}
 	}
 
-	public static String toString(NBTBase base) {
+	public static String toString(INBT base) {
 		switch(base.getId()) {
 		case 1:
 			return "" + ((NBTTagByte)base).getByte();

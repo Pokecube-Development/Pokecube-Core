@@ -1,6 +1,6 @@
 package pokecube.core.entity.pokemobs;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -63,10 +63,10 @@ public class ContainerPokemob extends Container
                 }
                 
                 @Override
-                public ItemStack onTake(EntityPlayer playerIn, ItemStack stack)
+                public ItemStack onTake(PlayerEntity playerIn, ItemStack stack)
                 {
                     ItemStack old = getStack();
-                    if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+                    if(FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
                     {
                         e.getPokedexEntry().onHeldItemChange(stack, old, e);
                     }
@@ -79,7 +79,7 @@ public class ContainerPokemob extends Container
                 {
                     // ItemStack old = getStack();
                     super.putStack(stack);
-                    if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+                    if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
                     {
                         e.setHeldItem(stack);
                         // e.getPokedexEntry().onHeldItemChange(old, stack, e);
@@ -119,7 +119,7 @@ public class ContainerPokemob extends Container
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer p_75145_1_)
+    public boolean canInteractWith(PlayerEntity p_75145_1_)
     {
         return this.pokemobInv.isUsableByPlayer(p_75145_1_) && this.pokemob.getEntity().isEntityAlive()
                 && this.pokemob.getEntity().getDistance(p_75145_1_) < 8.0F;
@@ -127,7 +127,7 @@ public class ContainerPokemob extends Container
 
     /** Called when the container is closed. */
     @Override
-    public void onContainerClosed(EntityPlayer p_75134_1_)
+    public void onContainerClosed(PlayerEntity p_75134_1_)
     {
         super.onContainerClosed(p_75134_1_);
         this.pokemobInv.closeInventory(p_75134_1_);
@@ -136,7 +136,7 @@ public class ContainerPokemob extends Container
     /** Called when a player shift-clicks on a slot. You must override this or
      * you will crash when someone does that. */
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_)
+    public ItemStack transferStackInSlot(PlayerEntity p_82846_1_, int p_82846_2_)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(p_82846_2_);

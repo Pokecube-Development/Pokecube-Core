@@ -66,7 +66,7 @@ public class GuiArranger
         GlStateManager.enableTexture2D();
     }
 
-    @SideOnly(value = Side.CLIENT)
+    @OnlyIn(value = Dist.CLIENT)
     @SubscribeEvent
     public void guiEvent(GuiScreenEvent event)
     {
@@ -77,7 +77,7 @@ public class GuiArranger
             {
                 // Draw the box for the messages.
                 GL11.glPushMatrix();
-                Minecraft minecraft = Minecraft.getMinecraft();
+                Minecraft minecraft = Minecraft.getInstance();
                 int texH = minecraft.fontRenderer.FONT_HEIGHT;
                 minecraft.entityRenderer.setupOverlayRendering();
                 int[] mess = GuiDisplayPokecubeInfo.applyTransform(

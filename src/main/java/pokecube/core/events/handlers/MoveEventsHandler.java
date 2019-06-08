@@ -10,19 +10,19 @@ import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -71,10 +71,10 @@ public class MoveEventsHandler
      * @return */
     public static boolean canEffectBlock(IPokemob user, Vector3 location)
     {
-        EntityLivingBase owner = user.getPokemonOwner();
+        LivingEntity owner = user.getPokemonOwner();
         boolean repel = SpawnHandler.checkNoSpawnerInArea(user.getEntity().getEntityWorld(), location.intX(),
                 location.intY(), location.intZ());
-        if (!(owner instanceof EntityPlayer))
+        if (!(owner instanceof PlayerEntity))
         {
             owner = PokecubeMod.getFakePlayer(user.getEntity().getEntityWorld());
         }
@@ -83,13 +83,13 @@ public class MoveEventsHandler
             if (!user.getCombatState(CombatStates.ANGRY)) CommandTools.sendError(owner, "pokemob.action.denyrepel");
             return false;
         }
-        EntityPlayer player = (EntityPlayer) owner;
+        PlayerEntity player = (PlayerEntity) owner;
         BreakEvent evt = new BreakEvent(player.getEntityWorld(), location.getPos(),
                 location.getBlockState(player.getEntityWorld()), player);
         MinecraftForge.EVENT_BUS.post(evt);
         if (evt.isCanceled())
         {
-            TextComponentTranslation message = new TextComponentTranslation("pokemob.createbase.deny.noperms");
+            TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.deny.noperms");
             if (!user.getCombatState(CombatStates.ANGRY)) owner.sendMessage(message);
             return false;
         }
@@ -99,13 +99,13 @@ public class MoveEventsHandler
     public static boolean attemptSmelt(IPokemob attacker, Vector3 location)
     {
         World world = attacker.getEntity().getEntityWorld();
-        List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, location.getAABB().grow(1));
+        List<ItemEntity> items = world.getEntitiesWithinAABB(ItemEntity.class, location.getAABB().grow(1));
         if (!items.isEmpty())
         {
             boolean smelt = false;
             for (int i = 0; i < items.size(); i++)
             {
-                EntityItem item = items.get(i);
+                ItemEntity item = items.get(i);
                 ItemStack stack = item.getItem();
                 int num = stack.getCount();
                 ItemStack newstack = FurnaceRecipes.instance().getSmeltingResult(stack);
@@ -161,14 +161,14 @@ public class MoveEventsHandler
         Vector3 prevBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).norm()
                 .addTo(location);
         IBlockState prevState = prevBlock.getBlockState(world);
-        int flamNext = nextState.getBlock().getFlammability(world, nextBlock.getPos(), EnumFacing.UP);
+        int flamNext = nextState.getBlock().getFlammability(world, nextBlock.getPos(), Direction.UP);
         if (state.getMaterial().isReplaceable() && flamNext != 0)
         {
             location.setBlock(world, Blocks.FIRE);
             return true;
         }
         else if (prevState.getMaterial().isReplaceable()
-                && state.getBlock().getFlammability(world, location.getPos(), EnumFacing.UP) != 0)
+                && state.getBlock().getFlammability(world, location.getPos(), Direction.UP) != 0)
         {
             prevBlock.setBlock(world, Blocks.FIRE);
             return true;
@@ -230,7 +230,7 @@ public class MoveEventsHandler
         Block block = state.getBlock();
         if (block.isAir(state, world, location.getPos()))
         {
-            if (location.offset(EnumFacing.DOWN).getBlockState(world).isNormalCube())
+            if (location.offset(Direction.DOWN).getBlockState(world).isNormalCube())
             {
                 try
                 {
@@ -250,7 +250,7 @@ public class MoveEventsHandler
         }
         else if (block.isReplaceable(world, pos))
         {
-            if (location.offset(EnumFacing.DOWN).getBlockState(world).isNormalCube())
+            if (location.offset(Direction.DOWN).getBlockState(world).isNormalCube())
                 location.setBlock(world, Blocks.SNOW_LAYER.getDefaultState());
             return true;
         }
@@ -423,9 +423,9 @@ public class MoveEventsHandler
             register(action = new DefaultAction(move));
             action.init();
         }
-        if (PokecubeMod.core.getConfig().permsMoveAction && attacker.getOwner() instanceof EntityPlayer)
+        if (PokecubeMod.core.getConfig().permsMoveAction && attacker.getOwner() instanceof PlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) attacker.getOwner();
+            PlayerEntity player = (PlayerEntity) attacker.getOwner();
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             if (!handler.hasPermission(player.getGameProfile(), Permissions.MOVEWORLDACTION.get(move.name), context))
@@ -512,7 +512,7 @@ public class MoveEventsHandler
         if (applied == null) return;
         if (!user)
         {
-            applied.getEntity().getEntityData().setString("lastMoveHitBy", move.attack);
+            applied.getEntity().getEntityData().putString("lastMoveHitBy", move.attack);
         }
         if (MoveEntry.oneHitKos.contains(attack.name) && target != null && target.getLevel() < attacker.getLevel())
         {

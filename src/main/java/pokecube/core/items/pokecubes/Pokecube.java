@@ -12,17 +12,17 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
@@ -51,17 +51,17 @@ import thut.lib.CompatWrapper;
 
 public class Pokecube extends Item implements IPokecube
 {
-    public static final Set<Class<? extends EntityLivingBase>> snagblacklist = Sets.newHashSet();
+    public static final Set<Class<? extends LivingEntity>> snagblacklist = Sets.newHashSet();
 
-    private static final Predicate<EntityLivingBase>           capturable    = new Predicate<EntityLivingBase>()
+    private static final Predicate<LivingEntity>           capturable    = new Predicate<LivingEntity>()
                                                                              {
                                                                                  @Override
-                                                                                 public boolean test(EntityLivingBase t)
+                                                                                 public boolean test(LivingEntity t)
                                                                                  {
                                                                                      if (snagblacklist
                                                                                              .contains(t.getClass()))
                                                                                          return false;
-                                                                                     for (Class<? extends EntityLivingBase> claz : snagblacklist)
+                                                                                     for (Class<? extends LivingEntity> claz : snagblacklist)
                                                                                      {
                                                                                          if (claz.isInstance(t))
                                                                                              return false;
@@ -70,8 +70,8 @@ public class Pokecube extends Item implements IPokecube
                                                                                  }
                                                                              };
 
-    @SideOnly(Side.CLIENT)
-    public static void displayInformation(NBTTagCompound nbt, List<String> list)
+    @OnlyIn(Dist.CLIENT)
+    public static void displayInformation(CompoundNBT nbt, List<String> list)
     {
         boolean flag2 = nbt.getBoolean("Flames");
 
@@ -114,7 +114,7 @@ public class Pokecube extends Item implements IPokecube
     /** allows items to add custom lines of information to the mouseover
      * description */
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack item, @Nullable World world, List<String> list, ITooltipFlag advanced)
     {
         if (PokecubeManager.isFilled(item))
@@ -127,7 +127,7 @@ public class Pokecube extends Item implements IPokecube
             }
             list.add(pokemob.getPokedexEntry().getTranslatedName());
 
-            NBTTagCompound pokeTag = item.getTagCompound().getCompoundTag(TagNames.POKEMOB);
+            CompoundNBT pokeTag = item.getTag().getCompound(TagNames.POKEMOB);
 
             float health = pokeTag.getFloat("Health");
             float maxHealth = pokemob.getStat(Stats.HP, false);
@@ -180,10 +180,10 @@ public class Pokecube extends Item implements IPokecube
             else list.add(I18n.format("pokecube.tooltip.advanced"));
         }
 
-        if (item.hasTagCompound())
+        if (item.hasTag())
         {
-            NBTTagCompound nbttagcompound = PokecubeManager.getSealTag(item);
-            displayInformation(nbttagcompound, list);
+            CompoundNBT CompoundNBT = PokecubeManager.getSealTag(item);
+            displayInformation(CompoundNBT, list);
         }
     }
 
@@ -195,7 +195,7 @@ public class Pokecube extends Item implements IPokecube
     }
 
     @Override
-    public double getCaptureModifier(EntityLivingBase mob, ResourceLocation pokecubeId)
+    public double getCaptureModifier(LivingEntity mob, ResourceLocation pokecubeId)
     {
         if (pokecubeId.getResourcePath().equals("snag"))
         {
@@ -222,7 +222,7 @@ public class Pokecube extends Item implements IPokecube
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
     {
         player.setActiveHand(hand);
         return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
@@ -231,11 +231,11 @@ public class Pokecube extends Item implements IPokecube
     @Override
     /** Called when the player stops using an Item (stops holding the right
      * mouse button). */
-    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase entityLiving, int timeLeft)
+    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity MobEntity, int timeLeft)
     {
-        if (entityLiving instanceof EntityPlayer && !worldIn.isRemote)
+        if (MobEntity instanceof PlayerEntity && !worldIn.isRemote)
         {
-            EntityPlayer player = (EntityPlayer) entityLiving;
+            PlayerEntity player = (PlayerEntity) MobEntity;
             com.google.common.base.Predicate<Entity> selector = new com.google.common.base.Predicate<Entity>()
             {
                 @Override
@@ -254,12 +254,12 @@ public class Pokecube extends Item implements IPokecube
             IPokemob targetMob = CapabilityPokemob.getPokemobFor(target);
             if (targetMob != null)
             {
-                if (targetMob.getPokemonOwner() == entityLiving) target = null;
+                if (targetMob.getPokemonOwner() == MobEntity) target = null;
             }
 
             boolean filled = PokecubeManager.isFilled(stack);
-            if (!filled && target instanceof EntityLivingBase
-                    && getCaptureModifier((EntityLivingBase) target, PokecubeItems.getCubeId(this)) == 0)
+            if (!filled && target instanceof LivingEntity
+                    && getCaptureModifier((LivingEntity) target, PokecubeItems.getCubeId(this)) == 0)
                 target = null;
             boolean used = false;
             boolean filledOrSneak = filled || player.isSneaking();
@@ -297,14 +297,14 @@ public class Pokecube extends Item implements IPokecube
 
     // Pokeseal stuff
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean requiresMultipleRenderPasses()
     {
         return true;
     }
 
     @Override
-    public boolean throwPokecube(World world, EntityLivingBase thrower, ItemStack cube, Vector3 direction, float power)
+    public boolean throwPokecube(World world, LivingEntity thrower, ItemStack cube, Vector3 direction, float power)
     {
         EntityPokecube entity = null;
         ResourceLocation id = PokecubeItems.getCubeId(cube.getItem());
@@ -313,10 +313,10 @@ public class Pokecube extends Item implements IPokecube
         boolean hasMob = PokecubeManager.hasMob(stack);
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
-        if (hasMob && (config.permsSendOut || config.permsSendOutSpecific) && thrower instanceof EntityPlayer)
+        if (hasMob && (config.permsSendOut || config.permsSendOutSpecific) && thrower instanceof PlayerEntity)
         {
             PokedexEntry entry = PokecubeManager.getPokedexEntry(stack);
-            EntityPlayer player = (EntityPlayer) thrower;
+            PlayerEntity player = (PlayerEntity) thrower;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             if (config.permsSendOut
@@ -350,7 +350,7 @@ public class Pokecube extends Item implements IPokecube
     }
 
     @Override
-    public boolean throwPokecubeAt(World world, EntityLivingBase thrower, ItemStack cube, Vector3 targetLocation,
+    public boolean throwPokecubeAt(World world, LivingEntity thrower, ItemStack cube, Vector3 targetLocation,
             Entity target)
     {
         EntityPokecube entity = null;
@@ -362,10 +362,10 @@ public class Pokecube extends Item implements IPokecube
         boolean rightclick = target == thrower;
         if (rightclick) target = null;
 
-        if (target instanceof EntityLivingBase || PokecubeManager.hasMob(cube) || thrower.isSneaking()
+        if (target instanceof LivingEntity || PokecubeManager.hasMob(cube) || thrower.isSneaking()
                 || (thrower instanceof FakePlayer))
         {
-            if (target instanceof EntityLivingBase) entity.targetEntity = (EntityLivingBase) target;
+            if (target instanceof LivingEntity) entity.targetEntity = (LivingEntity) target;
             if (target == null && targetLocation == null && PokecubeManager.hasMob(cube))
             {
                 targetLocation = Vector3.secondAxisNeg;
@@ -394,7 +394,7 @@ public class Pokecube extends Item implements IPokecube
     }
 
     @Override
-    public boolean canCapture(EntityLiving hit, ItemStack cube)
+    public boolean canCapture(MobEntity hit, ItemStack cube)
     {
         ResourceLocation id = PokecubeItems.getCubeId(cube);
         if (id != null && id.getResourcePath().equals("snag"))
@@ -406,8 +406,8 @@ public class Pokecube extends Item implements IPokecube
     }
 
     /** Determines if this Item has a special entity for when they are in the
-     * world. Is called when a EntityItem is spawned in the world, if true and
-     * Item#createCustomEntity returns non null, the EntityItem will be
+     * world. Is called when a ItemEntity is spawned in the world, if true and
+     * Item#createCustomEntity returns non null, the ItemEntity will be
      * destroyed and the new Entity will be added to the world.
      *
      * @param stack
@@ -421,13 +421,13 @@ public class Pokecube extends Item implements IPokecube
     }
 
     /** This function should return a new entity to replace the dropped item.
-     * Returning null here will not kill the EntityItem and will leave it to
+     * Returning null here will not kill the ItemEntity and will leave it to
      * function normally. Called when the item it placed in a world.
      *
      * @param world
      *            The world object
      * @param location
-     *            The EntityItem object, useful for getting the position of the
+     *            The ItemEntity object, useful for getting the position of the
      *            entity
      * @param itemstack
      *            The current item stack

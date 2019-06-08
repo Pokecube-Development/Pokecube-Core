@@ -19,7 +19,7 @@ public class ParticlesOnTarget extends MoveAnimationBase
     public void spawnClientEntities(MovePacketInfo info)
     {
         if (Math.random() > density) return;
-        initColour((info.attacker.getEntityWorld().getWorldTime()), 0, info.move);
+        initColour((info.attacker.getEntityWorld().getDayTime()), 0, info.move);
         Vector3 temp = Vector3.getNewVector().set(info.target);
         Random rand = new Random();
         float dw = 0.25f;

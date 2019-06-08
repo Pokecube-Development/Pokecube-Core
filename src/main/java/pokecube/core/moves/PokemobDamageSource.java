@@ -6,13 +6,13 @@ package pokecube.core.moves;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
@@ -27,7 +27,7 @@ import pokecube.core.utils.PokeType;
 public class PokemobDamageSource extends DamageSource
 {
 
-    private EntityLivingBase damageSourceEntity;
+    private LivingEntity damageSourceEntity;
     // TODO use this for damage stuff
     public Move_Base         move;
     /** This is the type of the used move, can be different from
@@ -37,7 +37,7 @@ public class PokemobDamageSource extends DamageSource
 
     /** @param par1Str
      * @param par2Entity */
-    public PokemobDamageSource(String par1Str, EntityLivingBase par2Entity, Move_Base type)
+    public PokemobDamageSource(String par1Str, LivingEntity par2Entity, Move_Base type)
     {
         super(par1Str);
         damageSourceEntity = par2Entity;
@@ -57,30 +57,30 @@ public class PokemobDamageSource extends DamageSource
     }
 
     @Override
-    public ITextComponent getDeathMessage(EntityLivingBase par1EntityPlayer)
+    public ITextComponent getDeathMessage(LivingEntity par1PlayerEntity)
     {
         ItemStack localObject = (this.damageSourceEntity != null) ? user.getHeldItem() : null;
         if ((localObject != null) && (localObject.hasDisplayName()))
-            return new TextComponentTranslation("death.attack." + this.damageType,
-                    new Object[] { par1EntityPlayer.getDisplayName(), this.damageSourceEntity.getDisplayName(),
+            return new TranslationTextComponent("death.attack." + this.damageType,
+                    new Object[] { par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName(),
                             localObject.getTextComponent() });
         IPokemob sourceMob = CapabilityPokemob.getPokemobFor(this.damageSourceEntity);
         if (sourceMob != null && sourceMob.getPokemonOwner() != null)
         {
-            TextComponentTranslation message = new TextComponentTranslation("pokemob.killed.tame",
-                    par1EntityPlayer.getDisplayName(), sourceMob.getPokemonOwner().getDisplayName(),
+            TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.tame",
+                    par1PlayerEntity.getDisplayName(), sourceMob.getPokemonOwner().getDisplayName(),
                     this.damageSourceEntity.getDisplayName());
             return message;
         }
         else if (sourceMob != null && sourceMob.getPokemonOwner() == null
                 && !sourceMob.getGeneralState(GeneralStates.TAMED))
         {
-            TextComponentTranslation message = new TextComponentTranslation("pokemob.killed.wild",
-                    par1EntityPlayer.getDisplayName(), this.damageSourceEntity.getDisplayName());
+            TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.wild",
+                    par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName());
             return message;
         }
-        return new TextComponentTranslation("death.attack." + this.damageType,
-                new Object[] { par1EntityPlayer.getDisplayName(), this.damageSourceEntity.getDisplayName() });
+        return new TranslationTextComponent("death.attack." + this.damageType,
+                new Object[] { par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName() });
     }
 
     @Override

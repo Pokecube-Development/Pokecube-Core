@@ -22,13 +22,13 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -57,47 +57,47 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void openEditGUI(final int entityID, final NBTTagCompound tag) {
-		Minecraft.getMinecraft().addScheduledTask(new Runnable() {
+	public void openEditGUI(final int entityID, final CompoundNBT tag) {
+		Minecraft.getInstance().addScheduledTask(new Runnable() {
 			@Override
 			public void run() {
-				Minecraft.getMinecraft().displayGuiScreen(new GuiEditNBTTree(entityID, tag));
+				Minecraft.getInstance().displayGuiScreen(new GuiEditNBTTree(entityID, tag));
 			}
 		});
 	}
 
     @Override
-    public void openEditGUI(final int entityID, final String customName, final NBTTagCompound tag)
+    public void openEditGUI(final int entityID, final String customName, final CompoundNBT tag)
     {
-        Minecraft.getMinecraft().addScheduledTask(new Runnable() {
+        Minecraft.getInstance().addScheduledTask(new Runnable() {
             @Override
             public void run() {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiEditNBTTree(entityID, customName, tag));
+                Minecraft.getInstance().displayGuiScreen(new GuiEditNBTTree(entityID, customName, tag));
             }
         });
     }
 	
 	@Override
-	public void openEditGUI(final BlockPos pos, final NBTTagCompound tag) {
-		Minecraft.getMinecraft().addScheduledTask(new Runnable() {
+	public void openEditGUI(final BlockPos pos, final CompoundNBT tag) {
+		Minecraft.getInstance().addScheduledTask(new Runnable() {
 			@Override
 			public void run() {
-				Minecraft.getMinecraft().displayGuiScreen(new GuiEditNBTTree(pos, tag));
+				Minecraft.getInstance().displayGuiScreen(new GuiEditNBTTree(pos, tag));
 			}
 		});
 	}
 
 	@Override
-	public void sendMessage(EntityPlayer player, String message, TextFormatting color) {
-		ITextComponent component = new TextComponentString(message);
+	public void sendMessage(PlayerEntity player, String message, TextFormatting color) {
+		ITextComponent component = new StringTextComponent(message);
 		component.getStyle().setColor(color);
-		Minecraft.getMinecraft().player.sendMessage(component);
+		Minecraft.getInstance().player.sendMessage(component);
 	}
 
 	@SuppressWarnings("deprecation")
     @SubscribeEvent
 	public void renderWorldLast(RenderWorldLastEvent event) {
-		GuiScreen curScreen = Minecraft.getMinecraft().currentScreen;
+		GuiScreen curScreen = Minecraft.getInstance().currentScreen;
 		if (curScreen instanceof GuiEditNBTTree){
 			GuiEditNBTTree screen = (GuiEditNBTTree)curScreen;
 			Entity e = screen.getEntity();
@@ -108,7 +108,7 @@ public class ClientProxy extends CommonProxy {
 				int x = screen.getBlockX();
 				int y = screen.y;
 				int z = screen.z;
-				World world = Minecraft.getMinecraft().world;
+				World world = Minecraft.getInstance().world;
 				BlockPos pos = new BlockPos(x, y, z);
 				IBlockState state = world.getBlockState(pos);
 				Block block = world.getBlockState(pos).getBlock();
@@ -123,7 +123,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void onKey(InputEvent.KeyInputEvent event) {
 		if (NBTEditKey.isPressed()) {
-			RayTraceResult pos = Minecraft.getMinecraft().objectMouseOver;
+			RayTraceResult pos = Minecraft.getInstance().objectMouseOver;
 			if (pos != null) {
 				if (pos.entityHit != null) {
 					NBTEdit.NETWORK.INSTANCE.sendToServer(new EntityRequestPacket(pos.entityHit.getEntityId()));
@@ -140,7 +140,7 @@ public class ClientProxy extends CommonProxy {
 		if (aabb == null)
 			return;
 
-		Entity player = Minecraft.getMinecraft().getRenderViewEntity();
+		Entity player = Minecraft.getInstance().getRenderViewEntity();
 
 		double var8 = player.lastTickPosX + (player.posX - player.lastTickPosX) * f;
 		double var10 = player.lastTickPosY + (player.posY - player.lastTickPosY) * f;

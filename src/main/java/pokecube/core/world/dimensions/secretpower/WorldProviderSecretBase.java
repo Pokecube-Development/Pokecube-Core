@@ -8,11 +8,11 @@ import java.util.UUID;
 
 import org.nfunk.jep.JEP;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
@@ -99,11 +99,11 @@ public class DimensionSecretBase extends Dimension
         file = new File(file, "data" + File.separator + "worldInfo.dat");
         try
         {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundNBT tag = new CompoundNBT();
             int size = world.getWorldBorder().getSize();
             tag.setInteger("border", size);
             owner = PokecubeDimensionManager.getOwner(getDimension());
-            if (owner != null && !owner.isEmpty()) tag.setString("owner", owner);
+            if (owner != null && !owner.isEmpty()) tag.putString("owner", owner);
             FileOutputStream fileoutputstream = new FileOutputStream(file);
             CompressedStreamTools.writeCompressed(tag, fileoutputstream);
             fileoutputstream.close();
@@ -125,7 +125,7 @@ public class DimensionSecretBase extends Dimension
             try
             {
                 FileInputStream fileinputstream = new FileInputStream(file);
-                NBTTagCompound tag = CompressedStreamTools.readCompressed(fileinputstream);
+                CompoundNBT tag = CompressedStreamTools.readCompressed(fileinputstream);
                 fileinputstream.close();
                 owner = tag.getString("owner");
                 int size = DEFAULTSIZE;
@@ -167,9 +167,9 @@ public class DimensionSecretBase extends Dimension
 
     /** Called when a Player is added to the provider's world. */
     @Override
-    public void onPlayerAdded(EntityPlayerMP player)
+    public void onPlayerAdded(ServerPlayerEntity player)
     {
-        if (!player.isDead) player.sendMessage(new TextComponentTranslation("pokecube.secretBase.enter"));
+        if (!player.isDead) player.sendMessage(new TranslationTextComponent("pokecube.secretBase.enter"));
         owner = PokecubeDimensionManager.getOwner(getDimension());
         if (!owner.isEmpty())
         {
@@ -196,9 +196,9 @@ public class DimensionSecretBase extends Dimension
 
     /** Called when a Player is removed from the provider's world. */
     @Override
-    public void onPlayerRemoved(EntityPlayerMP player)
+    public void onPlayerRemoved(ServerPlayerEntity player)
     {
-        if (!player.isDead) player.sendMessage(new TextComponentTranslation("pokecube.secretBase.exit"));
+        if (!player.isDead) player.sendMessage(new TranslationTextComponent("pokecube.secretBase.exit"));
     }
 
     @Override
@@ -208,7 +208,7 @@ public class DimensionSecretBase extends Dimension
     }
 
     @Override
-    public boolean canMineBlock(net.minecraft.entity.player.EntityPlayer player, BlockPos pos)
+    public boolean canMineBlock(net.minecraft.entity.player.PlayerEntity player, BlockPos pos)
     {
         return PermissionAPI.hasPermission(player,
                 player.getCachedUniqueIdString().equals(owner) ? PERMMINEOWNBASE : PERMMINEOTHERBASE);

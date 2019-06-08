@@ -5,8 +5,8 @@ package pokecube.core.moves;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.IWorldEventListener;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.interfaces.IMoveConstants;
@@ -77,7 +77,7 @@ public class Move_Transform extends Move_Basic
     @Override
     public void attack(IPokemob attacker, Entity attacked)
     {
-        if (attacker.getTransformedTo() == null && attacked instanceof EntityLivingBase)
+        if (attacker.getTransformedTo() == null && attacked instanceof LivingEntity)
         {
             if (MovesUtils.contactAttack(attacker, attacked))
             {
@@ -86,7 +86,7 @@ public class Move_Transform extends Move_Basic
                     if (attacked instanceof IPokemob)
                     {
                         if (!(attacked instanceof IBreedingMob) || attacked != ((IBreedingMob) attacker).getLover())
-                            ((EntityCreature) attacked).setAttackTarget((EntityLivingBase) attacker);
+                            ((EntityCreature) attacked).setAttackTarget((LivingEntity) attacker);
                     }
                 }
                 attacker.setTransformedTo(attacked);
@@ -104,7 +104,7 @@ public class Move_Transform extends Move_Basic
                     MovesUtils.displayEfficiencyMessages(attacker, attacked, 0F, 1F);
                 }
             }
-            else if (attacked instanceof EntityPlayer)
+            else if (attacked instanceof PlayerEntity)
             {
                 if (MovesUtils.contactAttack(attacker, attacked))
                 {

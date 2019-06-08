@@ -4,7 +4,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -46,7 +46,7 @@ public class PacketSyncGene implements IMessage, IMessageHandler<PacketSyncGene,
 
             void processMessage(MessageContext ctx, PacketSyncGene message)
             {
-                EntityPlayer player = PokecubeCore.getPlayer(null);
+                PlayerEntity player = PokecubeCore.getPlayer(null);
                 int id = message.entityId;
                 Alleles alleles = message.genes;
                 Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);

@@ -4,7 +4,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.pathfinding.WalkNodeProcessor;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 public class WalkNodeLadderProcessor extends WalkNodeProcessor
@@ -15,20 +15,20 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
             float maxDistance)
     {
         int i = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
-        PathPoint pathpoint = this.getPoint(currentPoint.x, currentPoint.y + 1, currentPoint.z, EnumFacing.UP);
+        PathPoint pathpoint = this.getPoint(currentPoint.x, currentPoint.y + 1, currentPoint.z, Direction.UP);
         if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
         {
             pathOptions[i++] = pathpoint;
         }
-        pathpoint = this.getPoint(currentPoint.x, currentPoint.y - 1, currentPoint.z, EnumFacing.DOWN);
+        pathpoint = this.getPoint(currentPoint.x, currentPoint.y - 1, currentPoint.z, Direction.DOWN);
         if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
         {
             pathOptions[i++] = pathpoint;
         }
-        for (EnumFacing side : EnumFacing.HORIZONTALS)
+        for (Direction side : Direction.HORIZONTALS)
         {
             pathpoint = this.getPoint(currentPoint.x + side.getFrontOffsetX(), currentPoint.y - 1,
-                    currentPoint.z + side.getFrontOffsetZ(), EnumFacing.DOWN);
+                    currentPoint.z + side.getFrontOffsetZ(), Direction.DOWN);
             if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
             {
                 pathOptions[i++] = pathpoint;
@@ -37,10 +37,10 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
         return i;
     }
 
-    private PathPoint getPoint(int x, int y, int z, EnumFacing direction)
+    private PathPoint getPoint(int x, int y, int z, Direction direction)
     {
-        if (direction == EnumFacing.UP) return getLadder(x, y, z);
-        else if (direction == EnumFacing.DOWN) return getJumpOff(x, y, z);
+        if (direction == Direction.UP) return getLadder(x, y, z);
+        else if (direction == Direction.DOWN) return getJumpOff(x, y, z);
         return null;
     }
 
@@ -60,7 +60,7 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
         PathPoint point = openPoint(x, y, z);
 
         boolean laddar = false;
-        for (EnumFacing dir : EnumFacing.HORIZONTALS)
+        for (Direction dir : Direction.HORIZONTALS)
         {
             laddar = laddar || getLadder(x + dir.getFrontOffsetX(), y, z + dir.getFrontOffsetZ()) != null;
         }

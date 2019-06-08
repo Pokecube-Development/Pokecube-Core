@@ -12,9 +12,9 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
@@ -46,14 +46,14 @@ public class EggCommand extends CommandBase
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String text = "";
         ITextComponent message;
         String name;
         if (args.length > 0)
         {
-            EntityPlayer getsEgg = null;
+            PlayerEntity getsEgg = null;
             int index = 1;
             PokedexEntry entry = null;
             ItemStack egg = null;
@@ -175,7 +175,7 @@ public class EggCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/" + aliases.get(0) + "<pokemob name/number> <arguments>";
     }
@@ -188,7 +188,7 @@ public class EggCommand extends CommandBase
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, BlockPos pos)
     {
         List<String> ret = new ArrayList<String>();
         if (args.length == 1)

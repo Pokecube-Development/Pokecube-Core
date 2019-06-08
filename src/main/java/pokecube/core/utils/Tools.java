@@ -10,14 +10,14 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
@@ -221,9 +221,9 @@ public class Tools
     public static int countPokemon(Vector3 location, World world, double distance, PokedexEntry entry)
     {
         int ret = 0;
-        List<EntityLiving> list = world.getEntitiesWithinAABB(EntityLiving.class,
+        List<MobEntity> list = world.getEntitiesWithinAABB(MobEntity.class,
                 location.getAABB().grow(distance, distance, distance));
-        for (EntityLiving o : list)
+        for (MobEntity o : list)
         {
             IPokemob mob = CapabilityPokemob.getPokemobFor(o);
             if (mob != null)
@@ -241,9 +241,9 @@ public class Tools
     public static int countPokemon(Vector3 location, World world, double distance, PokeType type)
     {
         int ret = 0;
-        List<EntityLiving> list = world.getEntitiesWithinAABB(EntityLiving.class,
+        List<MobEntity> list = world.getEntitiesWithinAABB(MobEntity.class,
                 location.getAABB().grow(distance, distance, distance));
-        for (EntityLiving o : list)
+        for (MobEntity o : list)
         {
             IPokemob mob = CapabilityPokemob.getPokemobFor(o);
             if (mob != null)
@@ -260,10 +260,10 @@ public class Tools
     public static int countPokemon(World world, Vector3 location, double radius)
     {
         AxisAlignedBB box = location.getAABB();
-        List<EntityLivingBase> list = world.getEntitiesWithinAABB(EntityLivingBase.class,
+        List<LivingEntity> list = world.getEntitiesWithinAABB(LivingEntity.class,
                 box.grow(radius, radius, radius));
         int num = 0;
-        for (EntityLivingBase o : list)
+        for (LivingEntity o : list)
         {
             IPokemob mob = CapabilityPokemob.getPokemobFor(o);
             if (mob != null) num++;
@@ -328,7 +328,7 @@ public class Tools
         }
         double d0 = distance;
         Vec3d vec31 = entity.getLook(0);
-        Vec3d vec32 = vec3.addVector(vec31.x * d0, vec31.y * d0, vec31.z * d0);
+        Vec3d vec32 = vec3.add(vec31.x * d0, vec31.y * d0, vec31.z * d0);
         Entity pointedEntity = null;
 
         Predicate<Entity> predicate = Predicates.and(EntitySelectors.NOT_SPECTATING, new Predicate<Entity>()
@@ -395,7 +395,7 @@ public class Tools
         Vec3d vec3 = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
         double d0 = distance;
         Vec3d vec31 = entity.getLook(0);
-        Vec3d vec32 = vec3.addVector(vec31.x * d0, vec31.y * d0, vec31.z * d0);
+        Vec3d vec32 = vec3.add(vec31.x * d0, vec31.y * d0, vec31.z * d0);
         RayTraceResult result = entity.getEntityWorld().rayTraceBlocks(vec3, vec32, false, true, false);
         if (result == null || result.hitVec == null) return null;
         Vector3 vec = Vector3.getNewVector().set(result.getBlockPos()).add(0.5, 0.5, 0.5);
@@ -470,12 +470,12 @@ public class Tools
         double dvm = rangeVertical * rangeVertical;
         for (int i = 0; i < world.playerEntities.size(); ++i)
         {
-            EntityPlayer entityplayer = world.playerEntities.get(i);
-            if (EntitySelectors.NOT_SPECTATING.apply(entityplayer))
+            PlayerEntity PlayerEntity = world.playerEntities.get(i);
+            if (EntitySelectors.NOT_SPECTATING.apply(PlayerEntity))
             {
-                double d0 = entityplayer.posX - location.x;
-                double d1 = entityplayer.posZ - location.z;
-                double d2 = entityplayer.posY - location.y;
+                double d0 = PlayerEntity.posX - location.x;
+                double d1 = PlayerEntity.posZ - location.z;
+                double d2 = PlayerEntity.posY - location.y;
                 double dh = d0 * d0 + d1 * d1;
                 double dv = d2 * d2;
                 if (dh < dhm && dv < dvm) { return true; }
@@ -529,14 +529,14 @@ public class Tools
                 || b.getItemDamage() == OreDictionary.WILDCARD_VALUE))
             check = false;
         if (check) return false;
-        NBTBase tag;
-        if (a.hasTagCompound() && ((tag = a.getTagCompound().getTag("ForgeCaps")) != null) && tag.hasNoTags())
+        INBT tag;
+        if (a.hasTag() && ((tag = a.getTag().getTag("ForgeCaps")) != null) && tag.hasNoTags())
         {
-            a.getTagCompound().removeTag("ForgeCaps");
+            a.getTag().remove("ForgeCaps");
         }
-        if (b.hasTagCompound() && ((tag = b.getTagCompound().getTag("ForgeCaps")) != null) && tag.hasNoTags())
+        if (b.hasTag() && ((tag = b.getTag().getTag("ForgeCaps")) != null) && tag.hasNoTags())
         {
-            b.getTagCompound().removeTag("ForgeCaps");
+            b.getTag().remove("ForgeCaps");
         }
         return ItemStack.areItemStackTagsEqual(a, b);
     }
@@ -645,7 +645,7 @@ public class Tools
         {
             try
             {
-                stack.setTagCompound(JsonToNBT.getTagFromJson(tag));
+                stack.put(JsonToNBT.getTagFromJson(tag));
             }
             catch (NBTException e)
             {
@@ -655,23 +655,23 @@ public class Tools
         return stack;
     }
 
-    public static void giveItem(EntityPlayer entityplayer, ItemStack itemstack)
+    public static void giveItem(PlayerEntity PlayerEntity, ItemStack itemstack)
     {
-        boolean flag = entityplayer.inventory.addItemStackToInventory(itemstack);
+        boolean flag = PlayerEntity.inventory.addItemStackToInventory(itemstack);
         if (flag)
         {
-            entityplayer.getEntityWorld().playSound((EntityPlayer) null, entityplayer.posX, entityplayer.posY,
-                    entityplayer.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F,
-                    ((entityplayer.getRNG().nextFloat() - entityplayer.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-            entityplayer.inventoryContainer.detectAndSendChanges();
+            PlayerEntity.getEntityWorld().playSound((PlayerEntity) null, PlayerEntity.posX, PlayerEntity.posY,
+                    PlayerEntity.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F,
+                    ((PlayerEntity.getRNG().nextFloat() - PlayerEntity.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            PlayerEntity.inventoryContainer.detectAndSendChanges();
         }
         if (!flag)
         {
-            EntityItem entityitem = entityplayer.dropItem(itemstack, false);
-            if (entityitem != null)
+            ItemEntity ItemEntity = PlayerEntity.dropItem(itemstack, false);
+            if (ItemEntity != null)
             {
-                entityitem.setNoPickupDelay();
-                entityitem.setOwner(entityplayer.getName());
+                ItemEntity.setNoPickupDelay();
+                ItemEntity.setOwner(PlayerEntity.getName());
             }
         }
     }

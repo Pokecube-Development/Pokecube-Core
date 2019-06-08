@@ -22,7 +22,7 @@ public class WorldGenFossils implements IWorldGenerator
     public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
             IChunkProvider chunkProvider)
     {
-        if (!world.provider.isSurfaceWorld() || !PokecubeMod.core.getConfig().generateFossils) return;
+        if (!world.dimension.isSurfaceWorld() || !PokecubeMod.core.getConfig().generateFossils) return;
         if (!SpawnHandler.canSpawnInWorld(world)) return;
 
         int fossilchance = random.nextInt(5) + 2;

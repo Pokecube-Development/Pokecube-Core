@@ -11,15 +11,15 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
 import pokecube.core.handlers.playerdata.PlayerPokemobCache;
@@ -46,13 +46,13 @@ public class RestoreCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokerestore <check|checkpc|checkdeleted|give|givepc|givedeleted> <player>";
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args,
             @Nullable BlockPos pos)
     {
         int last = args.length - 1;
@@ -68,7 +68,7 @@ public class RestoreCommand extends CommandBase
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length < 2) throw new CommandException(getUsage(sender));
         GameProfile profile = MakeCommand.getProfile(server, args[1]);
@@ -80,9 +80,9 @@ public class RestoreCommand extends CommandBase
 
         if (args[0].startsWith("check") || args[0].startsWith("give"))
         {
-            ITextComponent message = new TextComponentString("Pokemobs: ");
+            ITextComponent message = new StringTextComponent("Pokemobs: ");
             sender.sendMessage(message);
-            message = new TextComponentString("");
+            message = new StringTextComponent("");
             boolean pc = args[0].endsWith("pc");
             boolean deleted = args[0].endsWith("deleted");
             for (Entry<Integer, ItemStack> entry : cache.entrySet())
@@ -99,10 +99,10 @@ public class RestoreCommand extends CommandBase
                 else if (deleted && !wasDeleted) continue;
 
                 ItemStack stack = entry.getValue();
-                NBTTagList nbttaglist = stack.getTagCompound().getCompoundTag(TagNames.POKEMOB).getTagList("Pos", 6);
-                double posX = nbttaglist.getDoubleAt(0);
-                double posY = nbttaglist.getDoubleAt(1);
-                double posZ = nbttaglist.getDoubleAt(2);
+                ListNBT ListNBT = stack.getTag().getCompound(TagNames.POKEMOB).getTagList("Pos", 6);
+                double posX = ListNBT.getDoubleAt(0);
+                double posY = ListNBT.getDoubleAt(1);
+                double posZ = ListNBT.getDoubleAt(2);
                 String command;
                 if (args[0].startsWith("check"))
                 {
@@ -112,11 +112,11 @@ public class RestoreCommand extends CommandBase
                 {
                     command = "/pokerestore restore " + args[1] + " " + id;
                 }
-                NBTTagCompound tag = stack.getTagCompound().copy();
-                tag.removeTag(TagNames.POKEMOB);
+                CompoundNBT tag = stack.getTag().copy();
+                tag.remove(TagNames.POKEMOB);
                 ItemStack copy = stack.copy();
-                copy.setTagCompound(tag);
-                tag = copy.writeToNBT(new NBTTagCompound());
+                copy.put(tag);
+                tag = copy.writeToNBT(new CompoundNBT());
                 ClickEvent click = new ClickEvent(Action.RUN_COMMAND, command);
                 ITextComponent sub = stack.getTextComponent();
                 sub.getStyle().setClickEvent(click);
@@ -126,7 +126,7 @@ public class RestoreCommand extends CommandBase
                 if (size > 32000)
                 {
                     sender.sendMessage(message);
-                    message = new TextComponentString("");
+                    message = new StringTextComponent("");
                 }
             }
             sender.sendMessage(message);

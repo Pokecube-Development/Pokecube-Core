@@ -12,8 +12,8 @@ import javax.vecmath.Vector3f;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
@@ -68,9 +68,9 @@ public abstract class EntityMountablePokemob extends EntityDropPokemob implement
     @Override
     public boolean attackEntityFrom(DamageSource source, float i)
     {
-        if (isRiding())
+        if (isPassenger())
         {
-            dismountRidingEntity();
+            stopRiding();
             counterMount = 0;
         }
         return super.attackEntityFrom(source, i);
@@ -95,7 +95,7 @@ public abstract class EntityMountablePokemob extends EntityDropPokemob implement
             rotationYaw = getRidingEntity().rotationYaw;
             if (this.getAttackTarget() != null && !getEntityWorld().isRemote)
             {
-                this.dismountRidingEntity();
+                this.stopRiding();
                 counterMount = 0;
             }
         }
@@ -111,9 +111,9 @@ public abstract class EntityMountablePokemob extends EntityDropPokemob implement
     public boolean shouldDismountInWater(Entity rider)
     {
         boolean canDive = pokemobCap.canUseDive();
-        if (rider instanceof EntityPlayerMP)
+        if (rider instanceof ServerPlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) rider;
+            PlayerEntity player = (PlayerEntity) rider;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             PokedexEntry entry = pokemobCap.getPokedexEntry();

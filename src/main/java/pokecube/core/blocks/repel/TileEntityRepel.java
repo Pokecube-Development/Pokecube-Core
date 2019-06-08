@@ -1,6 +1,6 @@
 package pokecube.core.blocks.repel;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.interfaces.PokecubeMod;
@@ -19,7 +19,7 @@ public class TileEntityRepel extends TileEntity
     public boolean addForbiddenSpawningCoord()
     {
         if (getWorld() == null || getWorld().isRemote || !enabled) return false;
-        return SpawnHandler.addForbiddenSpawningCoord(pos, getWorld().provider.getDimension(), distance);
+        return SpawnHandler.addForbiddenSpawningCoord(pos, getWorld().dimension.getDimension(), distance);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class TileEntityRepel extends TileEntity
 
     /** Reads a tile entity from NBT. */
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void readFromNBT(CompoundNBT nbt)
     {
         super.readFromNBT(nbt);
         distance = nbt.getByte("distance");
@@ -51,7 +51,7 @@ public class TileEntityRepel extends TileEntity
     public boolean removeForbiddenSpawningCoord()
     {
         if (getWorld() == null || getWorld().isRemote) return false;
-        return SpawnHandler.removeForbiddenSpawningCoord(pos, getWorld().provider.getDimension());
+        return SpawnHandler.removeForbiddenSpawningCoord(pos, getWorld().dimension.getDimension());
     }
 
     @Override
@@ -65,11 +65,11 @@ public class TileEntityRepel extends TileEntity
      * 
      * @return */
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt)
+    public CompoundNBT writeToNBT(CompoundNBT nbt)
     {
         super.writeToNBT(nbt);
         nbt.setByte("distance", distance);
-        nbt.setBoolean("enabled", enabled);
+        nbt.putBoolean("enabled", enabled);
         return nbt;
     }
 }

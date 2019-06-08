@@ -11,10 +11,10 @@ import java.util.logging.Level;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -80,7 +80,7 @@ public class PokecubeDimensionManager
         return false;
     }
 
-    public static int getDimensionForPlayer(EntityPlayer player)
+    public static int getDimensionForPlayer(PlayerEntity player)
     {
         return getDimensionForPlayer(player.getCachedUniqueIdString());
     }
@@ -88,7 +88,7 @@ public class PokecubeDimensionManager
     public static int getDimensionForPlayer(String player)
     {
         int dim = 0;
-        NBTTagCompound tag = PokecubePlayerDataHandler.getCustomDataTag(player);
+        CompoundNBT tag = PokecubePlayerDataHandler.getCustomDataTag(player);
         if (tag.hasKey("secretPowerDimID"))
         {
             dim = tag.getInteger("secretPowerDimID");
@@ -105,7 +105,7 @@ public class PokecubeDimensionManager
         return dim;
     }
 
-    public static BlockPos getBaseEntrance(EntityPlayer player, int dim)
+    public static BlockPos getBaseEntrance(PlayerEntity player, int dim)
     {
         return getBaseEntrance(player.getCachedUniqueIdString(), dim);
     }
@@ -113,37 +113,37 @@ public class PokecubeDimensionManager
     public static BlockPos getBaseEntrance(String player, int dim)
     {
         BlockPos ret = null;
-        NBTTagCompound tag = PokecubePlayerDataHandler.getCustomDataTag(player);
+        CompoundNBT tag = PokecubePlayerDataHandler.getCustomDataTag(player);
         if (tag.hasKey("secretBase"))
         {
-            NBTTagCompound base = tag.getCompoundTag("secretBase");
+            CompoundNBT base = tag.getCompound("secretBase");
             if (base.hasKey(dim + "X"))
                 ret = new BlockPos(base.getInteger(dim + "X"), base.getInteger(dim + "Y"), base.getInteger(dim + "Z"));
         }
         return ret;
     }
 
-    public static void setBaseEntrance(EntityPlayer player, int dim, BlockPos pos)
+    public static void setBaseEntrance(PlayerEntity player, int dim, BlockPos pos)
     {
         setBaseEntrance(player.getCachedUniqueIdString(), dim, pos);
     }
 
     public static void setBaseEntrance(String player, int dim, BlockPos pos)
     {
-        NBTTagCompound tag = PokecubePlayerDataHandler.getCustomDataTag(player);
-        NBTTagCompound base;
+        CompoundNBT tag = PokecubePlayerDataHandler.getCustomDataTag(player);
+        CompoundNBT base;
         if (tag.hasKey("secretBase"))
         {
-            base = tag.getCompoundTag("secretBase");
+            base = tag.getCompound("secretBase");
         }
         else
         {
-            base = new NBTTagCompound();
+            base = new CompoundNBT();
         }
         base.setInteger(dim + "X", pos.getX());
         base.setInteger(dim + "Y", pos.getY());
         base.setInteger(dim + "Z", pos.getZ());
-        tag.setTag("secretBase", base);
+        tag.put("secretBase", base);
         PokecubePlayerDataHandler.saveCustomData(player);
     }
 
@@ -162,7 +162,7 @@ public class PokecubeDimensionManager
         return false;
     }
 
-    public static void sendToBase(String baseOwner, EntityPlayer toSend, int... optionalDefault)
+    public static void sendToBase(String baseOwner, PlayerEntity toSend, int... optionalDefault)
     {
         int dim = getDimensionForPlayer(baseOwner);
         WorldServer old = DimensionManager.getWorld(dim);
@@ -230,15 +230,15 @@ public class PokecubeDimensionManager
     @SubscribeEvent
     public void onWorldSave(WorldEvent.Save evt)
     {
-        if (evt.getWorld().provider.getDimension() == 0)
+        if (evt.getWorld().dimension.getDimension() == 0)
         {
-            NBTTagCompound nbttagcompound = getTag();
+            CompoundNBT CompoundNBT = getTag();
             ISaveHandler saveHandler = evt.getWorld().getSaveHandler();
             File file = saveHandler.getMapFileFromName("PokecubeDimensionIDs");
             try
             {
                 FileOutputStream fileoutputstream = new FileOutputStream(file);
-                CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
+                CompressedStreamTools.writeCompressed(CompoundNBT, fileoutputstream);
                 fileoutputstream.close();
             }
             catch (IOException e)
@@ -268,7 +268,7 @@ public class PokecubeDimensionManager
     @SubscribeEvent
     public void playerChangeDimension(PlayerChangedDimensionEvent event)
     {
-        ((EntityPlayerMP) event.player).connection.sendPacket(new SPacketWorldBorder(
+        ((ServerPlayerEntity) event.player).connection.sendPacket(new SPacketWorldBorder(
                 event.player.getEntityWorld().getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
     }
 
@@ -278,7 +278,7 @@ public class PokecubeDimensionManager
         World world = event.player.getEntityWorld();
         if (!world.isRemote)
         {
-            ((EntityPlayerMP) event.player).connection.sendPacket(new SPacketWorldBorder(
+            ((ServerPlayerEntity) event.player).connection.sendPacket(new SPacketWorldBorder(
                     event.player.getEntityWorld().getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
         }
     }
@@ -298,9 +298,9 @@ public class PokecubeDimensionManager
         if (file != null && file.exists())
         {
             FileInputStream fileinputstream = new FileInputStream(file);
-            NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(fileinputstream);
+            CompoundNBT CompoundNBT = CompressedStreamTools.readCompressed(fileinputstream);
             fileinputstream.close();
-            loadFromTag(nbttagcompound, true);
+            loadFromTag(CompoundNBT, true);
         }
         if (WorldgenHandler.dims != null) for (CustomDim dim : WorldgenHandler.dims.dims)
         {
@@ -325,10 +325,10 @@ public class PokecubeDimensionManager
         }
     }
 
-    private NBTTagCompound getTag()
+    private CompoundNBT getTag()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        NBTTagCompound types = new NBTTagCompound();
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        CompoundNBT types = new CompoundNBT();
         int[] dim = new int[dims.size()];
         int n = 0;
         for (int i : dims)
@@ -339,29 +339,29 @@ public class PokecubeDimensionManager
             {
                 type = DimensionManager.getProviderType(i);
             }
-            types.setString("dim-" + i + "-type", type.toString());
+            types.putString("dim-" + i + "-type", type.toString());
             World world = DimensionManager.getWorld(i);
             if (world != null && type != SECRET_BASE_TYPE)
             {
-                types.setString("dim-" + i + "-name", world.getWorldInfo().getWorldName());
-                types.setString("dim-" + i + "-options", world.getWorldInfo().getGeneratorOptions());
-                types.setString("dim-" + i + "-world", world.getWorldType().getName());
-                types.setLong("dim-" + i + "-seed", world.getSeed());
+                types.putString("dim-" + i + "-name", world.getWorldInfo().getWorldName());
+                types.putString("dim-" + i + "-options", world.getWorldInfo().getGeneratorOptions());
+                types.putString("dim-" + i + "-world", world.getWorldType().getName());
+                types.putLong("dim-" + i + "-seed", world.getSeed());
             }
-            if (dimOwners.containsKey(i)) nbttagcompound.setString("dim_" + i, dimOwners.get(i));
+            if (dimOwners.containsKey(i)) CompoundNBT.putString("dim_" + i, dimOwners.get(i));
         }
-        nbttagcompound.setIntArray("dims", dim);
-        nbttagcompound.setTag("types", types);
-        NBTTagCompound ret = new NBTTagCompound();
-        ret.setTag("Data", nbttagcompound);
+        CompoundNBT.putIntArray("dims", dim);
+        CompoundNBT.put("types", types);
+        CompoundNBT ret = new CompoundNBT();
+        ret.put("Data", CompoundNBT);
         return ret;
     }
 
-    public void loadFromTag(NBTTagCompound nbttagcompound, boolean init)
+    public void loadFromTag(CompoundNBT CompoundNBT, boolean init)
     {
-        nbttagcompound = nbttagcompound.getCompoundTag("Data");
-        int[] nums = nbttagcompound.getIntArray("dims");
-        NBTTagCompound typesTag = nbttagcompound.getCompoundTag("types");
+        CompoundNBT = CompoundNBT.getCompound("Data");
+        int[] nums = CompoundNBT.getIntArray("dims");
+        CompoundNBT typesTag = CompoundNBT.getCompound("types");
         dims.clear();
         for (int i : nums)
         {
@@ -379,9 +379,9 @@ public class PokecubeDimensionManager
                 CustomDimensionManager.initDimension(i, worldName, worldType, generatorOptions, seed);
             }
             else if (!DimensionManager.isDimensionRegistered(i)) DimensionManager.registerDimension(i, type);
-            if (nbttagcompound.hasKey("dim_" + i))
+            if (CompoundNBT.hasKey("dim_" + i))
             {
-                dimOwners.put(i, nbttagcompound.getString("dim_" + i));
+                dimOwners.put(i, CompoundNBT.getString("dim_" + i));
             }
         }
     }

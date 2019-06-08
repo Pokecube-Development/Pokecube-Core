@@ -1,7 +1,7 @@
 package pokecube.core.items.berries;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 import pokecube.core.PokecubeItems;
 
@@ -24,7 +24,7 @@ public class RecipeBrewBerries implements IBrewingRecipe
     @Override
     public boolean isInput(ItemStack input)
     {
-        NBTTagCompound tag = input.getTagCompound();
+        CompoundNBT tag = input.getTag();
         if ((tag != null && tag.hasKey("pokebloc"))) return true;
         return input.getItem() == Items.GLASS_BOTTLE;
     }
@@ -32,7 +32,7 @@ public class RecipeBrewBerries implements IBrewingRecipe
     private ItemStack makeOutput(ItemStack input, ItemStack ingredient)
     {
 
-        NBTTagCompound pokebloc = new NBTTagCompound();
+        CompoundNBT pokebloc = new CompoundNBT();
         ItemStack stack = PokecubeItems.getStack("revive");
 
         if (ingredient.getItem() instanceof ItemBerry)
@@ -40,8 +40,8 @@ public class RecipeBrewBerries implements IBrewingRecipe
             ItemBerry berry = (ItemBerry) ingredient.getItem();
             int[] flav = BerryManager.berryFlavours.get(berry.index);
             int[] old = null;
-            if (input.hasTagCompound() && input.getTagCompound().hasKey("pokebloc"))
-                old = input.getTagCompound().getIntArray("pokebloc");
+            if (input.hasTag() && input.getTag().hasKey("pokebloc"))
+                old = input.getTag().getIntArray("pokebloc");
             if (flav != null)
             {
                 flav = flav.clone();
@@ -49,10 +49,10 @@ public class RecipeBrewBerries implements IBrewingRecipe
                 {
                     flav[i] += old[i];
                 }
-                pokebloc.setIntArray("pokebloc", flav);
-                NBTTagCompound tag = input.hasTagCompound() ? input.getTagCompound().copy() : new NBTTagCompound();
-                tag.setTag("pokebloc", pokebloc);
-                stack.setTagCompound(tag);
+                pokebloc.putIntArray("pokebloc", flav);
+                CompoundNBT tag = input.hasTag() ? input.getTag().copy() : new CompoundNBT();
+                tag.put("pokebloc", pokebloc);
+                stack.put(tag);
             }
         }
         return stack;

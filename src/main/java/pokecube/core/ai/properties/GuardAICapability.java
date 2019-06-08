@@ -6,11 +6,11 @@ import java.util.concurrent.Callable;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.BlockPos;
 import pokecube.core.utils.TimePeriod;
@@ -79,7 +79,7 @@ public class GuardAICapability implements IGuardAICapability
         }
 
         @Override
-        public void startTask(EntityLiving entity)
+        public void startTask(MobEntity entity)
         {
             entity.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).removeModifier(executingGuardTask);
             entity.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).applyModifier(executingGuardTask);
@@ -88,7 +88,7 @@ public class GuardAICapability implements IGuardAICapability
         }
 
         @Override
-        public void continueTask(EntityLiving entity)
+        public void continueTask(MobEntity entity)
         {
             boolean hasPath = !entity.getNavigator().noPath();
             BlockPos newPos = entity.getPosition();
@@ -152,7 +152,7 @@ public class GuardAICapability implements IGuardAICapability
         }
 
         @Override
-        public void endTask(EntityLiving entity)
+        public void endTask(MobEntity entity)
         {
             entity.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).removeModifier(executingGuardTask);
         }
@@ -203,10 +203,10 @@ public class GuardAICapability implements IGuardAICapability
     }
 
     @Override
-    public void loadTasks(NBTTagList list)
+    public void loadTasks(ListNBT list)
     {
         tasks.clear();
-        for (int i = 0; i < list.tagCount(); i++)
+        for (int i = 0; i < list.size(); i++)
         {
             GuardTask task = new GuardTask();
             task.load(list.get(i));
@@ -216,9 +216,9 @@ public class GuardAICapability implements IGuardAICapability
     }
 
     @Override
-    public NBTTagList serializeTasks()
+    public ListNBT serializeTasks()
     {
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (IGuardTask task : tasks)
         {
             list.appendTag(task.serialze());

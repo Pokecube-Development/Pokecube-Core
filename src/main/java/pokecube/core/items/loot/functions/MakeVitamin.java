@@ -52,7 +52,7 @@ public class MakeVitamin extends LootFunction
         if (vitamins.containsKey(arg))
         {
             ItemStack vitamin = new ItemStack(VITAMIN, stack.getCount(), vitamins.get(arg));
-            vitamin.setTagCompound(stack.getTagCompound());
+            vitamin.put(stack.getTag());
             return vitamin;
         }
         else

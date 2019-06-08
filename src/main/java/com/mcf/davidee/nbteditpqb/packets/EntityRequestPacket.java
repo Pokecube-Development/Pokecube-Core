@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Level;
 import com.mcf.davidee.nbteditpqb.NBTEdit;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 
@@ -36,7 +36,7 @@ public class EntityRequestPacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(EntityRequestPacket packet, MessageContext ctx) {
-			EntityPlayerMP player = ctx.getServerHandler().player;
+			ServerPlayerEntity player = ctx.getServerHandler().player;
 			NBTEdit.log(Level.TRACE, player.getName() + " requested entity with Id #" + packet.entityID);
 			NBTEdit.NETWORK.sendEntity(player, packet.entityID);
 			return null;

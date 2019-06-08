@@ -12,8 +12,8 @@ import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
@@ -107,10 +107,10 @@ public class WikiPage extends ListPage
         int offsetY = (watch.height - 160) / 2 + 20;
         int height = 120;
         ItemStack book = books.get(index).getInfoBook(FMLClientHandler.instance().getCurrentLanguage());
-        NBTTagCompound tag = book.getTagCompound();
-        NBTTagList bookPages = tag.getTagList("pages", 8);
+        CompoundNBT tag = book.getTag();
+        ListNBT bookPages = tag.getTagList("pages", 8);
         ITextComponent line;
-        for (int i = 0; i < bookPages.tagCount(); i++)
+        for (int i = 0; i < bookPages.size(); i++)
         {
             ITextComponent page = ITextComponent.Serializer.jsonToComponent(bookPages.getStringTagAt(i));
             List<ITextComponent> list = GuiUtilRenderComponents.splitText(page, 120, fontRenderer, true, true);

@@ -10,9 +10,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -34,14 +34,14 @@ public class GuiTradingTable extends GuiContainer
     private float                yRenderAngle     = 10;
     private float                xRenderAngle     = 0;
 
-    protected EntityPlayer       entityPlayer     = null;
+    protected PlayerEntity       PlayerEntity     = null;
 
     final TileEntityTradingTable table;
 
     public GuiTradingTable(InventoryPlayer player_inventory, TileEntityTradingTable table)
     {
         super(new ContainerTradingTable(table, player_inventory));
-        entityPlayer = player_inventory.player;
+        PlayerEntity = player_inventory.player;
         this.table = table;
     }
 
@@ -49,9 +49,9 @@ public class GuiTradingTable extends GuiContainer
     protected void actionPerformed(GuiButton guibutton)
     {
         PacketTrade packet = new PacketTrade(PacketTrade.SETTRADER);
-        packet.data.setBoolean("R", false);
-        packet.data.setIntArray("L", new int[] { table.getPos().getX(), table.getPos().getY(), table.getPos().getZ() });
-        packet.data.setInteger("I", entityPlayer.getEntityId());
+        packet.data.putBoolean("R", false);
+        packet.data.putIntArray("L", new int[] { table.getPos().getX(), table.getPos().getY(), table.getPos().getZ() });
+        packet.data.setInteger("I", PlayerEntity.getEntityId());
         packet.data.setByte("B", (byte) guibutton.id);
         PokecubePacketHandler.sendToServer(packet);
     }
@@ -101,7 +101,7 @@ public class GuiTradingTable extends GuiContainer
         if (table.player1 != null)
         {
             green = true;
-            if (table.player1 == entityPlayer) blue = true;
+            if (table.player1 == PlayerEntity) blue = true;
         }
         {
             GL11.glPushMatrix();
@@ -117,7 +117,7 @@ public class GuiTradingTable extends GuiContainer
         if (table.player2 != null)
         {
             green = true;
-            if (table.player2 == entityPlayer) blue = true;
+            if (table.player2 == PlayerEntity) blue = true;
         }
         x += 90;
         {
@@ -133,9 +133,9 @@ public class GuiTradingTable extends GuiContainer
         this.renderHoveredToolTip(i, j);
     }
 
-    private EntityLiving getEntityToDisplay(int index)
+    private MobEntity getEntityToDisplay(int index)
     {
-        EntityLiving pokemob = PokecubeManager.itemToPokemob(table.getStackInSlot(index), table.getWorld()).getEntity();
+        MobEntity pokemob = PokecubeManager.itemToPokemob(table.getStackInSlot(index), table.getWorld()).getEntity();
         return pokemob;
     }
 
@@ -155,14 +155,14 @@ public class GuiTradingTable extends GuiContainer
     public void onGuiClosed()
     {
         PacketTrade packet = new PacketTrade(PacketTrade.SETTRADER);
-        packet.data.setBoolean("R", true);
-        packet.data.setIntArray("L", new int[] { table.getPos().getX(), table.getPos().getY(), table.getPos().getZ() });
+        packet.data.putBoolean("R", true);
+        packet.data.putIntArray("L", new int[] { table.getPos().getX(), table.getPos().getY(), table.getPos().getZ() });
         PokecubePacketHandler.sendToServer(packet);
     }
 
     private void renderMob(int index)
     {
-        EntityLiving entity = getEntityToDisplay(index);
+        MobEntity entity = getEntityToDisplay(index);
 
         if (entity == null) return;
 
@@ -192,7 +192,7 @@ public class GuiTradingTable extends GuiContainer
         RenderHelper.enableStandardItemLighting();
         GL11.glRotatef(-135F, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(-(float) Math.atan(f5 / 40F) * 20F, 1.0F, 0.0F, 0.0F);
-        EntityTools.copyEntityTransforms(entity, entityPlayer);
+        EntityTools.copyEntityTransforms(entity, PlayerEntity);
         GL11.glTranslatef(0.0F, (float) entity.getYOffset(), 0.0F);
         yRenderAngle = yRenderAngle + 0.15F;
         GL11.glRotatef(yRenderAngle, 0.0F, 1.0F, 0.0F);
@@ -201,10 +201,10 @@ public class GuiTradingTable extends GuiContainer
         PokeType flying = PokeType.getType("flying");
         entity.onGround = !pokemob.isType(flying);
 
-        Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0, POKEDEX_RENDER, false);
+        Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0, POKEDEX_RENDER, false);
 
         GL11.glPopMatrix();
-        EntityLivingBase owner = pokemob.getPokemonOwner();
+        LivingEntity owner = pokemob.getPokemonOwner();
         if (owner != null)
         {
             GL11.glScalef(-15, 15, 15);
@@ -216,7 +216,7 @@ public class GuiTradingTable extends GuiContainer
 
             GlStateManager.rotate(-shift * 20, 0, 1, 0);
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
-            Minecraft.getMinecraft().getRenderManager().renderEntity(owner, 0, 0, 0, 0, POKEDEX_RENDER, false);
+            Minecraft.getInstance().getRenderManager().renderEntity(owner, 0, 0, 0, 0, POKEDEX_RENDER, false);
             GlStateManager.disableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
         }
 

@@ -5,8 +5,8 @@ import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraftforge.common.util.FakePlayer;
 import pokecube.core.PokecubeItems;
 import pokecube.core.interfaces.IPokecube;
@@ -19,13 +19,13 @@ public class DispenserBehaviorPokecube implements IBehaviorDispenseItem
     @Override
     public ItemStack dispense(IBlockSource source, ItemStack stack)
     {
-        EnumFacing dir = null;
+        Direction dir = null;
         IBlockState state = source.getBlockState();
         for (IProperty<?> prop : state.getPropertyKeys())
         {
-            if (prop.getValueClass() == EnumFacing.class)
+            if (prop.getValueClass() == Direction.class)
             {
-                dir = (EnumFacing) state.getValue(prop);
+                dir = (Direction) state.getValue(prop);
                 break;
             }
         }
@@ -40,32 +40,32 @@ public class DispenserBehaviorPokecube implements IBehaviorDispenseItem
         player.rotationPitch = 0;
         player.rotationYaw = 0;
 
-        if (dir == EnumFacing.EAST)
+        if (dir == Direction.EAST)
         {
             player.rotationYaw = -90;
         }
-        else if (dir == EnumFacing.WEST)
+        else if (dir == Direction.WEST)
         {
             player.rotationYaw = 90;
         }
-        else if (dir == EnumFacing.NORTH)
+        else if (dir == Direction.NORTH)
         {
             player.rotationYaw = 180;
         }
-        else if (dir == EnumFacing.UP)
+        else if (dir == Direction.UP)
         {
             player.rotationPitch = -90;
         }
-        else if (dir == EnumFacing.DOWN)
+        else if (dir == Direction.DOWN)
         {
             player.rotationPitch = 90;
         }
 
         if (stack.getItem() == PokecubeItems.pokemobEgg)
         {
-            player.setHeldItem(EnumHand.MAIN_HAND, stack);
-            stack.onItemUse(player, source.getWorld(), source.getBlockPos().offset(dir), EnumHand.MAIN_HAND,
-                    EnumFacing.UP, 0.5f, 0.5f, 0.5f);
+            player.setHeldItem(Hand.MAIN_HAND, stack);
+            stack.onItemUse(player, source.getWorld(), source.getBlockPos().offset(dir), Hand.MAIN_HAND,
+                    Direction.UP, 0.5f, 0.5f, 0.5f);
             player.inventory.clear();
         }
         else if (stack.getItem() instanceof IPokecube)

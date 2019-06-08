@@ -25,7 +25,7 @@ public class ThrowParticle extends MoveAnimationBase
     {
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
     {

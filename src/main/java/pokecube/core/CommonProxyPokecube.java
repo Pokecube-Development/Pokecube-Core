@@ -6,8 +6,8 @@ package pokecube.core;
 import java.util.UUID;
 
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.profiler.ISnooperInfo;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IThreadListener;
@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import pokecube.core.blocks.healtable.ContainerHealTable;
 import pokecube.core.blocks.pc.ContainerPC;
@@ -39,7 +39,7 @@ import thut.api.maths.Vector3;
 public class CommonProxyPokecube extends CommonProxy implements IGuiHandler
 {
     @Override
-    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z)
+    public Object getClientGuiElement(int id, PlayerEntity player, World world, int x, int y, int z)
     {
         // unused server side. -- see ClientProxyPokecube for implementation
         return null;
@@ -60,14 +60,14 @@ public class CommonProxyPokecube extends CommonProxy implements IGuiHandler
         return FMLCommonHandler.instance().getMinecraftServerInstance();
     }
 
-    public EntityPlayer getPlayer(String playerName)
+    public PlayerEntity getPlayer(String playerName)
     {
         if (playerName != null && getWorld() != null)
         {
             try
             {
                 UUID id = UUID.fromString(playerName);
-                EntityPlayer ret = getWorld().getMinecraftServer().getPlayerList().getPlayerByUUID(id);
+                PlayerEntity ret = getWorld().getMinecraftServer().getPlayerList().getPlayerByUUID(id);
                 return ret != null ? ret : getWorld().getPlayerEntityByUUID(UUID.fromString(playerName));
             }
             catch (Exception e)
@@ -80,7 +80,7 @@ public class CommonProxyPokecube extends CommonProxy implements IGuiHandler
     }
 
     @Override
-    public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z)
+    public Object getServerGuiElement(int id, PlayerEntity player, World world, int x, int y, int z)
     {
         if (id == Config.GUIPOKECENTER_ID) { return new ContainerHealTable(player.inventory,
                 Vector3.getNewVector().set(x + .5, y + .5, z + .5)); }
@@ -157,7 +157,7 @@ public class CommonProxyPokecube extends CommonProxy implements IGuiHandler
 
     }
 
-    public void preInit(FMLPreInitializationEvent evt)
+    public void preInit(FMLCommonSetupEvent evt)
     {
 
     }
@@ -166,7 +166,7 @@ public class CommonProxyPokecube extends CommonProxy implements IGuiHandler
     {
     }
 
-    public void registerClass(Class<? extends EntityLiving> clazz, PokedexEntry entry)
+    public void registerClass(Class<? extends MobEntity> clazz, PokedexEntry entry)
     {
         // Register this pokemob has having genes.
         PokemobGenes.registerClass(clazz, entry);

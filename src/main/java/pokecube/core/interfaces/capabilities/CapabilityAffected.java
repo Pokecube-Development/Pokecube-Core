@@ -10,10 +10,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -49,23 +49,23 @@ public class CapabilityAffected
     {
 
         @Override
-        public NBTBase writeNBT(Capability<IOngoingAffected> capability, IOngoingAffected instance, EnumFacing side)
+        public INBT writeNBT(Capability<IOngoingAffected> capability, IOngoingAffected instance, Direction side)
         {
             return instance.serializeNBT();
         }
 
         @Override
-        public void readNBT(Capability<IOngoingAffected> capability, IOngoingAffected instance, EnumFacing side,
-                NBTBase nbt)
+        public void readNBT(Capability<IOngoingAffected> capability, IOngoingAffected instance, Direction side,
+                INBT nbt)
         {
-            if (nbt instanceof NBTTagList) instance.deserializeNBT((NBTTagList) nbt);
+            if (nbt instanceof ListNBT) instance.deserializeNBT((ListNBT) nbt);
         }
 
     }
 
-    public static class DefaultAffected implements IOngoingAffected, ICapabilitySerializable<NBTTagList>
+    public static class DefaultAffected implements IOngoingAffected, ICapabilitySerializable<ListNBT>
     {
-        EntityLivingBase                                 entity;
+        LivingEntity                                 entity;
         final List<IOngoingEffect>                       effects = Lists.newArrayList();
         IOngoingEffect[]                                 cachedArray;
         final Map<ResourceLocation, Set<IOngoingEffect>> map     = Maps.newHashMap();
@@ -74,7 +74,7 @@ public class CapabilityAffected
         {
         }
 
-        public DefaultAffected(EntityLivingBase entity)
+        public DefaultAffected(LivingEntity entity)
         {
             this.entity = entity;
             for (ResourceLocation id : EFFECTS.keySet())
@@ -84,7 +84,7 @@ public class CapabilityAffected
         }
 
         @Override
-        public EntityLivingBase getEntity()
+        public LivingEntity getEntity()
         {
             return entity;
         }
@@ -160,13 +160,13 @@ public class CapabilityAffected
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == AFFECTED_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             if (hasCapability(capability, facing)) return AFFECTED_CAP.cast(this);
             return null;

@@ -2,7 +2,7 @@ package pokecube.core.entity.pokemobs.genetics.genes;
 
 import java.util.Random;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -24,15 +24,15 @@ public class SpeciesGene implements Gene
         public byte         value;
         public PokedexEntry entry;
 
-        NBTTagCompound save()
+        CompoundNBT save()
         {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundNBT tag = new CompoundNBT();
             tag.setByte("G", value);
-            if (entry != null) tag.setString("E", entry.getName());
+            if (entry != null) tag.putString("E", entry.getName());
             return tag;
         }
 
-        void load(NBTTagCompound tag)
+        void load(CompoundNBT tag)
         {
             value = tag.getByte("G");
             entry = Database.getEntry(tag.getString("E"));
@@ -129,17 +129,17 @@ public class SpeciesGene implements Gene
     }
 
     @Override
-    public NBTTagCompound save()
+    public CompoundNBT save()
     {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setTag("V", info.save());
+        CompoundNBT tag = new CompoundNBT();
+        tag.put("V", info.save());
         return tag;
     }
 
     @Override
-    public void load(NBTTagCompound tag)
+    public void load(CompoundNBT tag)
     {
-        info.load(tag.getCompoundTag("V"));
+        info.load(tag.getCompound("V"));
     }
 
     @Override

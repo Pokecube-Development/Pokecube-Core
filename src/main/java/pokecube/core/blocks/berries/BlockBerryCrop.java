@@ -7,7 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
@@ -114,7 +114,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
-            EntityPlayer player)
+            PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
         return BerryManager.getBerryItem(tile.getBerryId());

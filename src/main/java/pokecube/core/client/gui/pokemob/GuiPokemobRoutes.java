@@ -14,7 +14,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import pokecube.core.ai.properties.IGuardAICapability;
 import pokecube.core.client.Resources;
 import pokecube.core.client.gui.GuiPokemob;
@@ -67,10 +67,10 @@ public class GuiPokemobRoutes extends GuiContainer
         buttonList.add(new GuiButton(0, xOffset + 60, yOffset, 30, 10, I18n.format("pokemob.gui.inventory")));
         buttonList.add(new GuiButton(1, xOffset + 30, yOffset, 30, 10, I18n.format("pokemob.gui.storage")));
         buttonList.add(new GuiButton(2, xOffset + 00, yOffset, 30, 10, I18n.format("pokemob.gui.ai")));
-        Function<NBTTagCompound, NBTTagCompound> function = new Function<NBTTagCompound, NBTTagCompound>()
+        Function<CompoundNBT, CompoundNBT> function = new Function<CompoundNBT, CompoundNBT>()
         {
             @Override
-            public NBTTagCompound apply(NBTTagCompound t)
+            public CompoundNBT apply(CompoundNBT t)
             {
                 PacketSyncRoutes.sendServerPacket(entity, t);
                 return t;

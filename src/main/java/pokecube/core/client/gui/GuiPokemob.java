@@ -26,7 +26,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.PokecubeCore;
@@ -245,7 +245,7 @@ public class GuiPokemob extends GuiContainer
                 renderMob.getEntity().prevRotationYaw = 0;
                 renderMob.getEntity().limbSwing += 0.05;
                 renderMob.getEntity().limbSwingAmount = 0.05f;
-                Object o = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(renderMob.getEntity());
+                Object o = Minecraft.getInstance().getRenderManager().getEntityRenderObject(renderMob.getEntity());
                 if (o instanceof RenderAdvancedPokemobModel
                         || (o = RenderPokemobs.getInstance().getRenderer(entry)) instanceof RenderAdvancedPokemobModel)
                 {
@@ -326,7 +326,7 @@ public class GuiPokemob extends GuiContainer
     public static void renderMob(IPokemob pokemob, int width, int height, int xSize, int ySize, float xRenderAngle,
             float yRenderAngle, float zRenderAngle, float scale)
     {
-        EntityLiving entity = pokemob.getEntity();
+        MobEntity entity = pokemob.getEntity();
         float size = 0;
         int j = width;
         int k = height;
@@ -346,8 +346,8 @@ public class GuiPokemob extends GuiContainer
         GL11.glRotatef(zRenderAngle, 0.0F, 0.0F, 1.0F);
         try
         {
-            Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, 0, 0, 0,
-                    Minecraft.getMinecraft().getRenderPartialTicks(), false);
+            Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0,
+                    Minecraft.getInstance().getRenderPartialTicks(), false);
         }
         catch (Throwable e)
         {
@@ -365,7 +365,7 @@ public class GuiPokemob extends GuiContainer
 
     private IInventory   playerInventory;
     private IPokemob     pokemob;
-    private EntityLiving entity;
+    private MobEntity entity;
     private float        yRenderAngle = 10;
     private GuiTextField name;
     private float        xRenderAngle = 0;

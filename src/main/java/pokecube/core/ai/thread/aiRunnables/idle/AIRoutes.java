@@ -1,6 +1,6 @@
 package pokecube.core.ai.thread.aiRunnables.idle;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.world.World;
 import pokecube.core.ai.properties.IGuardAICapability;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
@@ -17,7 +17,7 @@ public class AIRoutes extends AIBase
     public final GuardAI wrapped;
     private boolean      running;
 
-    public AIRoutes(EntityLiving mob, IGuardAICapability cap)
+    public AIRoutes(MobEntity mob, IGuardAICapability cap)
     {
         this.wrapped = new GuardAI(mob, cap);
         pokemob = CapabilityPokemob.getPokemobFor(mob);

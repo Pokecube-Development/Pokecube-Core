@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagDouble;
@@ -30,9 +30,9 @@ public class GuiEditNBT extends Gui{
 	
 	public static final int WIDTH = 178, HEIGHT = 93;
 
-	private Minecraft mc = Minecraft.getMinecraft();
+	private Minecraft mc = Minecraft.getInstance();
 	private Node<NamedNBT> node;
-	private NBTBase nbt;
+	private INBT nbt;
 	private boolean canEditText, canEditValue;
 	private GuiNBTTree parent;
 
@@ -197,7 +197,7 @@ public class GuiEditNBT extends Gui{
 	
 	private boolean validName(){
 		for (Node<NamedNBT> node : this.node.getParent().getChildren()){
-			NBTBase base = node.getObject().getNBT();
+			INBT base = node.getObject().getNBT();
 			if (base != nbt && node.getObject().getName().equals(key.getText()))
 				return false;
 		}
@@ -206,7 +206,7 @@ public class GuiEditNBT extends Gui{
 	
 	private static void setValidValue(Node<NamedNBT> node, String value){
 		NamedNBT named = node.getObject();
-		NBTBase base = named.getNBT();
+		INBT base = named.getNBT();
 		
 		if (base instanceof NBTTagByte)
 			named.setNBT(new NBTTagByte(ParseHelper.parseByte(value)));
@@ -257,7 +257,7 @@ public class GuiEditNBT extends Gui{
 		}
 	}
 	
-	private static String getValue(NBTBase base){
+	private static String getValue(INBT base){
 		switch(base.getId()){
 		case 7:
 			String s = "";

@@ -1,6 +1,6 @@
 package pokecube.core.world.gen.village.buildings.pokecenter;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import pokecube.core.world.gen.template.PokecubeTemplates;
 import pokecube.core.world.gen.village.buildings.TemplateStructure;
@@ -13,7 +13,7 @@ public class TemplatePokecenter extends TemplateStructure
         setOffset(-2);
     }
 
-    public TemplatePokecenter(BlockPos pos, EnumFacing dir)
+    public TemplatePokecenter(BlockPos pos, Direction dir)
     {
         super(PokecubeTemplates.POKECENTER, pos, dir);
     }

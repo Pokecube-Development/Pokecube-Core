@@ -6,7 +6,7 @@ import java.util.Random;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,7 +21,7 @@ public class TemplateStructure extends TemplateStructureBase
         super();
     }
 
-    public TemplateStructure(String type, BlockPos pos, EnumFacing dir)
+    public TemplateStructure(String type, BlockPos pos, Direction dir)
     {
         super(type, pos, dir);
     }

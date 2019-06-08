@@ -1,17 +1,17 @@
 package com.mcf.davidee.nbteditpqb.nbt;
 
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 
 public class NamedNBT {
 	
 	protected String name;
-	protected NBTBase nbt;
+	protected INBT nbt;
 	
-	public NamedNBT(NBTBase nbt) {
+	public NamedNBT(INBT nbt) {
 		this("", nbt);
 	}
 	
-	public NamedNBT(String name, NBTBase nbt) {
+	public NamedNBT(String name, INBT nbt) {
 		this.name = name;
 		this.nbt = nbt;
 	}
@@ -24,11 +24,11 @@ public class NamedNBT {
 		this.name = name;
 	}
 	
-	public NBTBase getNBT() {
+	public INBT getNBT() {
 		return nbt;
 	}
 	
-	public void setNBT(NBTBase nbt) {
+	public void setNBT(INBT nbt) {
 		this.nbt = nbt;
 	}
 	

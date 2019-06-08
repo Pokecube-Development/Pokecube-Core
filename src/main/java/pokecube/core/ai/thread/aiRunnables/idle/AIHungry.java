@@ -7,19 +7,19 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.blocks.berries.BerryGenManager;
@@ -60,7 +60,7 @@ public class AIHungry extends AIBase
             if (!stack.isEmpty())
             {
                 ItemStackTools.addItemStackToInventory(stack, pokemob.getPokemobInventory(), 2);
-                pokemob.eat(new EntityItem(world, 0, 0, 0, stack));
+                pokemob.eat(new ItemEntity(world, 0, 0, 0, stack));
             }
             return true;
         }
@@ -69,9 +69,9 @@ public class AIHungry extends AIBase
 
     public static int  TICKRATE = 20;
 
-    final EntityLiving entity;
+    final MobEntity entity;
     // final World world;
-    final EntityItem   berry;
+    final ItemEntity   berry;
     final double       distance;
     IPokemob           pokemob;
     Vector3            foodLoc  = null;
@@ -83,7 +83,7 @@ public class AIHungry extends AIBase
     Vector3            v1       = Vector3.getNewVector();
     Random             rand;
 
-    public AIHungry(final IPokemob pokemob, final EntityItem berry_, double distance)
+    public AIHungry(final IPokemob pokemob, final ItemEntity berry_, double distance)
     {
         this.entity = pokemob.getEntity();
         berry = berry_;
@@ -130,7 +130,7 @@ public class AIHungry extends AIBase
                 EntityFishHook hook = hooks.get(0);
                 if (v.isVisible(world, v1.set(hook)))
                 {
-                    Path path = entity.getNavigator().getPathToEntityLiving(hook);
+                    Path path = entity.getNavigator().getPathToMobEntity(hook);
                     addEntityPath(entity, path, moveSpeed);
                     addTargetInfo(entity, hook);
                     if (entity.getDistanceSq(hook) < 2)
@@ -155,7 +155,7 @@ public class AIHungry extends AIBase
         for (TimePeriod p : pokemob.getPokedexEntry().activeTimes())
         {// TODO find some way to determine actual length of day for things like
          // AR support.
-            if (p != null && p.contains(entity.getEntityWorld().getWorldTime(), 24000)) ;
+            if (p != null && p.contains(entity.getEntityWorld().getDayTime(), 24000)) ;
             {
                 sleepy = false;
                 pokemob.setLogicState(LogicStates.SLEEPING, false);
@@ -200,7 +200,7 @@ public class AIHungry extends AIBase
      * @return found light */
     protected boolean checkPhotoeat()
     {
-        if (entity.getEntityWorld().provider.isDaytime() && v.canSeeSky(world))
+        if (entity.getEntityWorld().dimension.isDaytime() && v.canSeeSky(world))
         {
             pokemob.setHungerTime(pokemob.getHungerTime() - PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
             setCombatState(pokemob, CombatStates.HUNTING, false);
@@ -229,7 +229,7 @@ public class AIHungry extends AIBase
      * @return found and ate rocks. */
     protected boolean checkRockEat()
     {
-        IBlockState state = v.offset(EnumFacing.DOWN).getBlockState(world);
+        IBlockState state = v.offset(Direction.DOWN).getBlockState(world);
         Block b = state.getBlock();
         // Look for nearby rocks.
         if (!PokecubeTerrainChecker.isRock(state))
@@ -248,7 +248,7 @@ public class AIHungry extends AIBase
             // Check configs, and if so, actually eat the rocks
             if (PokecubeMod.core.getConfig().pokemobsEatRocks)
             {
-                v.set(entity).offsetBy(EnumFacing.DOWN);
+                v.set(entity).offsetBy(Direction.DOWN);
                 if (MoveEventsHandler.canEffectBlock(pokemob, v))
                 {
                     if (b == Blocks.COBBLESTONE)
@@ -319,7 +319,7 @@ public class AIHungry extends AIBase
             if (entity.getEntityData().hasKey("lastInteract"))
             {
                 long time = entity.getEntityData().getLong("lastInteract");
-                long diff = entity.getEntityWorld().getTotalWorldTime() - time;
+                long diff = entity.getEntityWorld().getGameTime() - time;
                 if (diff < PokecubeMod.core.getConfig().pokemobLifeSpan) tameCheck = false;
             }
             // If they are allowed to, find the berries.
@@ -338,9 +338,9 @@ public class AIHungry extends AIBase
                 {
                     entity.attackEntityFrom(DamageSource.STARVE, damage);
                     if (!dead) pokemob.displayMessageToOwner(
-                            new TextComponentTranslation("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
+                            new TranslationTextComponent("pokemob.hungry.hurt", pokemob.getPokemonDisplayName()));
                     else pokemob.displayMessageToOwner(
-                            new TextComponentTranslation("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
+                            new TranslationTextComponent("pokemob.hungry.dead", pokemob.getPokemonDisplayName()));
                 }
             }
         }

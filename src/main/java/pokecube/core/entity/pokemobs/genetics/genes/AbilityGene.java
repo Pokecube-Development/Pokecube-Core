@@ -2,7 +2,7 @@ package pokecube.core.entity.pokemobs.genetics.genes;
 
 import java.util.Random;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
@@ -67,16 +67,16 @@ public class AbilityGene implements Gene
     }
 
     @Override
-    public NBTTagCompound save()
+    public CompoundNBT save()
     {
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
         tag.setByte("I", ability.abilityIndex);
-        tag.setString("A", ability.ability);
+        tag.putString("A", ability.ability);
         return tag;
     }
 
     @Override
-    public void load(NBTTagCompound tag)
+    public void load(CompoundNBT tag)
     {
         ability.abilityIndex = tag.getByte("I");
         ability.ability = tag.getString("A");

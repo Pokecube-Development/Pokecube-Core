@@ -1,8 +1,8 @@
 package pokecube.core.items.megastuff;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -16,10 +16,10 @@ public class MegaCapability implements ICapabilityProvider, IMegaCapability
 {
     public static interface RingChecker
     {
-        boolean canMegaEvolve(EntityPlayer player, PokedexEntry toEvolve);
+        boolean canMegaEvolve(PlayerEntity player, PokedexEntry toEvolve);
     }
 
-    public static boolean canMegaEvolve(EntityPlayer player, IPokemob target)
+    public static boolean canMegaEvolve(PlayerEntity player, IPokemob target)
     {
         PokedexEntry entry = target.getPokedexEntry();
         return checker.canMegaEvolve(player, entry);
@@ -43,7 +43,7 @@ public class MegaCapability implements ICapabilityProvider, IMegaCapability
     public static RingChecker                       checker  = new RingChecker()
                                                              {
                                                                  @Override
-                                                                 public boolean canMegaEvolve(EntityPlayer player,
+                                                                 public boolean canMegaEvolve(PlayerEntity player,
                                                                          PokedexEntry toEvolve)
                                                                  {
                                                                      for (int i = 0; i < player.inventory
@@ -80,11 +80,11 @@ public class MegaCapability implements ICapabilityProvider, IMegaCapability
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(Capability<?> capability, Direction facing)
     {
         if (capability != MEGA_CAP) return false;
         if (stack.getItem() instanceof ItemMegawearable) return true;
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("gemTag"))
+        if (stack.hasTag() && stack.getTag().hasKey("gemTag"))
         {
             ItemStack stack2 = new ItemStack(CompatWrapper.getTag(stack, "gemTag", false));
             if (stack2 != null) return getEntry(stack2) != null;
@@ -93,7 +93,7 @@ public class MegaCapability implements ICapabilityProvider, IMegaCapability
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(Capability<T> capability, Direction facing)
     {
         if (!hasCapability(MEGA_CAP, facing)) return null;
         if (MEGA_CAP != null && capability == MEGA_CAP)
@@ -131,7 +131,7 @@ public class MegaCapability implements ICapabilityProvider, IMegaCapability
         if (stack.getItem() instanceof IMegaCapability) return ((IMegaCapability) stack.getItem()).getEntry(stack);
         if (stack.getItem() instanceof ItemHeldItems) { return Database
                 .getEntry(stack.getItem().getRegistryName().getResourcePath()); }
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("gemTag"))
+        if (stack.hasTag() && stack.getTag().hasKey("gemTag"))
         {
             ItemStack stack2 = new ItemStack(CompatWrapper.getTag(stack, "gemTag", false));
             if (!stack2.isEmpty()) return getEntry(stack2);

@@ -1,9 +1,9 @@
 package pokecube.core.ai.pokemob;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -11,7 +11,7 @@ import pokecube.core.interfaces.pokemob.ai.LogicStates;
 
 public class PokemobAILookAt extends EntityAIBase
 {
-    protected EntityLiving            theWatcher;
+    protected MobEntity            theWatcher;
     /** The closest entity which is being watched by this one. */
     protected Entity                  closestEntity;
     /** the watcher casted to a pokemob. */
@@ -30,15 +30,15 @@ public class PokemobAILookAt extends EntityAIBase
     private int                       idleTime;
     protected Class<? extends Entity> watchedClass;
 
-    public PokemobAILookAt(EntityLiving entitylivingIn, Class<? extends Entity> watchTargetClass, float maxDistance)
+    public PokemobAILookAt(MobEntity MobEntityIn, Class<? extends Entity> watchTargetClass, float maxDistance)
     {
-        this(entitylivingIn, watchTargetClass, maxDistance, 0.02f);
+        this(MobEntityIn, watchTargetClass, maxDistance, 0.02f);
     }
 
-    public PokemobAILookAt(EntityLiving entitylivingIn, Class<? extends Entity> watchTargetClass, float maxDistance,
+    public PokemobAILookAt(MobEntity MobEntityIn, Class<? extends Entity> watchTargetClass, float maxDistance,
             float chanceIn)
     {
-        this.theWatcher = entitylivingIn;
+        this.theWatcher = MobEntityIn;
         this.watchedClass = watchTargetClass;
         this.maxDistanceForPlayer = maxDistance;
         this.pokemob = CapabilityPokemob.getPokemobFor(theWatcher);
@@ -97,7 +97,7 @@ public class PokemobAILookAt extends EntityAIBase
                 this.closestEntity = this.theWatcher.getAttackTarget();
             }
 
-            if (this.watchedClass == EntityPlayer.class)
+            if (this.watchedClass == PlayerEntity.class)
             {
                 this.closestEntity = this.theWatcher.getEntityWorld().getClosestPlayerToEntity(this.theWatcher,
                         this.maxDistanceForPlayer);

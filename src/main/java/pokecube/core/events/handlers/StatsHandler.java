@@ -3,9 +3,9 @@ package pokecube.core.events.handlers;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,9 +49,9 @@ public class StatsHandler
         if (!EntityPokecubeBase.canCaptureBasedOnConfigs(evt.caught))
         {
             evt.setCanceled(true);
-            if (catcher instanceof EntityPlayer)
+            if (catcher instanceof PlayerEntity)
             {
-                ((EntityPlayer) catcher).sendMessage(new TextComponentTranslation("pokecube.denied"));
+                ((PlayerEntity) catcher).sendMessage(new TranslationTextComponent("pokecube.denied"));
             }
             evt.pokecube.entityDropItem(((EntityPokecube) evt.pokecube).getItem(), (float) 0.5);
             evt.pokecube.setDead();
@@ -59,9 +59,9 @@ public class StatsHandler
         }
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
-        if (catcher instanceof EntityPlayer && (config.permsCapture || config.permsCaptureSpecific))
+        if (catcher instanceof PlayerEntity && (config.permsCapture || config.permsCaptureSpecific))
         {
-            EntityPlayer player = (EntityPlayer) catcher;
+            PlayerEntity player = (PlayerEntity) catcher;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             boolean denied = false;
@@ -74,9 +74,9 @@ public class StatsHandler
             if (denied)
             {
                 evt.setCanceled(true);
-                if (catcher instanceof EntityPlayer)
+                if (catcher instanceof PlayerEntity)
                 {
-                    ((EntityPlayer) catcher).sendMessage(new TextComponentTranslation("pokecube.denied"));
+                    ((PlayerEntity) catcher).sendMessage(new TranslationTextComponent("pokecube.denied"));
                 }
                 evt.pokecube.entityDropItem(((EntityPokecube) evt.pokecube).getItem(), (float) 0.5);
                 evt.pokecube.setDead();
@@ -98,9 +98,9 @@ public class StatsHandler
             if (deny)
             {
                 evt.setCanceled(true);
-                if (catcher instanceof EntityPlayer)
+                if (catcher instanceof PlayerEntity)
                 {
-                    ((EntityPlayer) catcher).sendMessage(new TextComponentTranslation("pokecube.denied"));
+                    ((PlayerEntity) catcher).sendMessage(new TranslationTextComponent("pokecube.denied"));
                 }
                 evt.pokecube.entityDropItem(((EntityPokecube) evt.pokecube).getItem(), (float) 0.5);
                 evt.pokecube.setDead();

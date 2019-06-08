@@ -33,7 +33,7 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import pokecube.core.PokecubeItems;
 import pokecube.core.database.Database;
@@ -113,7 +113,7 @@ public class ModPokecubeML implements IMobProvider
     }
 
     @EventHandler
-    public void registerMobs(FMLPreInitializationEvent evt)
+    public void registerMobs(FMLCommonSetupEvent evt)
     {
         registerDatabase(evt);
         MinecraftForge.EVENT_BUS.post(new RegisterPokemobsEvent.Pre());
@@ -123,7 +123,7 @@ public class ModPokecubeML implements IMobProvider
         postInitPokemobs();
     }
 
-    public void registerDatabase(FMLPreInitializationEvent evt)
+    public void registerDatabase(FMLCommonSetupEvent evt)
     {
         MinecraftForge.EVENT_BUS.post(new InitDatabase.Pre());
 
@@ -331,7 +331,7 @@ public class ModPokecubeML implements IMobProvider
      * 
      * @param evt */
     @EventHandler
-    public void preInit(FMLPreInitializationEvent evt)
+    public void preInit(FMLCommonSetupEvent evt)
     {
         proxy.preInit();
         doMetastuff();

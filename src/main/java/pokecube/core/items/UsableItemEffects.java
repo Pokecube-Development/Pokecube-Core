@@ -5,9 +5,9 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
@@ -15,7 +15,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -44,7 +44,7 @@ public class UsableItemEffects
          * @param stack
          * @return something happened */
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner())
                 return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
@@ -57,18 +57,18 @@ public class UsableItemEffects
                 stack.splitStack(1);
                 PokecubeItems.deValidate(stack);
             }
-            stack.setTagCompound(null);
+            stack.put(null);
             return new ActionResult<ItemStack>(used ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? USABLEITEM_CAP.cast(this) : null;
         }
@@ -85,7 +85,7 @@ public class UsableItemEffects
          * @param stack
          * @return something happened */
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner())
                 return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
@@ -95,13 +95,13 @@ public class UsableItemEffects
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? USABLEITEM_CAP.cast(this) : null;
         }
@@ -124,7 +124,7 @@ public class UsableItemEffects
          * @param stack
          * @return something happened */
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner() && !(stack.getItem() instanceof ItemVitamin))
                 return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
@@ -138,13 +138,13 @@ public class UsableItemEffects
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? USABLEITEM_CAP.cast(this) : null;
         }
@@ -187,7 +187,7 @@ public class UsableItemEffects
          * @param stack
          * @return something happened */
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (stack.getItem() instanceof ItemBerry)
             {
@@ -218,13 +218,13 @@ public class UsableItemEffects
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? IPokemobUseable.USABLEITEM_CAP.cast(this) : null;
         }
@@ -233,9 +233,9 @@ public class UsableItemEffects
     public static class PotionUse implements IPokemobUseable, ICapabilityProvider
     {
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
-            EntityLiving mob = pokemob.getEntity();
+            MobEntity mob = pokemob.getEntity();
             boolean applied = false;
             for (PotionEffect potioneffect : PotionUtils.getEffectsFromStack(stack))
             {
@@ -266,13 +266,13 @@ public class UsableItemEffects
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? IPokemobUseable.USABLEITEM_CAP.cast(this) : null;
         }
@@ -303,9 +303,9 @@ public class UsableItemEffects
          * @param stack
          * @return something happened */
         @Override
-        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, EntityLivingBase user)
+        public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
-            EntityLivingBase mob = pokemob.getEntity();
+            LivingEntity mob = pokemob.getEntity();
             float health = pokemob.getHealth();
             if ((int) health <= 0) return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
             float maxHealth = pokemob.getMaxHealth();
@@ -316,19 +316,19 @@ public class UsableItemEffects
             if (health + 20 < maxHealth) pokemob.setHealth(health + 20);
             else pokemob.setHealth(maxHealth);
             boolean useStack = true;
-            if (user instanceof EntityPlayer && ((EntityPlayer) user).capabilities.isCreativeMode) useStack = false;
+            if (user instanceof PlayerEntity && ((PlayerEntity) user).capabilities.isCreativeMode) useStack = false;
             if (useStack) stack.splitStack(1);
             return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IPokemobUseable.USABLEITEM_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             return hasCapability(capability, facing) ? IPokemobUseable.USABLEITEM_CAP.cast(this) : null;
         }

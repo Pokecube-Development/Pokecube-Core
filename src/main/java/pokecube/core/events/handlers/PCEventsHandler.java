@@ -8,10 +8,10 @@ import java.util.logging.Level;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayer;
@@ -19,7 +19,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.ItemEntityPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -46,7 +46,7 @@ public class PCEventsHandler
      * 
      * @param player
      * @return */
-    public static List<IPokemob> getOutMobs(EntityLivingBase player)
+    public static List<IPokemob> getOutMobs(LivingEntity player)
     {
         List<Entity> pokemobs = new ArrayList<Entity>(player.getEntityWorld().loadedEntityList);
         List<IPokemob> ret = new ArrayList<IPokemob>();
@@ -146,25 +146,25 @@ public class PCEventsHandler
             return;
         }
 
-        if (!(evt.getEntity() instanceof EntityPlayer)) return;
+        if (!(evt.getEntity() instanceof PlayerEntity)) return;
 
-        EntityPlayer entityPlayer = (EntityPlayer) evt.getEntity();
-        if (entityPlayer.getUniqueID().equals(THUTMOSE))
+        PlayerEntity PlayerEntity = (PlayerEntity) evt.getEntity();
+        if (PlayerEntity.getUniqueID().equals(THUTMOSE))
         {
             for (Object o : evt.getWorld().playerEntities)
             {
-                if (o instanceof EntityPlayer)
+                if (o instanceof PlayerEntity)
                 {
-                    EntityPlayer p = (EntityPlayer) o;
+                    PlayerEntity p = (PlayerEntity) o;
                     if (InventoryPC.getMap().containsKey(p.getCachedUniqueIdString()))
                     {
                         InventoryPC pc = InventoryPC.getPC(p.getUniqueID());
                         pc.seenOwner = true;
                         if (evt.getWorld().isRemote) continue;
                         PacketPC packet = new PacketPC(PacketPC.PCINIT, pc.owner);
-                        packet.data.setBoolean("O", pc.seenOwner);
-                        packet.data.setBoolean("A", pc.autoToPC);
-                        PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) p);
+                        packet.data.putBoolean("O", pc.seenOwner);
+                        packet.data.putBoolean("A", pc.autoToPC);
+                        PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) p);
                     }
                 }
             }
@@ -177,13 +177,13 @@ public class PCEventsHandler
     @SubscribeEvent
     public void PlayerLoggin(PlayerLoggedInEvent evt)
     {
-        EntityPlayer entityPlayer = evt.player;
+        PlayerEntity PlayerEntity = evt.player;
 
-        if (entityPlayer.getName().toLowerCase(java.util.Locale.ENGLISH).trim().equals("thutmose"))
+        if (PlayerEntity.getName().toLowerCase(java.util.Locale.ENGLISH).trim().equals("thutmose"))
         {
             PCSaveHandler.getInstance().seenPCCreator = true;
         }
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) return;
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT) return;
         PacketPC.sendInitialSyncMessage(evt.player);
 
     }
@@ -193,24 +193,24 @@ public class PCEventsHandler
      * 
      * @param evt */
     @SubscribeEvent
-    public void playerPickupItem(EntityItemPickupEvent evt)
+    public void playerPickupItem(ItemEntityPickupEvent evt)
     {
         if (evt.getItem().getEntityWorld().isRemote) return;
-        InventoryPlayer inv = evt.getEntityPlayer().inventory;
+        InventoryPlayer inv = evt.getPlayerEntity().inventory;
         int num = inv.getFirstEmptyStack();
         if (!PokecubeManager.isFilled(evt.getItem().getItem())) { return; }
         String owner = PokecubeManager.getOwner(evt.getItem().getItem());
-        if (evt.getEntityPlayer().getCachedUniqueIdString().equals(owner))
+        if (evt.getPlayerEntity().getCachedUniqueIdString().equals(owner))
         {
             if (num == -1)
             {
-                InventoryPC.addPokecubeToPC(evt.getItem().getItem(), evt.getEntityPlayer().getEntityWorld());
+                InventoryPC.addPokecubeToPC(evt.getItem().getItem(), evt.getPlayerEntity().getEntityWorld());
                 evt.getItem().setDead();
             }
         }
         else
         {
-            InventoryPC.addPokecubeToPC(evt.getItem().getItem(), evt.getEntityPlayer().getEntityWorld());
+            InventoryPC.addPokecubeToPC(evt.getItem().getItem(), evt.getPlayerEntity().getEntityWorld());
             evt.getItem().setDead();
             evt.setCanceled(true);
         }
@@ -222,11 +222,11 @@ public class PCEventsHandler
     @SubscribeEvent
     public void playerTossPokecubeToPC(ItemTossEvent evt)
     {
-        if (evt.getEntityItem().getEntityWorld().isRemote) return;
-        if (PokecubeManager.isFilled(evt.getEntityItem().getItem()))
+        if (evt.getItemEntity().getEntityWorld().isRemote) return;
+        if (PokecubeManager.isFilled(evt.getItemEntity().getItem()))
         {
-            InventoryPC.addPokecubeToPC(evt.getEntityItem().getItem(), evt.getEntityItem().getEntityWorld());
-            evt.getEntityItem().setDead();
+            InventoryPC.addPokecubeToPC(evt.getItemEntity().getItem(), evt.getItemEntity().getEntityWorld());
+            evt.getItemEntity().setDead();
             evt.setCanceled(true);
         }
     }
@@ -245,7 +245,7 @@ public class PCEventsHandler
         }
     }
 
-    /** Attempts to send the pokecube to the PC whenever the entityitem it is in
+    /** Attempts to send the pokecube to the PC whenever the ItemEntity it is in
      * expires. This prevents losing pokemobs if the cube is somehow left in the
      * world.
      * 
@@ -253,19 +253,19 @@ public class PCEventsHandler
     @SubscribeEvent
     public void sendPokemobToPCOnItemExpiration(ItemExpireEvent evt)
     {
-        if (PokecubeManager.isFilled(evt.getEntityItem().getItem()))
+        if (PokecubeManager.isFilled(evt.getItemEntity().getItem()))
         {
-            if (evt.getEntityItem().getEntityWorld().isRemote) return;
-            InventoryPC.addPokecubeToPC(evt.getEntityItem().getItem(), evt.getEntityItem().getEntityWorld());
+            if (evt.getItemEntity().getEntityWorld().isRemote) return;
+            InventoryPC.addPokecubeToPC(evt.getItemEntity().getItem(), evt.getItemEntity().getEntityWorld());
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
     public void sendPokemobToPCPlayerDeath(LivingDeathEvent evt)
     {
-        if (evt.getEntityLiving() instanceof EntityPlayer)
+        if (evt.getMobEntity() instanceof PlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) evt.getEntity();
+            PlayerEntity player = (PlayerEntity) evt.getEntity();
             EventsHandler.recallAllPokemobsExcluding(player, null);
         }
     }
@@ -276,10 +276,10 @@ public class PCEventsHandler
     @SubscribeEvent
     public void sendPokemobToPCPlayerDrops(PlayerDropsEvent evt)
     {
-        if (!(evt.getEntity() instanceof EntityPlayer) || !PokecubeMod.core.getConfig().pcOnDrop) return;
+        if (!(evt.getEntity() instanceof PlayerEntity) || !PokecubeMod.core.getConfig().pcOnDrop) return;
         if (evt.getEntity().getEntityWorld().isRemote) return;
-        List<EntityItem> toRemove = Lists.newArrayList();
-        for (EntityItem item : evt.getDrops())
+        List<ItemEntity> toRemove = Lists.newArrayList();
+        for (ItemEntity item : evt.getDrops())
         {
             if (item != null && item.getItem() != null && ContainerPC.isItemValid(item.getItem()))
             {
@@ -305,11 +305,11 @@ public class PCEventsHandler
         }
         Entity catcher = evt.caught.getPokemonOwner();
         if (evt.caught.isShadow()) return;
-        if (catcher instanceof EntityPlayer && PokecubeManager.isFilled(evt.filledCube))
+        if (catcher instanceof PlayerEntity && PokecubeManager.isFilled(evt.filledCube))
         {
             if (catcher.getEntityWorld().isRemote) return;
 
-            EntityPlayer player = (EntityPlayer) catcher;
+            PlayerEntity player = (PlayerEntity) catcher;
             if (player instanceof FakePlayer) return;
 
             InventoryPlayer inv = player.inventory;
@@ -328,10 +328,10 @@ public class PCEventsHandler
             else
             {
                 player.inventory.addItemStackToInventory(evt.filledCube);
-                if (player instanceof EntityPlayerMP) ((EntityPlayerMP) player)
+                if (player instanceof ServerPlayerEntity) ((ServerPlayerEntity) player)
                         .sendAllContents(player.inventoryContainer, player.inventoryContainer.inventoryItemStacks);
             }
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) return;
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT) return;
 
         }
         else

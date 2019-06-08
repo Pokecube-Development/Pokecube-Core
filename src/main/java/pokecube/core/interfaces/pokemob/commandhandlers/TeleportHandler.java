@@ -7,10 +7,10 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.handlers.playerdata.PokecubePlayerData;
 import pokecube.core.interfaces.IMoveNames;
@@ -159,7 +159,7 @@ public class TeleportHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob) throws Exception
     {
-        EntityPlayer player = (EntityPlayer) pokemob.getOwner();
+        PlayerEntity player = (PlayerEntity) pokemob.getOwner();
         TeleDest d = getTeleport(player.getCachedUniqueIdString());
         if (d == null) return;
         Vector3 loc = d.getLoc();
@@ -216,7 +216,7 @@ public class TeleportHandler extends DefaultHandler
             if (fromOwner()) pokemob.displayMessageToOwner(text);
             return;
         }
-        ITextComponent attackName = new TextComponentTranslation(
+        ITextComponent attackName = new TranslationTextComponent(
                 MovesUtils.getUnlocalizedMove(IMoveNames.MOVE_TELEPORT));
         ITextComponent text = CommandTools.makeTranslatedMessage("pokemob.move.used", "green",
                 pokemob.getPokemonDisplayName(), attackName);

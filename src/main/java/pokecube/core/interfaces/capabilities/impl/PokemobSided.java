@@ -15,7 +15,7 @@ public abstract class PokemobSided extends PokemobBase
     private Map<ResourceLocation, ResourceLocation> shinyTexs = Maps.newHashMap();
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture()
     {
         if (this.textures != null)
@@ -47,7 +47,7 @@ public abstract class PokemobSided extends PokemobBase
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ResourceLocation modifyTexture(ResourceLocation texture)
     {
         if (texture == null) { return getTexture(); }

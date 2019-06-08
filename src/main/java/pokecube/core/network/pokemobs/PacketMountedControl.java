@@ -4,7 +4,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.api.distmarker.Dist;
@@ -79,8 +79,8 @@ public class PacketMountedControl implements IMessage, IMessageHandler<PacketMou
 
     void processMessage(MessageContext ctx, PacketMountedControl message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }

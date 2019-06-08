@@ -3,9 +3,9 @@ package pokecube.core.moves.implementations.actions;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -23,7 +23,7 @@ import thut.api.maths.Vector3;
 public class ActionTeleport implements IMoveAction
 {
     /** Teleport the entity to a random nearby position */
-    public static boolean teleportRandomly(EntityLivingBase toTeleport)
+    public static boolean teleportRandomly(LivingEntity toTeleport)
     {
         double var1;
         double var3;
@@ -48,7 +48,7 @@ public class ActionTeleport implements IMoveAction
     }
 
     /** Teleport the entity */
-    protected static boolean teleportTo(EntityLivingBase toTeleport, double par1, double par3, double par5)
+    protected static boolean teleportTo(LivingEntity toTeleport, double par1, double par3, double par5)
     {
 
         short var30 = 128;
@@ -87,9 +87,9 @@ public class ActionTeleport implements IMoveAction
     public boolean applyEffect(IPokemob user, Vector3 location)
     {
         boolean angry = user.getCombatState(CombatStates.ANGRY);
-        if (!angry && user.getPokemonOwner() instanceof EntityPlayer && user.getEntity().isServerWorld())
+        if (!angry && user.getPokemonOwner() instanceof PlayerEntity && user.getEntity().isServerWorld())
         {
-            EntityPlayer target = (EntityPlayer) user.getPokemonOwner();
+            PlayerEntity target = (PlayerEntity) user.getPokemonOwner();
             EventsHandler.recallAllPokemobsExcluding(target, null);
             try
             {
@@ -105,9 +105,9 @@ public class ActionTeleport implements IMoveAction
             Entity attacked = user.getEntity().getAttackTarget();
             if (attacked != null)
             {
-                if (attacked instanceof EntityLiving)
+                if (attacked instanceof MobEntity)
                 {
-                    ((EntityLiving) attacked).setAttackTarget(null);
+                    ((MobEntity) attacked).setAttackTarget(null);
                 }
                 IPokemob attackedMob = CapabilityPokemob.getPokemobFor(attacked);
                 if (attackedMob != null)

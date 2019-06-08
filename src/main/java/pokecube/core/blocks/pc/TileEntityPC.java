@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -35,7 +35,7 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
     }
 
     @Override
-    public void closeInventory(EntityPlayer player)
+    public void closeInventory(PlayerEntity player)
     {
     }
 
@@ -102,15 +102,15 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(this.getPos(), 3, nbttagcompound);
+        CompoundNBT CompoundNBT = new CompoundNBT();
+        this.writeToNBT(CompoundNBT);
+        return new SPacketUpdateTileEntity(this.getPos(), 3, CompoundNBT);
     }
 
     @Override
-    public NBTTagCompound getUpdateTag()
+    public CompoundNBT getUpdateTag()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundNBT nbt = new CompoundNBT();
         return writeToNBT(nbt);
     }
 
@@ -134,9 +134,9 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer entityplayer)
+    public boolean isUsableByPlayer(PlayerEntity PlayerEntity)
     {
-        if (getPC() != null) return getPC().isUsableByPlayer(entityplayer);
+        if (getPC() != null) return getPC().isUsableByPlayer(PlayerEntity);
         return false;
     }
 
@@ -152,30 +152,30 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt)
     {
-        NBTTagCompound nbt = pkt.getNbtCompound();
+        CompoundNBT nbt = pkt.getNbtCompound();
         this.readFromNBT(nbt);
     }
 
     @Override
-    public void openInventory(EntityPlayer player)
+    public void openInventory(PlayerEntity player)
     {
     }
 
     /** Reads a tile entity from NBT. */
     @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound)
+    public void readFromNBT(CompoundNBT par1CompoundNBT)
     {
-        super.readFromNBT(par1NBTTagCompound);
-        this.bound = par1NBTTagCompound.getBoolean("bound");
+        super.readFromNBT(par1CompoundNBT);
+        this.bound = par1CompoundNBT.getBoolean("bound");
         try
         {
-            if (par1NBTTagCompound.hasKey("boundID"))
-                boundId = UUID.fromString(par1NBTTagCompound.getString("boundID"));
+            if (par1CompoundNBT.hasKey("boundID"))
+                boundId = UUID.fromString(par1CompoundNBT.getString("boundID"));
         }
         catch (Exception e)
         {
         }
-        boundName = par1NBTTagCompound.getString("boundName");
+        boundName = par1CompoundNBT.getString("boundName");
         if (boundId == null)
         {
             boundId = InventoryPC.defaultId;
@@ -190,13 +190,13 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
         return null;
     }
 
-    public void setBoundOwner(EntityPlayer player)
+    public void setBoundOwner(PlayerEntity player)
     {
         if (!canEdit(player)) return;
         if (this.world.isRemote)
         {
             PacketPC packet = new PacketPC(PacketPC.BIND);
-            packet.data.setBoolean("O", false);
+            packet.data.putBoolean("O", false);
             PokecubeMod.packetPipeline.sendToServer(packet);
             return;
         }
@@ -229,7 +229,7 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
         if (this.world.isRemote)
         {
             PacketPC packet = new PacketPC(PacketPC.BIND);
-            packet.data.setBoolean("O", true);
+            packet.data.putBoolean("O", true);
             PokecubeMod.packetPipeline.sendToServer(packet);
             return;
         }
@@ -259,13 +259,13 @@ public class TileEntityPC extends TileEntityOwnable implements IInventory
      * 
      * @return */
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound par1NBTTagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT par1CompoundNBT)
     {
-        super.writeToNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setBoolean("bound", bound);
-        if (boundId != null) par1NBTTagCompound.setString("boundID", boundId.toString());
-        par1NBTTagCompound.setString("boundName", boundName);
-        return par1NBTTagCompound;
+        super.writeToNBT(par1CompoundNBT);
+        par1CompoundNBT.putBoolean("bound", bound);
+        if (boundId != null) par1CompoundNBT.putString("boundID", boundId.toString());
+        par1CompoundNBT.putString("boundName", boundName);
+        return par1CompoundNBT;
     }
 
     @Override

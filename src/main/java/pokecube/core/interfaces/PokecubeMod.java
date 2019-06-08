@@ -18,7 +18,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList.EntityEggInfo;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -26,7 +26,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLCommonSetupEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.ByteClassLoader;
 import pokecube.core.CreativeTabPokecube;
@@ -140,7 +140,7 @@ public abstract class PokecubeMod
         {
             WorldServer world;
 
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 if (FMLClientHandler.instance().getServer() != null)
                     world = FMLClientHandler.instance().getServer().getWorld(dim);
@@ -160,7 +160,7 @@ public abstract class PokecubeMod
 
     public static FakePlayer getFakePlayer(World world)
     {
-        FakePlayer player = getFakePlayer(world.provider.getDimension());
+        FakePlayer player = getFakePlayer(world.dimension.getDimension());
         player.setWorld(world);
         return player;
     }
@@ -186,7 +186,7 @@ public abstract class PokecubeMod
 
     public abstract Config getConfig();
 
-    /** Returns the class of the {@link EntityLiving} for the given pokedexNb.
+    /** Returns the class of the {@link MobEntity} for the given pokedexNb.
      * If no Pokemob has been registered for this pokedex number, it returns
      * <code>null</code>.
      * 
@@ -198,7 +198,7 @@ public abstract class PokecubeMod
 
     public abstract IEntityProvider getEntityProvider();
 
-    public abstract Configuration getPokecubeConfig(FMLPreInitializationEvent evt);
+    public abstract Configuration getPokecubeConfig(FMLCommonSetupEvent evt);
 
     public abstract PokedexEntry[] getStarters();
 

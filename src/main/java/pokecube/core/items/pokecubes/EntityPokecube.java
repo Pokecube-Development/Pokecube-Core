@@ -12,14 +12,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -52,7 +52,7 @@ public class EntityPokecube extends EntityPokecubeBase
 {
     public static class CollectEntry
     {
-        static CollectEntry createFromNBT(NBTTagCompound nbt)
+        static CollectEntry createFromNBT(CompoundNBT nbt)
         {
             String player = nbt.getString("player");
             long time = nbt.getLong("time");
@@ -68,10 +68,10 @@ public class EntityPokecube extends EntityPokecubeBase
             this.time = time;
         }
 
-        void writeToNBT(NBTTagCompound nbt)
+        void writeToNBT(CompoundNBT nbt)
         {
-            nbt.setString("player", player);
-            nbt.setLong("time", time);
+            nbt.putString("player", player);
+            nbt.putLong("time", time);
         }
     }
 
@@ -80,9 +80,9 @@ public class EntityPokecube extends EntityPokecubeBase
         final ItemStack loot;
         final int       rolls;
 
-        static LootEntry createFromNBT(NBTTagCompound nbt)
+        static LootEntry createFromNBT(CompoundNBT nbt)
         {
-            ItemStack loot = new ItemStack(nbt.getCompoundTag("loot"));
+            ItemStack loot = new ItemStack(nbt.getCompound("loot"));
             return new LootEntry(loot, nbt.getInteger("rolls"));
         }
 
@@ -92,11 +92,11 @@ public class EntityPokecube extends EntityPokecubeBase
             this.rolls = rolls;
         }
 
-        void writeToNBT(NBTTagCompound nbt)
+        void writeToNBT(CompoundNBT nbt)
         {
-            NBTTagCompound loot = new NBTTagCompound();
+            CompoundNBT loot = new CompoundNBT();
             this.loot.writeToNBT(loot);
-            nbt.setTag("loot", loot);
+            nbt.put("loot", loot);
             nbt.setInteger("rolls", rolls);
         }
 
@@ -114,7 +114,7 @@ public class EntityPokecube extends EntityPokecubeBase
         resetTime = 10000;
     }
 
-    public EntityPokecube(World world, EntityLivingBase shootingEntity, ItemStack entityItem)
+    public EntityPokecube(World world, LivingEntity shootingEntity, ItemStack ItemEntity)
     {
         this(world);
         if (shootingEntity != null)
@@ -125,9 +125,9 @@ public class EntityPokecube extends EntityPokecubeBase
             setVelocity(speed, dir);
             shooter = shootingEntity.getPersistentID();
         }
-        this.setItem(entityItem);
+        this.setItem(ItemEntity);
         this.shootingEntity = shootingEntity;
-        if (PokecubeManager.hasMob(entityItem)) tilt = -2;
+        if (PokecubeManager.hasMob(ItemEntity)) tilt = -2;
     }
 
     /** Applies a velocity to each of the entities pushing them away from each
@@ -143,7 +143,7 @@ public class EntityPokecube extends EntityPokecubeBase
         }
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
         if (shootingEntity != null && pokemob != null && pokemob.getPokemonOwner() == shootingEntity) { return; }
-        if (e instanceof EntityLiving && pokemob != null && ((EntityLiving) e).getHealth() > 0 && tilt == -1)
+        if (e instanceof MobEntity && pokemob != null && ((MobEntity) e).getHealth() > 0 && tilt == -1)
         {
             captureAttempt(e);
         }
@@ -152,9 +152,9 @@ public class EntityPokecube extends EntityPokecubeBase
             IPokemob entity1 = CapabilityPokemob.getPokemobFor(sendOut());
             if (entity1 != null && shootingEntity != null)
             {
-                if (e instanceof EntityLivingBase)
+                if (e instanceof LivingEntity)
                 {
-                    EntityLivingBase entityHit = (EntityLivingBase) e;
+                    LivingEntity entityHit = (LivingEntity) e;
                     if (pokemob != null && entity1.getPokemonOwnerID() != null
                             && entity1.getPokemonOwnerID().equals(pokemob.getPokemonOwnerID()))
                     {
@@ -177,19 +177,19 @@ public class EntityPokecube extends EntityPokecubeBase
                 }
             }
         }
-        else if (tilt == -1 && e instanceof EntityLiving && getItem().getItem() instanceof IPokecube)
+        else if (tilt == -1 && e instanceof MobEntity && getItem().getItem() instanceof IPokecube)
         {
             IPokecube cube = (IPokecube) getItem().getItem();
-            if (cube.canCapture((EntityLiving) e, getItem()))
+            if (cube.canCapture((MobEntity) e, getItem()))
             {
                 captureAttempt(e);
             }
         }
         else
         {
-            if (e instanceof EntityPlayer)
+            if (e instanceof PlayerEntity)
             {
-                this.processInteract((EntityPlayer) e, EnumHand.MAIN_HAND);
+                this.processInteract((PlayerEntity) e, Hand.MAIN_HAND);
             }
         }
     }
@@ -202,7 +202,7 @@ public class EntityPokecube extends EntityPokecubeBase
             if (!name.isEmpty())
             {
                 UUID id = UUID.fromString(name);
-                EntityPlayer player = getEntityWorld().getPlayerEntityByUUID(id);
+                PlayerEntity player = getEntityWorld().getPlayerEntityByUUID(id);
                 return player;
             }
         }
@@ -225,11 +225,11 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void onCollideWithPlayer(EntityPlayer entityplayer)
+    public void onCollideWithPlayer(PlayerEntity PlayerEntity)
     {
         if (isLoot)
         {
-            processInteract(entityplayer, EnumHand.MAIN_HAND);
+            processInteract(PlayerEntity, Hand.MAIN_HAND);
         }
     }
 
@@ -285,7 +285,7 @@ public class EntityPokecube extends EntityPokecubeBase
         this.rotationYaw = -this.rotationYawHead;
 
         if (PokecubeManager.isFilled(getItem())
-                || (getItem().hasTagCompound() && getItem().getTagCompound().hasKey(TagNames.MOBID)))
+                || (getItem().hasTag() && getItem().getTag().hasKey(TagNames.MOBID)))
             time--;
 
         if (time == 0 && tilt >= 4) // Captured the pokemon
@@ -297,9 +297,9 @@ public class EntityPokecube extends EntityPokecubeBase
                     CaptureEvent.Post event = new CaptureEvent.Post(this);
                     MinecraftForge.EVENT_BUS.post(event);
                 }
-                else if (shootingEntity instanceof EntityPlayerMP && !(shootingEntity instanceof FakePlayer))
+                else if (shootingEntity instanceof ServerPlayerEntity && !(shootingEntity instanceof FakePlayer))
                 {
-                    Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                    Tools.giveItem((PlayerEntity) shootingEntity, getItem());
                 }
                 else
                 {
@@ -423,7 +423,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    public boolean processInteract(PlayerEntity player, Hand hand)
     {
         ItemStack stack = player.getHeldItem(hand);
         if (!player.getEntityWorld().isRemote)
@@ -440,7 +440,7 @@ public class EntityPokecube extends EntityPokecubeBase
             if (!isReleasing())
             {
                 if (PokecubeManager.isFilled(getItem())
-                        || (getItem().hasTagCompound() && (getItem().getTagCompound()).hasKey(TagNames.MOBID)))
+                        || (getItem().hasTag() && (getItem().getTag()).hasKey(TagNames.MOBID)))
                 {
                     if (player.isSneaking())
                     {
@@ -455,7 +455,7 @@ public class EntityPokecube extends EntityPokecubeBase
                     {
                         if (cannotCollect(player)) return false;
                         players.add(new CollectEntry(player.getCachedUniqueIdString(),
-                                getEntityWorld().getTotalWorldTime()));
+                                getEntityWorld().getGameTime()));
                         ItemStack loot = ItemStack.EMPTY;
 
                         if (!lootStacks.isEmpty())
@@ -464,7 +464,7 @@ public class EntityPokecube extends EntityPokecubeBase
                             if (CompatWrapper.isValid(loot))
                             {
                                 PacketPokecube.sendMessage(player, getEntityId(),
-                                        getEntityWorld().getTotalWorldTime() + resetTime);
+                                        getEntityWorld().getGameTime() + resetTime);
                                 Tools.giveItem(player, loot.copy());
                             }
                         }
@@ -483,7 +483,7 @@ public class EntityPokecube extends EntityPokecubeBase
                                 }
                             }
                             PacketPokecube.sendMessage(player, getEntityId(),
-                                    getEntityWorld().getTotalWorldTime() + resetTime);
+                                    getEntityWorld().getGameTime() + resetTime);
                         }
                         return true;
                     }
@@ -496,7 +496,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbt)
+    public void readEntityFromNBT(CompoundNBT nbt)
     {
         super.readEntityFromNBT(nbt);
         isLoot = nbt.getBoolean("isLoot");
@@ -507,15 +507,15 @@ public class EntityPokecube extends EntityPokecubeBase
         lootStacks.clear();
         if (nbt.hasKey("players", 9))
         {
-            NBTTagList nbttaglist = nbt.getTagList("players", 10);
-            for (int i = 0; i < nbttaglist.tagCount(); i++)
-                players.add(CollectEntry.createFromNBT(nbttaglist.getCompoundTagAt(i)));
+            ListNBT ListNBT = nbt.getTagList("players", 10);
+            for (int i = 0; i < ListNBT.size(); i++)
+                players.add(CollectEntry.createFromNBT(ListNBT.getCompound(i)));
         }
         if (nbt.hasKey("loot", 9))
         {
-            NBTTagList nbttaglist = nbt.getTagList("loot", 10);
-            for (int i = 0; i < nbttaglist.tagCount(); i++)
-                addLoot(LootEntry.createFromNBT(nbttaglist.getCompoundTagAt(i)));
+            ListNBT ListNBT = nbt.getTagList("loot", 10);
+            for (int i = 0; i < ListNBT.size(); i++)
+                addLoot(LootEntry.createFromNBT(ListNBT.getCompound(i)));
         }
         String lootTable = nbt.getString("lootTable");
         if (!lootTable.isEmpty())
@@ -526,7 +526,7 @@ public class EntityPokecube extends EntityPokecubeBase
 
     /** Sets the position and rotation. Only difference from the other one is no
      * bounding on the rotation. Args: posX, posY, posZ, yaw, pitch */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_,
             float p_70056_8_, int p_70056_9_)
     {
@@ -548,33 +548,33 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound nbt)
+    public void writeEntityToNBT(CompoundNBT nbt)
     {
         super.writeEntityToNBT(nbt);
-        nbt.setLong("resetTime", resetTime);
-        nbt.setBoolean("isLoot", isLoot);
+        nbt.putLong("resetTime", resetTime);
+        nbt.putBoolean("isLoot", isLoot);
         if (isReleasing())
         {
-            nbt.setBoolean("releasing", true);
+            nbt.putBoolean("releasing", true);
         }
-        NBTTagList nbttaglist = new NBTTagList();
+        ListNBT ListNBT = new ListNBT();
         for (CollectEntry entry : players)
         {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            entry.writeToNBT(nbttagcompound);
-            nbttaglist.appendTag(nbttagcompound);
+            CompoundNBT CompoundNBT = new CompoundNBT();
+            entry.writeToNBT(CompoundNBT);
+            ListNBT.appendTag(CompoundNBT);
         }
-        if (!players.isEmpty()) nbt.setTag("players", nbttaglist);
-        nbttaglist = new NBTTagList();
+        if (!players.isEmpty()) nbt.put("players", ListNBT);
+        ListNBT = new ListNBT();
         for (LootEntry entry : loot)
         {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            entry.writeToNBT(nbttagcompound);
-            nbttaglist.appendTag(nbttagcompound);
+            CompoundNBT CompoundNBT = new CompoundNBT();
+            entry.writeToNBT(CompoundNBT);
+            ListNBT.appendTag(CompoundNBT);
         }
-        if (!loot.isEmpty()) nbt.setTag("loot", nbttaglist);
-        if (lootTable != null) nbt.setString("lootTable", lootTable.toString());
-        else nbt.setString("lootTable", "");
+        if (!loot.isEmpty()) nbt.put("loot", ListNBT);
+        if (lootTable != null) nbt.putString("lootTable", lootTable.toString());
+        else nbt.putString("lootTable", "");
     }
 
     protected void captureAttempt(Entity e)
@@ -635,10 +635,10 @@ public class EntityPokecube extends EntityPokecubeBase
                 motionZ = 0;
             }
         }
-        else if (e instanceof EntityLiving && getItem().getItem() instanceof IPokecube)
+        else if (e instanceof MobEntity && getItem().getItem() instanceof IPokecube)
         {
             IPokecube cube = (IPokecube) getItem().getItem();
-            EntityLiving mob = (EntityLiving) e;
+            MobEntity mob = (MobEntity) e;
             int n = 0;
             rate:
             {
@@ -684,12 +684,12 @@ public class EntityPokecube extends EntityPokecubeBase
                 time = 20 * n;
             }
             ItemStack mobStack = getItem().copy();
-            if (!mobStack.hasTagCompound()) mobStack.setTagCompound(new NBTTagCompound());
+            if (!mobStack.hasTag()) mobStack.put(new CompoundNBT());
             String id = EntityList.getKey(mob).toString();
-            mobStack.getTagCompound().setString(TagNames.MOBID, id);
-            NBTTagCompound mobTag = new NBTTagCompound();
+            mobStack.getTag().putString(TagNames.MOBID, id);
+            CompoundNBT mobTag = new CompoundNBT();
             mob.writeToNBT(mobTag);
-            mobStack.getTagCompound().setTag(TagNames.OTHERMOB, mobTag);
+            mobStack.getTag().put(TagNames.OTHERMOB, mobTag);
             setItem(mobStack);
             PokecubeManager.setTilt(getItem(), n);
             mob.setDead();
@@ -711,7 +711,7 @@ public class EntityPokecube extends EntityPokecubeBase
             {
                 if (resetTime > 0)
                 {
-                    long diff = getEntityWorld().getTotalWorldTime() - s.time;
+                    long diff = getEntityWorld().getGameTime() - s.time;
                     if (diff > resetTime)
                     {
                         players.remove(s);

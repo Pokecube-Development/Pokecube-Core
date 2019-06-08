@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -127,7 +127,7 @@ public class MoveAnimationHelper
 
     Map<BlockPos, TerrainSegment> terrainMap = Maps.newHashMap();
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load evt)
     {
@@ -135,7 +135,7 @@ public class MoveAnimationHelper
         terrainMap.clear();
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void chunkUnload(ChunkEvent.Unload evt)
     {
@@ -146,7 +146,7 @@ public class MoveAnimationHelper
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onCapabilityAttach(AttachCapabilitiesEvent<Chunk> event)
     {
@@ -162,7 +162,7 @@ public class MoveAnimationHelper
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderWorldPost(RenderFogEvent event)
     {
@@ -171,7 +171,7 @@ public class MoveAnimationHelper
         try
         {
             if (index == -1) return;
-            EntityPlayer player = Minecraft.getMinecraft().player;
+            PlayerEntity player = Minecraft.getInstance().player;
             source.set(player);
             int range = 4;
             MutableBlockPos pos = new MutableBlockPos();

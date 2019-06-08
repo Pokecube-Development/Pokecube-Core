@@ -1,8 +1,8 @@
 package pokecube.core.interfaces.capabilities;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -26,17 +26,17 @@ public class CapabilityPokemob
     {
 
         @Override
-        public NBTBase writeNBT(Capability<IPokemob> capability, IPokemob instance, EnumFacing side)
+        public INBT writeNBT(Capability<IPokemob> capability, IPokemob instance, Direction side)
         {
             if (instance instanceof DefaultPokemob) return ((DefaultPokemob) instance).writePokemobData();
             return null;
         }
 
         @Override
-        public void readNBT(Capability<IPokemob> capability, IPokemob instance, EnumFacing side, NBTBase nbt)
+        public void readNBT(Capability<IPokemob> capability, IPokemob instance, Direction side, INBT nbt)
         {
-            if (instance instanceof DefaultPokemob && nbt instanceof NBTTagCompound)
-                ((DefaultPokemob) instance).readPokemobData((NBTTagCompound) nbt);
+            if (instance instanceof DefaultPokemob && nbt instanceof CompoundNBT)
+                ((DefaultPokemob) instance).readPokemobData((CompoundNBT) nbt);
         }
 
     }

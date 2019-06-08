@@ -68,7 +68,7 @@ public class ModelRing extends ModelBase
     {
         super.render(entity, f, f1, f2, f3, f4, f5);
         if (stack == null) return;
-        Minecraft.getMinecraft().getTextureManager().bindTexture(texture_1);
+        Minecraft.getInstance().getTextureManager().bindTexture(texture_1);
         GL11.glPushMatrix();
         GL11.glRotated(90, 0, 1, 0);
         GL11.glTranslated(-0.08, -0.3, 0);
@@ -76,11 +76,11 @@ public class ModelRing extends ModelBase
         GL11.glScaled(0.5, 0.5, 0.5);
         Shape2.render(f5);
         GL11.glScaled(1.01, 1.01, 1.01);
-        Minecraft.getMinecraft().getTextureManager().bindTexture(texture_2);
+        Minecraft.getInstance().getTextureManager().bindTexture(texture_2);
         EnumDyeColor ret = EnumDyeColor.GRAY;
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("dyeColour"))
+        if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
         {
-            int damage = stack.getTagCompound().getInteger("dyeColour");
+            int damage = stack.getTag().getInteger("dyeColour");
             ret = EnumDyeColor.byDyeDamage(damage);
         }
         Color colour = new Color(ret.getColorValue() + 0xFF000000);

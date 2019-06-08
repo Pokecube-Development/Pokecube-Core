@@ -103,11 +103,11 @@ public class GuiPC extends GuiContainer
                     }
                 }
                 cont.release = release;
-                if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+                if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
                 {
                     PacketPC packet = new PacketPC(PacketPC.RELEASE, cont.inv.owner);
-                    packet.data.setBoolean("T", true);
-                    packet.data.setBoolean("R", release);
+                    packet.data.putBoolean("T", true);
+                    packet.data.putBoolean("R", release);
                     PokecubeMod.packetPipeline.sendToServer(packet);
                 }
                 if (release)

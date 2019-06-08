@@ -5,9 +5,9 @@ import org.apache.logging.log4j.Level;
 import com.mcf.davidee.nbteditpqb.NBTEdit;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
@@ -31,15 +31,15 @@ public class PacketHandler
 
     public void registerPackets()
     {
-        INSTANCE.registerMessage(TileRequestPacket.Handler.class, TileRequestPacket.class, ID++, Side.SERVER);
-        INSTANCE.registerMessage(TileNBTPacket.Handler.class, TileNBTPacket.class, ID++, Side.CLIENT);
-        INSTANCE.registerMessage(TileNBTPacket.Handler.class, TileNBTPacket.class, ID++, Side.SERVER);
-        INSTANCE.registerMessage(EntityRequestPacket.Handler.class, EntityRequestPacket.class, ID++, Side.SERVER);
-        INSTANCE.registerMessage(EntityNBTPacket.Handler.class, EntityNBTPacket.class, ID++, Side.CLIENT);
-        INSTANCE.registerMessage(EntityNBTPacket.Handler.class, EntityNBTPacket.class, ID++, Side.SERVER);
-        INSTANCE.registerMessage(MouseOverPacket.Handler.class, MouseOverPacket.class, ID++, Side.CLIENT);
-        INSTANCE.registerMessage(CustomNBTPacket.Handler.class, CustomNBTPacket.class, ID++, Side.CLIENT);
-        INSTANCE.registerMessage(CustomNBTPacket.Handler.class, CustomNBTPacket.class, ID++, Side.SERVER);
+        INSTANCE.registerMessage(TileRequestPacket.Handler.class, TileRequestPacket.class, ID++, Dist.DEDICATED_SERVER);
+        INSTANCE.registerMessage(TileNBTPacket.Handler.class, TileNBTPacket.class, ID++, Dist.CLIENT);
+        INSTANCE.registerMessage(TileNBTPacket.Handler.class, TileNBTPacket.class, ID++, Dist.DEDICATED_SERVER);
+        INSTANCE.registerMessage(EntityRequestPacket.Handler.class, EntityRequestPacket.class, ID++, Dist.DEDICATED_SERVER);
+        INSTANCE.registerMessage(EntityNBTPacket.Handler.class, EntityNBTPacket.class, ID++, Dist.CLIENT);
+        INSTANCE.registerMessage(EntityNBTPacket.Handler.class, EntityNBTPacket.class, ID++, Dist.DEDICATED_SERVER);
+        INSTANCE.registerMessage(MouseOverPacket.Handler.class, MouseOverPacket.class, ID++, Dist.CLIENT);
+        INSTANCE.registerMessage(CustomNBTPacket.Handler.class, CustomNBTPacket.class, ID++, Dist.CLIENT);
+        INSTANCE.registerMessage(CustomNBTPacket.Handler.class, CustomNBTPacket.class, ID++, Dist.DEDICATED_SERVER);
     }
 
     /** Sends a TileEntity's nbt data to the player for editing.
@@ -48,7 +48,7 @@ public class PacketHandler
      *            The player to send the TileEntity to.
      * @param pos
      *            The block containing the TileEntity. */
-    public void sendTile(final EntityPlayerMP player, final BlockPos pos)
+    public void sendTile(final ServerPlayerEntity player, final BlockPos pos)
     {
         if (NBTEdit.proxy.checkPermission(player))
         {
@@ -60,7 +60,7 @@ public class PacketHandler
                     TileEntity te = player.getServerWorld().getTileEntity(pos);
                     if (te != null)
                     {
-                        NBTTagCompound tag = new NBTTagCompound();
+                        CompoundNBT tag = new CompoundNBT();
                         te.writeToNBT(tag);
                         INSTANCE.sendTo(new TileNBTPacket(pos, tag), player);
                     }
@@ -80,7 +80,7 @@ public class PacketHandler
      *            The player to send the Entity data to.
      * @param entityId
      *            The id of the Entity. */
-    public void sendEntity(final EntityPlayerMP player, final int entityId)
+    public void sendEntity(final ServerPlayerEntity player, final int entityId)
     {
         if (NBTEdit.proxy.checkPermission(player))
         {
@@ -90,7 +90,7 @@ public class PacketHandler
                 public void run()
                 {
                     Entity entity = player.getServerWorld().getEntityByID(entityId);
-                    if (entity instanceof EntityPlayer && entity != player)
+                    if (entity instanceof PlayerEntity && entity != player)
                     {
                         NBTEdit.proxy.sendMessage(player, "Error - You may not use NBTEdit on other Players",
                                 TextFormatting.RED);
@@ -99,7 +99,7 @@ public class PacketHandler
                     }
                     if (entity != null)
                     {
-                        NBTTagCompound tag = new NBTTagCompound();
+                        CompoundNBT tag = new CompoundNBT();
                         entity.writeToNBT(tag);
                         INSTANCE.sendTo(new EntityNBTPacket(entityId, tag), player);
                     }
@@ -119,7 +119,7 @@ public class PacketHandler
      *            The player to send the Entity data to.
      * @param entityId
      *            The id of the Entity. */
-    public void sendCustomTag(final EntityPlayerMP player, final int entityId, final String customType)
+    public void sendCustomTag(final ServerPlayerEntity player, final int entityId, final String customType)
     {
         if (NBTEdit.proxy.checkPermission(player))
         {
@@ -130,13 +130,13 @@ public class PacketHandler
                 {
                     Entity entity = player.getServerWorld().getEntityByID(entityId);
 
-                    if (entity != null && !(entity instanceof EntityPlayer))
+                    if (entity != null && !(entity instanceof PlayerEntity))
                     {
                         NBTEdit.proxy.sendMessage(player, "\"Error- Target must be a player", TextFormatting.RED);
                     }
                     else if (entity != null)
                     {
-                        NBTTagCompound tag = new NBTTagCompound();
+                        CompoundNBT tag = new CompoundNBT();
                         PlayerData data = PlayerDataHandler.getInstance()
                                 .getPlayerData(entity.getCachedUniqueIdString()).getData(customType);
                         if (data == null)

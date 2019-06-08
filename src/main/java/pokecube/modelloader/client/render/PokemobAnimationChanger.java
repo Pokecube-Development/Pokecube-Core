@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.IShearable;
@@ -122,7 +122,7 @@ public class PokemobAnimationChanger implements IAnimationChanger
     }
 
     @Override
-    public String modifyAnimation(EntityLiving entity, float partialTicks, String phase)
+    public String modifyAnimation(MobEntity entity, float partialTicks, String phase)
     {
         if (parent != null) return parent.modifyAnimation(entity, partialTicks, phase);
         return phase;

@@ -1,9 +1,9 @@
 package pokecube.core.blocks.nests;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import pokecube.core.blocks.TileEntityOwnable;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
 import pokecube.core.world.dimensions.secretpower.SecretBaseManager;
@@ -15,21 +15,21 @@ public class TileEntityBasePortal extends TileEntityOwnable
     public boolean sendToUsers = false;
     public int     exitDim     = 0;
 
-    public void transferPlayer(EntityPlayer playerIn)
+    public void transferPlayer(PlayerEntity playerIn)
     {
         if (!sendToUsers && placer == null) return;
         String owner = sendToUsers ? playerIn.getCachedUniqueIdString() : placer.toString();
-        BlockPos exitLoc = PokecubeDimensionManager.getBaseEntrance(owner, world.provider.getDimension());
+        BlockPos exitLoc = PokecubeDimensionManager.getBaseEntrance(owner, world.dimension.getDimension());
         if (exitLoc == null)
         {
-            PokecubeDimensionManager.setBaseEntrance(owner, world.provider.getDimension(), pos);
+            PokecubeDimensionManager.setBaseEntrance(owner, world.dimension.getDimension(), pos);
             exitLoc = pos;
         }
         double dist = exitLoc.distanceSq(pos);
         if (dist > 36)
         {
             world.setBlockState(pos, Blocks.STONE.getDefaultState());
-            playerIn.sendMessage(new TextComponentTranslation("pokemob.removebase.stale"));
+            playerIn.sendMessage(new TranslationTextComponent("pokemob.removebase.stale"));
         }
         else PokecubeDimensionManager.sendToBase(owner, playerIn, exitLoc.getX(), exitLoc.getY(), exitLoc.getZ(),
                 exitDim);
@@ -42,17 +42,17 @@ public class TileEntityBasePortal extends TileEntityOwnable
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound)
+    public void readFromNBT(CompoundNBT tagCompound)
     {
         super.readFromNBT(tagCompound);
         this.sendToUsers = tagCompound.getBoolean("allPlayer");
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound)
+    public CompoundNBT writeToNBT(CompoundNBT tagCompound)
     {
         super.writeToNBT(tagCompound);
-        tagCompound.setBoolean("allPlayer", sendToUsers);
+        tagCompound.putBoolean("allPlayer", sendToUsers);
         return tagCompound;
     }
 
@@ -61,7 +61,7 @@ public class TileEntityBasePortal extends TileEntityOwnable
     {
         super.invalidate();
         Coordinate c = new Coordinate(getPos().getX(), getPos().getY(), getPos().getZ(),
-                getWorld().provider.getDimension());
+                getWorld().dimension.getDimension());
         SecretBaseManager.removeBase(c);
     }
 
@@ -70,7 +70,7 @@ public class TileEntityBasePortal extends TileEntityOwnable
     {
         super.validate();
         Coordinate c = new Coordinate(getPos().getX(), getPos().getY(), getPos().getZ(),
-                getWorld().provider.getDimension());
+                getWorld().dimension.getDimension());
         SecretBaseManager.addBase(c);
     }
 }

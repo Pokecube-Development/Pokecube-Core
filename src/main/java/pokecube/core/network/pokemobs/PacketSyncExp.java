@@ -4,7 +4,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
@@ -17,7 +17,7 @@ public class PacketSyncExp implements IMessage, IMessageHandler<PacketSyncExp, I
 
     private static void processMessage(MessageContext ctx, PacketSyncExp message)
     {
-        EntityPlayer player = PokecubeCore.getPlayer(null);
+        PlayerEntity player = PokecubeCore.getPlayer(null);
         int id = message.entityId;
         int exp = message.exp;
         Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);

@@ -5,10 +5,10 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
@@ -79,7 +79,7 @@ public class NonPersistantStatusEffect extends BaseEffect
         @Override
         public void affectTarget(IOngoingAffected target, IOngoingEffect effect)
         {
-            EntityLivingBase entity = target.getEntity();
+            LivingEntity entity = target.getEntity();
             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
             switch (status)
             {
@@ -93,7 +93,7 @@ public class NonPersistantStatusEffect extends BaseEffect
                             pokemob.getPokemonDisplayName().getFormattedText());
                     pokemob.displayMessageToOwner(mess);
                 }
-                EntityLivingBase targetM = entity.getAttackingEntity();
+                LivingEntity targetM = entity.getAttackingEntity();
                 if (targetM == null) targetM = entity.getRevengeTarget();
                 if (targetM == null) targetM = entity.getLastAttackedEntity();
                 if (targetM == null) targetM = entity;
@@ -110,7 +110,7 @@ public class NonPersistantStatusEffect extends BaseEffect
                 }
                 else
                 {
-                    if (entity instanceof EntityPlayer)
+                    if (entity instanceof PlayerEntity)
                     {
                         scale = (float) (user != null && user.isPlayerOwned()
                                 ? PokecubeMod.core.getConfig().ownedPlayerDamageRatio
@@ -192,16 +192,16 @@ public class NonPersistantStatusEffect extends BaseEffect
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         this.effect = Effect.values()[nbt.getByte("S")];
         super.deserializeNBT(nbt);
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        NBTTagCompound tag = super.serializeNBT();
+        CompoundNBT tag = super.serializeNBT();
         tag.setByte("S", (byte) effect.ordinal());
         return tag;
     }

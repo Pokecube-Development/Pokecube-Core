@@ -8,9 +8,9 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -156,36 +156,36 @@ public class GeneticsManager
         }
     }
 
-    public static class GeneticsProvider implements ICapabilityProvider, INBTSerializable<NBTTagCompound>
+    public static class GeneticsProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT>
     {
         IMobGenetics genetics = IMobGenetics.GENETICS_CAP.getDefaultInstance();
 
         @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+        public boolean hasCapability(Capability<?> capability, Direction facing)
         {
             return capability == IMobGenetics.GENETICS_CAP;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+        public <T> T getCapability(Capability<T> capability, Direction facing)
         {
             if (hasCapability(capability, facing)) return IMobGenetics.GENETICS_CAP.cast(genetics);
             return null;
         }
 
         @Override
-        public NBTTagCompound serializeNBT()
+        public CompoundNBT serializeNBT()
         {
-            NBTBase nbt = IMobGenetics.GENETICS_CAP.getStorage().writeNBT(IMobGenetics.GENETICS_CAP, genetics, null);
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setTag("V", nbt);
+            INBT nbt = IMobGenetics.GENETICS_CAP.getStorage().writeNBT(IMobGenetics.GENETICS_CAP, genetics, null);
+            CompoundNBT tag = new CompoundNBT();
+            tag.put("V", nbt);
             return tag;
         }
 
         @Override
-        public void deserializeNBT(NBTTagCompound tag)
+        public void deserializeNBT(CompoundNBT tag)
         {
-            NBTBase nbt = tag.getTag("V");
+            INBT nbt = tag.getTag("V");
             IMobGenetics.GENETICS_CAP.getStorage().readNBT(IMobGenetics.GENETICS_CAP, genetics, null, nbt);
         }
     }

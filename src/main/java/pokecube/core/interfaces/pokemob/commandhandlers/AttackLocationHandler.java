@@ -2,7 +2,7 @@ package pokecube.core.interfaces.pokemob.commandhandlers;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
@@ -36,15 +36,15 @@ public class AttackLocationHandler extends DefaultHandler
         {
             Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
             // Send move use message first.
-            ITextComponent mess = new TextComponentTranslation("pokemob.action.usemove",
+            ITextComponent mess = new TranslationTextComponent("pokemob.action.usemove",
                     pokemob.getPokemonDisplayName(),
-                    new TextComponentTranslation(MovesUtils.getUnlocalizedMove(move.getName())));
+                    new TranslationTextComponent(MovesUtils.getUnlocalizedMove(move.getName())));
             if (fromOwner()) pokemob.displayMessageToOwner(mess);
 
             // If too hungry, send message about that.
             if (pokemob.getHungerTime() > 0)
             {
-                mess = new TextComponentTranslation("pokemob.action.hungry", pokemob.getPokemonDisplayName());
+                mess = new TranslationTextComponent("pokemob.action.hungry", pokemob.getPokemonDisplayName());
                 if (fromOwner()) pokemob.displayMessageToOwner(mess);
                 return;
             }

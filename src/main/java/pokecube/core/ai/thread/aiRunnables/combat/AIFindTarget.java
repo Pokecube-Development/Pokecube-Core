@@ -12,11 +12,11 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IEntityOwnable;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -58,9 +58,9 @@ public class AIFindTarget extends AIBase implements IAICombat
                 if (clas.isInstance(input)) return false;
             }
             // Then check if is a spectating player.
-            if (input instanceof EntityPlayerMP)
+            if (input instanceof ServerPlayerEntity)
             {
-                EntityPlayerMP player = (EntityPlayerMP) input;
+                ServerPlayerEntity player = (ServerPlayerEntity) input;
                 if (player.isSpectator()) return false;
             }
             return true;
@@ -143,7 +143,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (!handleDamagedTargets || event.getEntity().getEntityWorld().isRemote) return;
 
         DamageSource source = event.getSource();
-        EntityLivingBase attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getMobEntity();
         IPokemob pokemobCap = CapabilityPokemob.getPokemobFor(attacked);
         if (pokemobCap == null) return;
 
@@ -151,7 +151,7 @@ public class AIFindTarget extends AIBase implements IAICombat
 
         // Cancel the event if it is from owner.
         if (pokemobCap.getGeneralState(GeneralStates.TAMED)
-                && ((attacker instanceof EntityPlayer && ((EntityPlayer) attacker) == pokemobCap.getOwner())))
+                && ((attacker instanceof PlayerEntity && ((PlayerEntity) attacker) == pokemobCap.getOwner())))
         {
             event.setCanceled(true);
             event.setResult(Result.DENY);
@@ -159,15 +159,15 @@ public class AIFindTarget extends AIBase implements IAICombat
         }
         pokemobCap.setLogicState(LogicStates.SITTING, false);
 
-        if (attacked instanceof EntityLiving)
+        if (attacked instanceof MobEntity)
         {
-            EntityLiving living = (EntityLiving) attacked;
-            EntityLivingBase oldTarget = living.getAttackTarget();
+            MobEntity living = (MobEntity) attacked;
+            LivingEntity oldTarget = living.getAttackTarget();
 
             // Don't include dead old targets.
             if (oldTarget != null && oldTarget.isDead) oldTarget = null;
 
-            if (!(oldTarget == null && attacker != living && attacker instanceof EntityLivingBase
+            if (!(oldTarget == null && attacker != living && attacker instanceof LivingEntity
                     && living.getAttackTarget() != attacker))
             {
                 attacker = null;
@@ -190,7 +190,7 @@ public class AIFindTarget extends AIBase implements IAICombat
 
             // Either keep old target, or agress the attacker.
             if (oldTarget != null && living.getAttackTarget() != oldTarget) living.setAttackTarget(oldTarget);
-            else if (attacker instanceof EntityLivingBase) living.setAttackTarget((EntityLivingBase) attacker);
+            else if (attacker instanceof LivingEntity) living.setAttackTarget((LivingEntity) attacker);
         }
 
     }
@@ -202,7 +202,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (!handleDamagedTargets || event.getEntity().getEntityWorld().isRemote) return;
 
         DamageSource source = event.getSource();
-        EntityLivingBase attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getMobEntity();
         IPokemob pokemobCap = CapabilityPokemob.getPokemobFor(attacked);
         if (pokemobCap == null) return;
 
@@ -210,7 +210,7 @@ public class AIFindTarget extends AIBase implements IAICombat
 
         // Camcel the event if it is from owner.
         if (pokemobCap.getGeneralState(GeneralStates.TAMED)
-                && ((attacker instanceof EntityPlayer && ((EntityPlayer) attacker) == pokemobCap.getOwner())))
+                && ((attacker instanceof PlayerEntity && ((PlayerEntity) attacker) == pokemobCap.getOwner())))
         {
             event.setCanceled(true);
             event.setResult(Result.DENY);
@@ -223,13 +223,13 @@ public class AIFindTarget extends AIBase implements IAICombat
     {
         if (!handleDamagedTargets || evt.getEntity().getEntityWorld().isRemote) return;
         // Only handle attack target set, not revenge target set.
-        if (evt.getTarget() == evt.getEntityLiving().getRevengeTarget()) return;
+        if (evt.getTarget() == evt.getMobEntity().getRevengeTarget()) return;
         // Only handle actual changes in target.
-        if (evt.getEntityLiving() instanceof EntityLiving
-                && evt.getTarget() == ((EntityLiving) evt.getEntityLiving()).getAttackTarget())
+        if (evt.getMobEntity() instanceof MobEntity
+                && evt.getTarget() == ((MobEntity) evt.getMobEntity()).getAttackTarget())
             return;
         // Prevent mob from targetting self.
-        if (evt.getTarget() == evt.getEntityLiving())
+        if (evt.getTarget() == evt.getMobEntity())
         {
             if (PokecubeMod.core.getConfig().debug)
             {
@@ -238,7 +238,7 @@ public class AIFindTarget extends AIBase implements IAICombat
             }
             return;
         }
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(evt.getEntityLiving());
+        IPokemob pokemob = CapabilityPokemob.getPokemobFor(evt.getMobEntity());
         if (pokemob != null)
         {
             // Prevent pokemob from targetting its owner.
@@ -256,7 +256,7 @@ public class AIFindTarget extends AIBase implements IAICombat
     }
 
     final IPokemob           pokemob;
-    final EntityLiving       entity;
+    final MobEntity       entity;
     Vector3                  v                = Vector3.getNewVector();
     Vector3                  v1               = Vector3.getNewVector();
 
@@ -269,11 +269,11 @@ public class AIFindTarget extends AIBase implements IAICombat
                                                   {
                                                       if (TeamManager.sameTeam(entity, input)) { return false; }
                                                       if (!validTargets.apply(input)) return false;
-                                                      return (input instanceof EntityLivingBase);
+                                                      return (input instanceof LivingEntity);
                                                   }
                                               };
     private int              agroTimer        = -1;
-    private EntityLivingBase entityTarget     = null;
+    private LivingEntity entityTarget     = null;
 
     public AIFindTarget(IPokemob mob)
     {
@@ -283,10 +283,10 @@ public class AIFindTarget extends AIBase implements IAICombat
 
     /** Returns the closest vulnerable player within the given radius, or null
      * if none is found. */
-    EntityPlayer getClosestVulnerablePlayer(double x, double y, double z, double distance, int dimension)
+    PlayerEntity getClosestVulnerablePlayer(double x, double y, double z, double distance, int dimension)
     {
         double d4 = -1.0D;
-        EntityPlayer entityplayer = null;
+        PlayerEntity PlayerEntity = null;
 
         Vector<?> playerEntities = AIThreadManager.worldPlayers.get(dimension);
         ArrayList<?> list = new ArrayList<Object>(playerEntities);
@@ -294,25 +294,25 @@ public class AIFindTarget extends AIBase implements IAICombat
 
         for (int i = 0; i < list.size(); ++i)
         {
-            if (!(list.get(i) instanceof EntityPlayer)) continue;
+            if (!(list.get(i) instanceof PlayerEntity)) continue;
 
-            EntityPlayer entityplayer1 = (EntityPlayer) list.get(i);
-            if (entityplayer1.isCreative()) continue;
-            if (entityplayer1.isSpectator()) continue;
+            PlayerEntity PlayerEntity1 = (PlayerEntity) list.get(i);
+            if (PlayerEntity1.isCreative()) continue;
+            if (PlayerEntity1.isSpectator()) continue;
 
-            if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
+            if (!PlayerEntity1.capabilities.disableDamage && PlayerEntity1.isEntityAlive())
             {
-                double d5 = entityplayer1.getDistanceSq(x, y, z);
+                double d5 = PlayerEntity1.getDistanceSq(x, y, z);
                 double d6 = distance;
 
-                if (entityplayer1.isSneaking())
+                if (PlayerEntity1.isSneaking())
                 {
                     d6 = distance * 0.800000011920929D;
                 }
 
-                if (entityplayer1.isInvisible())
+                if (PlayerEntity1.isInvisible())
                 {
-                    float f = entityplayer1.getArmorVisibility();
+                    float f = PlayerEntity1.getArmorVisibility();
 
                     if (f < 0.1F)
                     {
@@ -325,17 +325,17 @@ public class AIFindTarget extends AIBase implements IAICombat
                 if ((distance < 0.0D || d5 < d6 * d6) && (d4 == -1.0D || d5 < d4))
                 {
                     d4 = d5;
-                    entityplayer = entityplayer1;
+                    PlayerEntity = PlayerEntity1;
                 }
             }
         }
 
-        return entityplayer;
+        return PlayerEntity;
     }
 
     /** Returns the closest vulnerable player to this entity within the given
      * radius, or null if none is found */
-    EntityPlayer getClosestVulnerablePlayerToEntity(Entity entity, double distance)
+    PlayerEntity getClosestVulnerablePlayerToEntity(Entity entity, double distance)
     {
         return this.getClosestVulnerablePlayer(entity.posX, entity.posY, entity.posZ, distance, entity.dimension);
     }
@@ -364,7 +364,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Disable via rate out of bounds, or not correct time in the rate.
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
-        List<Entity> list = getEntitiesWithinDistance(pokemob.getPokemonOwner(), 16, EntityLivingBase.class);
+        List<Entity> list = getEntitiesWithinDistance(pokemob.getPokemonOwner(), 16, LivingEntity.class);
         Entity old = entity.getAttackTarget();
         Entity oldOwner = old instanceof IEntityOwnable ? ((IEntityOwnable) old).getOwner() : null;
 
@@ -375,13 +375,13 @@ public class AIFindTarget extends AIBase implements IAICombat
                 Entity entity = list.get(j);
                 if (oldOwner != null && entity == oldOwner) return false;
 
-                if (entity instanceof EntityLiving && ((EntityLiving) entity).getAttackTarget() != null
-                        && ((EntityLiving) entity).getAttackTarget().equals(owner)
+                if (entity instanceof MobEntity && ((MobEntity) entity).getAttackTarget() != null
+                        && ((MobEntity) entity).getAttackTarget().equals(owner)
                         && Vector3.isVisibleEntityFromEntity(entity, entity))
                 {
                     addTargetInfo(this.entity, entity);
                     addTargetInfo(entity, this.entity);
-                    entityTarget = (EntityLivingBase) entity;
+                    entityTarget = (LivingEntity) entity;
                     setCombatState(pokemob, CombatStates.ANGRY, true);
                     setLogicState(pokemob, LogicStates.SITTING, false);
                     return true;
@@ -402,7 +402,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Disable via rate out of bounds, or not correct time in the rate.
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
-        List<Entity> list = getEntitiesWithinDistance(entity, 16, EntityLivingBase.class);
+        List<Entity> list = getEntitiesWithinDistance(entity, 16, LivingEntity.class);
         if (!list.isEmpty())
         {
             for (int j = 0; j < list.size(); j++)
@@ -413,7 +413,7 @@ public class AIFindTarget extends AIBase implements IAICombat
                         && pokemob.getLevel() > mob.getLevel() && Vector3.isVisibleEntityFromEntity(entity, entity))
                 {
                     addTargetInfo(this.entity, entity);
-                    entityTarget = (EntityLivingBase) entity;
+                    entityTarget = (LivingEntity) entity;
                     setCombatState(pokemob, CombatStates.ANGRY, true);
                     setLogicState(pokemob, LogicStates.SITTING, false);
                     return true;
@@ -437,7 +437,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Disable via rate out of bounds, or not correct time in the rate.
         if (rate <= 0 || entity.ticksExisted % rate != 0) return false;
 
-        List<EntityLivingBase> ret = new ArrayList<EntityLivingBase>();
+        List<LivingEntity> ret = new ArrayList<LivingEntity>();
         List<Object> pokemobs = new ArrayList<Object>();
 
         // Select either owner or home position as the centre of the check,
@@ -449,22 +449,22 @@ public class AIFindTarget extends AIBase implements IAICombat
         else centre.set(pokemob.getPokemonOwner());
 
         pokemobs = getEntitiesWithinDistance(centre, entity.dimension, PokecubeMod.core.getConfig().guardSearchDistance,
-                EntityLivingBase.class);
+                LivingEntity.class);
 
         // Only allow valid guard targets.
         for (Object o : pokemobs)
         {
-            if (validGuardTarget.apply((Entity) o)) ret.add((EntityLivingBase) o);
+            if (validGuardTarget.apply((Entity) o)) ret.add((LivingEntity) o);
         }
 
         if (ret.isEmpty()) return false;
 
-        EntityLivingBase newtarget = null;
+        LivingEntity newtarget = null;
         double closest = Integer.MAX_VALUE;
         Vector3 here = v1.set(entity, true);
 
         // Select closest visible guard target.
-        for (EntityLivingBase e : ret)
+        for (LivingEntity e : ret)
         {
             double dist = e.getDistanceSq(entity);
             v.set(e, true);
@@ -519,7 +519,7 @@ public class AIFindTarget extends AIBase implements IAICombat
      * This is called from {@link AIFindTarget#shouldRun()}
      * 
      * @return someone needed help. */
-    protected boolean checkForHelp(EntityLivingBase from)
+    protected boolean checkForHelp(LivingEntity from)
     {
         // No need to get help against null
         if (from == null) return false;
@@ -530,7 +530,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Random factor for this ai to apply
         if (Math.random() > 0.01 * PokecubeMod.core.getConfig().hordeRateFactor) return false;
 
-        List<EntityLiving> ret = new ArrayList<EntityLiving>();
+        List<MobEntity> ret = new ArrayList<MobEntity>();
         List<Object> pokemobs = new ArrayList<Object>();
 
         // Select either owner or home position as the centre of the check,
@@ -541,14 +541,14 @@ public class AIFindTarget extends AIBase implements IAICombat
             centre.set(pokemob.getHome());
         else centre.set(pokemob.getPokemonOwner());
 
-        pokemobs = getEntitiesWithinDistance(centre, entity.dimension, 16, EntityLiving.class);
+        pokemobs = getEntitiesWithinDistance(centre, entity.dimension, 16, MobEntity.class);
 
         // We check for whether it is the same species and, has the same owner
         // (including null) or is on the team.
-        Predicate<EntityLiving> relationCheck = new Predicate<EntityLiving>()
+        Predicate<MobEntity> relationCheck = new Predicate<MobEntity>()
         {
             @Override
-            public boolean apply(EntityLiving input)
+            public boolean apply(MobEntity input)
             {
                 IPokemob other = CapabilityPokemob.getPokemobFor(input);
                 // No pokemob, no helps.
@@ -568,10 +568,10 @@ public class AIFindTarget extends AIBase implements IAICombat
         // Only allow valid guard targets.
         for (Object o : pokemobs)
         {
-            if (relationCheck.apply((EntityLiving) o)) ret.add((EntityLiving) o);
+            if (relationCheck.apply((MobEntity) o)) ret.add((MobEntity) o);
         }
 
-        for (EntityLiving mob : ret)
+        for (MobEntity mob : ret)
         {
             // Only agress mobs that can see you are really under attack.
             if (!mob.canEntityBeSeen(entity)) continue;
@@ -591,7 +591,7 @@ public class AIFindTarget extends AIBase implements IAICombat
     {
         world = TickHandler.getInstance().getWorldCache(entity.dimension);
         if (world == null || !pokemob.isRoutineEnabled(AIRoutine.AGRESSIVE)) return false;
-        EntityLivingBase target = entity.getAttackTarget();
+        LivingEntity target = entity.getAttackTarget();
 
         // Don't look for targets if you are sitting.
         boolean ret = target == null && !pokemob.getLogicState(LogicStates.SITTING);
@@ -722,7 +722,7 @@ public class AIFindTarget extends AIBase implements IAICombat
         // If wild, randomly decided to agro a nearby player instead.
         if (ret && shouldAgroNearestPlayer.apply(pokemob))
         {
-            EntityPlayer player = getClosestVulnerablePlayerToEntity(entity,
+            PlayerEntity player = getClosestVulnerablePlayerToEntity(entity,
                     PokecubeMod.core.getConfig().mobAggroRadius);
 
             if (player != null && Vector3.isVisibleEntityFromEntity(entity, player))

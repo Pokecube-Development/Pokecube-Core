@@ -49,9 +49,9 @@ public class Move_Terrain extends Move_Basic
         // TODO check if effect already exists, and send message if so.
         // Otherwise send the it starts to effect message
 
-        teffect.setEffect(effect, duration + world.getTotalWorldTime());
+        teffect.setEffect(effect, duration + world.getGameTime());
 
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
         {
             PacketSyncTerrain.sendTerrainEffects(attacker.getEntity(), segment.chunkX, segment.chunkY, segment.chunkZ,
                     teffect);

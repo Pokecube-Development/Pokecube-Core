@@ -126,7 +126,7 @@ public abstract class PageWithSubPages extends WatchPage
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        if (this.fontRenderer == null) this.fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        if (this.fontRenderer == null) this.fontRenderer = Minecraft.getInstance().fontRenderer;
         prePageDraw(mouseX, mouseY, partialTicks);
         pages.get(index).drawScreen(mouseX, mouseY, partialTicks);
         postPageDraw(mouseX, mouseY, partialTicks);

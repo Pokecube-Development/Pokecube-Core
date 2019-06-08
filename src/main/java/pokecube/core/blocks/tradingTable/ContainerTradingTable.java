@@ -1,6 +1,6 @@
 package pokecube.core.blocks.tradingTable;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.Item;
@@ -20,7 +20,7 @@ public class ContainerTradingTable extends Container
      * @return true if the id is a filled pokecube one, false otherwise */
     protected static boolean isItemValid(ItemStack itemstack)
     {
-        return (!PokecubeManager.isFilled(itemstack) && itemstack.hasTagCompound())
+        return (!PokecubeManager.isFilled(itemstack) && itemstack.hasTag())
                 || (itemstack.getItem() == Items.EMERALD && itemstack.getCount() == 64)
                 || (itemstack.getItem() == Item.getItemFromBlock(Blocks.STONE_BUTTON) && itemstack.getCount() == 1)
                 || (itemstack.getItem() instanceof IPokecube && itemstack.getCount() == 1);
@@ -55,9 +55,9 @@ public class ContainerTradingTable extends Container
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer entityPlayer)
+    public boolean canInteractWith(PlayerEntity PlayerEntity)
     {
-        return tile.isUsableByPlayer(entityPlayer);
+        return tile.isUsableByPlayer(PlayerEntity);
     }
 
     protected void clearSlots()
@@ -85,7 +85,7 @@ public class ContainerTradingTable extends Container
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int index)
+    public ItemStack transferStackInSlot(PlayerEntity player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
@@ -137,7 +137,7 @@ public class ContainerTradingTable extends Container
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void updateProgressBar(int id, int data)
     {
         this.tile.setField(id, data);
@@ -145,7 +145,7 @@ public class ContainerTradingTable extends Container
 
     /** Called when the container is closed. */
     @Override
-    public void onContainerClosed(EntityPlayer player)
+    public void onContainerClosed(PlayerEntity player)
     {
         super.onContainerClosed(player);
         this.tile.closeInventory(player);

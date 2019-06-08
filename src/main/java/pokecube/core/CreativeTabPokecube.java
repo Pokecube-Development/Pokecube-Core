@@ -20,21 +20,21 @@ public class CreativeTabPokecube extends CreativeTabs
 
     /** the itemID for the item to be displayed on the tab */
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ItemStack getTabIconItem()
     {
         return PokecubeItems.getStack("pokedex");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getTabLabel()
     {
         return "Pok\u00e9cube";
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getTranslatedTabLabel()
     {
         return getTabLabel();

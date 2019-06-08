@@ -10,7 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -54,7 +54,7 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     @Override
     public boolean canBeCollidedWith()
     {
-        return !this.isRiding();
+        return !this.isPassenger();
     }
 
     /** Returns true if this entity should push and be pushed by other entities
@@ -158,10 +158,10 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     @Override
     public ITextComponent getDisplayName()
     {
-        ITextComponent textcomponentstring = pokemobCap.getPokemonDisplayName();
-        textcomponentstring.getStyle().setHoverEvent(this.getHoverEvent());
-        textcomponentstring.getStyle().setInsertion(this.getCachedUniqueIdString());
-        return textcomponentstring;
+        ITextComponent StringTextComponent = pokemobCap.getPokemonDisplayName();
+        StringTextComponent.getStyle().setHoverEvent(this.getHoverEvent());
+        StringTextComponent.getStyle().setInsertion(this.getCachedUniqueIdString());
+        return StringTextComponent;
     }
 
     @Override
@@ -309,12 +309,12 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbttagcompound)
+    public void readEntityFromNBT(CompoundNBT CompoundNBT)
     {
-        super.readEntityFromNBT(nbttagcompound);
-        if (nbttagcompound.hasKey(POKEMOBTAG))
+        super.readEntityFromNBT(CompoundNBT);
+        if (CompoundNBT.hasKey(POKEMOBTAG))
         {
-            NBTTagCompound pokemobTag = nbttagcompound.getCompoundTag(POKEMOBTAG);
+            CompoundNBT pokemobTag = CompoundNBT.getCompound(POKEMOBTAG);
             pokemobCap.readPokemobData(pokemobTag);
             // readPokemobData(pokemobTag);
             return;
@@ -323,10 +323,10 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound)
+    public CompoundNBT writeToNBT(CompoundNBT CompoundNBT)
     {
         GeneticsManager.handleEpigenetics(pokemobCap);
-        return super.writeToNBT(nbttagcompound);
+        return super.writeToNBT(CompoundNBT);
     }
 
     @Override

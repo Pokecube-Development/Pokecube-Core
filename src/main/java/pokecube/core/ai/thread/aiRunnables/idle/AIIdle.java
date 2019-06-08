@@ -5,11 +5,11 @@ import java.util.Random;
 import java.util.UUID;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.world.IBlockAccess;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
@@ -31,7 +31,7 @@ public class AIIdle extends AIBase
     public static int          IDLETIMER   = 1;
     private AttributeModifier  idlePathing = null;
 
-    final private EntityLiving entity;
+    final private MobEntity entity;
     final IPokemob             mob;
     final PokedexEntry         entry;
     private double             x;
@@ -82,10 +82,10 @@ public class AIIdle extends AIBase
             v.set(Vector3.getNextSurfacePoint(world, v, Vector3.secondAxisNeg, v.y));
             if (v != null) y = v.y;
         }
-        List<EntityPlayer> players = getPlayersWithinDistance(entity, Integer.MAX_VALUE);
+        List<PlayerEntity> players = getPlayersWithinDistance(entity, Integer.MAX_VALUE);
         if (!players.isEmpty())
         {
-            EntityPlayer player = players.get(0);
+            PlayerEntity player = players.get(0);
             double diff = Math.abs(player.posY - y);
             if (diff > 5)
             {
@@ -145,7 +145,7 @@ public class AIIdle extends AIBase
         }
         else
         {
-            EntityLivingBase setTo = entity;
+            LivingEntity setTo = entity;
             if (mob.getPokemonOwner() != null) setTo = mob.getPokemonOwner();
             v.set(setTo);
         }

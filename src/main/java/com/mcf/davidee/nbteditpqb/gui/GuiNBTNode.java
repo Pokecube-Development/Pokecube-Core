@@ -14,7 +14,7 @@ public class GuiNBTNode extends Gui{
 	
 	public static final ResourceLocation WIDGET_TEXTURE = new ResourceLocation("nbtedit", "textures/gui/widgets.png");
 
-	private Minecraft mc = Minecraft.getMinecraft();
+	private Minecraft mc = Minecraft.getInstance();
 	
 	private Node<NamedNBT> node;
 	private GuiNBTTree tree;

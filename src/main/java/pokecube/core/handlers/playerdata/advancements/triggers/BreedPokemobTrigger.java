@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -36,7 +36,7 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
             this.mate2 = mate2 != null ? mate2 : Database.missingno;
         }
 
-        public boolean test(EntityPlayerMP player, IPokemob first, IPokemob second)
+        public boolean test(ServerPlayerEntity player, IPokemob first, IPokemob second)
         {
             if (!(first.getPokemonOwner() == player || second.getPokemonOwner() == player)) return false;
 
@@ -87,7 +87,7 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
             this.listeners.remove(listener);
         }
 
-        public void trigger(EntityPlayerMP player, IPokemob first, IPokemob second)
+        public void trigger(ServerPlayerEntity player, IPokemob first, IPokemob second)
         {
             List<ICriterionTrigger.Listener<BreedPokemobTrigger.Instance>> list = null;
 
@@ -173,7 +173,7 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
         return new BreedPokemobTrigger.Instance(Database.getEntry(mate1), Database.getEntry(mate2));
     }
 
-    public void trigger(EntityPlayerMP player, IPokemob first, IPokemob second)
+    public void trigger(ServerPlayerEntity player, IPokemob first, IPokemob second)
     {
         BreedPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
         if (bredanimalstrigger$listeners != null)

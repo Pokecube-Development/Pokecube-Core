@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.util.math.Vec3d;
@@ -29,7 +29,7 @@ public class MultiNodeNavigator extends PathNavigate2
         field.set(objTo, field.get(objFrom));
     }
 
-    public MultiNodeNavigator(EntityLiving entityIn, World worldIn, NodeProcessor a, NodeProcessor b, boolean canFly)
+    public MultiNodeNavigator(MobEntity entityIn, World worldIn, NodeProcessor a, NodeProcessor b, boolean canFly)
     {
         super(entityIn, worldIn);
         this.a = a;

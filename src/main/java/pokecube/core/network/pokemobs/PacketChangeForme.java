@@ -4,11 +4,11 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -41,8 +41,8 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
         packet.entityId = mob.getEntityId();
         packet.forme = forme;
         WorldServer server = (WorldServer) mob.getEntityWorld();
-        for (EntityPlayer player : server.getEntityTracker().getTrackingPlayers(mob))
-            PokecubeMod.packetPipeline.sendTo(packet, (EntityPlayerMP) player);
+        for (PlayerEntity player : server.getEntityTracker().getTrackingPlayers(mob))
+            PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
     }
 
     int          entityId;
@@ -85,8 +85,8 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
 
     void processMessage(MessageContext ctx, PacketChangeForme message)
     {
-        EntityPlayer player;
-        if (ctx.side == Side.CLIENT)
+        PlayerEntity player;
+        if (ctx.side == Dist.CLIENT)
         {
             player = PokecubeCore.getPlayer(null);
         }
@@ -98,7 +98,7 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         if (pokemob == null) return;
 
-        if (ctx.side == Side.CLIENT)
+        if (ctx.side == Dist.CLIENT)
         {
             pokemob.setPokedexEntry(message.forme);
         }
@@ -109,7 +109,7 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
             if (!hasRing)
             {
                 player.sendMessage(
-                        new TextComponentTranslation("pokecube.mega.noring", pokemob.getPokemonDisplayName()));
+                        new TranslationTextComponent("pokecube.mega.noring", pokemob.getPokemonDisplayName()));
                 return;
             }
             PokedexEntry newEntry = pokemob.getPokedexEntry().getEvo(pokemob);

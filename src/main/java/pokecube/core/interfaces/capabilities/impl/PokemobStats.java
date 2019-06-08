@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -105,7 +105,7 @@ public abstract class PokemobStats extends PokemobGenes
                         if (evo != null) ret = evo;
                     }
                     ret.levelUp(newLvl);
-                    if (getEntity().addedToChunk && ret.getPokemonOwner() instanceof EntityPlayer
+                    if (getEntity().addedToChunk && ret.getPokemonOwner() instanceof PlayerEntity
                             && getEntity().getEntityWorld().getGameRules().getBoolean("doMobLoot")
                             && !getEntity().getEntityWorld().isRemote)
                     {

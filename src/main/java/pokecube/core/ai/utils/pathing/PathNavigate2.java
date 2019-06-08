@@ -3,7 +3,7 @@ package pokecube.core.ai.utils.pathing;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.math.BlockPos;
@@ -17,7 +17,7 @@ public abstract class PathNavigate2 extends PathNavigate
     private long       lastCacheTime = -1;
     private Object     lock          = new Object();
 
-    public PathNavigate2(EntityLiving entityIn, World worldIn)
+    public PathNavigate2(MobEntity entityIn, World worldIn)
     {
         super(entityIn, worldIn);
     }
@@ -32,13 +32,13 @@ public abstract class PathNavigate2 extends PathNavigate
             // it has been more than a second.
             if (lastCachePos != null && cache != null)
             {
-                long dt = this.world.getTotalWorldTime() - lastCacheTime;
+                long dt = this.world.getGameTime() - lastCacheTime;
                 if (dt < 20 && lastCachePos.distanceSq(blockpos) < 16) { return; }
             }
             float f = this.getPathSearchRange();
             int i = (int) (f + 16.0F);
             lastCachePos = blockpos;
-            lastCacheTime = this.world.getTotalWorldTime();
+            lastCacheTime = this.world.getGameTime();
             cache = new ChunkCache(this.world, blockpos.add(-i, -i, -i), blockpos.add(i, i, i), 0);
         }
     }
@@ -71,10 +71,10 @@ public abstract class PathNavigate2 extends PathNavigate
         }
     }
 
-    /** Returns the path to the given EntityLiving. Args : entity */
+    /** Returns the path to the given MobEntity. Args : entity */
     @Nullable
     @Override
-    public Path getPathToEntityLiving(Entity entityIn)
+    public Path getPathToMobEntity(Entity entityIn)
     {
         if (!this.canNavigate() || cache == null)
         {

@@ -1,13 +1,13 @@
 package pokecube.core.handlers.playerdata;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 
 /** Generic data to store for each player, this gives another place besides in
  * the player's entity data to store information. */
 public class PokecubePlayerCustomData extends PlayerData
 {
-    public NBTTagCompound tag = new NBTTagCompound();
+    public CompoundNBT tag = new CompoundNBT();
 
     public PokecubePlayerCustomData()
     {
@@ -32,15 +32,15 @@ public class PokecubePlayerCustomData extends PlayerData
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
+    public void writeToNBT(CompoundNBT tag)
     {
-        tag.setTag("data", this.tag);
+        tag.put("data", this.tag);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public void readFromNBT(CompoundNBT tag)
     {
-        this.tag = tag.getCompoundTag("data");
+        this.tag = tag.getCompound("data");
     }
 
 }

@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.critereon.AbstractCriterionInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
@@ -34,7 +34,7 @@ public class KillPokemobTrigger implements ICriterionTrigger<KillPokemobTrigger.
             this.entry = entry != null ? entry : Database.missingno;
         }
 
-        public boolean test(EntityPlayerMP player, IPokemob pokemob)
+        public boolean test(ServerPlayerEntity player, IPokemob pokemob)
         {
             return (entry == Database.missingno || pokemob.getPokedexEntry() == entry)
                     && pokemob.getPokemonOwner() != player;
@@ -67,7 +67,7 @@ public class KillPokemobTrigger implements ICriterionTrigger<KillPokemobTrigger.
             this.listeners.remove(listener);
         }
 
-        public void trigger(EntityPlayerMP player, IPokemob pokemob)
+        public void trigger(ServerPlayerEntity player, IPokemob pokemob)
         {
             List<ICriterionTrigger.Listener<KillPokemobTrigger.Instance>> list = null;
 
@@ -152,7 +152,7 @@ public class KillPokemobTrigger implements ICriterionTrigger<KillPokemobTrigger.
         return new KillPokemobTrigger.Instance(Database.getEntry(name));
     }
 
-    public void trigger(EntityPlayerMP player, IPokemob pokemob)
+    public void trigger(ServerPlayerEntity player, IPokemob pokemob)
     {
         KillPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
         if (bredanimalstrigger$listeners != null)

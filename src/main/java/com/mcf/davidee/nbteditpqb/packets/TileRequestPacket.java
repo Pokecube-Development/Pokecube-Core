@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Level;
 import com.mcf.davidee.nbteditpqb.NBTEdit;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -37,7 +37,7 @@ public class TileRequestPacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(TileRequestPacket packet, MessageContext ctx) {
-			EntityPlayerMP player = ctx.getServerHandler().player;
+			ServerPlayerEntity player = ctx.getServerHandler().player;
 			NBTEdit.log(Level.TRACE, player.getName() + " requested tileEntity at "
 					+ packet.pos.getX() + ", " + packet.pos.getY() + ", " + packet.pos.getZ());
 			NBTEdit.NETWORK.sendTile(player, packet.pos);

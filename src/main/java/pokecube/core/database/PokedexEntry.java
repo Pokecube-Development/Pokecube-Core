@@ -28,16 +28,16 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
@@ -259,7 +259,7 @@ public class PokedexEntry
             if (!rightTime)
             {
                 // TODO better way to choose current time.
-                double time = (mob.getEntity().getEntityWorld().getWorldTime() % 24000) / 24000d;
+                double time = (mob.getEntity().getEntityWorld().getDayTime() % 24000) / 24000d;
                 rightTime = dayOnly ? day.contains(time)
                         : nightOnly ? night.contains(time) : duskOnly ? dusk.contains(time) : dawn.contains(time);
             }
@@ -275,7 +275,7 @@ public class PokedexEntry
             return ret;
         }
 
-        @SideOnly(Side.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         public String getEvoString()
         {
             /*
@@ -563,9 +563,9 @@ public class PokedexEntry
             return ItemStack.EMPTY;
         }
 
-        boolean interact(EntityPlayer player, IPokemob pokemob, boolean doInteract)
+        boolean interact(PlayerEntity player, IPokemob pokemob, boolean doInteract)
         {
-            EntityLiving entity = pokemob.getEntity();
+            MobEntity entity = pokemob.getEntity();
             ItemStack held = player.getHeldItemMainhand();
             ItemStack stack = getStackKey(held);
             if (!CompatWrapper.isValid(stack))
@@ -578,12 +578,12 @@ public class PokedexEntry
                 pokemob.megaEvolve(forme);
                 return true;
             }
-            NBTTagCompound data = entity.getEntityData();
+            CompoundNBT data = entity.getEntityData();
             Interaction action = actions.get(stack);
             if (data.hasKey("lastInteract"))
             {
                 long time = data.getLong("lastInteract");
-                long diff = entity.getEntityWorld().getTotalWorldTime() - time;
+                long diff = entity.getEntityWorld().getGameTime() - time;
                 if (diff < action.cooldown + new Random(time).nextInt(action.variance)) { return false; }
             }
             if (!action.male && pokemob.getSexe() == IPokemob.MALE) return false;
@@ -615,7 +615,7 @@ public class PokedexEntry
                 result = results.get(index).copy();
             }
             if (!CompatWrapper.isValid(result)) return false;
-            data.setLong("lastInteract", entity.getEntityWorld().getTotalWorldTime());
+            data.putLong("lastInteract", entity.getEntityWorld().getGameTime());
             int time = pokemob.getHungerTime();
             pokemob.setHungerTime(time + action.hunger);
             held.shrink(1);
@@ -1529,7 +1529,7 @@ public class PokedexEntry
         return ret;
     }
 
-    public ItemStack getRandomHeldItem(EntityLiving mob)
+    public ItemStack getRandomHeldItem(MobEntity mob)
     {
         if (mob.getEntityWorld().isRemote) return ItemStack.EMPTY;
         if (heldTable != null)
@@ -1660,7 +1660,7 @@ public class PokedexEntry
         return translated;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getTranslatedName()
     {
         return I18n.format(getUnlocalizedName());
@@ -1768,7 +1768,7 @@ public class PokedexEntry
      * @param doInteract
      *            - if false, will not actually do anything.
      * @return */
-    public boolean interact(EntityPlayer player, IPokemob pokemob, boolean doInteract)
+    public boolean interact(PlayerEntity player, IPokemob pokemob, boolean doInteract)
     {
         return interactionLogic.interact(player, pokemob, doInteract);
     }
@@ -2028,7 +2028,7 @@ public class PokedexEntry
 
     private ITextComponent description;
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ITextComponent getDescription()
     {
         if (description == null)
@@ -2056,7 +2056,7 @@ public class PokedexEntry
                 descString = descString + "\n" + I18n.format("pokemob.description.evolve.from",
                         entry.getTranslatedName(), entry.evolvesFrom.getTranslatedName());
             }
-            description = new TextComponentString(descString);
+            description = new StringTextComponent(descString);
         }
         return description;
     }

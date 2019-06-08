@@ -5,11 +5,11 @@ import java.util.logging.Level;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -38,9 +38,9 @@ public class RecallCommand extends CommandBase
     }
 
     @Override
-    /** Check if the given ICommandSender has permission to execute this
+    /** Check if the given ICommandSource has permission to execute this
      * command */
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSource sender)
     {
         return true;
     }
@@ -52,13 +52,13 @@ public class RecallCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokerecall <optional:name,cubes,stay,all>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         String sender = cSender.getName();
         boolean all = args.length > 0 && args[0].equalsIgnoreCase("all");
@@ -71,7 +71,7 @@ public class RecallCommand extends CommandBase
 
         WorldServer world = (WorldServer) cSender.getEntityWorld();
 
-        EntityPlayer player = cSender.getEntityWorld().getPlayerEntityByName(sender);
+        PlayerEntity player = cSender.getEntityWorld().getPlayerEntityByName(sender);
         if (allall && cSender.getEntityWorld().getPlayerEntityByName(sender) != null)
         {
             allall = CommandTools.isOp(cSender, ALLALL);
@@ -140,11 +140,11 @@ public class RecallCommand extends CommandBase
         }
         if (num == 0)
         {
-            cSender.sendMessage(new TextComponentTranslation("pokecube.recall.fail"));
+            cSender.sendMessage(new TranslationTextComponent("pokecube.recall.fail"));
         }
         else
         {
-            cSender.sendMessage(new TextComponentTranslation("pokecube.recall.success", num));
+            cSender.sendMessage(new TranslationTextComponent("pokecube.recall.success", num));
         }
     }
 }

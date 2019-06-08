@@ -7,9 +7,9 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -25,19 +25,19 @@ import thut.api.entity.ai.ILogicRunnable;
 public class PacketUpdateAI implements IMessage, IMessageHandler<PacketUpdateAI, IMessage>
 {
     public int            entityId;
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public static void sendUpdatePacket(IPokemob pokemob, @Nullable String ai, @Nullable String logic)
     {
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound savedAI = new NBTTagCompound();
-        NBTTagCompound savedLogic = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
+        CompoundNBT savedAI = new CompoundNBT();
+        CompoundNBT savedLogic = new CompoundNBT();
         if (ai != null) for (IAIRunnable runnable : pokemob.getAI().aiTasks)
         {
             if (runnable instanceof INBTSerializable && runnable.getIdentifier().equals(ai))
             {
-                NBTBase base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedAI.setTag(runnable.getIdentifier(), base);
+                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
+                savedAI.put(runnable.getIdentifier(), base);
                 break;
             }
         }
@@ -45,13 +45,13 @@ public class PacketUpdateAI implements IMessage, IMessageHandler<PacketUpdateAI,
         {
             if (runnable instanceof INBTSerializable && runnable.getIdentifier().equals(logic))
             {
-                NBTBase base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedLogic.setTag(runnable.getIdentifier(), base);
+                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
+                savedLogic.put(runnable.getIdentifier(), base);
                 break;
             }
         }
-        tag.setTag("ai", savedAI);
-        tag.setTag("logic", savedLogic);
+        tag.put("ai", savedAI);
+        tag.put("logic", savedLogic);
         PacketUpdateAI packet = new PacketUpdateAI();
         packet.data = tag;
         packet.entityId = pokemob.getEntity().getEntityId();
@@ -101,9 +101,9 @@ public class PacketUpdateAI implements IMessage, IMessageHandler<PacketUpdateAI,
 
     void processMessage(MessageContext ctx, PacketUpdateAI message)
     {
-        EntityPlayer player = ctx.getServerHandler().player;
+        PlayerEntity player = ctx.getServerHandler().player;
         int id = message.entityId;
-        NBTTagCompound data = message.data;
+        CompoundNBT data = message.data;
         Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
         IAIMob ai = e.getCapability(IAIMob.THUTMOBAI, null);
         if (ai instanceof AICapWrapper)

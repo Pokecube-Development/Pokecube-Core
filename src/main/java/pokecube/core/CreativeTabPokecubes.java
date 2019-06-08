@@ -29,7 +29,7 @@ public class CreativeTabPokecubes extends CreativeTabs
 
     /** the itemID for the item to be displayed on the tab */
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ItemStack getTabIconItem()
     {
         if (stack == null) stack = new ItemStack(POKECUBE == null ? POKESEAL : POKECUBE);
@@ -37,14 +37,14 @@ public class CreativeTabPokecubes extends CreativeTabs
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getTabLabel()
     {
         return I18n.format("igwtab.entry.Pokecubes");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getTranslatedTabLabel()
     {
         return getTabLabel();

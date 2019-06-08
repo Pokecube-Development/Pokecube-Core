@@ -9,9 +9,9 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -54,7 +54,7 @@ public class Move_Explode extends Move_Basic
         @Override
         public void hitEntity(Entity e, float power, Explosion boom)
         {
-            if (hit.get(e.getEntityId()) || !(e instanceof EntityLivingBase)) return;
+            if (hit.get(e.getEntityId()) || !(e instanceof LivingEntity)) return;
             hit.set(e.getEntityId());
 
             byte statusChange = STATUS_NON;
@@ -87,7 +87,7 @@ public class Move_Explode extends Move_Basic
     public void attack(IPokemob attacker, Entity attacked)
     {
         if (attacker.getEntity().isDead) return;
-        EntityLiving mob = attacker.getEntity();
+        MobEntity mob = attacker.getEntity();
         IPokemob pokemob = attacker;
         if (pokemob.getMoveStats().timeSinceIgnited-- <= 0)
         {
@@ -127,7 +127,7 @@ public class Move_Explode extends Move_Basic
             }
             else
             {
-                mob.getEntityWorld().playSound((EntityPlayer) null, mob.posX, mob.posY, mob.posZ,
+                mob.getEntityWorld().playSound((PlayerEntity) null, mob.posX, mob.posY, mob.posZ,
                         SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F,
                         (1.0F + (mob.getEntityWorld().rand.nextFloat() - mob.getEntityWorld().rand.nextFloat()) * 0.2F)
                                 * 0.7F);
@@ -171,7 +171,7 @@ public class Move_Explode extends Move_Basic
                 .getEntitiesWithinAABBExcludingEntity(attacker.getEntity(), location.getAABB().grow(8));
         List<Entity> toRemove = Lists.newArrayList();
         for (Entity e : targets)
-            if (!(e instanceof EntityLivingBase)) toRemove.add(e);
+            if (!(e instanceof LivingEntity)) toRemove.add(e);
         targets.removeAll(toRemove);
         int n = targets.size();
         if (n > 0)
@@ -205,7 +205,7 @@ public class Move_Explode extends Move_Basic
             if ((pokemob.getHealth() <= 0) && target != null && (pokemob.getHealth() >= 0 && attacked != pokemob))
             {
             boolean giveExp = true;
-            if ((target.getGeneralState(GeneralStates.TAMED) && !PokecubeMod.core.getConfig().pvpExp) && (target.getPokemonOwner() instanceof EntityPlayer))
+            if ((target.getGeneralState(GeneralStates.TAMED) && !PokecubeMod.core.getConfig().pvpExp) && (target.getPokemonOwner() instanceof PlayerEntity))
             {
             giveExp = false;
             }
@@ -226,7 +226,7 @@ public class Move_Explode extends Move_Basic
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public IMoveAnimation getAnimation()
     {
         return null;

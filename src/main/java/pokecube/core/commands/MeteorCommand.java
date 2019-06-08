@@ -4,7 +4,7 @@ import java.util.Random;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
 import pokecube.core.events.handlers.SpawnHandler;
 import thut.api.maths.Vector3;
@@ -24,13 +24,13 @@ public class MeteorCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokemeteor <optional:number -> power>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         Random rand = new Random();
         float energy = (float) Math.abs((rand.nextGaussian() + 1) * 50);

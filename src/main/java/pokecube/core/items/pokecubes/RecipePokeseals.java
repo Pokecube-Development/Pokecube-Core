@@ -6,7 +6,7 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import pokecube.core.PokecubeItems;
@@ -100,14 +100,14 @@ public class RecipePokeseals implements IDefaultRecipe
 
         sparklystuff += dye + boomboomstuff;
 
-        NBTTagCompound nbttagcompound;
-        NBTTagCompound nbttagcompound1;
+        CompoundNBT CompoundNBT;
+        CompoundNBT CompoundNBT1;
 
         if (cube == 1 && addons > 0)
         {
             toCraft = new ItemStack(PokecubeItems.getEmptyCube(PokecubeBehavior.POKESEAL), 1);
-            nbttagcompound = new NBTTagCompound();
-            nbttagcompound1 = new NBTTagCompound();
+            CompoundNBT = new CompoundNBT();
+            CompoundNBT1 = new CompoundNBT();
             byte b0 = 0;
             ArrayList arraylist = new ArrayList();
 
@@ -119,19 +119,19 @@ public class RecipePokeseals implements IDefaultRecipe
                 {
                     if (itemstack2.getItem() == Items.COAL)
                     {
-                        nbttagcompound1.setBoolean("Flames", true);
+                        CompoundNBT1.putBoolean("Flames", true);
                     }
                     if (itemstack2.getItem() == Items.WATER_BUCKET)
                     {
-                        nbttagcompound1.setBoolean("Bubbles", true);
+                        CompoundNBT1.putBoolean("Bubbles", true);
                     }
                     if (itemstack2.getItem() == Item.getItemFromBlock(Blocks.LEAVES))
                     {
-                        nbttagcompound1.setBoolean("Leaves", true);
+                        CompoundNBT1.putBoolean("Leaves", true);
                     }
                     if (itemstack2.getItem() == Items.DYE)
                     {
-                        nbttagcompound1.setInteger("dye", itemstack2.getItemDamage());
+                        CompoundNBT1.setInteger("dye", itemstack2.getItemDamage());
                     }
 
                 }
@@ -143,8 +143,8 @@ public class RecipePokeseals implements IDefaultRecipe
             {
                 aint1[l2] = ((Integer) arraylist.get(l2)).intValue();
             }
-            nbttagcompound.setTag(TagNames.POKESEAL, nbttagcompound1);
-            this.toCraft.setTagCompound(nbttagcompound);
+            CompoundNBT.put(TagNames.POKESEAL, CompoundNBT1);
+            this.toCraft.put(CompoundNBT);
             return true;
         }
         return false;
@@ -152,12 +152,12 @@ public class RecipePokeseals implements IDefaultRecipe
 
     public static ItemStack process(ItemStack cube, ItemStack seal)
     {
-        if (!seal.hasTagCompound()) return cube;
-        NBTTagCompound pokecubeTag = TagNames.getPokecubePokemobTag(cube.getTagCompound())
-                .getCompoundTag(TagNames.VISUALSTAG).getCompoundTag(TagNames.POKECUBE);
-        if (!pokecubeTag.hasKey("tag")) pokecubeTag.setTag("tag", new NBTTagCompound());
-        NBTTagCompound cubeTag = pokecubeTag.getCompoundTag("tag");
-        cubeTag.setTag(TagNames.POKESEAL, seal.getTagCompound().getCompoundTag(TagNames.POKESEAL));
+        if (!seal.hasTag()) return cube;
+        CompoundNBT pokecubeTag = TagNames.getPokecubePokemobTag(cube.getTag())
+                .getCompound(TagNames.VISUALSTAG).getCompound(TagNames.POKECUBE);
+        if (!pokecubeTag.hasKey("tag")) pokecubeTag.put("tag", new CompoundNBT());
+        CompoundNBT cubeTag = pokecubeTag.getCompound("tag");
+        cubeTag.put(TagNames.POKESEAL, seal.getTag().getCompound(TagNames.POKESEAL));
         return cube;
     }
 

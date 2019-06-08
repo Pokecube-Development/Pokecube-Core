@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -14,7 +14,7 @@ import pokecube.core.world.dimensions.PokecubeDimensionManager;
 
 public class PacketSyncDimIds implements IMessage, IMessageHandler<PacketSyncDimIds, IMessage>
 {
-    public NBTTagCompound data = new NBTTagCompound();
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketSyncDimIds()
     {

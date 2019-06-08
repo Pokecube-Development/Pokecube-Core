@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -35,11 +35,11 @@ public class WorldGenMultiTemplate implements IWorldGenerator
         List<TemplateSet> templates  = Lists.newArrayList();
         public boolean    syncGround = false;
         public BlockPos   origin;
-        public EnumFacing dir;
+        public Direction dir;
         public boolean    done       = false;
         private boolean   made       = false;
 
-        protected void getTemplate(EnumFacing dir, int chunkX, int chunkZ, World world)
+        protected void getTemplate(Direction dir, int chunkX, int chunkZ, World world)
         {
             if (made) return;
             made = true;
@@ -97,19 +97,19 @@ public class WorldGenMultiTemplate implements IWorldGenerator
                 int dx = (int) (set.position.getX() * set.size.getX() / 2d);
                 int dz = (int) (set.position.getZ() * set.size.getZ() / 2d);
 
-                if (dir == EnumFacing.SOUTH)
+                if (dir == Direction.SOUTH)
                 {
                     posOffset = new BlockPos(dx, 0, dz);
                 }
-                if (dir == EnumFacing.EAST)
+                if (dir == Direction.EAST)
                 {
                     posOffset = new BlockPos(-dz, 0, dx);
                 }
-                if (dir == EnumFacing.NORTH)
+                if (dir == Direction.NORTH)
                 {
                     posOffset = new BlockPos(-dx, 0, -dz);
                 }
-                if (dir == EnumFacing.WEST)
+                if (dir == Direction.WEST)
                 {
                     posOffset = new BlockPos(dz, 0, -dx);
                 }
@@ -197,7 +197,7 @@ public class WorldGenMultiTemplate implements IWorldGenerator
         public TemplateSet template;
         public BlockPos    position      = BlockPos.ORIGIN;
         public String      biome         = null;
-        public EnumFacing  dir;
+        public Direction  dir;
         public Rotation    rotation;
         public Mirror      mirror;
         public int         averageGround = -1;
@@ -213,7 +213,7 @@ public class WorldGenMultiTemplate implements IWorldGenerator
     public boolean                 syncGround   = false;
     public float                   chance       = 1;
     public BlockPos                origin;
-    public EnumFacing              dir;
+    public Direction              dir;
     Set<MultiTemplateSet>          templates    = Sets.newHashSet();
 
     public WorldGenMultiTemplate(SpawnBiomeMatcher spawnRule)
@@ -271,7 +271,7 @@ public class WorldGenMultiTemplate implements IWorldGenerator
         BlockPos offset = new BlockPos(rX, world.getHeight(rX, rZ), rZ);
         if (!spawnRule.matches(new SpawnCheck(Vector3.getNewVector().set(offset), world))) return;
         offset = this.origin == null ? new BlockPos(rX, 255, rZ) : this.origin;
-        EnumFacing dir = this.dir == null ? EnumFacing.HORIZONTALS[random.nextInt(EnumFacing.HORIZONTALS.length)]
+        Direction dir = this.dir == null ? Direction.HORIZONTALS[random.nextInt(Direction.HORIZONTALS.length)]
                 : this.dir;
         if (parts.isEmpty()) initParts();
         List<Template> toBuild = Lists.newArrayList();

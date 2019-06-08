@@ -9,8 +9,8 @@ import com.mcf.davidee.nbteditpqb.NBTHelper;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -24,7 +24,7 @@ public class CustomNBTPacket implements IMessage
     /** The id of the entity being edited. */
     protected int            entityID;
     /** The nbt data of the entity. */
-    protected NBTTagCompound tag;
+    protected CompoundNBT tag;
     /** The custom name tag */
     protected String         customName;
 
@@ -33,7 +33,7 @@ public class CustomNBTPacket implements IMessage
     {
     }
 
-    public CustomNBTPacket(int entityID, String customName, NBTTagCompound tag)
+    public CustomNBTPacket(int entityID, String customName, CompoundNBT tag)
     {
         this.entityID = entityID;
         this.customName = customName;
@@ -62,9 +62,9 @@ public class CustomNBTPacket implements IMessage
         @Override
         public IMessage onMessage(final CustomNBTPacket packet, MessageContext ctx)
         {
-            if (ctx.side == Side.SERVER)
+            if (ctx.side == Dist.DEDICATED_SERVER)
             {
-                final EntityPlayerMP player = ctx.getServerHandler().player;
+                final ServerPlayerEntity player = ctx.getServerHandler().player;
                 player.getServerWorld().addScheduledTask(new Runnable()
                 {
                     @Override
@@ -75,7 +75,7 @@ public class CustomNBTPacket implements IMessage
                         {
                             try
                             {
-                                NBTTagCompound tag = packet.tag;
+                                CompoundNBT tag = packet.tag;
                                 PlayerData data = PlayerDataHandler.getInstance()
                                         .getPlayerData(entity.getCachedUniqueIdString()).getData(packet.customName);
                                 data.readFromNBT(tag);

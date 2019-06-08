@@ -19,6 +19,6 @@ public class ItemBerryLeaf extends ItemBlock
      * damage or NBT. */
     public String getUnlocalizedName(ItemStack stack)
     {
-        return stack.getTagCompound().getString("berryId");
+        return stack.getTag().getString("berryId");
     }
 }

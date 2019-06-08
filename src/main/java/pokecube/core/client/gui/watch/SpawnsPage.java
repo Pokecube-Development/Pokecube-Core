@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.client.gui.watch.util.LineEntry;
 import pokecube.core.client.gui.watch.util.LineEntry.IClickListener;
@@ -80,8 +80,8 @@ public class SpawnsPage extends ListPage
                     pokeEntry, height, height, offsetY);
             List<LineEntry> lines = entry.getLines(listener);
             int num = 4;
-            ITextComponent water0 = new TextComponentString(I18n.format("pokewatch.spawns.water_only"));
-            ITextComponent water1 = new TextComponentString(I18n.format("pokewatch.spawns.water_optional"));
+            ITextComponent water0 = new StringTextComponent(I18n.format("pokewatch.spawns.water_only"));
+            ITextComponent water1 = new StringTextComponent(I18n.format("pokewatch.spawns.water_optional"));
             while (lines.size() > num)
             {
                 ITextComponent comp = lines.get(1).line;

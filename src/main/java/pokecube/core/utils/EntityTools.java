@@ -1,12 +1,12 @@
 package pokecube.core.utils;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import pokecube.core.interfaces.IPokemob;
 
 public class EntityTools
 {
-    public static void copyEntityTransforms(EntityLivingBase to, EntityLivingBase from)
+    public static void copyEntityTransforms(LivingEntity to, LivingEntity from)
     {
         to.setEntityId(from.getEntityId());
         to.posX = from.posX;
@@ -39,9 +39,9 @@ public class EntityTools
         to.limbSwingAmount = from.limbSwingAmount;
     }
 
-    public static void copyEntityData(EntityLivingBase to, EntityLivingBase from)
+    public static void copyEntityData(LivingEntity to, LivingEntity from)
     {
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
         from.writeEntityToNBT(tag);
         to.readEntityFromNBT(tag);
     }

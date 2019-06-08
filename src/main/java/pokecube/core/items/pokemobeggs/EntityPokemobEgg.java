@@ -3,16 +3,16 @@ package pokecube.core.items.pokemobeggs;
 import java.util.UUID;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -26,7 +26,7 @@ import thut.api.maths.Vector3;
 import thut.lib.CompatWrapper;
 
 /** @author Manchou */
-public class EntityPokemobEgg extends EntityLiving
+public class EntityPokemobEgg extends MobEntity
 {
     int               delayBeforeCanPickup = 0;
     int               age                  = 0;
@@ -55,7 +55,7 @@ public class EntityPokemobEgg extends EntityLiving
     public EntityPokemobEgg(World world, double d, double d1, double d2, ItemStack itemstack, Entity placer)
     {
         this(world);
-        this.setHeldItem(EnumHand.MAIN_HAND, itemstack);
+        this.setHeldItem(Hand.MAIN_HAND, itemstack);
         this.setPosition(d, d1, d2);
         delayBeforeCanPickup = 20;
     }
@@ -71,7 +71,7 @@ public class EntityPokemobEgg extends EntityLiving
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(placer);
         ItemStack itemstack = ItemPokemobEgg.getEggStack(pokemob);
         ItemPokemobEgg.initStack(placer, father, itemstack);
-        this.setHeldItem(EnumHand.MAIN_HAND, itemstack);
+        this.setHeldItem(Hand.MAIN_HAND, itemstack);
         this.setPosition(d, d1, d2);
         delayBeforeCanPickup = 20;
     }
@@ -81,13 +81,13 @@ public class EntityPokemobEgg extends EntityLiving
     public boolean attackEntityFrom(DamageSource source, float damage)
     {
         Entity e = source.getImmediateSource();
-        if (!getEntityWorld().isRemote && e instanceof EntityPlayer)
+        if (!getEntityWorld().isRemote && e instanceof PlayerEntity)
         {
             if (this.delayBeforeCanPickup > 0) { return false; }
 
             ItemStack itemstack = this.getHeldItemMainhand();
             int i = itemstack.getCount();
-            EntityPlayer player = (EntityPlayer) e;
+            PlayerEntity player = (PlayerEntity) e;
             if (mother != null && mother.getOwner() != player)
             {
                 mother.getEntity().setAttackTarget(player);
@@ -123,16 +123,16 @@ public class EntityPokemobEgg extends EntityLiving
 
     public UUID getMotherId()
     {
-        if (getHeldItemMainhand() != null && getHeldItemMainhand().hasTagCompound())
+        if (getHeldItemMainhand() != null && getHeldItemMainhand().hasTag())
         {
-            if (getHeldItemMainhand().getTagCompound().hasKey("motherId")) { return UUID
-                    .fromString(getHeldItemMainhand().getTagCompound().getString("motherId")); }
+            if (getHeldItemMainhand().getTag().hasKey("motherId")) { return UUID
+                    .fromString(getHeldItemMainhand().getTag().getString("motherId")); }
         }
         return null;
     }
 
     @Override
-    public void setHeldItem(EnumHand hand, ItemStack stack)
+    public void setHeldItem(Hand hand, ItemStack stack)
     {
         super.setHeldItem(hand, stack);
         eggCache = stack;
@@ -159,7 +159,7 @@ public class EntityPokemobEgg extends EntityLiving
     }
 
     @Override
-    protected boolean processInteract(EntityPlayer player, EnumHand hand)
+    protected boolean processInteract(PlayerEntity player, Hand hand)
     {
         if (this.delayBeforeCanPickup > 0) { return false; }
         ItemStack itemstack = this.getHeldItemMainhand();
@@ -198,7 +198,7 @@ public class EntityPokemobEgg extends EntityLiving
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, getEntityWorld()));
         if (pokemob == null) return null;
         here.moveEntity(pokemob.getEntity());
-        ItemPokemobEgg.initPokemobGenetics(pokemob, getHeldItemMainhand().getTagCompound());
+        ItemPokemobEgg.initPokemobGenetics(pokemob, getHeldItemMainhand().getTag());
         pokemob.getEntity().setWorld(getEntityWorld());
         return pokemob;
     }
@@ -241,8 +241,8 @@ public class EntityPokemobEgg extends EntityLiving
             return;
         }
         this.delayBeforeCanPickup--;
-        boolean spawned = getHeldItemMainhand().hasTagCompound()
-                && getHeldItemMainhand().getTagCompound().hasKey("nestLocation");
+        boolean spawned = getHeldItemMainhand().hasTag()
+                && getHeldItemMainhand().getTag().hasKey("nestLocation");
 
         if (age++ >= hatch || spawned)
         {
@@ -263,12 +263,12 @@ public class EntityPokemobEgg extends EntityLiving
             if (mob == null) this.setDead();
             else mob.getEntity().playLivingSound();
         }
-        TileEntity te = here.getTileEntity(getEntityWorld(), EnumFacing.DOWN);
+        TileEntity te = here.getTileEntity(getEntityWorld(), Direction.DOWN);
         if (te == null) te = here.getTileEntity(getEntityWorld());
         if (te instanceof TileEntityHopper)
         {
             TileEntityHopper hopper = (TileEntityHopper) te;
-            EntityItem item = new EntityItem(getEntityWorld(), posX, posY, posZ, getHeldItemMainhand());
+            ItemEntity item = new ItemEntity(getEntityWorld(), posX, posY, posZ, getHeldItemMainhand());
             boolean added = TileEntityHopper.putDropInInventoryAllSlots(null, hopper, item);
             if (added)// needs null as first argument for 1.11+
             {
@@ -280,7 +280,7 @@ public class EntityPokemobEgg extends EntityLiving
     @Override
     /** (abstract) Protected helper method to read subclass entity data from
      * NBT. */
-    public void readEntityFromNBT(NBTTagCompound nbt)
+    public void readEntityFromNBT(CompoundNBT nbt)
     {
         super.readEntityFromNBT(nbt);
         age = nbt.getInteger("age");
@@ -290,7 +290,7 @@ public class EntityPokemobEgg extends EntityLiving
     @Override
     /** (abstract) Protected helper method to write subclass entity data to
      * NBT. */
-    public void writeEntityToNBT(NBTTagCompound nbt)
+    public void writeEntityToNBT(CompoundNBT nbt)
     {
         super.writeEntityToNBT(nbt);
         nbt.setInteger("age", age);

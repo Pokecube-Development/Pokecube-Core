@@ -16,7 +16,7 @@ import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -485,10 +485,10 @@ public class ActionNaturePower implements IMoveAction
     public boolean applyEffect(IPokemob attacker, Vector3 location)
     {
         if (attacker.getCombatState(CombatStates.ANGRY)) return false;
-        if (!(attacker.getPokemonOwner() instanceof EntityPlayerMP)) return false;
+        if (!(attacker.getPokemonOwner() instanceof ServerPlayerEntity)) return false;
         if (!MoveEventsHandler.canEffectBlock(attacker, location)) return false;
         long time = attacker.getEntity().getEntityData().getLong("lastAttackTick");
-        if (time + (20 * 3) > attacker.getEntity().getEntityWorld().getTotalWorldTime()) return false;
+        if (time + (20 * 3) > attacker.getEntity().getEntityWorld().getGameTime()) return false;
         BlockPos pos = location.getPos();
         World world = attacker.getEntity().getEntityWorld();
         // Check the changers in order, and apply the first one that returns

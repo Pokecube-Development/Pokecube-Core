@@ -13,22 +13,22 @@ import net.minecraft.block.BlockFence;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.api.distmarker.Dist;
@@ -82,8 +82,8 @@ public class ItemPokemobEgg extends Item
     public static ItemStack getEggStack(PokedexEntry entry)
     {
         ItemStack eggItemStack = new ItemStack(PokecubeItems.pokemobEgg);
-        eggItemStack.setTagCompound(new NBTTagCompound());
-        eggItemStack.getTagCompound().setString("pokemob", entry.getName());
+        eggItemStack.put(new CompoundNBT());
+        eggItemStack.getTag().putString("pokemob", entry.getName());
         return eggItemStack;
     }
 
@@ -108,37 +108,37 @@ public class ItemPokemobEgg extends Item
         return pokemob;
     }
 
-    private static void getGenetics(IPokemob mother, IPokemob father, NBTTagCompound nbt)
+    private static void getGenetics(IPokemob mother, IPokemob father, CompoundNBT nbt)
     {
         IMobGenetics eggs = IMobGenetics.GENETICS_CAP.getDefaultInstance();
         IMobGenetics mothers = mother.getEntity().getCapability(IMobGenetics.GENETICS_CAP, null);
         IMobGenetics fathers = father.getEntity().getCapability(IMobGenetics.GENETICS_CAP, null);
         GeneticsManager.initEgg(eggs, mothers, fathers);
-        NBTBase tag = IMobGenetics.GENETICS_CAP.getStorage().writeNBT(IMobGenetics.GENETICS_CAP, eggs, null);
-        nbt.setTag(GeneticsManager.GENES, tag);
+        INBT tag = IMobGenetics.GENETICS_CAP.getStorage().writeNBT(IMobGenetics.GENETICS_CAP, eggs, null);
+        nbt.put(GeneticsManager.GENES, tag);
         try
         {
             SpeciesGene gene = eggs.getAlleles().get(GeneticsManager.SPECIESGENE).getExpressed();
             SpeciesInfo info = gene.getValue();
-            nbt.setString("pokemob", info.entry.getName());
+            nbt.putString("pokemob", info.entry.getName());
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        nbt.setString("motherId", mother.getEntity().getCachedUniqueIdString());
+        nbt.putString("motherId", mother.getEntity().getCachedUniqueIdString());
         return;
     }
 
     public static PokedexEntry getEntry(ItemStack stack)
     {
-        if (!CompatWrapper.isValid(stack) || stack.getTagCompound() == null) return null;
-        if (stack.getTagCompound().hasKey("pokemobNumber"))
-            return Database.getEntry(stack.getTagCompound().getInteger("pokemobNumber"));
+        if (!CompatWrapper.isValid(stack) || stack.getTag() == null) return null;
+        if (stack.getTag().hasKey("pokemobNumber"))
+            return Database.getEntry(stack.getTag().getInteger("pokemobNumber"));
         genes:
-        if (stack.getTagCompound().hasKey(GeneticsManager.GENES))
+        if (stack.getTag().hasKey(GeneticsManager.GENES))
         {
-            NBTBase genes = stack.getTagCompound().getTag(GeneticsManager.GENES);
+            INBT genes = stack.getTag().getTag(GeneticsManager.GENES);
             IMobGenetics eggs = IMobGenetics.GENETICS_CAP.getDefaultInstance();
             IMobGenetics.GENETICS_CAP.getStorage().readNBT(IMobGenetics.GENETICS_CAP, eggs, null, genes);
             Alleles gene = eggs.getAlleles().get(GeneticsManager.SPECIESGENE);
@@ -146,7 +146,7 @@ public class ItemPokemobEgg extends Item
             SpeciesInfo info = gene.getExpressed().getValue();
             return info.entry;
         }
-        return Database.getEntry(stack.getTagCompound().getString("pokemob"));
+        return Database.getEntry(stack.getTag().getString("pokemob"));
     }
 
     public static IPokemob getPokemob(World world, ItemStack stack)
@@ -165,23 +165,23 @@ public class ItemPokemobEgg extends Item
         return ret;
     }
 
-    public static void initPokemobGenetics(IPokemob mob, NBTTagCompound nbt)
+    public static void initPokemobGenetics(IPokemob mob, CompoundNBT nbt)
     {
         mob.setForSpawn(10);
         if (nbt.hasKey(GeneticsManager.GENES))
         {
-            NBTBase genes = nbt.getTag(GeneticsManager.GENES);
+            INBT genes = nbt.getTag(GeneticsManager.GENES);
             IMobGenetics eggs = IMobGenetics.GENETICS_CAP.getDefaultInstance();
             IMobGenetics.GENETICS_CAP.getStorage().readNBT(IMobGenetics.GENETICS_CAP, eggs, null, genes);
             GeneticsManager.initFromGenes(eggs, mob);
         }
-        EntityLivingBase owner = nbt.hasKey("nestLocation") ? null : imprintOwner(mob);
+        LivingEntity owner = nbt.hasKey("nestLocation") ? null : imprintOwner(mob);
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
-        if (owner instanceof EntityPlayer && (config.permsHatch || config.permsHatchSpecific))
+        if (owner instanceof PlayerEntity && (config.permsHatch || config.permsHatchSpecific))
         {
             PokedexEntry entry = mob.getPokedexEntry();
-            EntityPlayer player = (EntityPlayer) owner;
+            PlayerEntity player = (PlayerEntity) owner;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             if (config.permsHatch
@@ -200,31 +200,31 @@ public class ItemPokemobEgg extends Item
         }
     }
 
-    public static EntityLivingBase imprintOwner(IPokemob mob)
+    public static LivingEntity imprintOwner(IPokemob mob)
     {
         Vector3 location = Vector3.getNewVector().set(mob.getEntity());
-        EntityPlayer player = mob.getEntity().getEntityWorld().getClosestPlayer(location.x, location.y, location.z,
+        PlayerEntity player = mob.getEntity().getEntityWorld().getClosestPlayer(location.x, location.y, location.z,
                 PLAYERDIST, false);
-        EntityLivingBase owner = player;
+        LivingEntity owner = player;
         AxisAlignedBB box = location.getAABB().grow(MOBDIST, MOBDIST, MOBDIST);
         if (owner == null)
         {
-            List<EntityLivingBase> list = mob.getEntity().getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class,
-                    box, new Predicate<EntityLivingBase>()
+            List<LivingEntity> list = mob.getEntity().getEntityWorld().getEntitiesWithinAABB(LivingEntity.class,
+                    box, new Predicate<LivingEntity>()
                     {
                         @Override
-                        public boolean apply(EntityLivingBase input)
+                        public boolean apply(LivingEntity input)
                         {
                             return !(input instanceof EntityPokemobEgg);
                         }
                     });
-            EntityLivingBase closestTo = mob.getEntity();
-            EntityLivingBase t = null;
+            LivingEntity closestTo = mob.getEntity();
+            LivingEntity t = null;
             double d0 = Double.MAX_VALUE;
 
             for (int i = 0; i < list.size(); ++i)
             {
-                EntityLivingBase t1 = list.get(i);
+                LivingEntity t1 = list.get(i);
 
                 if (t1 != closestTo && EntitySelectors.NOT_SPECTATING.apply(t1))
                 {
@@ -242,10 +242,10 @@ public class ItemPokemobEgg extends Item
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(owner);
         if (owner == null || pokemob != null || owner instanceof IEntityOwnable)
         {
-            if (pokemob != null && pokemob.getPokemonOwner() instanceof EntityPlayer)
-                player = (EntityPlayer) pokemob.getPokemonOwner();
-            else if (owner instanceof IEntityOwnable && ((IEntityOwnable) owner).getOwner() instanceof EntityPlayer)
-                player = (EntityPlayer) ((IEntityOwnable) owner).getOwner();
+            if (pokemob != null && pokemob.getPokemonOwner() instanceof PlayerEntity)
+                player = (PlayerEntity) pokemob.getPokemonOwner();
+            else if (owner instanceof IEntityOwnable && ((IEntityOwnable) owner).getOwner() instanceof PlayerEntity)
+                player = (PlayerEntity) ((IEntityOwnable) owner).getOwner();
             owner = player;
         }
         return owner;
@@ -253,11 +253,11 @@ public class ItemPokemobEgg extends Item
 
     public static void initStack(Entity mother, IPokemob father, ItemStack stack)
     {
-        if (!stack.hasTagCompound()) stack.setTagCompound(new NBTTagCompound());
+        if (!stack.hasTag()) stack.put(new CompoundNBT());
         IPokemob mob = CapabilityPokemob.getPokemobFor(mother);
         if (mob != null && father != null)
         {
-            getGenetics(mob, father, stack.getTagCompound());
+            getGenetics(mob, father, stack.getTag());
         }
     }
 
@@ -266,7 +266,7 @@ public class ItemPokemobEgg extends Item
         PokedexEntry entry = getEntry(stack);
         if (!PokecubeMod.pokemobEggs.containsKey(entry.getPokedexNb())) { return false; }
 
-        EntityLiving entity = (EntityLiving) PokecubeMod.core.createPokemob(entry, world);
+        MobEntity entity = (MobEntity) PokecubeMod.core.createPokemob(entry, world);
 
         if (entity != null)
         {
@@ -278,24 +278,24 @@ public class ItemPokemobEgg extends Item
             mob.setForSpawn(exp);
             entity.setLocationAndAngles(par2, par4, par6, world.rand.nextFloat() * 360F, 0.0F);
             int[] nest = null;
-            if (stack.hasTagCompound())
+            if (stack.hasTag())
             {
-                if (stack.getTagCompound().hasKey("nestLocation"))
+                if (stack.getTag().hasKey("nestLocation"))
                 {
-                    nest = stack.getTagCompound().getIntArray("nestLocation");
+                    nest = stack.getTag().getIntArray("nestLocation");
                 }
                 else
                 {
-                    initPokemobGenetics(mob, stack.getTagCompound());
+                    initPokemobGenetics(mob, stack.getTag());
                 }
             }
             mob.specificSpawnInit();
             world.spawnEntity(entity);
             if (mob.getPokemonOwner() != null)
             {
-                EntityLivingBase owner = mob.getPokemonOwner();
+                LivingEntity owner = mob.getPokemonOwner();
                 owner.sendMessage(
-                        new TextComponentTranslation("pokemob.hatch", mob.getPokemonDisplayName().getFormattedText()));
+                        new TranslationTextComponent("pokemob.hatch", mob.getPokemonDisplayName().getFormattedText()));
                 if (world.getGameRules().getBoolean("doMobLoot"))
                 {
                     world.spawnEntity(new EntityXPOrb(world, entity.posX, entity.posY, entity.posZ,
@@ -307,7 +307,7 @@ public class ItemPokemobEgg extends Item
                 mob.setHome(nest[0], nest[1], nest[2], 16);
                 mob.setGeneralState(GeneralStates.EXITINGCUBE, false);
             }
-            entity.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
+            entity.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
             entity.playLivingSound();
         }
 
@@ -328,7 +328,7 @@ public class ItemPokemobEgg extends Item
 
     /** allows items to add custom lines of information to the mouseover
      * description */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
     {
@@ -342,8 +342,8 @@ public class ItemPokemobEgg extends Item
         PokedexEntry entry = getEntry(stack);
         if (entry == null || !PokecubeMod.pokemobEggs.containsKey(entry.getPokedexNb())) { return false; }
         ItemStack eggItemStack = new ItemStack(PokecubeItems.pokemobEgg, 1, stack.getItemDamage());
-        if (stack.hasTagCompound()) eggItemStack.setTagCompound(stack.getTagCompound());
-        else eggItemStack.setTagCompound(new NBTTagCompound());
+        if (stack.hasTag()) eggItemStack.put(stack.getTag());
+        else eggItemStack.put(new CompoundNBT());
         Entity entity = new EntityPokemobEgg(world, location.x, location.y, location.z, eggItemStack, placer);
         EggEvent.Place event = new EggEvent.Place(entity);
         MinecraftForge.EVENT_BUS.post(event);
@@ -352,13 +352,13 @@ public class ItemPokemobEgg extends Item
     }
 
     /** This function should return a new entity to replace the dropped item.
-     * Returning null here will not kill the EntityItem and will leave it to
+     * Returning null here will not kill the ItemEntity and will leave it to
      * function normally. Called when the item it placed in a world.
      *
      * @param world
      *            The world object
      * @param location
-     *            The EntityItem object, useful for getting the position of the
+     *            The ItemEntity object, useful for getting the position of the
      *            entity
      * @param itemstack
      *            The current item stack
@@ -379,8 +379,8 @@ public class ItemPokemobEgg extends Item
     }
 
     /** Determines if this Item has a special entity for when they are in the
-     * world. Is called when a EntityItem is spawned in the world, if true and
-     * Item#createCustomEntity returns non null, the EntityItem will be
+     * world. Is called when a ItemEntity is spawned in the world, if true and
+     * Item#createCustomEntity returns non null, the ItemEntity will be
      * destroyed and the new Entity will be added to the world.
      *
      * @param stack
@@ -394,15 +394,15 @@ public class ItemPokemobEgg extends Item
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand,
-            EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
+            Direction side, float hitX, float hitY, float hitZ)
     {
         if (worldIn.isRemote) { return EnumActionResult.SUCCESS; }
         Block i = worldIn.getBlockState(pos).getBlock();
         BlockPos newPos = pos.offset(side);
         double d = 0.0D;
 
-        if (side == EnumFacing.UP && i instanceof BlockFence)
+        if (side == Direction.UP && i instanceof BlockFence)
         {
             d = 0.5D;
         }

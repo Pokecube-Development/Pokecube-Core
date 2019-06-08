@@ -1,6 +1,6 @@
 package pokecube.core.moves.implementations.actions;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import pokecube.core.interfaces.IMoveAction;
@@ -20,7 +20,7 @@ public class ActionFlash implements IMoveAction
     public boolean applyEffect(IPokemob user, Vector3 location)
     {
         if (user.getCombatState(CombatStates.ANGRY)) return false;
-        EntityLivingBase owner = user.getPokemonOwner();
+        LivingEntity owner = user.getPokemonOwner();
         if (owner == null) return false;
         IHungrymob mob = user;
         int count = 1;

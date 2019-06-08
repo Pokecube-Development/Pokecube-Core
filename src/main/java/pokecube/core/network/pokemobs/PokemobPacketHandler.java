@@ -5,8 +5,8 @@ import javax.xml.ws.handler.MessageContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -28,10 +28,10 @@ public class PokemobPacketHandler
         {
             static class PacketHandler
             {
-                final EntityPlayer player;
+                final PlayerEntity player;
                 final PacketBuffer buffer;
 
-                public PacketHandler(EntityPlayer p, PacketBuffer b)
+                public PacketHandler(PlayerEntity p, PacketBuffer b)
                 {
                     this.player = p;
                     this.buffer = b;
@@ -64,7 +64,7 @@ public class PokemobPacketHandler
             @Override
             public IMessage onMessage(MessageServer message, MessageContext ctx)
             {
-                EntityPlayer player = ctx.getServerHandler().player;
+                PlayerEntity player = ctx.getServerHandler().player;
                 new PacketHandler(player, message.buffer);
                 return null;
             }
@@ -86,7 +86,7 @@ public class PokemobPacketHandler
             buffer.writeInt(entityId);
         }
 
-        public MessageServer(byte channel, int id, NBTTagCompound nbt)
+        public MessageServer(byte channel, int id, CompoundNBT nbt)
         {
             this.buffer = new PacketBuffer(Unpooled.buffer(9));
             buffer.writeByte(channel);

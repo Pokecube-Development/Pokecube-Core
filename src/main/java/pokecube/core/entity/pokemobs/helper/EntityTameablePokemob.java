@@ -11,11 +11,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.IJumpingMount;
 import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -34,7 +34,7 @@ import thut.api.entity.IMobColourable;
 import thut.api.maths.Vector3;
 
 /** @author Manchou */
-public abstract class EntityTameablePokemob extends EntityAnimal implements IShearable, IEntityOwnable, IMobColourable,
+public abstract class EntityTameablePokemob extends AnimalEntity implements IShearable, IEntityOwnable, IMobColourable,
         IRangedAttackMob, IEntityAdditionalSpawnData, IJumpingMount
 {
 
@@ -97,7 +97,7 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
             long last = getEntityData().getLong("lastSheared");
             Interaction action = pokemobCap.getPokedexEntry().interactionLogic.actions
                     .get(pokemobCap.getPokedexEntry().interactionLogic.getKey(key));
-            if (last < getEntityWorld().getTotalWorldTime() - (action.cooldown + rand.nextInt(1 + action.variance))
+            if (last < getEntityWorld().getGameTime() - (action.cooldown + rand.nextInt(1 + action.variance))
                     && !getEntityWorld().isRemote)
             {
                 pokemobCap.setGeneralState(GeneralStates.SHEARED, false);
@@ -116,7 +116,7 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
         {
             ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
             pokemobCap.setGeneralState(GeneralStates.SHEARED, true);
-            getEntityData().setLong("lastSheared", getEntityWorld().getTotalWorldTime());
+            getEntityData().putLong("lastSheared", getEntityWorld().getGameTime());
             List<ItemStack> list = pokemobCap.getPokedexEntry().getInteractResult(key);
             Interaction action = pokemobCap.getPokedexEntry().interactionLogic.actions
                     .get(pokemobCap.getPokedexEntry().interactionLogic.getKey(key));
@@ -151,7 +151,7 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(Capability<T> capability, Direction facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
             return (T) (inventory == null ? inventory = new InvWrapper(pokemobCap.getPokemobInventory()) : inventory);
@@ -159,7 +159,7 @@ public abstract class EntityTameablePokemob extends EntityAnimal implements IShe
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(Capability<?> capability, Direction facing)
     {
         return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
     }

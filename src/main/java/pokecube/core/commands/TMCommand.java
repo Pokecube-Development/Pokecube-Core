@@ -8,10 +8,10 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.arguments.EntitySelector;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -31,17 +31,17 @@ public class TMCommand extends CommandBase
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
-        EntityPlayerMP[] targets = null;
+        ServerPlayerEntity[] targets = null;
         for (int i = 1; i < args.length; i++)
         {
             String s = args[i];
             if (s.contains("@"))
             {
-                ArrayList<EntityPlayer> targs = new ArrayList<EntityPlayer>(
-                        EntitySelector.matchEntities(sender, s, EntityPlayer.class));
-                targets = targs.toArray(new EntityPlayerMP[0]);
+                ArrayList<PlayerEntity> targs = new ArrayList<PlayerEntity>(
+                        EntitySelector.matchEntities(sender, s, PlayerEntity.class));
+                targets = targs.toArray(new ServerPlayerEntity[0]);
             }
         }
         if (args.length == 0)
@@ -60,7 +60,7 @@ public class TMCommand extends CommandBase
             {
                 int index = 0;
                 String name = null;
-                EntityPlayer player = null;
+                PlayerEntity player = null;
 
                 WorldServer world = (WorldServer) sender.getEntityWorld();
                 if (args.length == 2)
@@ -102,7 +102,7 @@ public class TMCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/" + aliases.get(0) + "<move name>";
     }
@@ -115,7 +115,7 @@ public class TMCommand extends CommandBase
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, BlockPos pos)
     {
         Collection<String> moves = MovesUtils.moves.keySet();
         List<String> ret = new ArrayList<String>();

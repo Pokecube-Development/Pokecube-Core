@@ -31,7 +31,7 @@ public class RenderMoves<T extends EntityMoveUse> extends Render<T>
             GlStateManager.pushMatrix();
             MovePacketInfo info = entity.getMoveInfo();
             GlStateManager.translate((float) x, (float) y, (float) z);
-            animation.clientAnimation(info, Minecraft.getMinecraft().renderGlobal, partialTicks);
+            animation.clientAnimation(info, Minecraft.getInstance().renderGlobal, partialTicks);
             GlStateManager.popMatrix();
         }
     }

@@ -13,12 +13,12 @@ import java.util.logging.Level;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -72,7 +72,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         return pokemob.getLevel() > 90 && ability.toString().equalsIgnoreCase("hypercutter");
     }
 
-    public static void silkHarvest(IBlockState state, BlockPos pos, World worldIn, EntityPlayer player)
+    public static void silkHarvest(IBlockState state, BlockPos pos, World worldIn, PlayerEntity player)
     {
         java.util.ArrayList<ItemStack> items = new java.util.ArrayList<ItemStack>();
         ItemStack itemstack = createStackedBlock(state);
@@ -296,7 +296,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         if (packet.denied) return;
 
         IPokemob attacker = packet.attacker;
-        EntityLivingBase attackerMob = attacker.getEntity();
+        LivingEntity attackerMob = attacker.getEntity();
         Entity attacked = packet.attacked;
         IPokemob targetPokemob = CapabilityPokemob.getPokemobFor(attacked);
         Random rand = new Random();
@@ -439,8 +439,8 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         }
         if (attacked != attackerMob && targetPokemob != null)
         {
-            if (((EntityLiving) attacked).getAttackTarget() != attackerMob)
-                ((EntityLiving) attacked).setAttackTarget(attackerMob);
+            if (((MobEntity) attacked).getAttackTarget() != attackerMob)
+                ((MobEntity) attacked).setAttackTarget(attackerMob);
             targetPokemob.setCombatState(CombatStates.ANGRY, true);
         }
         if (efficiency > 0 && packet.applyOngoing)
@@ -481,7 +481,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         float healRatio;
         float damageRatio;
 
-        int beforeHealth = (int) ((EntityLivingBase) attacked).getHealth();
+        int beforeHealth = (int) ((LivingEntity) attacked).getHealth();
 
         if (efficiency > 0 && MoveEntry.oneHitKos.contains(attack))
         {
@@ -497,16 +497,16 @@ public class Move_Basic extends Move_Base implements IMoveConstants
 
         boolean wild = !attacker.getGeneralState(GeneralStates.TAMED);
 
-        if (PokecubeMod.core.getConfig().maxWildPlayerDamage >= 0 && wild && attacked instanceof EntityPlayer)
+        if (PokecubeMod.core.getConfig().maxWildPlayerDamage >= 0 && wild && attacked instanceof PlayerEntity)
         {
             finalAttackStrength = Math.min(PokecubeMod.core.getConfig().maxWildPlayerDamage, finalAttackStrength);
         }
-        else if (PokecubeMod.core.getConfig().maxOwnedPlayerDamage >= 0 && !wild && attacked instanceof EntityPlayer)
+        else if (PokecubeMod.core.getConfig().maxOwnedPlayerDamage >= 0 && !wild && attacked instanceof PlayerEntity)
         {
             finalAttackStrength = Math.min(PokecubeMod.core.getConfig().maxOwnedPlayerDamage, finalAttackStrength);
         }
         double scaleFactor = 1;
-        if (attacked instanceof EntityPlayer)
+        if (attacked instanceof PlayerEntity)
         {
             boolean owner = attacked == attacker.getPokemonOwner();
             if (!owner || PokecubeMod.core.getConfig().pokemobsDamageOwner)
@@ -541,7 +541,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         if (!((move.attackCategory & CATEGORY_SELF) > 0 && PWR == 0) && finalAttackStrength > 0)
         {
             // Apply attack damage to players.
-            if (attacked instanceof EntityPlayer)
+            if (attacked instanceof PlayerEntity)
             {
                 DamageSource source1 = new PokemobDamageSource("mob", attackerMob, MovesUtils.getMoveFromName(attack))
                         .setType(type);
@@ -618,7 +618,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         if (finalAttackStrength > 0)
             MovesUtils.displayEfficiencyMessages(attacker, attacked, efficiency, criticalRatio);
 
-        int afterHealth = (int) Math.max(0, ((EntityLivingBase) attacked).getHealth());
+        int afterHealth = (int) Math.max(0, ((LivingEntity) attacked).getHealth());
 
         int damageDealt = beforeHealth - afterHealth;
 

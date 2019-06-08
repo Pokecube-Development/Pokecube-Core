@@ -5,15 +5,15 @@ package pokecube.core.items;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.ITextComponent;
@@ -55,14 +55,14 @@ public class ItemPokedex extends Item
     }
 
     @Override
-    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target,
-            EnumHand hand)
+    public boolean itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target,
+            Hand hand)
     {
-        if (playerIn instanceof EntityPlayerMP)
+        if (playerIn instanceof ServerPlayerEntity)
         {
             Chunk chunk = playerIn.getEntityWorld().getChunkFromBlockCoords(playerIn.getPosition());
             PacketHandler.sendTerrainToClient(playerIn.getEntityWorld(), new ChunkPos(chunk.x, chunk.z),
-                    (EntityPlayerMP) playerIn);
+                    (ServerPlayerEntity) playerIn);
             PacketDataSync.sendInitPacket(playerIn, "pokecube-stats");
             PacketPokedex.sendSecretBaseInfoPacket(playerIn, watch);
             Entity entityHit = target;
@@ -75,7 +75,7 @@ public class ItemPokedex extends Item
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
     {
         ItemStack itemstack = player.getHeldItem(hand);
         if (!world.isRemote) SpawnHandler.refreshTerrain(Vector3.getNewVector().set(player), player.getEntityWorld());
@@ -107,8 +107,8 @@ public class ItemPokedex extends Item
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand,
-            EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
+            Direction side, float hitX, float hitY, float hitZ)
     {
         Vector3 hit = Vector3.getNewVector().set(pos);
         Block block = hit.getBlockState(worldIn).getBlock();
@@ -141,13 +141,13 @@ public class ItemPokedex extends Item
         return EnumActionResult.FAIL;
     }
 
-    private void showGui(EntityPlayer player)
+    private void showGui(PlayerEntity player)
     {
-        if (player instanceof EntityPlayerMP)
+        if (player instanceof ServerPlayerEntity)
         {
             Chunk chunk = player.getEntityWorld().getChunkFromBlockCoords(player.getPosition());
             PacketHandler.sendTerrainToClient(player.getEntityWorld(), new ChunkPos(chunk.x, chunk.z),
-                    (EntityPlayerMP) player);
+                    (ServerPlayerEntity) player);
             PacketDataSync.sendInitPacket(player, "pokecube-stats");
             PacketPokedex.sendSecretBaseInfoPacket(player, watch);
             Entity entityHit = Tools.getPointedEntity(player, 16);

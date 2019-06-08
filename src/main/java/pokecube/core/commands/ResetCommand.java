@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import pokecube.core.network.PokecubePacketHandler;
@@ -31,27 +31,27 @@ public class ResetCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokereset <player>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
-        EntityPlayer player = args.length == 0 ? getCommandSenderAsPlayer(cSender)
+        PlayerEntity player = args.length == 0 ? getCommandSenderAsPlayer(cSender)
                 : getPlayer(server, cSender, args[0]);
         PokecubeSerializer.getInstance().setHasStarter(player, false);
         PacketChoose packet = new PacketChoose(PacketChoose.OPENGUI);
-        packet.data.setBoolean("C", false);
-        packet.data.setBoolean("H", false);
+        packet.data.putBoolean("C", false);
+        packet.data.putBoolean("H", false);
         PokecubePacketHandler.sendToClient(packet, player);
         cSender.sendMessage(CommandTools.makeTranslatedMessage("pokecube.command.reset", "", player.getName()));
         CommandTools.sendMessage(player, "pokecube.command.canchoose");
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args,
             @Nullable BlockPos pos)
     {
         int last = args.length - 1;

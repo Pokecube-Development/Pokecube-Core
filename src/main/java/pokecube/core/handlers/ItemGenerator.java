@@ -44,7 +44,7 @@ public class ItemGenerator
         {
             ItemHeldItems item = new ItemHeldItems(type);
             PokecubeItems.register(item, registry);
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 registerItemTexture(item, 0, new ModelResourceLocation("pokecube:" + type, "inventory"));
             }
@@ -60,7 +60,7 @@ public class ItemGenerator
             ItemFossil item = new ItemFossil(type);
             PokecubeItems.register(item, registry);
             PokecubeItems.registerFossil(new ItemStack(item), type);
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 registerItemTexture(item, 0, new ModelResourceLocation("pokecube:fossil_" + type, "inventory"));
             }
@@ -73,7 +73,7 @@ public class ItemGenerator
         {
             ItemMegawearable item = new ItemMegawearable(type, ItemMegawearable.getSlot(type));
             PokecubeItems.register(item, registry);
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 registerItemTexture(item, 0, new ModelResourceLocation("pokecube:mega_" + type, "inventory"));
             }
@@ -86,7 +86,7 @@ public class ItemGenerator
         {
             Item tm = new ItemTM(type);
             PokecubeItems.register(tm, registry);
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 registerItemTexture(tm, 0, new ModelResourceLocation("pokecube:" + "tm" + type.ordinal(), "inventory"));
             }

@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import com.google.common.collect.Sets;
 
 import invtweaks.api.container.ChestContainer;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.ItemStack;
@@ -120,7 +120,7 @@ public class ContainerPC extends Container
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer entityplayer)
+    public boolean canInteractWith(PlayerEntity PlayerEntity)
     {
         return true;
     }
@@ -128,10 +128,10 @@ public class ContainerPC extends Container
     public void changeName(String name)
     {
         inv.boxes[inv.getPage()] = name;
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
         {
             PacketPC packet = new PacketPC(PacketPC.RENAME, inv.owner);
-            packet.data.setString("N", name);
+            packet.data.putString("N", name);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
     }
@@ -141,13 +141,13 @@ public class ContainerPC extends Container
         this.inventorySlots.clear();
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getPage()
     {
         return inv.boxes[inv.getPage()];
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getPageNb()
     {
         return Integer.toString(inv.getPage() + 1);
@@ -168,7 +168,7 @@ public class ContainerPC extends Container
     {
         if (page - 1 == inv.getPage()) return;
         inv.setPage(page - 1);
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
         {
             PacketPC packet = new PacketPC(PacketPC.SETPAGE, inv.owner);
             packet.data.setInteger("P", page);
@@ -178,7 +178,7 @@ public class ContainerPC extends Container
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer player)
+    public void onContainerClosed(PlayerEntity player)
     {
         super.onContainerClosed(player);
         inv.closeInventory(player);
@@ -187,10 +187,10 @@ public class ContainerPC extends Container
     public void toggleAuto()
     {
         inv.autoToPC = !inv.autoToPC;
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
         {
             PacketPC packet = new PacketPC(PacketPC.TOGGLEAUTO, inv.owner);
-            packet.data.setBoolean("A", inv.autoToPC);
+            packet.data.putBoolean("A", inv.autoToPC);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
     }
@@ -199,16 +199,16 @@ public class ContainerPC extends Container
     {
         if (release && !bool)
         {
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+            if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {
                 PacketPC packet = new PacketPC(PacketPC.RELEASE, inv.owner);
-                packet.data.setBoolean("T", false);
+                packet.data.putBoolean("T", false);
                 packet.data.setInteger("page", inv.getPage());
                 for (int i = 0; i < 54; i++)
                 {
                     if (toRelease[i])
                     {
-                        packet.data.setBoolean("val" + i, true);
+                        packet.data.putBoolean("val" + i, true);
                     }
                 }
                 PokecubeMod.packetPipeline.sendToServer(packet);
@@ -218,7 +218,7 @@ public class ContainerPC extends Container
     }
 
     @Override
-    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player)
+    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player)
     {
         if (release)
         {
@@ -229,7 +229,7 @@ public class ContainerPC extends Container
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int index)
+    public ItemStack transferStackInSlot(PlayerEntity player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);

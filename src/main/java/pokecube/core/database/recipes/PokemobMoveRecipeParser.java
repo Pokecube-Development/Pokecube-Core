@@ -11,13 +11,13 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -185,7 +185,7 @@ public class PokemobMoveRecipeParser implements IRecipeParser
             this.handler = new Container()
             {
                 @Override
-                public boolean canInteractWith(EntityPlayer playerIn)
+                public boolean canInteractWith(PlayerEntity playerIn)
                 {
                     return false;
                 }
@@ -239,7 +239,7 @@ public class PokemobMoveRecipeParser implements IRecipeParser
             World world = user.getEntity().getEntityWorld();
             IBlockState state = location.getBlockState(world);
             if (canCraftBlocks(world, location.getPos(), state)) return true;
-            for (EnumFacing dir : EnumFacing.VALUES)
+            for (Direction dir : Direction.VALUES)
             {
                 BlockPos pos = location.getPos().offset(dir);
                 if (canCraftBlocks(world, pos, world.getBlockState(pos))) return true;
@@ -269,7 +269,7 @@ public class PokemobMoveRecipeParser implements IRecipeParser
                 {
                     world.setBlockToAir(pos);
                     world.spawnEntity(
-                            new EntityItem(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack));
+                            new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack));
                 }
                 return true;
             }
@@ -279,12 +279,12 @@ public class PokemobMoveRecipeParser implements IRecipeParser
         public boolean attemptCraft(IPokemob attacker, Vector3 location)
         {
             World world = attacker.getEntity().getEntityWorld();
-            List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, location.getAABB().grow(1));
+            List<ItemEntity> items = world.getEntitiesWithinAABB(ItemEntity.class, location.getAABB().grow(1));
             if (!items.isEmpty())
             {
                 List<ItemStack> stacks = Lists.newArrayList();
-                Set<EntityItem> valid = Sets.newHashSet();
-                for (EntityItem item : items)
+                Set<ItemEntity> valid = Sets.newHashSet();
+                for (ItemEntity item : items)
                 {
                     ItemStack stack = item.getItem();
                     if (CompatWrapper.isValid(stack))
@@ -305,18 +305,18 @@ public class PokemobMoveRecipeParser implements IRecipeParser
                 boolean crafted = false;
                 if (recipe.matches(inventory, world))
                 {
-                    for (EntityItem item : valid)
+                    for (ItemEntity item : valid)
                     {
                         item.setDead();
                     }
                     ItemStack stack = recipe.getCraftingResult(inventory);
-                    EntityItem item = new EntityItem(world, location.x, location.y, location.z, stack);
+                    ItemEntity item = new ItemEntity(world, location.x, location.y, location.z, stack);
                     crafted = world.spawnEntity(item);
                     for (ItemStack remain : recipe.getRemainingItems(inventory))
                     {
                         if (CompatWrapper.isValid(remain))
                         {
-                            item = new EntityItem(world, location.x, location.y, location.z, remain);
+                            item = new ItemEntity(world, location.x, location.y, location.z, remain);
                             world.spawnEntity(item);
                         }
                     }

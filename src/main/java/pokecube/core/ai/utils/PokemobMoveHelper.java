@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.pathfinding.PathPoint;
@@ -20,7 +20,7 @@ public class PokemobMoveHelper extends EntityMoveHelper
 {
     final IPokemob pokemob;
 
-    public PokemobMoveHelper(EntityLiving entity)
+    public PokemobMoveHelper(MobEntity entity)
     {
         super(entity);
         this.pokemob = CapabilityPokemob.getPokemobFor(entity);

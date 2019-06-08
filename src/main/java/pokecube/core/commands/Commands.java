@@ -7,15 +7,15 @@ import java.util.List;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.command.arguments.EntitySelector;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -62,7 +62,7 @@ public class Commands extends CommandBase
         return super.compareTo(arg0);
     }
 
-    private boolean doReset(ICommandSender cSender, String[] args, EntityPlayerMP[] targets) throws CommandException
+    private boolean doReset(ICommandSource cSender, String[] args, ServerPlayerEntity[] targets) throws CommandException
     {
         if (args[0].equalsIgnoreCase("resetreward"))
         {
@@ -73,7 +73,7 @@ public class Commands extends CommandBase
             }
             if (args.length >= 3)
             {
-                EntityPlayer player = null;
+                PlayerEntity player = null;
                 String name = null;
                 if (targets == null)
                 {
@@ -89,7 +89,7 @@ public class Commands extends CommandBase
 
                 if (player != null)
                 {
-                    NBTTagCompound tag = PokecubePlayerDataHandler.getCustomDataTag(player);
+                    CompoundNBT tag = PokecubePlayerDataHandler.getCustomDataTag(player);
                     if (check)
                     {
                         boolean has = tag.getBoolean(reward);
@@ -98,7 +98,7 @@ public class Commands extends CommandBase
                     }
                     else
                     {
-                        tag.setBoolean(reward, false);
+                        tag.putBoolean(reward, false);
                         cSender.sendMessage(CommandTools.makeTranslatedMessage("pokecube.command.resetreward", "",
                                 player.getName(), reward));
                         PokecubePlayerDataHandler.saveCustomData(player);
@@ -114,7 +114,7 @@ public class Commands extends CommandBase
         return false;
     }
 
-    private boolean doSetHasStarter(ICommandSender cSender, String[] args, EntityPlayerMP[] targets)
+    private boolean doSetHasStarter(ICommandSource cSender, String[] args, ServerPlayerEntity[] targets)
     {
         if (args[0].equalsIgnoreCase("denystarter") && !CommandTools.isOp(cSender, DENYSTARTER))
         {
@@ -124,7 +124,7 @@ public class Commands extends CommandBase
         if (args[0].equalsIgnoreCase("denystarter") && args.length == 2)
         {
             WorldServer world = (WorldServer) cSender.getEntityWorld();
-            EntityPlayer player = null;
+            PlayerEntity player = null;
 
             int num = 1;
             int index = 0;
@@ -150,7 +150,7 @@ public class Commands extends CommandBase
                 {
                     PokecubeSerializer.getInstance().setHasStarter(player, true);
                     PacketDataSync.sendInitPacket(player, "pokecube-data");
-                    cSender.sendMessage(new TextComponentTranslation("pokecube.command.denystarter", player.getName()));
+                    cSender.sendMessage(new TranslationTextComponent("pokecube.command.denystarter", player.getName()));
                 }
             }
             return true;
@@ -159,7 +159,7 @@ public class Commands extends CommandBase
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length == 0)
         {
@@ -191,15 +191,15 @@ public class Commands extends CommandBase
             return;
         }
 
-        EntityPlayerMP[] targets = null;
+        ServerPlayerEntity[] targets = null;
         for (int i = 1; i < args.length; i++)
         {
             String s = args[i];
             if (s.contains("@"))
             {
-                ArrayList<EntityPlayer> targs = new ArrayList<EntityPlayer>(
-                        EntitySelector.matchEntities(sender, s, EntityPlayer.class));
-                targets = targs.toArray(new EntityPlayerMP[0]);
+                ArrayList<PlayerEntity> targs = new ArrayList<PlayerEntity>(
+                        EntitySelector.matchEntities(sender, s, PlayerEntity.class));
+                targets = targs.toArray(new ServerPlayerEntity[0]);
             }
         }
         boolean message = false;
@@ -225,13 +225,13 @@ public class Commands extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender icommandsender)
+    public String getUsage(ICommandSource ICommandSource)
     {
         return "pokecube <denystarter|resetreward|reloadAnims> <arguments>";
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, BlockPos pos)
     {
         List<String> ret = new ArrayList<String>();
         if (args[0].isEmpty()) { return ret; }

@@ -4,8 +4,8 @@ import javax.xml.ws.handler.MessageContext;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
@@ -38,7 +38,7 @@ public class PacketSyncTerrain implements IMessage, IMessageHandler<PacketSyncTe
     int            y;
     int            z;
     long[]         effects = new long[16];
-    NBTTagCompound data    = new NBTTagCompound();
+    CompoundNBT data    = new CompoundNBT();
 
     @Override
     public IMessage onMessage(final PacketSyncTerrain message, final MessageContext ctx)
@@ -80,7 +80,7 @@ public class PacketSyncTerrain implements IMessage, IMessageHandler<PacketSyncTe
 
     void processMessage(MessageContext ctx, PacketSyncTerrain message)
     {
-        EntityPlayer player;
+        PlayerEntity player;
         player = PokecubeCore.getPlayer(null);
         TerrainSegment t = TerrainManager.getInstance().getTerrain(player.getEntityWorld(), message.x * 16,
                 message.y * 16, message.z * 16);

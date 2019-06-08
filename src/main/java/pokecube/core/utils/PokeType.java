@@ -30,7 +30,7 @@ public enum PokeType
         return type.name;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static String getTranslatedName(PokeType type)
     {
         String translated = I18n.format("type." + type.name);

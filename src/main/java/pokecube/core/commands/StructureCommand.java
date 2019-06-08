@@ -4,9 +4,9 @@ import java.util.Random;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -34,13 +34,13 @@ public class StructureCommand extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "/pokebuild <structure||!reload> <optional|direction>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender cSender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource cSender, String[] args) throws CommandException
     {
         if (args.length == 0) throw new CommandException(getUsage(cSender));
         String structure = args[0];
@@ -51,12 +51,12 @@ public class StructureCommand extends CommandBase
             return;
         }
 
-        EnumFacing dir = EnumFacing.HORIZONTALS[new Random().nextInt(EnumFacing.HORIZONTALS.length)];
+        Direction dir = Direction.HORIZONTALS[new Random().nextInt(Direction.HORIZONTALS.length)];
         int offset = 0;
 
         if (args.length > 1)
         {
-            dir = EnumFacing.byName(args[1]);
+            dir = Direction.byName(args[1]);
         }
         WorldServer world = (WorldServer) cSender.getEntityWorld();
         IWorldGenerator generator = WorldGenTemplates.namedTemplates.get(structure);

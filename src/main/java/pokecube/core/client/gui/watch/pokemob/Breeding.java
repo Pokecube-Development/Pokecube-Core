@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
@@ -78,7 +78,7 @@ public class Breeding extends ListPage
                 thisObj.handleComponentHover(component, x, y);
             }
         };
-        ITextComponent main = new TextComponentTranslation(pokemob.getPokedexEntry().getUnlocalizedName());
+        ITextComponent main = new TranslationTextComponent(pokemob.getPokedexEntry().getUnlocalizedName());
         main.setStyle(new Style());
         main.getStyle().setColor(TextFormatting.GREEN);
         main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, pokemob.getPokedexEntry().getName()));
@@ -87,7 +87,7 @@ public class Breeding extends ListPage
             entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
             for (PokedexEntry entry : pokemob.getPokedexEntry().getRelated())
             {
-                main = new TextComponentTranslation(entry.getUnlocalizedName());
+                main = new TranslationTextComponent(entry.getUnlocalizedName());
                 main.setStyle(new Style());
                 main.getStyle().setColor(TextFormatting.GREEN);
                 main.getStyle().setClickEvent(new ClickEvent(Action.CHANGE_PAGE, entry.getName()));

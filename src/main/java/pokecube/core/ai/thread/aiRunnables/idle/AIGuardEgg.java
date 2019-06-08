@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.common.base.Predicate;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -24,7 +24,7 @@ public class AIGuardEgg extends AIBase
     public static int SEARCHCOOLDOWN    = 50;
 
     IPokemob          pokemob;
-    EntityLiving      entity;
+    MobEntity      entity;
     EntityPokemobEgg  egg               = null;
     int               eggSearchCooldown = 0;
     int               eggPathCooldown   = 0;
@@ -82,7 +82,7 @@ public class AIGuardEgg extends AIBase
         if (eggPathCooldown-- > 0) return;
         eggPathCooldown = PATHCOOLDOWN;
         // Path to the egg.
-        Path path = entity.getNavigator().getPathToEntityLiving(egg);
+        Path path = entity.getNavigator().getPathToMobEntity(egg);
         this.addEntityPath(entity, path, pokemob.getMovementSpeed());
     }
 

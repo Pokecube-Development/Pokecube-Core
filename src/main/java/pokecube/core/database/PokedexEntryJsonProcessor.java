@@ -16,7 +16,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import pokecube.core.utils.PokeType;
 
 public class PokedexEntryJsonProcessor
@@ -122,7 +122,7 @@ public class PokedexEntryJsonProcessor
                                                          @Override
                                                          public boolean shouldSkipClass(Class<?> clazz)
                                                          {
-                                                             return clazz == EntityPlayer.class;
+                                                             return clazz == PlayerEntity.class;
                                                          }
                                                      };
 

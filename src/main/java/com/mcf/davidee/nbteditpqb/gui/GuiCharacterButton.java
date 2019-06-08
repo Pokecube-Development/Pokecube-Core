@@ -10,7 +10,7 @@ public class GuiCharacterButton extends Gui{
 
 	public static final int WIDTH = 14, HEIGHT = 14;
 
-	private Minecraft mc = Minecraft.getMinecraft();
+	private Minecraft mc = Minecraft.getInstance();
 	private byte id;
 	private int x, y;
 	private boolean enabled;

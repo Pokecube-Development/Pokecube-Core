@@ -29,9 +29,9 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.MinecraftForge;
@@ -76,7 +76,7 @@ public class GuiDisplayPokecubeInfo extends Gui
     {
         if (PokecubeMod.core.getConfig().guiAutoScale) return 1;
 
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         float scaleFactor = 1;
         boolean flag = mc.isUnicode();
         int i = mc.gameSettings.guiScale;
@@ -119,7 +119,7 @@ public class GuiDisplayPokecubeInfo extends Gui
 
     public static int[] applyTransform(String ref, int[] shift, int[] dims, float scale)
     {
-        Minecraft minecraft = Minecraft.getMinecraft();
+        Minecraft minecraft = Minecraft.getInstance();
         ScaledResolution res = new ScaledResolution(minecraft);
         int w = shift[0];
         int h = shift[1];
@@ -479,7 +479,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         render:
         if (pokemob != null)
         {
-            EntityLivingBase entity = pokemob.getEntity().getAttackTarget();
+            LivingEntity entity = pokemob.getEntity().getAttackTarget();
             if (entity == null || entity.isDead) break render;
 
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
@@ -581,7 +581,7 @@ public class GuiDisplayPokecubeInfo extends Gui
             int k1 = i / 65536;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j1 / 1.0F, k1 / 1.0F);
             GL11.glRotated(entity.rotationYaw - 40, 0, 1, 0);
-            Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0, -0.123456, 0, 0, 1.5F, false);
+            Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, -0.123456, 0, 0, 1.5F, false);
             GL11.glPopMatrix();
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
@@ -612,7 +612,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         }
         if (refreshCounter > 0) return arrayRet;
 
-        EntityPlayer player = minecraft.player;
+        PlayerEntity player = minecraft.player;
 
         if (player == null || player.getEntityWorld() == null) return new IPokemob[0];
 
@@ -701,7 +701,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         if (indexPokemob >= arrayRet.length) indexPokemob = 0;
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.HIGH, receiveCanceled = true)
     public void onRenderHotbar(RenderGameOverlayEvent.Post event)
     {
@@ -724,7 +724,7 @@ public class GuiDisplayPokecubeInfo extends Gui
     public void pokemobAttack()
     {
         if (getCurrentPokemob() == null) return;
-        EntityPlayer player = minecraft.player;
+        PlayerEntity player = minecraft.player;
         Predicate<Entity> selector = new Predicate<Entity>()
         {
             @Override
@@ -759,7 +759,7 @@ public class GuiDisplayPokecubeInfo extends Gui
                 return;
             }
         }
-        if (target != null && !sameOwner && target instanceof EntityLivingBase)
+        if (target != null && !sameOwner && target instanceof LivingEntity)
         {
             PacketCommand.sendCommand(pokemob, Command.ATTACKENTITY,
                     new AttackEntityHandler(target.getEntityId()).setFromOwner(true));
@@ -793,7 +793,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         if (pokemob != null) pokemob.returnToPokecube();
         else
         {
-            EntityPlayer player = minecraft.player;
+            PlayerEntity player = minecraft.player;
             Entity target = null;
             Vector3 look = Vector3.getNewVector().set(player.getLook(1));
             Vector3 temp = Vector3.getNewVector().set(player).addTo(0, player.getEyeHeight(), 0);
@@ -824,7 +824,7 @@ public class GuiDisplayPokecubeInfo extends Gui
         }
         else
         {
-            EntityPlayer player = minecraft.player;
+            PlayerEntity player = minecraft.player;
             Entity target = null;
             Vector3 look = Vector3.getNewVector().set(player.getLook(1));
             Vector3 temp = Vector3.getNewVector().set(player).addTo(0, player.getEyeHeight(), 0);

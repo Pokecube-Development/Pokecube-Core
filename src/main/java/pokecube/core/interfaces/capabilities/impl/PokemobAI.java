@@ -271,8 +271,8 @@ public abstract class PokemobAI extends PokemobEvolves
             pokeballId = pokeballId.copy();
             pokeballId.setCount(1);
             // Remove the extra tag containing data about this pokemob
-            if (pokeballId.hasTagCompound() && pokeballId.getTagCompound().hasKey("Pokemob"))
-                pokeballId.getTagCompound().removeTag("Pokemob");
+            if (pokeballId.hasTag() && pokeballId.getTag().hasKey("Pokemob"))
+                pokeballId.getTag().remove("Pokemob");
         }
         pokecube = pokeballId;
     }

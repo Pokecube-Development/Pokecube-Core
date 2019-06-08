@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
@@ -18,7 +18,7 @@ import thut.api.entity.ai.IAICombat;
 
 public class AISelectMove extends AIBase implements IAICombat
 {
-    final EntityLiving attacker;
+    final MobEntity attacker;
     final IPokemob     pokemob;
     Entity             target;
     private int        moveIndexCounter = 0;

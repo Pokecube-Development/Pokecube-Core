@@ -208,7 +208,7 @@ public class AnimationLoader
             try
             {
                 model = new ResourceLocation(s + "." + ext);
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(model);
                 res.close();
                 break;
             }
@@ -223,7 +223,7 @@ public class AnimationLoader
             try
             {
                 model = new ResourceLocation(s + ".xml");
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(model);
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 InputStream stream = res.getInputStream();
@@ -245,7 +245,7 @@ public class AnimationLoader
             try
             {
                 animation = new ResourceLocation(anim);
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(animation);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(animation);
                 res.close();
             }
             catch (Exception e3)
@@ -257,7 +257,7 @@ public class AnimationLoader
                 if (PokecubeMod.debug) PokecubeMod.log("Setting animation xml for " + entry + " to " + animation);
                 try
                 {
-                    IResource res = Minecraft.getMinecraft().getResourceManager().getResource(animation);
+                    IResource res = Minecraft.getInstance().getResourceManager().getResource(animation);
                     res.close();
                 }
                 catch (Exception e)
@@ -322,7 +322,7 @@ public class AnimationLoader
             }
             else
             {
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(model.animation);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(model.animation);
                 InputStream stream = res.getInputStream();
                 parse(stream, model);
                 res.close();

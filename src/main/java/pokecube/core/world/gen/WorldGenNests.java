@@ -25,7 +25,7 @@ public class WorldGenNests implements IWorldGenerator
         PokecubeMod.core.getConfig().nestsPerChunk = 1;
         if (random.nextDouble() < 0.9) return;
 
-        switch (world.provider.getDimension())
+        switch (world.dimension.getDimension())
         {
         case -1:
             for (int i = 0; i < PokecubeMod.core.getConfig().nestsPerChunk; i++)
@@ -50,15 +50,15 @@ public class WorldGenNests implements IWorldGenerator
     {
         int rX = rand.nextInt(20);
         int rZ = rand.nextInt(20);
-        int rY = rand.nextInt(world.provider.getActualHeight());
+        int rY = rand.nextInt(world.dimension.getActualHeight());
         for (int i = 0; i < 16; i++)
         {
-            for (int j = 1; j < world.provider.getActualHeight(); j++)
+            for (int j = 1; j < world.dimension.getActualHeight(); j++)
             {
                 for (int k = 0; k < 16; k++)
                 {
                     int x = ((i + rX) % 16) + chunkX * 16;
-                    int y = ((j + rY) % world.provider.getActualHeight());
+                    int y = ((j + rY) % world.dimension.getActualHeight());
                     int z = ((k + rZ) % 16) + chunkZ * 16;
                     BlockPos pos = new BlockPos(x, y, z);
                     IBlockState state = world.getBlockState(pos);
@@ -87,15 +87,15 @@ public class WorldGenNests implements IWorldGenerator
     {
         int rX = rand.nextInt(20);
         int rZ = rand.nextInt(20);
-        int rY = rand.nextInt(world.provider.getActualHeight());
+        int rY = rand.nextInt(world.dimension.getActualHeight());
         for (int i = 0; i < 16; i++)
         {
-            for (int j = 1; j < world.provider.getActualHeight(); j++)
+            for (int j = 1; j < world.dimension.getActualHeight(); j++)
             {
                 for (int k = 0; k < 16; k++)
                 {
                     int x = ((i + rX) % 16) + chunkX * 16;
-                    int y = ((j + rY) % world.provider.getActualHeight());
+                    int y = ((j + rY) % world.dimension.getActualHeight());
                     int z = ((k + rZ) % 16) + chunkZ * 16;
 
                     BlockPos pos = new BlockPos(x, y, z);

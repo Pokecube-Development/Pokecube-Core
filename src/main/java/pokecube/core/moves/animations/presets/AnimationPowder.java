@@ -25,7 +25,7 @@ public class AnimationPowder extends MoveAnimationBase
     public void spawnClientEntities(MovePacketInfo info)
     {
         Vector3 target = info.target;
-        initColour((info.attacker.getEntityWorld().getWorldTime()) * 20, 0, info.move);
+        initColour((info.attacker.getEntityWorld().getDayTime()) * 20, 0, info.move);
         Vector3 temp = Vector3.getNewVector();
         Random rand = new Random();
         for (int i = 0; i < 100 * density; i++)

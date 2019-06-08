@@ -24,7 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 /** This class is directly based on the URL Skin texture used by CustomNPCs. */
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class URLSkinTexture extends SimpleTexture
 {
     private static final Logger        logger                = LogManager.getLogger();
@@ -127,7 +127,7 @@ public class URLSkinTexture extends SimpleTexture
                 try
                 {
                     connection = (HttpURLConnection) (new URL(URLSkinTexture.this.imageUrl))
-                            .openConnection(Minecraft.getMinecraft().getProxy());
+                            .openConnection(Minecraft.getInstance().getProxy());
                     connection.setDoInput(true);
                     connection.setDoOutput(false);
                     connection.setRequestProperty("User-Agent",

@@ -8,14 +8,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -25,7 +25,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
@@ -54,7 +54,7 @@ import thut.api.maths.Vector3;
 import thut.core.common.commands.CommandTools;
 import thut.lib.CompatWrapper;
 
-public class EntityPokecubeBase extends EntityLiving implements IEntityAdditionalSpawnData, IProjectile
+public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSpawnData, IProjectile
 {
     public static final String CUBETIMETAG = "lastCubeTime";
 
@@ -63,8 +63,8 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
         if (PokecubeMod.core
                 .getConfig().captureDelayTillAttack) { return !pokemob.getCombatState(CombatStates.NOITEMUSE); }
         long lastAttempt = pokemob.getEntity().getEntityData().getLong(CUBETIMETAG);
-        boolean capture = lastAttempt <= pokemob.getEntity().getEntityWorld().getTotalWorldTime();
-        if (capture) pokemob.getEntity().getEntityData().removeTag(CUBETIMETAG);
+        boolean capture = lastAttempt <= pokemob.getEntity().getEntityWorld().getGameTime();
+        if (capture) pokemob.getEntity().getEntityData().remove(CUBETIMETAG);
         return capture;
     }
 
@@ -72,8 +72,8 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     {
 
         if (PokecubeMod.core.getConfig().captureDelayTillAttack) pokemob.setCombatState(CombatStates.NOITEMUSE, true);
-        else pokemob.getEntity().getEntityData().setLong(CUBETIMETAG,
-                pokemob.getEntity().getEntityWorld().getTotalWorldTime()
+        else pokemob.getEntity().getEntityData().putLong(CUBETIMETAG,
+                pokemob.getEntity().getEntityWorld().getGameTime()
                         + PokecubeMod.core.getConfig().captureDelayTicks);
     }
 
@@ -96,10 +96,10 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     protected int                                 inData;
     protected boolean                             inGround;
     public UUID                                   shooter;
-    public EntityLivingBase                       shootingEntity;
+    public LivingEntity                       shootingEntity;
 
     public double                                 speed          = 2;
-    public EntityLivingBase                       targetEntity;
+    public LivingEntity                       targetEntity;
     public Vector3                                targetLocation = Vector3.getNewVector();
 
     /** The owner of this arrow. */
@@ -154,7 +154,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     }
 
     // For compatiblity.
-    public ItemStack getEntityItem()
+    public ItemStack getItemEntity()
     {
         return getItem();
     }
@@ -187,7 +187,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     }
 
     // For compatiblity
-    public void setEntityItemStack(ItemStack stack)
+    public void setItemEntityStack(ItemStack stack)
     {
         setItem(stack);
     }
@@ -232,7 +232,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
 
     /** Sets the velocity to the args. Args: x, y, z */
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void setVelocity(double x, double y, double z)
     {
         this.motionX = x;
@@ -276,10 +276,10 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             entity1.setLogicState(LogicStates.SITTING, false);
             entity1.setGeneralState(GeneralStates.TAMED, false);
             entity1.setPokemonOwner((UUID) null);
-            if (shootingEntity instanceof EntityPlayer && !(shootingEntity instanceof FakePlayer))
+            if (shootingEntity instanceof PlayerEntity && !(shootingEntity instanceof FakePlayer))
             {
-                ITextComponent mess = new TextComponentTranslation("pokecube.missed", entity1.getPokemonDisplayName());
-                ((EntityPlayer) shootingEntity).sendMessage(mess);
+                ITextComponent mess = new TranslationTextComponent("pokecube.missed", entity1.getPokemonDisplayName());
+                ((PlayerEntity) shootingEntity).sendMessage(mess);
                 entity1.getEntity().setAttackTarget(shootingEntity);
             }
         }
@@ -295,14 +295,14 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
         IPokemob mob = PokecubeManager.itemToPokemob(getItem(), getEntityWorld());
         if (mob == null)
         {
-            if ((getItem().hasTagCompound() && getItem().getTagCompound().hasKey(TagNames.MOBID)))
+            if ((getItem().hasTag() && getItem().getTag().hasKey(TagNames.MOBID)))
             {
                 Entity caught = EntityList.createEntityByIDFromName(
-                        new ResourceLocation(getItem().getTagCompound().getString(TagNames.MOBID)), getEntityWorld());
+                        new ResourceLocation(getItem().getTag().getString(TagNames.MOBID)), getEntityWorld());
                 if (caught == null) return false;
-                caught.readFromNBT(getItem().getTagCompound().getCompoundTag(TagNames.OTHERMOB));
+                caught.readFromNBT(getItem().getTag().getCompound(TagNames.OTHERMOB));
 
-                if (shootingEntity instanceof EntityPlayer && !(shootingEntity instanceof FakePlayer))
+                if (shootingEntity instanceof PlayerEntity && !(shootingEntity instanceof FakePlayer))
                 {
                     if (caught instanceof EntityTameable)
                     {
@@ -312,12 +312,12 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
                     {// .1.12 use AbstractHorse instead
                         ((EntityHorse) caught).setOwnerUniqueId(shootingEntity.getUniqueID());
                     }
-                    NBTTagCompound tag = new NBTTagCompound();
+                    CompoundNBT tag = new CompoundNBT();
                     caught.writeToNBT(tag);
-                    getItem().getTagCompound().setTag(TagNames.OTHERMOB, tag);
+                    getItem().getTag().put(TagNames.OTHERMOB, tag);
                     getItem().setStackDisplayName(caught.getDisplayName().getFormattedText());
-                    ITextComponent mess = new TextComponentTranslation("pokecube.caught", caught.getDisplayName());
-                    ((EntityPlayer) shootingEntity).sendMessage(mess);
+                    ITextComponent mess = new TranslationTextComponent("pokecube.caught", caught.getDisplayName());
+                    ((PlayerEntity) shootingEntity).sendMessage(mess);
                     this.playSound(POKECUBESOUND, 1, 1);
                 }
                 return true;
@@ -337,10 +337,10 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
         }
         ItemStack mobStack = PokecubeManager.pokemobToItem(mob);
         this.setItem(mobStack);
-        if (shootingEntity instanceof EntityPlayer && !(shootingEntity instanceof FakePlayer))
+        if (shootingEntity instanceof PlayerEntity && !(shootingEntity instanceof FakePlayer))
         {
-            ITextComponent mess = new TextComponentTranslation("pokecube.caught", mob.getPokemonDisplayName());
-            ((EntityPlayer) shootingEntity).sendMessage(mess);
+            ITextComponent mess = new TranslationTextComponent("pokecube.caught", mob.getPokemonDisplayName());
+            ((PlayerEntity) shootingEntity).sendMessage(mess);
             this.setPosition(shootingEntity.posX, shootingEntity.posY, shootingEntity.posZ);
             this.playSound(POKECUBESOUND, 1, 1);
         }
@@ -348,74 +348,74 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound nbttagcompound)
+    public void writeEntityToNBT(CompoundNBT CompoundNBT)
     {
-        super.writeEntityToNBT(nbttagcompound);
-        nbttagcompound.setInteger("tilt", tilt);
-        nbttagcompound.setInteger("time", time);
-        if (shooter != null) nbttagcompound.setString("shooter", shooter.toString());
+        super.writeEntityToNBT(CompoundNBT);
+        CompoundNBT.setInteger("tilt", tilt);
+        CompoundNBT.setInteger("time", time);
+        if (shooter != null) CompoundNBT.putString("shooter", shooter.toString());
         if (this.getItem() != null)
         {
-            nbttagcompound.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound()));
+            CompoundNBT.put("Item", this.getItem().writeToNBT(new CompoundNBT()));
         }
         if (tilePos != null)
         {
-            nbttagcompound.setInteger("xTile", this.tilePos.getX());
-            nbttagcompound.setInteger("yTile", this.tilePos.getY());
-            nbttagcompound.setInteger("zTile", this.tilePos.getZ());
+            CompoundNBT.setInteger("xTile", this.tilePos.getX());
+            CompoundNBT.setInteger("yTile", this.tilePos.getY());
+            CompoundNBT.setInteger("zTile", this.tilePos.getZ());
         }
-        nbttagcompound.setShort("life", (short) this.ticksInGround);
-        nbttagcompound.setByte("inTile", (byte) Block.getIdFromBlock(this.tile));
-        nbttagcompound.setByte("inData", (byte) this.inData);
-        nbttagcompound.setByte("shake", (byte) this.arrowShake);
-        nbttagcompound.setByte("inGround", (byte) (this.inGround ? 1 : 0));
+        CompoundNBT.setShort("life", (short) this.ticksInGround);
+        CompoundNBT.setByte("inTile", (byte) Block.getIdFromBlock(this.tile));
+        CompoundNBT.setByte("inData", (byte) this.inData);
+        CompoundNBT.setByte("shake", (byte) this.arrowShake);
+        CompoundNBT.setByte("inGround", (byte) (this.inGround ? 1 : 0));
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbttagcompound)
+    public void readEntityFromNBT(CompoundNBT CompoundNBT)
     {
-        super.readEntityFromNBT(nbttagcompound);
-        tilt = nbttagcompound.getInteger("tilt");
-        time = nbttagcompound.getInteger("time");
-        NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Item");
-        this.setItem(new ItemStack(nbttagcompound1));
+        super.readEntityFromNBT(CompoundNBT);
+        tilt = CompoundNBT.getInteger("tilt");
+        time = CompoundNBT.getInteger("time");
+        CompoundNBT CompoundNBT1 = CompoundNBT.getCompound("Item");
+        this.setItem(new ItemStack(CompoundNBT1));
 
         ItemStack item = getItem();
 
-        if (nbttagcompound.hasKey("shooter"))
+        if (CompoundNBT.hasKey("shooter"))
         {
-            shooter = UUID.fromString(nbttagcompound.getString("shooter"));
+            shooter = UUID.fromString(CompoundNBT.getString("shooter"));
         }
 
         if (!CompatWrapper.isValid(item))
         {
             this.setDead();
         }
-        this.tilePos = new BlockPos(nbttagcompound.getInteger("xTile"), nbttagcompound.getInteger("yTile"),
-                nbttagcompound.getInteger("zTile"));
-        this.ticksInGround = nbttagcompound.getShort("life");
-        this.tile = Block.getBlockById(nbttagcompound.getByte("inTile") & 255);
-        this.inData = nbttagcompound.getByte("inData") & 255;
-        this.arrowShake = nbttagcompound.getByte("shake") & 255;
-        this.inGround = nbttagcompound.getByte("inGround") == 1;
+        this.tilePos = new BlockPos(CompoundNBT.getInteger("xTile"), CompoundNBT.getInteger("yTile"),
+                CompoundNBT.getInteger("zTile"));
+        this.ticksInGround = CompoundNBT.getShort("life");
+        this.tile = Block.getBlockById(CompoundNBT.getByte("inTile") & 255);
+        this.inData = CompoundNBT.getByte("inData") & 255;
+        this.arrowShake = CompoundNBT.getByte("shake") & 255;
+        this.inGround = CompoundNBT.getByte("inGround") == 1;
     }
 
-    public EntityLivingBase sendOut()
+    public LivingEntity sendOut()
     {
         if (getEntityWorld().isRemote || isReleasing()) { return null; }
         IPokemob pokemob = PokecubeManager.itemToPokemob(getItem(), getEntityWorld());
         Config config = PokecubeMod.core.getConfig();
         // Check permissions
-        if (config.permsSendOut && shootingEntity instanceof EntityPlayer)
+        if (config.permsSendOut && shootingEntity instanceof PlayerEntity)
         {
-            EntityPlayer player = (EntityPlayer) shootingEntity;
+            PlayerEntity player = (PlayerEntity) shootingEntity;
             IPermissionHandler handler = PermissionAPI.getPermissionHandler();
             PlayerContext context = new PlayerContext(player);
             boolean denied = false;
             if (!handler.hasPermission(player.getGameProfile(), Permissions.SENDOUTPOKEMOB, context)) denied = true;
             if (denied)
             {
-                Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                Tools.giveItem((PlayerEntity) shootingEntity, getItem());
                 this.setDead();
                 return null;
             }
@@ -423,10 +423,10 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
         if (pokemob != null)
         {
             // Check permissions
-            if (config.permsSendOutSpecific && shootingEntity instanceof EntityPlayer)
+            if (config.permsSendOutSpecific && shootingEntity instanceof PlayerEntity)
             {
                 PokedexEntry entry = pokemob.getPokedexEntry();
-                EntityPlayer player = (EntityPlayer) shootingEntity;
+                PlayerEntity player = (PlayerEntity) shootingEntity;
                 IPermissionHandler handler = PermissionAPI.getPermissionHandler();
                 PlayerContext context = new PlayerContext(player);
                 boolean denied = false;
@@ -434,7 +434,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
                     denied = true;
                 if (denied)
                 {
-                    Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                    Tools.giveItem((PlayerEntity) shootingEntity, getItem());
                     this.setDead();
                     return null;
                 }
@@ -447,16 +447,16 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             v.set(v.intX() + 0.5, v.y, v.intZ() + 0.5);
             IBlockState state = v.getBlockState(getEntityWorld());
             if (state.getMaterial().isSolid()) v.y = Math.ceil(v.y);
-            EntityLiving entity = pokemob.getEntity();
+            MobEntity entity = pokemob.getEntity();
             entity.fallDistance = 0;
             v.moveEntity(entity);
 
             SendOut evt = new SendOut.Pre(pokemob.getPokedexEntry(), v, getEntityWorld(), pokemob);
             if (MinecraftForge.EVENT_BUS.post(evt))
             {
-                if (shootingEntity != null && shootingEntity instanceof EntityPlayer)
+                if (shootingEntity != null && shootingEntity instanceof PlayerEntity)
                 {
-                    Tools.giveItem((EntityPlayer) shootingEntity, getItem());
+                    Tools.giveItem((PlayerEntity) shootingEntity, getItem());
                     this.setDead();
                 }
                 return null;
@@ -468,7 +468,7 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
             pokemob.setGeneralState(GeneralStates.EXITINGCUBE, true);
             pokemob.setEvolutionTicks(50 + LogicMiscUpdate.EXITCUBEDURATION);
             Entity owner = pokemob.getPokemonOwner();
-            if (owner instanceof EntityPlayer)
+            if (owner instanceof PlayerEntity)
             {
                 ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.action.sendout", "green",
                         pokemob.getPokemonDisplayName());
@@ -490,13 +490,13 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
         }
         else
         {
-            NBTTagCompound tag;
-            if (getItem().hasTagCompound() && (tag = getItem().getTagCompound()).hasKey(TagNames.MOBID))
+            CompoundNBT tag;
+            if (getItem().hasTag() && (tag = getItem().getTag()).hasKey(TagNames.MOBID))
             {
-                NBTTagCompound mobTag = tag.getCompoundTag(TagNames.OTHERMOB);
+                CompoundNBT mobTag = tag.getCompound(TagNames.OTHERMOB);
                 ResourceLocation id = new ResourceLocation(tag.getString(TagNames.MOBID));
                 Entity newMob = EntityList.createEntityByIDFromName(id, getEntityWorld());
-                if (newMob != null && newMob instanceof EntityLivingBase)
+                if (newMob != null && newMob instanceof LivingEntity)
                 {
                     newMob.readFromNBT(mobTag);
                     Vector3 v = v0.set(this).addTo(-motionX, -motionY, -motionZ);
@@ -508,17 +508,17 @@ public class EntityPokecubeBase extends EntityLiving implements IEntityAdditiona
                     if (state.getMaterial().isSolid()) v.y = Math.ceil(v.y);
                     v.moveEntity(newMob);
                     getEntityWorld().spawnEntity(newMob);
-                    tag.removeTag(TagNames.MOBID);
-                    tag.removeTag(TagNames.OTHERMOB);
-                    tag.removeTag("display");
-                    tag.removeTag("tilt");
-                    if (tag.hasNoTags()) getItem().setTagCompound(null);
+                    tag.remove(TagNames.MOBID);
+                    tag.remove(TagNames.OTHERMOB);
+                    tag.remove("display");
+                    tag.remove("tilt");
+                    if (tag.hasNoTags()) getItem().put(null);
                     entityDropItem(getItem(), 0.5f);
                     setReleased(newMob);
                     motionX = motionY = motionZ = 0;
                     time = 10;
                     setReleasing(true);
-                    return (EntityLivingBase) newMob;
+                    return (LivingEntity) newMob;
                 }
             }
             System.err.println("Send out no pokemob?");

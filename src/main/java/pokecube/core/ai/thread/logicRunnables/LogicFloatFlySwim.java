@@ -1,7 +1,7 @@
 package pokecube.core.ai.thread.logicRunnables;
 
 import net.minecraft.pathfinding.Path;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.world.World;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
@@ -125,7 +125,7 @@ public class LogicFloatFlySwim extends LogicBase
             }
         }
         canFloat = pokemob.flys() || pokemob.floats();
-        if (canFloat && here.offset(EnumFacing.DOWN).getBlockState(entity.getEntityWorld()).getMaterial().isLiquid())
+        if (canFloat && here.offset(Direction.DOWN).getBlockState(entity.getEntityWorld()).getMaterial().isLiquid())
         {
             if (entity.motionY < -0.1) entity.motionY = 0;
             entity.motionY += 0.05;

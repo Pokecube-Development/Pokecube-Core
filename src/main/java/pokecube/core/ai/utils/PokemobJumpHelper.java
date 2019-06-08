@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.EntityJumpHelper;
 import pokecube.core.entity.pokemobs.helper.EntityAiPokemob;
 import pokecube.core.interfaces.IPokemob;
@@ -15,7 +15,7 @@ public class PokemobJumpHelper extends EntityJumpHelper
     private final IPokemob        pokemob;
     private final EntityAiPokemob living;
 
-    public PokemobJumpHelper(EntityLiving entityIn)
+    public PokemobJumpHelper(MobEntity entityIn)
     {
         super(entityIn);
         pokemob = CapabilityPokemob.getPokemobFor(entityIn);

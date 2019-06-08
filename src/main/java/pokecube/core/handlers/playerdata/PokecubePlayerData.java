@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import pokecube.core.utils.PokecubeSerializer.TeleDest;
 import thut.core.common.handlers.PlayerDataHandler.PlayerData;
 
@@ -27,37 +27,37 @@ public class PokecubePlayerData extends PlayerData
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
+    public void writeToNBT(CompoundNBT tag)
     {
-        tag.setBoolean("hasStarter", hasStarter);
+        tag.putBoolean("hasStarter", hasStarter);
         tag.setInteger("teleIndex", teleIndex);
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (TeleDest d : telelocs)
         {
             if (d != null)
             {
-                NBTTagCompound loc = new NBTTagCompound();
+                CompoundNBT loc = new CompoundNBT();
                 d.writeToNBT(loc);
                 list.appendTag(loc);
             }
         }
-        tag.setTag("telelocs", list);
+        tag.put("telelocs", list);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public void readFromNBT(CompoundNBT tag)
     {
         hasStarter = tag.getBoolean("hasStarter");
         teleIndex = tag.getInteger("teleIndex");
-        NBTBase temp2 = tag.getTag("telelocs");
+        INBT temp2 = tag.getTag("telelocs");
         telelocs.clear();
-        if (temp2 instanceof NBTTagList)
+        if (temp2 instanceof ListNBT)
         {
-            NBTTagList tagListOptions = (NBTTagList) temp2;
-            NBTTagCompound pokemobData2 = null;
-            for (int j = 0; j < tagListOptions.tagCount(); j++)
+            ListNBT tagListOptions = (ListNBT) temp2;
+            CompoundNBT pokemobData2 = null;
+            for (int j = 0; j < tagListOptions.size(); j++)
             {
-                pokemobData2 = tagListOptions.getCompoundTagAt(j);
+                pokemobData2 = tagListOptions.getCompound(j);
                 TeleDest d = TeleDest.readFromNBT(pokemobData2);
                 telelocs.add(d.setIndex(j));
             }

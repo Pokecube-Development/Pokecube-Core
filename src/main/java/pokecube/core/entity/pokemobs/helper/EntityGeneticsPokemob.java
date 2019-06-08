@@ -7,8 +7,8 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import pokecube.core.entity.pokemobs.genetics.genes.ColourGene;
@@ -90,18 +90,18 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
         pokemobCap.onGenesChanged();
         IMobGenetics genes = getCapability(IMobGenetics.GENETICS_CAP, null);
         PacketBuffer buffer = new PacketBuffer(data);
-        NBTTagList list = (NBTTagList) IMobGenetics.GENETICS_CAP.writeNBT(genes, null);
-        NBTTagCompound nbt = new NBTTagCompound();
+        ListNBT list = (ListNBT) IMobGenetics.GENETICS_CAP.writeNBT(genes, null);
+        CompoundNBT nbt = new CompoundNBT();
         IAIMob ai = getCapability(IAIMob.THUTMOBAI, null);
         if (ai instanceof AICapWrapper)
         {
             AICapWrapper wrapper = (AICapWrapper) ai;
-            nbt.setTag("a", wrapper.serializeNBT());
+            nbt.put("a", wrapper.serializeNBT());
         }
-        nbt.setTag("p", pokemobCap.writePokemobData());
-        nbt.setTag("g", list);
+        nbt.put("p", pokemobCap.writePokemobData());
+        nbt.put("g", list);
         buffer.writeCompoundTag(nbt);
-        nbt = getEntityData().getCompoundTag("url_model");
+        nbt = getEntityData().getCompound("url_model");
         buffer.writeCompoundTag(nbt);
     }
 
@@ -133,23 +133,23 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
         PacketBuffer buffer = new PacketBuffer(data);
         try
         {
-            NBTTagCompound tag = buffer.readCompoundTag();
-            NBTTagList list = (NBTTagList) tag.getTag("g");
+            CompoundNBT tag = buffer.readCompoundTag();
+            ListNBT list = (ListNBT) tag.getTag("g");
             IMobGenetics genes = getCapability(IMobGenetics.GENETICS_CAP, null);
             IMobGenetics.GENETICS_CAP.readNBT(genes, null, list);
-            pokemobCap.readPokemobData(tag.getCompoundTag("p"));
+            pokemobCap.readPokemobData(tag.getCompound("p"));
             pokemobCap.onGenesChanged();
             this.onGenesChanged();
             IAIMob ai = getCapability(IAIMob.THUTMOBAI, null);
             if (ai instanceof AICapWrapper)
             {
                 AICapWrapper wrapper = (AICapWrapper) ai;
-                wrapper.deserializeNBT(tag.getCompoundTag("a"));
+                wrapper.deserializeNBT(tag.getCompound("a"));
             }
             tag = buffer.readCompoundTag();
             if (!tag.hasNoTags())
             {
-                getEntityData().setTag("url_model", tag);
+                getEntityData().put("url_model", tag);
             }
         }
         catch (Exception e)
@@ -159,9 +159,9 @@ public abstract class EntityGeneticsPokemob extends EntityTameablePokemob
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbttagcompound)
+    public void readEntityFromNBT(CompoundNBT CompoundNBT)
     {
-        super.readEntityFromNBT(nbttagcompound);
+        super.readEntityFromNBT(CompoundNBT);
         onGenesChanged();
     }
 }

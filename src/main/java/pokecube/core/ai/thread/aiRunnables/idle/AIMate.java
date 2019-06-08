@@ -7,8 +7,8 @@ import java.util.List;
 import com.google.common.base.Predicate;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
@@ -33,7 +33,7 @@ public class AIMate extends AIBase
     public static int  PATHCOOLDOWN   = 5;
 
     final IPokemob     pokemob;
-    final EntityLiving entity;
+    final MobEntity entity;
     int                cooldown       = 0;
     int                spawnBabyDelay = 0;
     int                pathDelay      = 0;
@@ -192,7 +192,7 @@ public class AIMate extends AIBase
                     {
                         World world = input.getEntityWorld();
                         input = PokecubeMod.core.getEntityProvider().getEntity(world, input.getEntityId(), true);
-                        return input instanceof EntityAnimal && pokemob.canMate((EntityAnimal) input);
+                        return input instanceof AnimalEntity && pokemob.canMate((AnimalEntity) input);
                     }
                 });
         bb = makeBox(PokecubeMod.core.getConfig().maxSpawnRadius, searchingLoveDist,
@@ -202,7 +202,7 @@ public class AIMate extends AIBase
             @Override
             public boolean apply(Entity input)
             {
-                return input instanceof EntityAnimal && CapabilityPokemob.getPokemobFor(input) != null;
+                return input instanceof AnimalEntity && CapabilityPokemob.getPokemobFor(input) != null;
             }
         });
         float multiplier = pokemob.isPlayerOwned() ? PokecubeMod.core.getConfig().mateDensityPlayer
@@ -216,12 +216,12 @@ public class AIMate extends AIBase
         for (int i = 0; i < targetMates.size(); i++)
         {
             Entity mob = targetMates.get(i);
-            if (!(mob instanceof EntityAnimal))
+            if (!(mob instanceof AnimalEntity))
             {
                 mob = PokecubeMod.core.getEntityProvider().getEntity(mob.getEntityWorld(), mob.getEntityId(), true);
             }
             IPokemob otherPokemob = CapabilityPokemob.getPokemobFor(mob);
-            EntityAnimal animal = (EntityAnimal) mob;
+            AnimalEntity animal = (AnimalEntity) mob;
             if (gendered && !transforms && otherPokemob.getSexe() == pokemob.getSexe()) continue;
             if (!otherPokemob.isRoutineEnabled(AIRoutine.MATE)) continue;
             if (otherPokemob == this.pokemob
@@ -234,9 +234,9 @@ public class AIMate extends AIBase
                 if (s != null && s.equalsIgnoreCase(IMoveNames.MOVE_TRANSFORM)) otherTransforms = true;
             }
 
-            if (transforms && otherTransforms || !(otherPokemob.getEntity() instanceof EntityAnimal)) continue;
+            if (transforms && otherTransforms || !(otherPokemob.getEntity() instanceof AnimalEntity)) continue;
 
-            boolean validMate = pokemob.canMate((EntityAnimal) otherPokemob.getEntity());
+            boolean validMate = pokemob.canMate((AnimalEntity) otherPokemob.getEntity());
             if (!validMate || entity.getDistanceSq(otherPokemob.getEntity()) > searchingLoveDist * searchingLoveDist)
                 continue;
             if (!Vector3.isVisibleEntityFromEntity(entity, otherPokemob.getEntity())
@@ -302,7 +302,7 @@ public class AIMate extends AIBase
         if (pathDelay-- < 0)
         {
             pathDelay = PATHCOOLDOWN;
-            entity.getNavigator().tryMoveToEntityLiving(emob, pokemob.getMovementSpeed());
+            entity.getNavigator().tryMoveToMobEntity(emob, pokemob.getMovementSpeed());
         }
         spawnBabyDelay++;
         pokemob.setGeneralState(GeneralStates.MATING, true);

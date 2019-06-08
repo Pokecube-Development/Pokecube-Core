@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.PokecubeCore;
@@ -15,15 +15,15 @@ import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 
-@SideOnly(Side.CLIENT)
-public abstract class RenderPokemobInfos<T extends EntityLiving> extends RenderLiving<T>
+@OnlyIn(Dist.CLIENT)
+public abstract class RenderPokemobInfos<T extends MobEntity> extends RenderLiving<T>
 {
-    public static boolean shouldShow(EntityLivingBase entity)
+    public static boolean shouldShow(LivingEntity entity)
     {
         if (((Minecraft) PokecubeCore.getMinecraftInstance()).gameSettings.hideGUI
                 || entity.isBeingRidden()) { return false; }
 
-        EntityLivingBase player = Minecraft.getMinecraft().player;
+        LivingEntity player = Minecraft.getInstance().player;
         if (!entity.addedToChunk || entity.getRidingEntity() == player) return false;
         float d = entity.getDistance(player);
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
@@ -40,9 +40,9 @@ public abstract class RenderPokemobInfos<T extends EntityLiving> extends RenderL
     }
 
     @Override
-    public void doRender(T entityliving, double d, double d1, double d2, float f, float partialTick)
+    public void doRender(T MobEntity, double d, double d1, double d2, float f, float partialTick)
     {
-        super.doRender(entityliving, d, d1, d2, f, partialTick);
+        super.doRender(MobEntity, d, d1, d2, f, partialTick);
     }
 
     @Override

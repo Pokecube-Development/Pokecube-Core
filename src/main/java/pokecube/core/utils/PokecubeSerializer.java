@@ -11,13 +11,13 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -47,7 +47,7 @@ public class PokecubeSerializer
 {
     public static class TeleDest
     {
-        public static TeleDest readFromNBT(NBTTagCompound nbt)
+        public static TeleDest readFromNBT(CompoundNBT nbt)
         {
             Vector4 loc = new Vector4(nbt);
             String name = nbt.getString("name");
@@ -94,10 +94,10 @@ public class PokecubeSerializer
             return this;
         }
 
-        public void writeToNBT(NBTTagCompound nbt)
+        public void writeToNBT(CompoundNBT nbt)
         {
             loc.writeToNBT(nbt);
-            nbt.setString("name", name);
+            nbt.putString("name", name);
             nbt.setInteger("i", index);
         }
     }
@@ -203,11 +203,11 @@ public class PokecubeSerializer
         loadData();
     }
 
-    public void addChunks(World world, BlockPos location, EntityLivingBase placer)
+    public void addChunks(World world, BlockPos location, LivingEntity placer)
     {
         if (!PokecubeMod.core.getConfig().chunkLoadPokecenters) return;
 
-        Integer dimension = world.provider.getDimension();
+        Integer dimension = world.dimension.getDimension();
 
         HashMap<BlockPos, Ticket> tickets = chunks.get(dimension);
         if (tickets == null)
@@ -220,15 +220,15 @@ public class PokecubeSerializer
             if (!found)
             {
                 Ticket ticket;
-                if (placer instanceof EntityPlayer)
+                if (placer instanceof PlayerEntity)
                 {
                     ticket = ForgeChunkManager.requestPlayerTicket(PokecubeCore.instance,
                             placer.getCachedUniqueIdString(), world, ForgeChunkManager.Type.NORMAL);
-                    NBTTagCompound pos = new NBTTagCompound();
+                    CompoundNBT pos = new CompoundNBT();
                     pos.setInteger("x", location.getX());
                     pos.setInteger("y", location.getY());
                     pos.setInteger("z", location.getZ());
-                    ticket.getModData().setTag("pos", pos);
+                    ticket.getModData().put("pos", pos);
                     ChunkPos chunk = world.getChunkFromBlockCoords(location).getPos();
                     PokecubeMod.log("Forcing Chunk at " + location);
                     ForgeChunkManager.forceChunk(ticket, chunk);
@@ -284,7 +284,7 @@ public class PokecubeSerializer
         return lastId++;
     }
 
-    public boolean hasStarter(EntityPlayer player)
+    public boolean hasStarter(PlayerEntity player)
     {
         return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class).hasStarter();
     }
@@ -300,9 +300,9 @@ public class PokecubeSerializer
                 if (file != null && file.exists())
                 {
                     FileInputStream fileinputstream = new FileInputStream(file);
-                    NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(fileinputstream);
+                    CompoundNBT CompoundNBT = CompressedStreamTools.readCompressed(fileinputstream);
                     fileinputstream.close();
-                    readFromNBT(nbttagcompound.getCompoundTag(DATA));
+                    readFromNBT(CompoundNBT.getCompound(DATA));
                 }
             }
             catch (Exception exception)
@@ -312,20 +312,20 @@ public class PokecubeSerializer
         }
     }
 
-    public void readFromNBT(NBTTagCompound nbttagcompound)
+    public void readFromNBT(CompoundNBT CompoundNBT)
     {
-        lastId = nbttagcompound.getInteger(LASTUID);
-        NBTBase temp;
-        temp = nbttagcompound.getTag(METEORS);
-        if (temp instanceof NBTTagList)
+        lastId = CompoundNBT.getInteger(LASTUID);
+        INBT temp;
+        temp = CompoundNBT.getTag(METEORS);
+        if (temp instanceof ListNBT)
         {
-            NBTTagList tagListMeteors = (NBTTagList) temp;
-            if (tagListMeteors.tagCount() > 0)
+            ListNBT tagListMeteors = (ListNBT) temp;
+            if (tagListMeteors.size() > 0)
             {
                 meteors:
-                for (int i = 0; i < tagListMeteors.tagCount(); i++)
+                for (int i = 0; i < tagListMeteors.size(); i++)
                 {
-                    NBTTagCompound pokemobData = tagListMeteors.getCompoundTagAt(i);
+                    CompoundNBT pokemobData = tagListMeteors.getCompound(i);
 
                     if (pokemobData != null)
                     {
@@ -352,16 +352,16 @@ public class PokecubeSerializer
                 }
             }
         }
-        temp = nbttagcompound.getTag("tmtags");
-        if (temp instanceof NBTTagCompound)
+        temp = CompoundNBT.getTag("tmtags");
+        if (temp instanceof CompoundNBT)
         {
-            PokecubeItems.loadTime((NBTTagCompound) temp);
+            PokecubeItems.loadTime((CompoundNBT) temp);
         }
     }
 
     public void removeChunks(World world, BlockPos location)
     {
-        Integer dimension = world.provider.getDimension();
+        Integer dimension = world.dimension.getDimension();
         HashMap<BlockPos, Ticket> tickets = chunks.get(dimension);
         if (tickets != null)
         {
@@ -380,19 +380,19 @@ public class PokecubeSerializer
 
     private void saveData()
     {
-        if (saveHandler == null || FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) { return; }
+        if (saveHandler == null || FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT) { return; }
 
         try
         {
             File file = saveHandler.getMapFileFromName(POKECUBE);
             if (file != null)
             {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                writeToNBT(nbttagcompound);
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setTag(DATA, nbttagcompound);
+                CompoundNBT CompoundNBT = new CompoundNBT();
+                writeToNBT(CompoundNBT);
+                CompoundNBT CompoundNBT1 = new CompoundNBT();
+                CompoundNBT1.put(DATA, CompoundNBT);
                 FileOutputStream fileoutputstream = new FileOutputStream(file);
-                CompressedStreamTools.writeCompressed(nbttagcompound1, fileoutputstream);
+                CompressedStreamTools.writeCompressed(CompoundNBT1, fileoutputstream);
                 fileoutputstream.close();
             }
         }
@@ -402,12 +402,12 @@ public class PokecubeSerializer
         }
     }
 
-    public void setHasStarter(EntityPlayer player)
+    public void setHasStarter(PlayerEntity player)
     {
         setHasStarter(player, true);
     }
 
-    public void setHasStarter(EntityPlayer player, boolean value)
+    public void setHasStarter(PlayerEntity player, boolean value)
     {
         try
         {
@@ -418,11 +418,11 @@ public class PokecubeSerializer
         {
             PokecubeMod.log(Level.WARNING, "Error setting has starter state for " + player, e);
         }
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
     }
 
-    public ItemStack starter(PokedexEntry entry, EntityPlayer owner)
+    public ItemStack starter(PokedexEntry entry, PlayerEntity owner)
     {
         World worldObj = owner.getEntityWorld();
         IPokemob entity = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, worldObj));
@@ -446,22 +446,22 @@ public class PokecubeSerializer
         return ItemStack.EMPTY;
     }
 
-    public void writeToNBT(NBTTagCompound nbttagcompound)
+    public void writeToNBT(CompoundNBT CompoundNBT)
     {
-        nbttagcompound.setInteger(LASTUID, lastId);
-        NBTTagList tagListMeteors = new NBTTagList();
+        CompoundNBT.setInteger(LASTUID, lastId);
+        ListNBT tagListMeteors = new ListNBT();
         for (Vector4 v : meteors)
         {
             if (v != null && !v.isEmpty())
             {
-                NBTTagCompound nbt = new NBTTagCompound();
+                CompoundNBT nbt = new CompoundNBT();
                 v.writeToNBT(nbt);
                 tagListMeteors.appendTag(nbt);
             }
         }
-        nbttagcompound.setTag(METEORS, tagListMeteors);
-        NBTTagCompound tms = new NBTTagCompound();
+        CompoundNBT.put(METEORS, tagListMeteors);
+        CompoundNBT tms = new CompoundNBT();
         PokecubeItems.saveTime(tms);
-        nbttagcompound.setTag("tmtags", tms);
+        CompoundNBT.put("tmtags", tms);
     }
 }

@@ -29,7 +29,7 @@ public class SphericalFunction extends MoveAnimationBase
     public void spawnClientEntities(MovePacketInfo info)
     {
         Vector3 source = reverse ? info.source : info.target;
-        initColour((info.attacker.getEntityWorld().getWorldTime()) * 20, 0, info.move);
+        initColour((info.attacker.getEntityWorld().getDayTime()) * 20, 0, info.move);
         Vector3 temp = Vector3.getNewVector();
         double scale = this.width;
         if (!absolute)

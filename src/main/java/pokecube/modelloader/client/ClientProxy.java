@@ -12,7 +12,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -36,7 +36,7 @@ public class ClientProxy extends CommonProxy
 {
 
     @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
+    public Object getClientGuiElement(int ID, PlayerEntity player, World world, int x, int y, int z)
     {
         return new GuiAnimate();
     }
@@ -45,7 +45,7 @@ public class ClientProxy extends CommonProxy
     public void init()
     {
         super.init();
-        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(ItemModelReloader.instance, 0,
+        Minecraft.getInstance().getRenderItem().getItemModelMesher().register(ItemModelReloader.instance, 0,
                 new ModelResourceLocation("pokecube_ml:modelreloader", "inventory"));
     }
 
@@ -70,7 +70,7 @@ public class ClientProxy extends CommonProxy
                 try
                 {
                     ResourceLocation tex = new ResourceLocation(mod, provider.getModelDirectory(p) + name + ".xml");
-                    IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                    IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                     res.close();
                     ArrayList<String> models = modModels.get(mod);
                     if (models == null)
@@ -84,7 +84,7 @@ public class ClientProxy extends CommonProxy
                     try
                     {
                         ResourceLocation tex = new ResourceLocation(mod, provider.getModelDirectory(p) + name + ".tbl");
-                        IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                        IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                         res.getInputStream().close();
                         res.close();
                         ArrayList<String> models = modModels.get(mod);
@@ -104,7 +104,7 @@ public class ClientProxy extends CommonProxy
                             {
                                 ResourceLocation tex = new ResourceLocation(mod,
                                         provider.getModelDirectory(p) + name + "." + ext);
-                                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                                IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                                 res.getInputStream().close();
                                 res.close();
                                 ArrayList<String> models = modModels.get(mod);
@@ -194,7 +194,7 @@ public class ClientProxy extends CommonProxy
             {
                 // First check to see if it has an XML
                 ResourceLocation tex = new ResourceLocation(mod, provider.getModelDirectory(p) + name + ".xml");
-                IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                 res.close();
                 ArrayList<String> models = modModels.get(mod);
                 if (models == null)
@@ -212,7 +212,7 @@ public class ClientProxy extends CommonProxy
                     // another.
                     ResourceLocation tex = new ResourceLocation(mod,
                             provider.getModelDirectory(p) + ExtraDatabase.resourceEntries.get(name) + ".xml");
-                    IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                    IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                     res.close();
                     ArrayList<String> models = modModels.get(mod);
                     if (models == null)
@@ -239,7 +239,7 @@ public class ClientProxy extends CommonProxy
                             // Then look for an ModelFactory model
                             ResourceLocation tex = new ResourceLocation(mod,
                                     provider.getModelDirectory(p) + name + "." + ext);
-                            IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                            IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                             res.close();
                             ArrayList<String> models = modModels.get(mod);
                             if (models == null)
@@ -264,7 +264,7 @@ public class ClientProxy extends CommonProxy
                     {
                         // finally look for an tbl model
                         ResourceLocation tex = new ResourceLocation(mod, provider.getModelDirectory(p) + name + ".tbl");
-                        IResource res = Minecraft.getMinecraft().getResourceManager().getResource(tex);
+                        IResource res = Minecraft.getInstance().getResourceManager().getResource(tex);
                         res.close();
                         ArrayList<String> models = modModels.get(mod);
                         if (models == null)

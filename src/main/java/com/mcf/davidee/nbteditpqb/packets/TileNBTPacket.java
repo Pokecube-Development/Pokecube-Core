@@ -8,8 +8,8 @@ import com.mcf.davidee.nbteditpqb.NBTEdit;
 import com.mcf.davidee.nbteditpqb.NBTHelper;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
@@ -22,12 +22,12 @@ public class TileNBTPacket implements IMessage {
 	/** The block of the tileEntity. */
 	protected BlockPos pos;
 	/** The nbt data of the tileEntity. */
-	protected NBTTagCompound tag;
+	protected CompoundNBT tag;
 
 	/** Required default constructor. */
 	public TileNBTPacket() {}
 
-	public TileNBTPacket(BlockPos pos, NBTTagCompound tag) {
+	public TileNBTPacket(BlockPos pos, CompoundNBT tag) {
 		this.pos = pos;
 		this.tag = tag;
 	}
@@ -48,8 +48,8 @@ public class TileNBTPacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(final TileNBTPacket packet, MessageContext ctx) {
-			if (ctx.side == Side.SERVER) {
-				final EntityPlayerMP player = ctx.getServerHandler().player;
+			if (ctx.side == Dist.DEDICATED_SERVER) {
+				final ServerPlayerEntity player = ctx.getServerHandler().player;
 				player.getServerWorld().addScheduledTask(new Runnable() {
 					@Override
 					public void run() {
