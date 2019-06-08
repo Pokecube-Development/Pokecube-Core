@@ -45,8 +45,8 @@ import thut.lib.ItemStackTools;
 public class AIGatherStuff extends AIBase
 {
     public static int                           COOLDOWN_SEARCH  = 200;
-    public static int                           COOLDOWN_COLLECT = 20;
-    public static int                           COOLDOWN_PATH    = 50;
+    public static int                           COOLDOWN_COLLECT = 5;
+    public static int                           COOLDOWN_PATH    = 5;
 
     // Matcher used to determine if a block is a fruit or crop to be picked.
     private static final Predicate<IBlockState> berryMatcher     = new Predicate<IBlockState>()
@@ -141,9 +141,9 @@ public class AIGatherStuff extends AIBase
     public void doMainThreadTick(World world)
     {
         super.doMainThreadTick(world);
+        // if (collectCooldown-- > 0) return;
         synchronized (stuffLoc)
         {
-            if (collectCooldown-- > 0) return;
             // check stuff for being still around.
             if (!stuff.isEmpty())
             {
@@ -172,8 +172,7 @@ public class AIGatherStuff extends AIBase
                     return;
                 }
             }
-
-            if (!stuffLoc.isEmpty())
+            else if (!stuffLoc.isEmpty())
             {
                 if (!stuff.isEmpty())
                 {
@@ -193,7 +192,6 @@ public class AIGatherStuff extends AIBase
                         if (stuff.isEmpty()) reset();
                         else
                         {
-                            collectCooldown = COOLDOWN_COLLECT;
                             stuffLoc.set(stuff.get(0));
                         }
                     }
@@ -201,7 +199,6 @@ public class AIGatherStuff extends AIBase
                 else
                 {
                     gatherStuff(true);
-                    collectCooldown = COOLDOWN_COLLECT;
                 }
             }
         }
@@ -277,23 +274,20 @@ public class AIGatherStuff extends AIBase
         if (!mainThread)
         {
             if (pathCooldown-- > 0) return;
-            pathCooldown = COOLDOWN_PATH;
             // Set path to the stuff found.
-            if (entity.getNavigator().noPath())
+            double speed = entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+            if (stuff != null)
             {
-                double speed = entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
-                if (stuff != null)
-                {
-                    stuffLoc.set(stuff);
-                    Path path = entity.getNavigator().getPathToXYZ(stuffLoc.x, stuffLoc.y, stuffLoc.z);
-                    addEntityPath(entity, path, speed);
-                }
-                else
-                {
-                    Path path = entity.getNavigator().getPathToXYZ(stuffLoc.x, stuffLoc.y, stuffLoc.z);
-                    addEntityPath(entity, path, speed);
-                }
+                stuffLoc.set(stuff);
+                Path path = entity.getNavigator().getPathToXYZ(stuffLoc.x, stuffLoc.y, stuffLoc.z);
+                addEntityPath(entity, path, speed);
             }
+            else
+            {
+                Path path = entity.getNavigator().getPathToXYZ(stuffLoc.x, stuffLoc.y, stuffLoc.z);
+                addEntityPath(entity, path, speed);
+            }
+            pathCooldown = COOLDOWN_PATH;
         }
         else if (!stuffLoc.isEmpty())
         {
@@ -367,7 +361,7 @@ public class AIGatherStuff extends AIBase
     @Override
     public void run()
     {
-        if (stuffLoc.isEmpty())
+        if (stuffLoc.isEmpty() && collectCooldown-- < 0)
         {
             findStuff();
         }
@@ -393,6 +387,7 @@ public class AIGatherStuff extends AIBase
         // Check if it has a location, if so, apply a delay and return false if
         // not correct tick for this pokemob.
         if (pokemob.getHome() == null || entity.ticksExisted % rate != rand.nextInt(rate)) return false;
+
         // Apply cooldown.
         if (collectCooldown < -2000)
         {
@@ -400,8 +395,6 @@ public class AIGatherStuff extends AIBase
         }
         // If too far, clear location.
         if (stuffLoc.distToEntity(entity) > 32) stuffLoc.clear();
-        // If on cooldown, return.
-        if (collectCooldown > 0) return false;
 
         // check if pokemob has room in inventory for stuff, if so, return true.
         IInventory inventory = pokemob.getPokemobInventory();
