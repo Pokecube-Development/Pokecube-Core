@@ -2,7 +2,6 @@ package com.mcf.davidee.nbteditpqb.forge;
 
 import java.io.File;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.mcf.davidee.nbteditpqb.NBTEdit;
@@ -10,13 +9,14 @@ import com.mcf.davidee.nbteditpqb.gui.GuiEditNBTTree;
 import com.mcf.davidee.nbteditpqb.nbt.SaveStates;
 import com.mcf.davidee.nbteditpqb.packets.EntityRequestPacket;
 import com.mcf.davidee.nbteditpqb.packets.TileRequestPacket;
+import com.mojang.blaze3d.platform.GlStateManager;
 
+import net.java.games.input.Keyboard;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -33,10 +33,9 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 public class ClientProxy extends CommonProxy {
 

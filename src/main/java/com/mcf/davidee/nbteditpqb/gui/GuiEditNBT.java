@@ -1,6 +1,5 @@
 package com.mcf.davidee.nbteditpqb.gui;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.mcf.davidee.nbteditpqb.NBTStringHelper;
@@ -8,6 +7,7 @@ import com.mcf.davidee.nbteditpqb.nbt.NamedNBT;
 import com.mcf.davidee.nbteditpqb.nbt.Node;
 import com.mcf.davidee.nbteditpqb.nbt.ParseHelper;
 
+import net.java.games.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;

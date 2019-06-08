@@ -1,5 +1,7 @@
 package com.mcf.davidee.nbteditpqb.packets;
 
+import javax.xml.ws.handler.MessageContext;
+
 import org.apache.logging.log4j.Level;
 
 import com.mcf.davidee.nbteditpqb.NBTEdit;
@@ -15,8 +17,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.api.distmarker.Dist;
 
 public class EntityNBTPacket implements IMessage {
 	/** The id of the entity being edited. */

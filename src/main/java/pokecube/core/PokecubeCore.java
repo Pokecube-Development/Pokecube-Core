@@ -37,14 +37,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Ticket;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.PlayerOrderedLoadingCallback;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -52,16 +52,15 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLModIdMappingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
+import net.minecraftforge.fml.network.NetworkRegistry;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
 import pokecube.core.blocks.berries.BerryGenManager;
 import pokecube.core.blocks.healtable.TileHealTable;
@@ -121,7 +120,7 @@ import pokecube.core.utils.Permissions;
 import pokecube.core.utils.PokecubeSerializer;
 import pokecube.core.utils.Tools;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import pokecube.core.world.dimensions.secretpower.WorldProviderSecretBase;
+import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
 import pokecube.core.world.gen.WorldGenFossils;
 import pokecube.core.world.gen.WorldGenNests;
 import pokecube.core.world.gen.WorldGenTemplates;
@@ -437,7 +436,7 @@ public class PokecubeCore extends PokecubeMod
     {
         if (PokecubeMod.debug) PokecubeMod.log("Pokecube Core Post Init");
         // Initialize permissions for secret base stuff
-        WorldProviderSecretBase.initPerms();
+        DimensionSecretBase.initPerms();
         // Initialize the target blacklists.
         AIFindTarget.initIDs();
         // Send database postinit.

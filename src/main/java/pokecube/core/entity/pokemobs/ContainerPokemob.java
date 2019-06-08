@@ -1,13 +1,10 @@
 package pokecube.core.entity.pokemobs;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.PokecubeItems;
 import pokecube.core.interfaces.IPokemob;
 import thut.lib.CompatWrapper;

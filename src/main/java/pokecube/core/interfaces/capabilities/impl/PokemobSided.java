@@ -5,8 +5,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
 

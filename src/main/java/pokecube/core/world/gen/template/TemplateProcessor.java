@@ -9,13 +9,10 @@ import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.structure.StructureVillagePieces;
-import net.minecraft.world.gen.structure.StructureVillagePieces.Start;
 import net.minecraft.world.gen.structure.StructureVillagePieces.Well;
 import net.minecraft.world.gen.structure.template.BlockRotationProcessor;
-import net.minecraft.world.gen.structure.template.PlacementSettings;
-import net.minecraft.world.gen.structure.template.Template;
-import net.minecraft.world.gen.structure.template.Template.BlockInfo;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class TemplateProcessor extends BlockRotationProcessor

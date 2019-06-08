@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 
 /** This event is fired during the item registration phase. Add any pokecubes

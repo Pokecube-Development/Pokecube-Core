@@ -2,9 +2,9 @@ package pokecube.core.blocks.berries;
 
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.IProperty;
+import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class BlockBerryLog extends BlockLog

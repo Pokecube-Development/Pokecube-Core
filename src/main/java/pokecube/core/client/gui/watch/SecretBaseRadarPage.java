@@ -6,10 +6,10 @@ import java.util.Set;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;

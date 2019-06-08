@@ -2,8 +2,7 @@ package pokecube.core.events.pokemob;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
-import net.minecraftforge.fml.common.eventhandler.Event.HasResult;
+import net.minecraftforge.eventbus.api.Event.HasResult;
 import pokecube.core.interfaces.IPokemob;
 
 @HasResult

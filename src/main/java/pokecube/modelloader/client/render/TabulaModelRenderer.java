@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import pokecube.core.ai.thread.logicRunnables.LogicMiscUpdate;

@@ -13,16 +13,14 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Property;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.LoaderState;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pokecube.core.PokecubeItems;
 import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
 import pokecube.core.ai.thread.aiRunnables.idle.AIHungry;
@@ -42,7 +40,7 @@ import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
 import pokecube.core.network.PokecubePacketHandler.StarterInfo;
 import pokecube.core.utils.PokecubeSerializer;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import pokecube.core.world.dimensions.secretpower.WorldProviderSecretBase;
+import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
 import pokecube.core.world.terrain.PokecubeTerrainChecker;
 import thut.core.common.config.ConfigBase;
 import thut.core.common.config.Configure;
@@ -745,7 +743,7 @@ public class Config extends ConfigBase
         AIHungry.TICKRATE = hungerTickRate;
 
         // Init secret bases.
-        WorldProviderSecretBase.init(baseSizeFunction);
+        DimensionSecretBase.init(baseSizeFunction);
         for (String s : structureSubiomes)
         {
             String[] args = s.split(":");

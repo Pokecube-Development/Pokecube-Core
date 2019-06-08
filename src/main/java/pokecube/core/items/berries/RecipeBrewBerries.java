@@ -1,6 +1,5 @@
 package pokecube.core.items.berries;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.brewing.IBrewingRecipe;

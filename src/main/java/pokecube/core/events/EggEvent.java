@@ -1,8 +1,7 @@
 package pokecube.core.events;
 
 import net.minecraft.entity.Entity;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
 import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
 
 public class EggEvent extends Event

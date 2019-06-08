@@ -5,6 +5,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.xml.ws.handler.MessageContext;
+
 import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBuf;
@@ -23,8 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.GuiInfoMessages;
 import pokecube.core.handlers.Config;

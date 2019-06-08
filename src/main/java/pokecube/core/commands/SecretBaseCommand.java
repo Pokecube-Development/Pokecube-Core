@@ -19,7 +19,7 @@ import pokecube.core.blocks.nests.BlockNest;
 import pokecube.core.blocks.nests.TileEntityBasePortal;
 import pokecube.core.moves.implementations.actions.ActionSecretPower;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import pokecube.core.world.dimensions.secretpower.WorldProviderSecretBase;
+import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
 import thut.api.entity.Transporter;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
@@ -71,7 +71,7 @@ public class SecretBaseCommand extends CommandBase
             }
             else if (args[0].equals("exit"))
             {
-                if (player.getEntityWorld().provider instanceof WorldProviderSecretBase)
+                if (player.getEntityWorld().provider instanceof DimensionSecretBase)
                 {
                     String owner = PokecubeDimensionManager.getOwner(player.dimension);
                     BlockPos exit = PokecubeDimensionManager.getBaseEntrance(owner, 0);

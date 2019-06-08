@@ -1,7 +1,6 @@
 package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Items;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
 import thut.api.maths.Vector3;

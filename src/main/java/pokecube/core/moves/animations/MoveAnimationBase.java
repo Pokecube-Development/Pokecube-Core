@@ -4,8 +4,8 @@ import java.util.Random;
 
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemDye;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.interfaces.Move_Base;
 

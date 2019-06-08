@@ -17,7 +17,6 @@ import com.mcf.davidee.nbteditpqb.packets.PacketHandler;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -27,7 +26,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import pokecube.core.interfaces.PokecubeMod;
 
 @Mod(modid = NBTEdit.MODID, name = NBTEdit.NAME, acceptedMinecraftVersions = "*", version = NBTEdit.VERSION, acceptableRemoteVersions = "*")

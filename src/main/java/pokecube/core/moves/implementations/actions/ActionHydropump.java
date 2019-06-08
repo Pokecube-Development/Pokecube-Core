@@ -3,7 +3,6 @@ package pokecube.core.moves.implementations.actions;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import pokecube.core.events.handlers.MoveEventsHandler;

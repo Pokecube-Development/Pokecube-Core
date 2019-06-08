@@ -7,11 +7,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import org.lwjgl.input.Keyboard;
-
 import com.google.common.base.Predicate;
+import com.mcf.davidee.nbteditpqb.gui.GuiTextField;
 
-import net.minecraft.client.gui.GuiTextField;
+import net.java.games.input.Keyboard;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
 import net.minecraft.entity.Entity;

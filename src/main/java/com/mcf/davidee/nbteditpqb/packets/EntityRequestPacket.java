@@ -1,5 +1,7 @@
 package com.mcf.davidee.nbteditpqb.packets;
 
+import javax.xml.ws.handler.MessageContext;
+
 import org.apache.logging.log4j.Level;
 
 import com.mcf.davidee.nbteditpqb.NBTEdit;
@@ -8,7 +10,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class EntityRequestPacket implements IMessage {
 	/** The id of the entity being requested. */

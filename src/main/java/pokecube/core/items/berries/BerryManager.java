@@ -9,10 +9,9 @@ import com.google.common.base.Optional;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.IProperty;
 import net.minecraftforge.oredict.OreDictionary;
 import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.berries.BerryGenManager.GenericGrower;

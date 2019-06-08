@@ -2,8 +2,8 @@ package pokecube.core.entity.pokemobs;
 
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class AnimalChest extends InventoryBasic
 {

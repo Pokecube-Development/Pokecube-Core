@@ -2,8 +2,8 @@ package pokecube.core.events;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event.HasResult;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.handlers.SpawnHandler.Variance;
 import pokecube.core.interfaces.IPokemob;

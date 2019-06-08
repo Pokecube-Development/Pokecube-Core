@@ -1,5 +1,7 @@
 package com.mcf.davidee.nbteditpqb.packets;
 
+import javax.xml.ws.handler.MessageContext;
+
 import com.mcf.davidee.nbteditpqb.NBTEdit;
 
 import io.netty.buffer.ByteBuf;
@@ -8,7 +10,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MouseOverPacket implements IMessage {
 

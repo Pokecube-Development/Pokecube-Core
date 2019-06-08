@@ -7,8 +7,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
+import thut.api.WorldCache.ChunkCache;
 
 public abstract class PathNavigate2 extends PathNavigate
 {

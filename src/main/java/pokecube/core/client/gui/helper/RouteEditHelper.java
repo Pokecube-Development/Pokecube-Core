@@ -4,15 +4,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import com.mcf.davidee.nbteditpqb.gui.GuiTextField;
+
+import net.java.games.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTBase;

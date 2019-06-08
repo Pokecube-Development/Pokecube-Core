@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.blocks.pc.InventoryPC;
 import pokecube.core.interfaces.PokecubeMod;
 import thut.core.common.handlers.PlayerDataHandler;

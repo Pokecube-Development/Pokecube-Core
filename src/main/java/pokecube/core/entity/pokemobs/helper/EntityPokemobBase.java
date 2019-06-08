@@ -20,7 +20,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.PokemobBodies;
 import pokecube.core.entity.pokemobs.EntityPokemobPart;

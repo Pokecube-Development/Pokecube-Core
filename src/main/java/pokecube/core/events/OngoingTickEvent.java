@@ -2,7 +2,7 @@ package pokecube.core.events;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
+import net.minecraftforge.eventbus.api.Cancelable;
 import pokecube.core.interfaces.entity.IOngoingAffected.IOngoingEffect;
 
 /** This event is fired on the MinecraftForge.EVENT_BUS. If canceled, the

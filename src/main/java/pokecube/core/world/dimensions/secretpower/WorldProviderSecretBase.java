@@ -13,9 +13,9 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.WorldProvider;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
@@ -26,7 +26,7 @@ import pokecube.core.database.stats.KillStats;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
 
-public class WorldProviderSecretBase extends WorldProvider
+public class DimensionSecretBase extends Dimension
 {
     public static final String PERMMINEOWNBASE   = "pokecube.secretbase.mine.own";
     public static final String PERMMINEOTHERBASE = "pokecube.secretbase.mine.other";
@@ -64,7 +64,7 @@ public class WorldProviderSecretBase extends WorldProvider
         border.setWarningDistance(1);
     }
 
-    public WorldProviderSecretBase()
+    public DimensionSecretBase()
     {
     }
 
@@ -89,7 +89,7 @@ public class WorldProviderSecretBase extends WorldProvider
     }
 
     /** Called when the world is performing a save. Only used to save the state
-     * of the Dragon Boss fight in WorldProviderEnd in Vanilla. */
+     * of the Dragon Boss fight in DimensionEnd in Vanilla. */
     @Override
     public void onWorldSave()
     {
@@ -215,7 +215,7 @@ public class WorldProviderSecretBase extends WorldProvider
     }
 
     /** Called to determine if the chunk at the given chunk coordinates within
-     * the provider's world can be dropped. Used in WorldProviderSurface to
+     * the provider's world can be dropped. Used in DimensionSurface to
      * prevent spawn chunks from being unloaded. */
     @Override
     public boolean canDropChunk(int x, int z)

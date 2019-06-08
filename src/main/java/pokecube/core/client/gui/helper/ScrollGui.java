@@ -2,12 +2,12 @@ package pokecube.core.client.gui.helper;
 
 import java.util.List;
 
-import org.lwjgl.input.Mouse;
+import com.mojang.blaze3d.platform.GlStateManager;
 
+import net.java.games.input.Mouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;

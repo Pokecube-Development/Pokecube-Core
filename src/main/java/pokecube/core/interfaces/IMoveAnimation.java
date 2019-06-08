@@ -2,8 +2,8 @@ package pokecube.core.interfaces;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.IWorldEventListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import thut.api.maths.Vector3;
 
 public interface IMoveAnimation

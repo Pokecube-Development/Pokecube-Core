@@ -13,8 +13,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.structure.template.Template;
-import net.minecraft.world.gen.structure.template.TemplateManager;
+import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import pokecube.core.database.Database;
 

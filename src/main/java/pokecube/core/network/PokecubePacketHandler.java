@@ -6,6 +6,8 @@ package pokecube.core.network;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import javax.xml.ws.handler.MessageContext;
+
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 
@@ -19,11 +21,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
+import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.commands.MakeCommand;

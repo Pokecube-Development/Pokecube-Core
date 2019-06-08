@@ -2,19 +2,19 @@ package pokecube.core.world.dimensions.custom;
 
 import java.util.logging.Level;
 
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.border.IBorderListener;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
+import thut.essentials.world.WorldServerMulti;
 
 public class CustomDimensionManager
 {

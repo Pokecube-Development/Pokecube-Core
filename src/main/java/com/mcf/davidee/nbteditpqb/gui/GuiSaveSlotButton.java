@@ -1,10 +1,10 @@
 package com.mcf.davidee.nbteditpqb.gui;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.mcf.davidee.nbteditpqb.nbt.SaveStates;
 
+import net.java.games.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.nbt.NBTTagCompound;

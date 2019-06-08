@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.logging.log4j.Level;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import com.mcf.davidee.nbteditpqb.NBTEdit;
@@ -21,6 +19,8 @@ import com.mcf.davidee.nbteditpqb.nbt.NamedNBT;
 import com.mcf.davidee.nbteditpqb.nbt.Node;
 import com.mcf.davidee.nbteditpqb.nbt.SaveStates;
 
+import net.java.games.input.Keyboard;
+import net.java.games.input.Mouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
@@ -28,10 +28,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.SoundEvents;
 
 
 /*

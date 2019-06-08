@@ -13,31 +13,30 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import pokecube.core.database.worldgen.WorldgenHandler;
 import pokecube.core.database.worldgen.WorldgenHandler.CustomDim;
 import pokecube.core.handlers.PokecubePlayerDataHandler;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.network.packets.PacketSyncDimIds;
 import pokecube.core.world.dimensions.custom.CustomDimensionManager;
-import pokecube.core.world.dimensions.secretpower.WorldProviderSecretBase;
+import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
 import thut.api.entity.Transporter;
 import thut.api.maths.Vector3;
 
@@ -224,7 +223,7 @@ public class PokecubeDimensionManager
         }
         id++;
         if (PokecubeMod.debug) PokecubeMod.log("Registering Pokecube Secret Base Dimension type at id " + id);
-        SECRET_BASE_TYPE = DimensionType.register("pokecube_secretbase", "_pokecube", id, WorldProviderSecretBase.class,
+        SECRET_BASE_TYPE = DimensionType.register("pokecube_secretbase", "_pokecube", id, DimensionSecretBase.class,
                 PokecubeMod.core.getConfig().basesLoaded);
     }
 
@@ -252,9 +251,9 @@ public class PokecubeDimensionManager
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load evt)
     {
-        if (evt.getWorld().provider instanceof WorldProviderSecretBase)
+        if (evt.getWorld().provider instanceof DimensionSecretBase)
         {
-            ((WorldProviderSecretBase) evt.getWorld().provider).onWorldLoad();
+            ((DimensionSecretBase) evt.getWorld().provider).onWorldLoad();
         }
     }
 
