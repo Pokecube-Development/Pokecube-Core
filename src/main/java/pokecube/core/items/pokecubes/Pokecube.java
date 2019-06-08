@@ -397,7 +397,11 @@ public class Pokecube extends Item implements IPokecube
     public boolean canCapture(EntityLiving hit, ItemStack cube)
     {
         ResourceLocation id = PokecubeItems.getCubeId(cube);
-        if (id != null && id.getResourcePath().equals("snag")) { return capturable.test(hit); }
+        if (id != null && id.getResourcePath().equals("snag"))
+        {
+            if (getCaptureModifier(hit, id) <= 0) return false;
+            return capturable.test(hit);
+        }
         return CapabilityPokemob.getPokemobFor(hit) != null;
     }
 
