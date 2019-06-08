@@ -13,8 +13,8 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

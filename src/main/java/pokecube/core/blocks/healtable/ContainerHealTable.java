@@ -1,9 +1,9 @@
 package pokecube.core.blocks.healtable;
 
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;

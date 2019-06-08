@@ -11,8 +11,8 @@ import com.mcf.davidee.nbteditpqb.NBTEdit;
 import com.mcf.davidee.nbteditpqb.NBTHelper;
 import com.mcf.davidee.nbteditpqb.NBTStringHelper;
 
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 public class NBTTree {

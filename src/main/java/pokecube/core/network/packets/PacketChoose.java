@@ -14,15 +14,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.PokecubeCore;
 import pokecube.core.contributors.Contributor;
 import pokecube.core.contributors.ContributorManager;
@@ -200,7 +200,7 @@ public class PacketChoose implements IMessage, IMessageHandler<PacketChoose, IMe
         ListNBT starters = new ListNBT();
         for (PokedexEntry e : starts)
         {
-            starters.appendTag(new NBTTagString(e.getTrimmedName()));
+            starters.appendTag(new StringNBT(e.getTrimmedName()));
         }
         packet.data.put("L", starters);
         return packet;

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -169,7 +169,7 @@ public class TileEntityNest extends TileEntity implements ITickable
         ListNBT spawnsTag = new ListNBT();
         for (PokedexEntry entry : spawns)
         {
-            spawnsTag.appendTag(new NBTTagString(entry.getTrimmedName()));
+            spawnsTag.appendTag(new StringNBT(entry.getTrimmedName()));
         }
         nbt.put("spawns", spawnsTag);
         nbt.setInteger("time", time);

@@ -10,7 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -33,7 +33,7 @@ public class PacketSyncNewMoves implements IMessage, IMessageHandler<PacketSyncN
             ListNBT newMoves = new ListNBT();
             for (String s : pokemob.getMoveStats().newMoves)
             {
-                newMoves.appendTag(new NBTTagString(s));
+                newMoves.appendTag(new StringNBT(s));
             }
             PacketSyncNewMoves packet = new PacketSyncNewMoves();
             packet.data.put(TagNames.NEWMOVES, newMoves);

@@ -22,11 +22,13 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.NonNullList;
@@ -429,9 +431,9 @@ public class PokecubeItems extends Items
         {
             Block b = iter.next();
             if (grasses.contains(b)) continue;
-            if (b.getDefaultState().getMaterial() == Material.GRASS) grasses.add(b);
-            if (b.getDefaultState().getMaterial() == Blocks.RED_FLOWER.getDefaultState().getMaterial()) grasses.add(b);
-            if (b.getDefaultState().getMaterial() == Blocks.TALLGRASS.getDefaultState().getMaterial())
+            if (b.getDefaultState().getMaterial() == Material.PLANTS) grasses.add(b);
+            if (b.getDefaultState().getMaterial() == Blocks.POPPY.getDefaultState().getMaterial()) grasses.add(b);
+            if (b.getDefaultState().getMaterial() == Blocks.TALL_GRASS.getDefaultState().getMaterial())
                 PokecubeItems.grasses.add(b);
             if (b.getDefaultState().getMaterial() == Blocks.WHEAT.getDefaultState().getMaterial())
                 PokecubeItems.grasses.add(b);

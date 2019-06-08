@@ -1,7 +1,7 @@
 package pokecube.core.ai.thread.aiRunnables;
 
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;

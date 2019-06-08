@@ -6,9 +6,9 @@ package pokecube.core.entity.pokemobs.helper;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.IMobEntityData;
 import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.IMobEntityData;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Potion;

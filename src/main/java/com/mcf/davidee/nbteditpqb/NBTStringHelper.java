@@ -3,19 +3,19 @@ package com.mcf.davidee.nbteditpqb;
 import com.google.common.base.Strings;
 import com.mcf.davidee.nbteditpqb.nbt.NamedNBT;
 
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagByteArray;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.ByteNBTArray;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagEnd;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagIntArray;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagShort;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.NBTTagEnd;
+import net.minecraft.nbt.ShortNBT;
+import net.minecraft.nbt.StringNBT;
 
 public class NBTStringHelper {
 
@@ -43,27 +43,27 @@ public class NBTStringHelper {
 		case 0:
 			return new NBTTagEnd2();
 		case 1:
-			return new NBTTagByte((byte) 0);
+			return new ByteNBT((byte) 0);
 		case 2:
-			return new NBTTagShort();
+			return new ShortNBT();
 		case 3:
-			return new NBTTagInt(0);
+			return new IntNBT(0);
 		case 4:
-			return new NBTTagLong(0);
+			return new LongNBT(0);
 		case 5:
-			return new NBTTagFloat(0);
+			return new FloatNBT(0);
 		case 6:
-			return new NBTTagDouble(0);
+			return new DoubleNBT(0);
 		case 7:
-			return new NBTTagByteArray(new byte[0]);
+			return new ByteNBTArray(new byte[0]);
 		case 8:
-			return new NBTTagString("");
+			return new StringNBT("");
 		case 9:
 			return new ListNBT();
 		case 10:
 			return new CompoundNBT();
 		case 11:
-			return new NBTTagIntArray(new int[0]);
+			return new IntArrayNBT(new int[0]);
 		default:
 			return null;
 		}
@@ -72,21 +72,21 @@ public class NBTStringHelper {
 	public static String toString(INBT base) {
 		switch(base.getId()) {
 		case 1:
-			return "" + ((NBTTagByte)base).getByte();
+			return "" + ((ByteNBT)base).getByte();
 		case 2:
-			return "" + ((NBTTagShort)base).getShort();
+			return "" + ((ShortNBT)base).getShort();
 		case 3:
-			return "" + ((NBTTagInt)base).getInt();
+			return "" + ((IntNBT)base).getInt();
 		case 4:
-			return "" + ((NBTTagLong)base).getLong();
+			return "" + ((LongNBT)base).getLong();
 		case 5:
-			return "" + ((NBTTagFloat)base).getFloat();
+			return "" + ((FloatNBT)base).getFloat();
 		case 6:
-			return "" + ((NBTTagDouble)base).getDouble();
+			return "" + ((DoubleNBT)base).getDouble();
 		case 7:
 			return base.toString();
 		case 8:
-			return ((NBTTagString)base).getString();
+			return ((StringNBT)base).getString();
 		case 9:
 			return "(TagList)";
 		case 10:

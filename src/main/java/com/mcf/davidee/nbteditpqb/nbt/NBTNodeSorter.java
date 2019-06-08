@@ -2,8 +2,8 @@ package com.mcf.davidee.nbteditpqb.nbt;
 
 import java.util.Comparator;
 
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 public class NBTNodeSorter implements Comparator<Node<NamedNBT>>{

@@ -1,7 +1,7 @@
 package pokecube.core.blocks.tradingTable;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import thut.lib.CompatWrapper;

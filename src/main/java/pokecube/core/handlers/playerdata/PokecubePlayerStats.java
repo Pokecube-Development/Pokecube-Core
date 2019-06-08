@@ -10,7 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.playerdata.advancements.triggers.Triggers;
@@ -117,7 +117,7 @@ public class PokecubePlayerStats extends PlayerData
         ListNBT list = new ListNBT();
         for (PokedexEntry e : inspected)
         {
-            list.appendTag(new NBTTagString(e.getName()));
+            list.appendTag(new StringNBT(e.getName()));
         }
         tag_.put("inspected", list);
         tag_.putBoolean("F", hasFirst);

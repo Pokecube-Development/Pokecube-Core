@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Level;
 
 import com.mcf.davidee.nbteditpqb.NBTEdit;
 
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompressedStreamTools;
 
 // This save format can definitely be improved. Also, this can be extended to provide infinite save slots - just
 // need to add some scrollbar (use GuiLib!).

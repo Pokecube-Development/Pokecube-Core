@@ -3,8 +3,8 @@ package pokecube.core.moves.templates;
 import java.util.Random;
 
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.moves.PokemobTerrainEffects;
 import pokecube.core.network.packets.PacketSyncTerrain;

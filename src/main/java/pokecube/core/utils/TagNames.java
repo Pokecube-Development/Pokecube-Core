@@ -1,7 +1,7 @@
 package pokecube.core.utils;
 
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
 import pokecube.core.events.handlers.EventsHandler;
 

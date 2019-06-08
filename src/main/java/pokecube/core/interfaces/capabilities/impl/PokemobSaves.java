@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
@@ -202,7 +202,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
             ListNBT newMoves = new ListNBT();
             for (String s : getMoveStats().newMoves)
             {
-                newMoves.appendTag(new NBTTagString(s));
+                newMoves.appendTag(new StringNBT(s));
             }
             movesTag.put(NEWMOVES, newMoves);
         }

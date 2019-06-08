@@ -12,16 +12,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.nbt.ByteArrayNBT;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagShort;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.ShortNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 
 public class GuiEditNBT extends Gui{
@@ -208,24 +208,24 @@ public class GuiEditNBT extends Gui{
 		NamedNBT named = node.getObject();
 		INBT base = named.getNBT();
 		
-		if (base instanceof NBTTagByte)
-			named.setNBT(new NBTTagByte(ParseHelper.parseByte(value)));
-		if (base instanceof NBTTagShort)
-			named.setNBT(new NBTTagShort(ParseHelper.parseShort(value)));
-		if (base instanceof NBTTagInt)
-			named.setNBT(new NBTTagInt(ParseHelper.parseInt(value)));
-		if (base instanceof NBTTagLong)
-			named.setNBT(new NBTTagLong(ParseHelper.parseLong(value)));
-		if(base instanceof NBTTagFloat)
-			named.setNBT(new NBTTagFloat(ParseHelper.parseFloat(value)));
-		if(base instanceof NBTTagDouble)
-			named.setNBT(new NBTTagDouble(ParseHelper.parseDouble(value)));
-		if(base instanceof NBTTagByteArray)
-			named.setNBT(new NBTTagByteArray(ParseHelper.parseByteArray(value)));
-		if(base instanceof NBTTagIntArray)
-			named.setNBT(new NBTTagIntArray(ParseHelper.parseIntArray(value)));
-		if (base instanceof NBTTagString)
-			named.setNBT(new NBTTagString(value));
+		if (base instanceof ByteNBT)
+			named.setNBT(new ByteNBT(ParseHelper.parseByte(value)));
+		if (base instanceof ShortNBT)
+			named.setNBT(new ShortNBT(ParseHelper.parseShort(value)));
+		if (base instanceof IntNBT)
+			named.setNBT(new IntNBT(ParseHelper.parseInt(value)));
+		if (base instanceof LongNBT)
+			named.setNBT(new LongNBT(ParseHelper.parseLong(value)));
+		if(base instanceof FloatNBT)
+			named.setNBT(new FloatNBT(ParseHelper.parseFloat(value)));
+		if(base instanceof DoubleNBT)
+			named.setNBT(new DoubleNBT(ParseHelper.parseDouble(value)));
+		if(base instanceof ByteArrayNBT)
+			named.setNBT(new ByteArrayNBT(ParseHelper.parseByteArray(value)));
+		if(base instanceof IntArrayNBT)
+			named.setNBT(new IntArrayNBT(ParseHelper.parseIntArray(value)));
+		if (base instanceof StringNBT)
+			named.setNBT(new StringNBT(value));
 	}
 
 	private static void validValue(String value, byte type) throws NumberFormatException{
@@ -261,7 +261,7 @@ public class GuiEditNBT extends Gui{
 		switch(base.getId()){
 		case 7:
 			String s = "";
-			for (byte b : ((NBTTagByteArray)base).getByteArray()){
+			for (byte b : ((ByteArrayNBT)base).getByteArray()){
 				s += b + " ";
 			}
 			return s;
@@ -271,7 +271,7 @@ public class GuiEditNBT extends Gui{
 			return "TagCompound";
 		case 11:
 			String i = "";
-			for (int a : ((NBTTagIntArray)base).getIntArray()){
+			for (int a : ((IntArrayNBT)base).getIntArray()){
 				i += a + " ";
 			}
 			return i;

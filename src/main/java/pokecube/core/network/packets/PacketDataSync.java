@@ -12,20 +12,20 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagIntArray;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.api.distmarker.Dist;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.GuiInfoMessages;
 import pokecube.core.handlers.Config;
@@ -90,32 +90,32 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                     if ((f.getType() == Long.TYPE) || (f.getType() == Long.class))
                     {
                         long defaultValue = f.getLong(defaults);
-                        longs.put(f.getName(), new NBTTagLong(defaultValue));
+                        longs.put(f.getName(), new LongNBT(defaultValue));
                     }
                     else if (f.getType() == String.class)
                     {
                         String defaultValue = (String) f.get(defaults);
-                        strings.put(f.getName(), new NBTTagString(defaultValue));
+                        strings.put(f.getName(), new StringNBT(defaultValue));
                     }
                     else if ((f.getType() == Integer.TYPE) || (f.getType() == Integer.class))
                     {
                         int defaultValue = f.getInt(defaults);
-                        ints.put(f.getName(), new NBTTagInt(defaultValue));
+                        ints.put(f.getName(), new IntNBT(defaultValue));
                     }
                     else if ((f.getType() == Float.TYPE) || (f.getType() == Float.class))
                     {
                         float defaultValue = f.getFloat(defaults);
-                        floats.put(f.getName(), new NBTTagFloat(defaultValue));
+                        floats.put(f.getName(), new FloatNBT(defaultValue));
                     }
                     else if ((f.getType() == Double.TYPE) || (f.getType() == Double.class))
                     {
                         double defaultValue = f.getDouble(defaults);
-                        doubles.put(f.getName(), new NBTTagDouble(defaultValue));
+                        doubles.put(f.getName(), new DoubleNBT(defaultValue));
                     }
                     else if ((f.getType() == Boolean.TYPE) || (f.getType() == Boolean.class))
                     {
                         boolean defaultValue = f.getBoolean(defaults);
-                        bools.put(f.getName(), new NBTTagByte((byte) (defaultValue ? 1 : 0)));
+                        bools.put(f.getName(), new ByteNBT((byte) (defaultValue ? 1 : 0)));
                     }
                     else
                     {
@@ -125,13 +125,13 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
                             String[] defaultValue = (String[]) o;
                             ListNBT arr = new ListNBT();
                             for (String s : defaultValue)
-                                arr.appendTag(new NBTTagString(s));
+                                arr.appendTag(new StringNBT(s));
                             stringarrs.put(f.getName(), arr);
                         }
                         else if (o instanceof int[])
                         {
                             int[] defaultValue = (int[]) o;
-                            intarrs.put(f.getName(), new NBTTagIntArray(defaultValue));
+                            intarrs.put(f.getName(), new IntArrayNBT(defaultValue));
                         }
                         else System.err.println("Unknown Type " + f.getType() + " " + f.getName() + " " + o.getClass());
                     }

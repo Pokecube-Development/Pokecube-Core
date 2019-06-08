@@ -2,8 +2,8 @@ package pokecube.core.moves.templates;
 
 import java.util.Random;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.INpc;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import pokecube.core.interfaces.IPokemob;
