@@ -21,7 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
@@ -225,7 +225,7 @@ public class Pokecube extends Item implements IPokecube
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
     {
         player.setActiveHand(hand);
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+        return new ActionResult<ItemStack>(ActionResultType.SUCCESS, player.getHeldItem(hand));
     }
 
     @Override

@@ -47,7 +47,7 @@ public class GlobalProgress extends Progress
         String killLine = I18n.format("pokewatch.progress.global.killed", killed1, killed0);
         String hatchLine = I18n.format("pokewatch.progress.global.hatched", hatched1, hatched0);
 
-        AxisAlignedBB centre = watch.player.getEntityBoundingBox();
+        AxisAlignedBB centre = watch.player.getBoundingBox();
         AxisAlignedBB bb = centre.grow(PokecubeMod.core.getConfig().maxSpawnRadius, 5,
                 PokecubeMod.core.getConfig().maxSpawnRadius);
         List<Entity> otherMobs = watch.player.getEntityWorld().getEntitiesInAABBexcluding(watch.player, bb,

@@ -228,7 +228,7 @@ public class TileHealTable extends TileEntityOwnable implements IInventory, ITic
     {
         super.writeToNBT(tagCompound);
         ListNBT itemList = new ListNBT();
-        tagCompound.setInteger("time", ticks);
+        tagCompound.putInt("time", ticks);
         for (int i = 0; i < inventory.size(); i++)
         {
             ItemStack stack = inventory.get(i);

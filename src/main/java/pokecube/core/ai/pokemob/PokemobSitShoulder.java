@@ -59,7 +59,7 @@ public class PokemobSitShoulder extends EntityAIBase
     {
         if (!this.isSittingOnShoulder && !this.pokemob.getLogicState(LogicStates.SITTING) && !this.entity.getLeashed())
         {
-            if (this.entity.getEntityBoundingBox().intersects(this.owner.getEntityBoundingBox()))
+            if (this.entity.getBoundingBox().intersects(this.owner.getBoundingBox()))
             {
                 this.isSittingOnShoulder = this.pokemob.moveToShoulder(this.owner);
             }

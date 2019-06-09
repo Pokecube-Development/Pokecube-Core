@@ -18,7 +18,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.DimensionManager;
@@ -48,7 +48,7 @@ public class PokecubeDimensionManager
     public static boolean createNewSecretBaseDimension(int dim, boolean reset)
     {
         if (!DimensionManager.isDimensionRegistered(dim)) DimensionManager.registerDimension(dim, SECRET_BASE_TYPE);
-        WorldServer world1 = DimensionManager.getWorld(dim);
+        ServerWorld world1 = DimensionManager.getWorld(dim);
         boolean registered = true;
         if (world1 == null)
         {
@@ -98,7 +98,7 @@ public class PokecubeDimensionManager
         {
             if (PokecubeMod.debug) PokecubeMod.log("Creating Base DimensionID for " + player);
             dim = DimensionManager.getNextFreeDimId();
-            tag.setInteger("secretPowerDimID", dim);
+            tag.putInt("secretPowerDimID", dim);
             PokecubePlayerDataHandler.saveCustomData(player);
             getInstance().dimOwners.put(dim, player);
         }
@@ -140,9 +140,9 @@ public class PokecubeDimensionManager
         {
             base = new CompoundNBT();
         }
-        base.setInteger(dim + "X", pos.getX());
-        base.setInteger(dim + "Y", pos.getY());
-        base.setInteger(dim + "Z", pos.getZ());
+        base.putInt(dim + "X", pos.getX());
+        base.putInt(dim + "Y", pos.getY());
+        base.putInt(dim + "Z", pos.getZ());
         tag.put("secretBase", base);
         PokecubePlayerDataHandler.saveCustomData(player);
     }
@@ -165,7 +165,7 @@ public class PokecubeDimensionManager
     public static void sendToBase(String baseOwner, PlayerEntity toSend, int... optionalDefault)
     {
         int dim = getDimensionForPlayer(baseOwner);
-        WorldServer old = DimensionManager.getWorld(dim);
+        ServerWorld old = DimensionManager.getWorld(dim);
         Vector3 spawnPos = Vector3.getNewVector().set(0, 64, 0);
         BlockPos entrance = getBaseEntrance(baseOwner, dim);
         if (entrance != null) spawnPos.set(entrance);

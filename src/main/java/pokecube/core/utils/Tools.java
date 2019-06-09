@@ -342,7 +342,7 @@ public class Tools
         if (selector != null) predicate = Predicates.and(predicate, selector);
         float f = 0.5F;
         List<Entity> list = entity.getEntityWorld().getEntitiesInAABBexcluding(entity,
-                entity.getEntityBoundingBox().expand(vec31.x * d0, vec31.y * d0, vec31.z * d0).grow(f, f, f),
+                entity.getBoundingBox().expand(vec31.x * d0, vec31.y * d0, vec31.z * d0).grow(f, f, f),
                 predicate);
         double d2 = distance;
 
@@ -350,7 +350,7 @@ public class Tools
         {
             Entity entity1 = list.get(j);
             float f1 = 1f;
-            AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand(f1, f1, f1);
+            AxisAlignedBB axisalignedbb = entity1.getBoundingBox().expand(f1, f1, f1);
             RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(vec3, vec32);
 
             if (axisalignedbb.contains(vec3))

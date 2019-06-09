@@ -8,7 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.server.permission.IPermissionHandler;
@@ -113,7 +113,7 @@ public class LogicMountedControl extends LogicBase
         Entity controller = rider;
         if (pokemob.getPokedexEntry().shouldDive)
         {
-            PotionEffect vision = new PotionEffect(Potion.getPotionFromResourceLocation("night_vision"), 300, 1, true,
+            EffectInstance vision = new EffectInstance(Potion.getPotionFromResourceLocation("night_vision"), 300, 1, true,
                     false);
             ItemStack stack = new ItemStack(Blocks.BARRIER);
             vision.setCurativeItems(Lists.newArrayList(stack));
@@ -123,10 +123,10 @@ public class LogicMountedControl extends LogicBase
                 {
                     if (entity.isInWater())
                     {
-                        ((LivingEntity) e).addPotionEffect(vision);
+                        ((LivingEntity) e).addEffectInstance(vision);
                         ((LivingEntity) e).setAir(300);
                     }
-                    else((LivingEntity) e).curePotionEffects(stack);
+                    else((LivingEntity) e).cureEffectInstances(stack);
                 }
             }
         }

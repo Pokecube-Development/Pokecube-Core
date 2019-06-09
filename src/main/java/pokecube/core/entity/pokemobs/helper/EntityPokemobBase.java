@@ -135,7 +135,7 @@ public abstract class EntityPokemobBase extends EntityAiPokemob implements IEnti
     public boolean getCanSpawnHere()
     {
         int i = MathHelper.floor(posX);
-        int j = MathHelper.floor(getEntityBoundingBox().minY);
+        int j = MathHelper.floor(getBoundingBox().minY);
         int k = MathHelper.floor(posZ);
         here.set(i, j, k);
         float weight = pokemobCap.getBlockPathWeight(getEntityWorld(), here);

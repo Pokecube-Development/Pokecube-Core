@@ -388,7 +388,7 @@ public class InventoryPC implements IInventory, INBTSerializable<CompoundNBT>
     public CompoundNBT serializeBox(int box)
     {
         CompoundNBT items = new CompoundNBT();
-        items.setInteger("box", box);
+        items.putInt("box", box);
         int start = box * 54;
         for (int i = start; i < start + 54; i++)
         {
@@ -429,12 +429,12 @@ public class InventoryPC implements IInventory, INBTSerializable<CompoundNBT>
         boxes.putString("UUID", owner.toString());
         boxes.putBoolean("seenOwner", seenOwner);
         boxes.putBoolean("autoSend", autoToPC);
-        boxes.setInteger("page", page);
+        boxes.putInt("page", page);
         for (int i = 0; i < PAGECOUNT; i++)
         {
             boxes.putString("name" + i, this.boxes[i]);
         }
-        items.setInteger("page", getPage());
+        items.putInt("page", getPage());
         for (int i = 0; i < getSizeInventory(); i++)
         {
             ItemStack itemstack = getStackInSlot(i);

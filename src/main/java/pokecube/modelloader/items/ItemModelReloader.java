@@ -19,7 +19,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import pokecube.core.PokecubeItems;
@@ -79,7 +79,7 @@ public class ItemModelReloader extends Item
                     PokedexEntryLoader.mergeNonDefaults(new XMLPokedexEntry(), one, two);
                     System.out.println(two.toString() + " " + two.stats.hatedMaterials + " " + two.stats.expMode);
 
-                    return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+                    return new ActionResult<ItemStack>(ActionResultType.PASS, itemstack);
                 }
 
                 try
@@ -264,10 +264,10 @@ public class ItemModelReloader extends Item
                     e.printStackTrace();
                 }
             }
-            return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+            return new ActionResult<ItemStack>(ActionResultType.PASS, itemstack);
         }
-        if (!world.isRemote) return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+        if (!world.isRemote) return new ActionResult<ItemStack>(ActionResultType.PASS, itemstack);
         player.openGui(ModPokecubeML.instance, 0, player.getEntityWorld(), 0, 0, 0);
-        return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+        return new ActionResult<ItemStack>(ActionResultType.PASS, itemstack);
     }
 }

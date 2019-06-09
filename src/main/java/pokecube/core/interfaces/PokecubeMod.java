@@ -21,7 +21,7 @@ import net.minecraft.entity.EntityList.EntityEggInfo;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
@@ -138,7 +138,7 @@ public abstract class PokecubeMod
     {
         if (fakePlayers.get(dim) == null)
         {
-            WorldServer world;
+            ServerWorld world;
 
             if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
             {

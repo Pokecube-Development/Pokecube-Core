@@ -13,7 +13,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.events.pokemob.combat.StatusEvent;
@@ -152,10 +152,10 @@ public class PersistantStatusEffect extends BaseEffect
                 {
                     toRemove = true;
                 }
-                entity.addPotionEffect(
-                        new PotionEffect(Potion.getPotionFromResourceLocation("slowness"), duration, 100));
-                entity.addPotionEffect(
-                        new PotionEffect(Potion.getPotionFromResourceLocation("weakness"), duration, 100));
+                entity.addEffectInstance(
+                        new EffectInstance(Potion.getPotionFromResourceLocation("slowness"), duration, 100));
+                entity.addEffectInstance(
+                        new EffectInstance(Potion.getPotionFromResourceLocation("weakness"), duration, 100));
                 break;
             case PARALYSIS:
                 break;
@@ -170,12 +170,12 @@ public class PersistantStatusEffect extends BaseEffect
                 }
                 else
                 {
-                    entity.addPotionEffect(
-                            new PotionEffect(Potion.getPotionFromResourceLocation("blindness"), duration, 100));
-                    entity.addPotionEffect(
-                            new PotionEffect(Potion.getPotionFromResourceLocation("slowness"), duration, 100));
-                    entity.addPotionEffect(
-                            new PotionEffect(Potion.getPotionFromResourceLocation("weakness"), duration, 100));
+                    entity.addEffectInstance(
+                            new EffectInstance(Potion.getPotionFromResourceLocation("blindness"), duration, 100));
+                    entity.addEffectInstance(
+                            new EffectInstance(Potion.getPotionFromResourceLocation("slowness"), duration, 100));
+                    entity.addEffectInstance(
+                            new EffectInstance(Potion.getPotionFromResourceLocation("weakness"), duration, 100));
                     spawnSleepParticle(entity);
                 }
                 break;

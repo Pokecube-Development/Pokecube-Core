@@ -7,9 +7,9 @@ import java.util.logging.Level;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import pokecube.core.interfaces.IMoveConstants;
@@ -142,7 +142,7 @@ public class LogicMovesUpdates extends LogicBase
         if (!entity.isDead && usable != null)
         {
             ActionResult<ItemStack> result = usable.onTick(pokemob, pokemob.getHeldItem());
-            if (result.getType() == EnumActionResult.SUCCESS) pokemob.setHeldItem(result.getResult());
+            if (result.getType() == ActionResultType.SUCCESS) pokemob.setHeldItem(result.getResult());
             if (!CompatWrapper.isValid(pokemob.getHeldItem())) pokemob.setHeldItem(ItemStack.EMPTY);
         }
     }
@@ -164,10 +164,10 @@ public class LogicMovesUpdates extends LogicBase
             if (pokemob.getLogicState(LogicStates.SLEEPING))
             {
                 int duration = 10;
-                entity.addPotionEffect(
-                        new PotionEffect(Potion.getPotionFromResourceLocation("blindness"), duration * 2, 100));
-                entity.addPotionEffect(
-                        new PotionEffect(Potion.getPotionFromResourceLocation("slowness"), duration * 2, 100));
+                entity.addEffectInstance(
+                        new EffectInstance(Potion.getPotionFromResourceLocation("blindness"), duration * 2, 100));
+                entity.addEffectInstance(
+                        new EffectInstance(Potion.getPotionFromResourceLocation("slowness"), duration * 2, 100));
             }
             return;
         }

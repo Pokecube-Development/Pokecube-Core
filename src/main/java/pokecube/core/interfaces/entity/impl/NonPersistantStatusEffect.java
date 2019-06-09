@@ -10,7 +10,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -84,7 +84,7 @@ public class NonPersistantStatusEffect extends BaseEffect
             switch (status)
             {
             case CONFUSED:
-                entity.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("nausea"), 10));
+                entity.addEffectInstance(new EffectInstance(Potion.getPotionFromResourceLocation("nausea"), 10));
                 break;
             case CURSED:
                 if (pokemob != null)

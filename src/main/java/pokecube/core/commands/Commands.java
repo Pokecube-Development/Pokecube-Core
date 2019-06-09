@@ -16,7 +16,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import pokecube.core.database.Database;
@@ -123,7 +123,7 @@ public class Commands extends CommandBase
         }
         if (args[0].equalsIgnoreCase("denystarter") && args.length == 2)
         {
-            WorldServer world = (WorldServer) cSender.getEntityWorld();
+            ServerWorld world = (ServerWorld) cSender.getEntityWorld();
             PlayerEntity player = null;
 
             int num = 1;

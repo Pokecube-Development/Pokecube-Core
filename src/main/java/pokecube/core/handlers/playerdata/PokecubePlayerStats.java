@@ -99,19 +99,19 @@ public class PokecubePlayerStats extends PlayerData
         CompoundNBT tag = new CompoundNBT();
         for (PokedexEntry e : getKills().keySet())
         {
-            tag.setInteger(e.getName(), getKills().get(e));
+            tag.putInt(e.getName(), getKills().get(e));
         }
         tag_.put("kills", tag);
         tag = new CompoundNBT();
         for (PokedexEntry e : getCaptures().keySet())
         {
-            tag.setInteger(e.getName(), getCaptures().get(e));
+            tag.putInt(e.getName(), getCaptures().get(e));
         }
         tag_.put("captures", tag);
         tag = new CompoundNBT();
         for (PokedexEntry e : getHatches().keySet())
         {
-            tag.setInteger(e.getName(), getHatches().get(e));
+            tag.putInt(e.getName(), getHatches().get(e));
         }
         tag_.put("hatches", tag);
         ListNBT list = new ListNBT();

@@ -13,7 +13,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -133,10 +133,10 @@ public class PCEventsHandler
     {
         // I will deal with some pokemob related bugs here, as to not have
         // multiple event handlers for this.
-        if (evt.getWorld() instanceof WorldServer && evt.getEntity() instanceof IPokemob)
+        if (evt.getWorld() instanceof ServerWorld && evt.getEntity() instanceof IPokemob)
         {
             UUID id = evt.getEntity().getUniqueID();
-            WorldServer serer = (WorldServer) evt.getWorld();
+            ServerWorld serer = (ServerWorld) evt.getWorld();
             if (serer.getEntityFromUuid(id) != null)
             {
                 evt.setCanceled(true);

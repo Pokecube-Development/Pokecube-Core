@@ -103,7 +103,7 @@ public class ClientProxy extends CommonProxy {
 			Entity e = screen.getEntity();
 			
 			if (e != null && e.isEntityAlive())
-				drawBoundingBox(event.getContext(), event.getPartialTicks(), e.getEntityBoundingBox());
+				drawBoundingBox(event.getContext(), event.getPartialTicks(), e.getBoundingBox());
 			else if (screen.isTileEntity()){
 				int x = screen.getBlockX();
 				int y = screen.y;

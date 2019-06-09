@@ -24,7 +24,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntitySelectors;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -394,10 +394,10 @@ public class ItemPokemobEgg extends Item
     }
 
     @Override
-    public EnumActionResult onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
+    public ActionResultType onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
             Direction side, float hitX, float hitY, float hitZ)
     {
-        if (worldIn.isRemote) { return EnumActionResult.SUCCESS; }
+        if (worldIn.isRemote) { return ActionResultType.SUCCESS; }
         Block i = worldIn.getBlockState(pos).getBlock();
         BlockPos newPos = pos.offset(side);
         double d = 0.0D;
@@ -412,7 +412,7 @@ public class ItemPokemobEgg extends Item
         {
             stack.shrink(1);
         }
-        return EnumActionResult.SUCCESS;
+        return ActionResultType.SUCCESS;
     }
 
 }

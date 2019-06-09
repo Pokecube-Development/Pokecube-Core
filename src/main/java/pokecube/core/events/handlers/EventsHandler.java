@@ -42,7 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -584,7 +584,7 @@ public class EventsHandler
             if (event.getResult() != Result.DEFAULT)
             {
                 evt.setCanceled(true);
-                evt.setCancellationResult(EnumActionResult.SUCCESS);
+                evt.setCancellationResult(ActionResultType.SUCCESS);
                 return;
             }
 
@@ -592,7 +592,7 @@ public class EventsHandler
             if (held.getItem().itemInteractionForEntity(held, player, entity, hand))
             {
                 evt.setCanceled(true);
-                evt.setCancellationResult(EnumActionResult.SUCCESS);
+                evt.setCancellationResult(ActionResultType.SUCCESS);
                 return;
             }
 
@@ -602,7 +602,7 @@ public class EventsHandler
             if (entry.interact(player, pokemob, true))
             {
                 evt.setCanceled(true);
-                evt.setCancellationResult(EnumActionResult.SUCCESS);
+                evt.setCancellationResult(ActionResultType.SUCCESS);
                 return;
             }
 
@@ -654,7 +654,7 @@ public class EventsHandler
                         if (!player.capabilities.isCreativeMode) held.splitStack(1);
                     }
                     evt.setCanceled(true);
-                    evt.setCancellationResult(EnumActionResult.SUCCESS);
+                    evt.setCancellationResult(ActionResultType.SUCCESS);
                     return;
                 }
             }
@@ -683,7 +683,7 @@ public class EventsHandler
                     pokemob.setSpecialInfo(dye.getDyeDamage());
                     if (!player.capabilities.isCreativeMode) held.shrink(1);
                     evt.setCanceled(true);
-                    evt.setCancellationResult(EnumActionResult.SUCCESS);
+                    evt.setCancellationResult(ActionResultType.SUCCESS);
                     return;
                 }
                 else if (held.getItem() == Items.SHEARS) { return; }
@@ -729,7 +729,7 @@ public class EventsHandler
                     entity.setAttackTarget(null);
                     entity.getEntityWorld().setEntityState(entity, (byte) 18);
                     evt.setCanceled(true);
-                    evt.setCancellationResult(EnumActionResult.SUCCESS);
+                    evt.setCancellationResult(ActionResultType.SUCCESS);
                     return;
                 }
             }
@@ -756,7 +756,7 @@ public class EventsHandler
                             }
                         }
                         evt.setCanceled(true);
-                        evt.setCancellationResult(EnumActionResult.SUCCESS);
+                        evt.setCancellationResult(ActionResultType.SUCCESS);
                         return;
                     }
                     // Otherwise check if useable item.
@@ -764,12 +764,12 @@ public class EventsHandler
                     if (usable != null)
                     {
                         ActionResult<ItemStack> result = usable.onUse(pokemob, held, player);
-                        if (result.getType() == EnumActionResult.SUCCESS)
+                        if (result.getType() == ActionResultType.SUCCESS)
                         {
                             player.setHeldItem(hand, result.getResult());
                             pokemob.setCombatState(CombatStates.NOITEMUSE, true);
                             evt.setCanceled(true);
-                            evt.setCancellationResult(EnumActionResult.SUCCESS);
+                            evt.setCancellationResult(ActionResultType.SUCCESS);
                             return;
                         }
                     }
@@ -794,7 +794,7 @@ public class EventsHandler
                             }
                         }
                         evt.setCanceled(true);
-                        evt.setCancellationResult(EnumActionResult.SUCCESS);
+                        evt.setCancellationResult(ActionResultType.SUCCESS);
                         return;
                     }
                 }
@@ -805,7 +805,7 @@ public class EventsHandler
                     player.openGui(PokecubeMod.core, Config.GUIPOKEMOB_ID, entity.getEntityWorld(),
                             entity.getEntityId(), 0, 0);
                     evt.setCanceled(true);
-                    evt.setCancellationResult(EnumActionResult.SUCCESS);
+                    evt.setCancellationResult(ActionResultType.SUCCESS);
                     return;
                 }
             }
@@ -815,7 +815,7 @@ public class EventsHandler
             {
                 entity.setJumping(false);
                 evt.setCanceled(true);
-                evt.setCancellationResult(EnumActionResult.SUCCESS);
+                evt.setCancellationResult(ActionResultType.SUCCESS);
                 return;
             }
         }

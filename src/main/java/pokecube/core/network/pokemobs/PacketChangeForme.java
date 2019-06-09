@@ -9,7 +9,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -40,7 +40,7 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
         PacketChangeForme packet = new PacketChangeForme();
         packet.entityId = mob.getEntityId();
         packet.forme = forme;
-        WorldServer server = (WorldServer) mob.getEntityWorld();
+        ServerWorld server = (ServerWorld) mob.getEntityWorld();
         for (PlayerEntity player : server.getEntityTracker().getTrackingPlayers(mob))
             PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
     }

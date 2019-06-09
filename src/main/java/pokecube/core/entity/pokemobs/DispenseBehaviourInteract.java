@@ -16,7 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -72,7 +72,7 @@ public class DispenseBehaviourInteract implements IBehaviorDispenseItem
             player.inventory.clear();
             player.setHeldItem(Hand.MAIN_HAND, stack);
 
-            EnumActionResult cancelResult = net.minecraftforge.common.ForgeHooks.onInteractEntityAt(player, mobs.get(0),
+            ActionResultType cancelResult = net.minecraftforge.common.ForgeHooks.onInteractEntityAt(player, mobs.get(0),
                     new Vec3d(0, 0, 0), Hand.MAIN_HAND);
             if (cancelResult == null) cancelResult = net.minecraftforge.common.ForgeHooks.onInteractEntity(player,
                     mobs.get(0), Hand.MAIN_HAND);

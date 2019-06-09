@@ -2,7 +2,7 @@ package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -27,8 +27,8 @@ public class ActionFlash implements IMoveAction
         int level = user.getLevel();
         int hungerValue = PokecubeMod.core.getConfig().pokemobLifeSpan / 16;
         count = (int) Math.max(1, Math.ceil(count * Math.pow((100 - level) / 100d, 3))) * hungerValue;
-        PotionEffect effect = new PotionEffect(Potion.getPotionFromResourceLocation("night_vision"), 5000);
-        owner.addPotionEffect(effect);
+        EffectInstance effect = new EffectInstance(Potion.getPotionFromResourceLocation("night_vision"), 5000);
+        owner.addEffectInstance(effect);
         mob.setHungerTime(mob.getHungerTime() + count);
         return true;
     }

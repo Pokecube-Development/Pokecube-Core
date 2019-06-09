@@ -176,12 +176,12 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
     public CompoundNBT writePokemobData()
     {
         CompoundNBT pokemobTag = new CompoundNBT();
-        pokemobTag.setInteger(VERSION, 1);
+        pokemobTag.putInt(VERSION, 1);
         // Write Ownership tag
         CompoundNBT ownerShipTag = new CompoundNBT();
         // This is still written for pokecubes to read from. Actual number is
         // stored in genes.
-        ownerShipTag.setInteger(POKEDEXNB, this.getPokedexNb());
+        ownerShipTag.putInt(POKEDEXNB, this.getPokedexNb());
         ownerShipTag.putString(NICKNAME, getPokemonNickname());
         ownerShipTag.putBoolean(PLAYERS, isPlayerOwned());
         ownerShipTag.putString(TEAM, getPokemobTeam());
@@ -190,13 +190,13 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
 
         // Write stats tag
         CompoundNBT statsTag = new CompoundNBT();
-        statsTag.setInteger(EXP, getExp());
+        statsTag.putInt(EXP, getExp());
         statsTag.setByte(STATUS, getStatus());
-        statsTag.setInteger(HAPPY, bonusHappiness);
+        statsTag.putInt(HAPPY, bonusHappiness);
 
         // Write moves tag
         CompoundNBT movesTag = new CompoundNBT();
-        movesTag.setInteger(MOVEINDEX, getMoveIndex());
+        movesTag.putInt(MOVEINDEX, getMoveIndex());
         if (!getMoveStats().newMoves.isEmpty())
         {
             ListNBT newMoves = new ListNBT();
@@ -206,7 +206,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
             }
             movesTag.put(NEWMOVES, newMoves);
         }
-        movesTag.setInteger(COOLDOWN, getAttackCooldown());
+        movesTag.putInt(COOLDOWN, getAttackCooldown());
         int[] disables = new int[4];
         boolean tag = false;
         for (int i = 0; i < 4; i++)
@@ -238,7 +238,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
 
         // Write Breeding tag
         CompoundNBT breedingTag = new CompoundNBT();
-        breedingTag.setInteger(SEXETIME, loveTimer);
+        breedingTag.putInt(SEXETIME, loveTimer);
 
         // Write visuals tag
         CompoundNBT visualsTag = new CompoundNBT();
@@ -246,7 +246,7 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // This is still written for pokecubes to read from. Actual form is
         // stored in genes.
         visualsTag.putString(FORME, getPokedexEntry().getTrimmedName());
-        visualsTag.setInteger(SPECIALTAG, dataSync().get(params.SPECIALINFO));
+        visualsTag.putInt(SPECIALTAG, dataSync().get(params.SPECIALINFO));
         int[] flavourAmounts = new int[5];
         for (int i = 0; i < flavourAmounts.length; i++)
         {
@@ -261,11 +261,11 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Misc AI
         CompoundNBT aiTag = new CompoundNBT();
 
-        aiTag.setInteger(GENERALSTATE, getTotalGeneralState());
-        aiTag.setInteger(LOGICSTATE, getTotalLogicState());
-        aiTag.setInteger(COMBATSTATE, getTotalCombatState());
+        aiTag.putInt(GENERALSTATE, getTotalGeneralState());
+        aiTag.putInt(LOGICSTATE, getTotalLogicState());
+        aiTag.putInt(COMBATSTATE, getTotalCombatState());
 
-        aiTag.setInteger(HUNGER, getHungerTime());
+        aiTag.putInt(HUNGER, getHungerTime());
         CompoundNBT aiRoutineTag = new CompoundNBT();
         for (AIRoutine routine : AIRoutine.values())
         {
@@ -275,8 +275,8 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
 
         // Misc other
         CompoundNBT miscTag = new CompoundNBT();
-        miscTag.setInteger(RNGVAL, getRNGValue());
-        miscTag.setInteger(UID, getPokemonUID());
+        miscTag.putInt(RNGVAL, getRNGValue());
+        miscTag.putInt(UID, getPokemonUID());
         miscTag.putBoolean(WASSHADOW, wasShadow);
 
         // Set tags to the pokemob tag.

@@ -11,11 +11,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -47,7 +47,7 @@ public class UsableItemEffects
         public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner())
-                return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
             boolean used = true;
             int xp = Tools.levelToXp(pokemob.getExperienceMode(),
                     pokemob.getLevel() + (PokecubeItems.isValid(stack) ? 1 : -1));
@@ -58,7 +58,7 @@ public class UsableItemEffects
                 PokecubeItems.deValidate(stack);
             }
             stack.put(null);
-            return new ActionResult<ItemStack>(used ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(used ? ActionResultType.SUCCESS : ActionResultType.FAIL, stack);
         }
 
         @Override
@@ -88,10 +88,10 @@ public class UsableItemEffects
         public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner())
-                return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
             boolean used = ItemTM.applyEffect(pokemob.getEntity(), stack);
             if (used) stack.splitStack(1);
-            return new ActionResult<ItemStack>(used ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(used ? ActionResultType.SUCCESS : ActionResultType.FAIL, stack);
         }
 
         @Override
@@ -127,13 +127,13 @@ public class UsableItemEffects
         public ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
         {
             if (user != pokemob.getEntity() && user != pokemob.getOwner() && !(stack.getItem() instanceof ItemVitamin))
-                return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
             ItemVitamin vitamin = (ItemVitamin) stack.getItem();
             ActionResult<ItemStack> result = null;
             VitaminEffect effect = effects.get(vitamin.type);
             if (effect != null) result = effect.onUse(pokemob, stack, user);
-            else return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
-            if (result.getType() == EnumActionResult.SUCCESS) stack.splitStack(1);
+            else return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
+            if (result.getType() == ActionResultType.SUCCESS) stack.splitStack(1);
             return result;
         }
 
@@ -171,11 +171,11 @@ public class UsableItemEffects
             {
                 int berryId = ((ItemBerry) stack.getItem()).index;
                 if (!BerryManager.berryNames.containsKey(berryId))
-                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                    return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
                 BerryEffect effect = effects.get(berryId);
                 if (effect != null) return effect.onTick(pokemob, stack);
             }
-            return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
         }
 
         /** Called when this item is "used". Normally this means via right
@@ -193,11 +193,11 @@ public class UsableItemEffects
             {
                 int berryId = ((ItemBerry) stack.getItem()).index;
                 if (!BerryManager.berryNames.containsKey(berryId))
-                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                    return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
                 BerryEffect effect = effects.get(berryId);
                 if (effect != null) return effect.onUse(pokemob, stack, user);
             }
-            return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
         }
 
         /** @param pokemob
@@ -210,11 +210,11 @@ public class UsableItemEffects
             {
                 int berryId = ((ItemBerry) stack.getItem()).index;
                 if (!BerryManager.berryNames.containsKey(berryId))
-                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                    return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
                 BerryEffect effect = effects.get(berryId);
                 if (effect != null) return effect.onMoveTick(pokemob, stack, moveuse);
             }
-            return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
         }
 
         @Override
@@ -237,7 +237,7 @@ public class UsableItemEffects
         {
             MobEntity mob = pokemob.getEntity();
             boolean applied = false;
-            for (PotionEffect potioneffect : PotionUtils.getEffectsFromStack(stack))
+            for (EffectInstance potioneffect : PotionUtils.getEffectsFromStack(stack))
             {
                 if (potioneffect.getPotion().isInstant())
                 {
@@ -245,7 +245,7 @@ public class UsableItemEffects
                 }
                 else
                 {
-                    mob.addPotionEffect(new PotionEffect(potioneffect));
+                    mob.addEffectInstance(new EffectInstance(potioneffect));
                 }
                 applied = true;
             }
@@ -260,9 +260,9 @@ public class UsableItemEffects
                 {
                     // Add to inventory or drop
                 }
-                return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
+                return new ActionResult<ItemStack>(ActionResultType.SUCCESS, stack);
             }
-            return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+            return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
         }
 
         @Override
@@ -307,18 +307,18 @@ public class UsableItemEffects
         {
             LivingEntity mob = pokemob.getEntity();
             float health = pokemob.getHealth();
-            if ((int) health <= 0) return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+            if ((int) health <= 0) return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
             float maxHealth = pokemob.getMaxHealth();
             if (user == mob)
             {
-                if (health >= maxHealth / 3) return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+                if (health >= maxHealth / 3) return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
             }
             if (health + 20 < maxHealth) pokemob.setHealth(health + 20);
             else pokemob.setHealth(maxHealth);
             boolean useStack = true;
             if (user instanceof PlayerEntity && ((PlayerEntity) user).capabilities.isCreativeMode) useStack = false;
             if (useStack) stack.splitStack(1);
-            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
+            return new ActionResult<ItemStack>(ActionResultType.SUCCESS, stack);
         }
 
         @Override

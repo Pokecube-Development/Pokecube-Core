@@ -26,7 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.api.distmarker.Dist;
@@ -97,7 +97,7 @@ public class EntityPokecube extends EntityPokecubeBase
             CompoundNBT loot = new CompoundNBT();
             this.loot.writeToNBT(loot);
             nbt.put("loot", loot);
-            nbt.setInteger("rolls", rolls);
+            nbt.putInt("rolls", rolls);
         }
 
     }
@@ -473,7 +473,7 @@ public class EntityPokecube extends EntityPokecubeBase
                             LootTable loottable = getEntityWorld().getLootTableManager()
                                     .getLootTableFromLocation(lootTable);
                             LootContext.Builder lootcontext$builder = (new LootContext.Builder(
-                                    (WorldServer) getEntityWorld())).withLootedEntity(this);
+                                    (ServerWorld) getEntityWorld())).withLootedEntity(this);
                             for (ItemStack itemstack : loottable.generateLootForPools(getRNG(),
                                     lootcontext$builder.build()))
                             {

@@ -51,7 +51,7 @@ public class GuiTradingTable extends GuiContainer
         PacketTrade packet = new PacketTrade(PacketTrade.SETTRADER);
         packet.data.putBoolean("R", false);
         packet.data.putIntArray("L", new int[] { table.getPos().getX(), table.getPos().getY(), table.getPos().getZ() });
-        packet.data.setInteger("I", PlayerEntity.getEntityId());
+        packet.data.putInt("I", PlayerEntity.getEntityId());
         packet.data.setByte("B", (byte) guibutton.id);
         PokecubePacketHandler.sendToServer(packet);
     }

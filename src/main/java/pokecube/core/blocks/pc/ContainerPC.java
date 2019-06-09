@@ -171,7 +171,7 @@ public class ContainerPC extends Container
         if (FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT)
         {
             PacketPC packet = new PacketPC(PacketPC.SETPAGE, inv.owner);
-            packet.data.setInteger("P", page);
+            packet.data.putInt("P", page);
             PokecubeMod.packetPipeline.sendToServer(packet);
         }
         bindInventories();
@@ -203,7 +203,7 @@ public class ContainerPC extends Container
             {
                 PacketPC packet = new PacketPC(PacketPC.RELEASE, inv.owner);
                 packet.data.putBoolean("T", false);
-                packet.data.setInteger("page", inv.getPage());
+                packet.data.putInt("page", inv.getPage());
                 for (int i = 0; i < 54; i++)
                 {
                     if (toRelease[i])

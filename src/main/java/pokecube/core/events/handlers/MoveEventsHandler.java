@@ -18,7 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -449,7 +449,7 @@ public class MoveEventsHandler
         if (attackerheld != null)
         {
             ActionResult<ItemStack> result = attackerheld.onMoveTick(attacker, attacker.getHeldItem(), move);
-            if (result.getType() == EnumActionResult.SUCCESS)
+            if (result.getType() == ActionResultType.SUCCESS)
             {
                 attacker.setHeldItem(result.getResult());
             }
@@ -460,7 +460,7 @@ public class MoveEventsHandler
             if (targetheld != null)
             {
                 ActionResult<ItemStack> result = targetheld.onMoveTick(attacker, target.getHeldItem(), move);
-                if (result.getType() == EnumActionResult.SUCCESS)
+                if (result.getType() == ActionResultType.SUCCESS)
                 {
                     target.setHeldItem(result.getResult());
                 }
@@ -491,7 +491,7 @@ public class MoveEventsHandler
         if (attackerheld != null)
         {
             ActionResult<ItemStack> result = attackerheld.onMoveTick(attacker, attacker.getHeldItem(), move);
-            if (result.getType() == EnumActionResult.SUCCESS)
+            if (result.getType() == ActionResultType.SUCCESS)
             {
                 attacker.setHeldItem(result.getResult());
             }
@@ -502,7 +502,7 @@ public class MoveEventsHandler
             if (targetheld != null)
             {
                 ActionResult<ItemStack> result = targetheld.onMoveTick(attacker, target.getHeldItem(), move);
-                if (result.getType() == EnumActionResult.SUCCESS)
+                if (result.getType() == ActionResultType.SUCCESS)
                 {
                     target.setHeldItem(result.getResult());
                 }

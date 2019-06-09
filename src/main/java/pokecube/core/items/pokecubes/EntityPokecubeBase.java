@@ -351,8 +351,8 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
     public void writeEntityToNBT(CompoundNBT CompoundNBT)
     {
         super.writeEntityToNBT(CompoundNBT);
-        CompoundNBT.setInteger("tilt", tilt);
-        CompoundNBT.setInteger("time", time);
+        CompoundNBT.putInt("tilt", tilt);
+        CompoundNBT.putInt("time", time);
         if (shooter != null) CompoundNBT.putString("shooter", shooter.toString());
         if (this.getItem() != null)
         {
@@ -360,9 +360,9 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
         }
         if (tilePos != null)
         {
-            CompoundNBT.setInteger("xTile", this.tilePos.getX());
-            CompoundNBT.setInteger("yTile", this.tilePos.getY());
-            CompoundNBT.setInteger("zTile", this.tilePos.getZ());
+            CompoundNBT.putInt("xTile", this.tilePos.getX());
+            CompoundNBT.putInt("yTile", this.tilePos.getY());
+            CompoundNBT.putInt("zTile", this.tilePos.getZ());
         }
         CompoundNBT.setShort("life", (short) this.ticksInGround);
         CompoundNBT.setByte("inTile", (byte) Block.getIdFromBlock(this.tile));

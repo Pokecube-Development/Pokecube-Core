@@ -79,7 +79,7 @@ public interface IOngoingAffected extends INBTSerializable<ListNBT>
         default CompoundNBT serializeNBT()
         {
             CompoundNBT tag = new CompoundNBT();
-            tag.setInteger("D", getDuration());
+            tag.putInt("D", getDuration());
             return tag;
         }
 

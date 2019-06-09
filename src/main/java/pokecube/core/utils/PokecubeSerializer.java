@@ -98,7 +98,7 @@ public class PokecubeSerializer
         {
             loc.writeToNBT(nbt);
             nbt.putString("name", name);
-            nbt.setInteger("i", index);
+            nbt.putInt("i", index);
         }
     }
 
@@ -225,9 +225,9 @@ public class PokecubeSerializer
                     ticket = ForgeChunkManager.requestPlayerTicket(PokecubeCore.instance,
                             placer.getCachedUniqueIdString(), world, ForgeChunkManager.Type.NORMAL);
                     CompoundNBT pos = new CompoundNBT();
-                    pos.setInteger("x", location.getX());
-                    pos.setInteger("y", location.getY());
-                    pos.setInteger("z", location.getZ());
+                    pos.putInt("x", location.getX());
+                    pos.putInt("y", location.getY());
+                    pos.putInt("z", location.getZ());
                     ticket.getModData().put("pos", pos);
                     ChunkPos chunk = world.getChunk(location).getPos();
                     PokecubeMod.log("Forcing Chunk at " + location);
@@ -448,7 +448,7 @@ public class PokecubeSerializer
 
     public void writeToNBT(CompoundNBT CompoundNBT)
     {
-        CompoundNBT.setInteger(LASTUID, lastId);
+        CompoundNBT.putInt(LASTUID, lastId);
         ListNBT tagListMeteors = new ListNBT();
         for (Vector4 v : meteors)
         {

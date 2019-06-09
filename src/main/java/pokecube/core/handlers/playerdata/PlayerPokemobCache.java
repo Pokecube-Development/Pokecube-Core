@@ -82,7 +82,7 @@ public class PlayerPokemobCache extends PlayerData
         for (Integer id : cache.keySet())
         {
             CompoundNBT var = new CompoundNBT();
-            var.setInteger("uid", id);
+            var.putInt("uid", id);
             var.putBoolean("_in_pc_", inPC.contains(id));
             var.putBoolean("_dead_", genesDeleted.contains(id));
             ItemStack stack = cache.get(id);

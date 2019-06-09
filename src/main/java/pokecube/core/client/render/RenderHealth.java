@@ -131,7 +131,7 @@ public class RenderHealth
                 if (entity != null && entity instanceof LivingEntity && entity != mc.player
                         && entity.isInRangeToRender3d(renderingVector.getX(), renderingVector.getY(),
                                 renderingVector.getZ())
-                        && (entity.ignoreFrustumCheck || frustum.isBoundingBoxInFrustum(entity.getEntityBoundingBox()))
+                        && (entity.ignoreFrustumCheck || frustum.isBoundingBoxInFrustum(entity.getBoundingBox()))
                         && entity.isEntityAlive() && entity.getRecursivePassengers().isEmpty())
                 {
                     try
@@ -446,7 +446,7 @@ public class RenderHealth
 
         Entity lookedEntity = null;
         List<Entity> entitiesInBoundingBox = e.getEntityWorld().getEntitiesWithinAABBExcludingEntity(e, e
-                .getEntityBoundingBox()
+                .getBoundingBox()
                 .expand(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance)
                 .grow(1F, 1F, 1F));
         double minDistance = distance;
@@ -456,7 +456,7 @@ public class RenderHealth
             if (entity.canBeCollidedWith())
             {
                 float collisionBorderSize = entity.getCollisionBorderSize();
-                AxisAlignedBB hitbox = entity.getEntityBoundingBox().grow(collisionBorderSize, collisionBorderSize,
+                AxisAlignedBB hitbox = entity.getBoundingBox().grow(collisionBorderSize, collisionBorderSize,
                         collisionBorderSize);
                 RayTraceResult interceptPosition = hitbox.calculateIntercept(positionVector, reachVector);
 

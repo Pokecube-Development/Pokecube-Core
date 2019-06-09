@@ -8,7 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.world.IBlockReader;
 import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.interfaces.IPokemobUseable;
@@ -35,7 +35,7 @@ public abstract class PokemobHungry extends PokemobMoves
             if (usable != null)
             {
                 ActionResult<ItemStack> result = usable.onUse(this, item, getEntity());
-                if (result.getType() == EnumActionResult.SUCCESS)
+                if (result.getType() == ActionResultType.SUCCESS)
                 {
                     ItemStackTools.addItemStackToInventory(result.getResult(), this.getPokemobInventory(), 1);
                 }

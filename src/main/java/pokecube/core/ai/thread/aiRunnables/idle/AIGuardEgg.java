@@ -44,7 +44,7 @@ public class AIGuardEgg extends AIBase
         // Only the female (or neutral) will guard the eggs.
         if (pokemob.getSexe() == IPokemob.MALE) return;
         eggSearchCooldown = SEARCHCOOLDOWN;
-        AxisAlignedBB bb = entity.getEntityBoundingBox().grow(16, 8, 16);
+        AxisAlignedBB bb = entity.getBoundingBox().grow(16, 8, 16);
         // Search for valid eggs.
         List<Entity> list2 = entity.getEntityWorld().getEntitiesInAABBexcluding(entity, bb, new Predicate<Entity>()
         {

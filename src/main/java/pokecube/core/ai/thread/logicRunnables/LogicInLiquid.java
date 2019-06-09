@@ -30,14 +30,14 @@ public class LogicInLiquid extends LogicBase
         {
             for (Entity e : entity.getParts())
             {
-                box.set(e.getEntityBoundingBox());
+                box.set(e.getBoundingBox());
                 if (!lava) lava = lava || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.LAVA);
                 if (!water) water = water || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.WATER);
             }
         }
         else
         {
-            box.set(entity.getEntityBoundingBox());
+            box.set(entity.getBoundingBox());
             if (!lava) lava = lava || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.LAVA);
             if (!water) water = water || box.isInMaterial(world, Vector3.empty, Vector3.empty, Material.WATER);
         }

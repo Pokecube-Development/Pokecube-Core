@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -58,8 +58,8 @@ public class TileNBTPacket implements IMessage {
 							try {
 								te.readFromNBT(packet.tag);
 								te.markDirty();// Ensures changes gets saved to disk later on.
-								if (te.hasWorld() && te.getWorld() instanceof WorldServer) {
-									((WorldServer) te.getWorld()).getPlayerChunkMap().markBlockForUpdate(packet.pos);// Broadcast changes.
+								if (te.hasWorld() && te.getWorld() instanceof ServerWorld) {
+									((ServerWorld) te.getWorld()).getPlayerChunkMap().markBlockForUpdate(packet.pos);// Broadcast changes.
 								}
 								NBTEdit.log(Level.TRACE, player.getName() + " edited a tag -- Tile Entity at " + packet.pos.getX() + ", " + packet.pos.getY() + ", " + packet.pos.getZ());
 								NBTEdit.logTag(packet.tag);

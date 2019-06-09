@@ -568,7 +568,7 @@ public class PokecubeItems extends Items
                 num++;
             }
         }
-        nbt.setInteger("count", num);
+        nbt.putInt("count", num);
     }
 
     public static Predicate<BlockState> getState(String arguments)

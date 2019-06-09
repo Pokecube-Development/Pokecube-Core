@@ -22,7 +22,7 @@ import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.chunk.Chunk;
@@ -58,7 +58,7 @@ public class ActionNaturePower implements IMoveAction
         if (checker.blocks.size() > 1)
         {
             Set<Chunk> affected = Sets.newHashSet();
-            WorldServer sWorld = (WorldServer) world;
+            ServerWorld sWorld = (ServerWorld) world;
             PlayerChunkMap chunkMap = sWorld.getPlayerChunkMap();
             int minY = Integer.MAX_VALUE;
             int maxY = Integer.MIN_VALUE;
@@ -455,7 +455,7 @@ public class ActionNaturePower implements IMoveAction
                     }
                 }
             }
-            WorldServer sWorld = (WorldServer) world;
+            ServerWorld sWorld = (ServerWorld) world;
             PlayerChunkMap chunkMap = sWorld.getPlayerChunkMap();
             updateChunks(chunkMap, affected, 0, 16);
             return mod;

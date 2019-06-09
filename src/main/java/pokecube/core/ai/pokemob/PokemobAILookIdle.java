@@ -80,7 +80,7 @@ public class PokemobAILookIdle extends EntityAIBase
             this.closestEntity = this.theWatcher.getAttackTarget();
         }
         this.closestEntity = this.theWatcher.getEntityWorld().findNearestEntityWithinAABB(LivingEntity.class,
-                this.theWatcher.getEntityBoundingBox().grow(this.maxDistanceForPlayer, 3.0D, this.maxDistanceForPlayer),
+                this.theWatcher.getBoundingBox().grow(this.maxDistanceForPlayer, 3.0D, this.maxDistanceForPlayer),
                 this.theWatcher);
         if (closestEntity != null && closestEntity.getRidingEntity() == theWatcher) closestEntity = null;
         else if (closestEntity != null) return true;

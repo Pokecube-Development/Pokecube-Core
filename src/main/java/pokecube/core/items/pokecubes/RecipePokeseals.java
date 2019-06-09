@@ -131,7 +131,7 @@ public class RecipePokeseals implements IDefaultRecipe
                     }
                     if (itemstack2.getItem() == Items.DYE)
                     {
-                        CompoundNBT1.setInteger("dye", itemstack2.getItemDamage());
+                        CompoundNBT1.putInt("dye", itemstack2.getItemDamage());
                     }
 
                 }

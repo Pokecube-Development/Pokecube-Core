@@ -8,7 +8,7 @@ import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import pokecube.core.database.SpawnBiomeMatcher;
@@ -58,7 +58,7 @@ public class StructureCommand extends CommandBase
         {
             dir = Direction.byName(args[1]);
         }
-        WorldServer world = (WorldServer) cSender.getEntityWorld();
+        ServerWorld world = (ServerWorld) cSender.getEntityWorld();
         IWorldGenerator generator = WorldGenTemplates.namedTemplates.get(structure);
         SpawnBiomeMatcher matcher = SpawnBiomeMatcher.ALLMATCHER;
         matcher.reset();

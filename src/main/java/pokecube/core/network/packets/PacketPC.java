@@ -37,10 +37,10 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
     {
         InventoryPC inv = InventoryPC.getPC(sendTo.getUniqueID());
         PacketPC packet = new PacketPC(PacketPC.PCINIT, sendTo.getUniqueID());
-        packet.data.setInteger("N", inv.boxes.length);
+        packet.data.putInt("N", inv.boxes.length);
         packet.data.putBoolean("A", inv.autoToPC);
         packet.data.putBoolean("O", inv.seenOwner);
-        packet.data.setInteger("C", inv.getPage());
+        packet.data.putInt("C", inv.getPage());
         for (int i = 0; i < inv.boxes.length; i++)
         {
             packet.data.putString("N" + i, inv.boxes[i]);

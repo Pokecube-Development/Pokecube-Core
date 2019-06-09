@@ -3,7 +3,7 @@ package pokecube.core.interfaces.entity.impl;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.interfaces.IPokemob.Stats;
 import pokecube.core.interfaces.PokecubeMod;
@@ -83,24 +83,24 @@ public class StatEffect extends BaseEffect
             {
                 if (entity.isPotionActive(atkD))
                 {
-                    entity.removePotionEffect(atkD);
+                    entity.removeEffectInstance(atkD);
                 }
-                entity.addPotionEffect(new PotionEffect(atkU, duration, amount));
+                entity.addEffectInstance(new EffectInstance(atkU, duration, amount));
             }
             else
             {
                 if (entity.isPotionActive(atkU))
                 {
-                    entity.removePotionEffect(atkU);
+                    entity.removeEffectInstance(atkU);
                 }
-                entity.addPotionEffect(new PotionEffect(atkD, duration, amount));
+                entity.addEffectInstance(new EffectInstance(atkD, duration, amount));
             }
             break;
         case DEFENSE:
             Potion defU = Potion.getPotionFromResourceLocation("resistance");
             if (up)
             {
-                entity.addPotionEffect(new PotionEffect(defU, duration, amount));
+                entity.addEffectInstance(new EffectInstance(defU, duration, amount));
             }
             break;
         case EVASION:
@@ -118,17 +118,17 @@ public class StatEffect extends BaseEffect
             {
                 if (entity.isPotionActive(vitD))
                 {
-                    entity.removePotionEffect(vitD);
+                    entity.removeEffectInstance(vitD);
                 }
-                entity.addPotionEffect(new PotionEffect(vitU, duration, amount));
+                entity.addEffectInstance(new EffectInstance(vitU, duration, amount));
             }
             else
             {
                 if (entity.isPotionActive(vitU))
                 {
-                    entity.removePotionEffect(vitU);
+                    entity.removeEffectInstance(vitU);
                 }
-                entity.addPotionEffect(new PotionEffect(vitD, duration, amount));
+                entity.addEffectInstance(new EffectInstance(vitD, duration, amount));
             }
             break;
         default:

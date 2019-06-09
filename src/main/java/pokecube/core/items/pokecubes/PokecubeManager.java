@@ -250,7 +250,7 @@ public class PokecubeManager
             var3.put("display", var4);
         }
 
-        var4.setInteger("cubecolor", color);
+        var4.putInt("cubecolor", color);
     }
 
     public static void setOwner(ItemStack itemStack, UUID owner)
@@ -274,7 +274,7 @@ public class PokecubeManager
         {
             itemStack.put(new CompoundNBT());
         }
-        itemStack.getTag().setInteger("tilt", number);
+        itemStack.getTag().putInt("tilt", number);
     }
 
     public static void heal(ItemStack stack)
@@ -301,7 +301,7 @@ public class PokecubeManager
                 e.printStackTrace();
             }
             CompoundNBT poketag = TagNames.getPokecubePokemobTag(stack.getTag());
-            poketag.getCompound(TagNames.AITAG).setInteger(TagNames.HUNGER,
+            poketag.getCompound(TagNames.AITAG).putInt(TagNames.HUNGER,
                     -PokecubeMod.core.getConfig().pokemobLifeSpan / 4);
             PokecubeManager.setStatus(stack, IMoveConstants.STATUS_NON);
         }

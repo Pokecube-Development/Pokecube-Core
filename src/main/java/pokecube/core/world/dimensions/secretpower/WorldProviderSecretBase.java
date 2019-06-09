@@ -100,7 +100,7 @@ public class DimensionSecretBase extends Dimension
         {
             CompoundNBT tag = new CompoundNBT();
             int size = world.getWorldBorder().getSize();
-            tag.setInteger("border", size);
+            tag.putInt("border", size);
             owner = PokecubeDimensionManager.getOwner(getDimension());
             if (owner != null && !owner.isEmpty()) tag.putString("owner", owner);
             FileOutputStream fileoutputstream = new FileOutputStream(file);

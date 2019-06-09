@@ -30,7 +30,7 @@ public class PokecubePlayerData extends PlayerData
     public void writeToNBT(CompoundNBT tag)
     {
         tag.putBoolean("hasStarter", hasStarter);
-        tag.setInteger("teleIndex", teleIndex);
+        tag.putInt("teleIndex", teleIndex);
         ListNBT list = new ListNBT();
         for (TeleDest d : telelocs)
         {

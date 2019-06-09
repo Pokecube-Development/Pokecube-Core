@@ -329,7 +329,7 @@ public final class SpawnHandler
                 level = event.getLevel();
             }
             maxXP = Tools.levelToXp(pokemob.getPokedexEntry().getEvolutionMode(), level);
-            pokemob.getEntity().getEntityData().setInteger("spawnExp", maxXP);
+            pokemob.getEntity().getEntityData().putInt("spawnExp", maxXP);
             pokemob = pokemob.specificSpawnInit();
             double dt = (System.nanoTime() - time) / 10e3D;
             if (PokecubeMod.debug && dt > 100)

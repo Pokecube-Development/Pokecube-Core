@@ -70,7 +70,7 @@ public class PerMobProgress extends Progress
         String killLine = I18n.format("pokewatch.progress.mob.killed", killed0, entry);
         String hatchLine = I18n.format("pokewatch.progress.mob.hatched", hatched0, entry);
 
-        AxisAlignedBB centre = watch.player.getEntityBoundingBox();
+        AxisAlignedBB centre = watch.player.getBoundingBox();
         AxisAlignedBB bb = centre.grow(PokecubeMod.core.getConfig().maxSpawnRadius, 5,
                 PokecubeMod.core.getConfig().maxSpawnRadius);
         List<Entity> otherMobs = watch.player.getEntityWorld().getEntitiesInAABBexcluding(watch.player, bb,

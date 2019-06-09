@@ -85,7 +85,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         PacketPokedex packet = new PacketPokedex(PacketPokedex.INSPECTMOB);
         PlayerDataHandler.getInstance().getPlayerData(PokecubeCore.getPlayer(null))
                 .getData(PokecubePlayerStats.class).inspect(PokecubeCore.getPlayer(null), pokemob);
-        packet.data.setInteger("V", pokemob.getEntity().getEntityId());
+        packet.data.putInt("V", pokemob.getEntity().getEntityId());
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -119,7 +119,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         PacketPokedex packet = new PacketPokedex();
         packet.message = RENAME;
         packet.data.putString("N", newName);
-        packet.data.setInteger("I", index);
+        packet.data.putInt("I", index);
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -127,8 +127,8 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         PacketPokedex packet = new PacketPokedex();
         packet.message = REORDER;
-        packet.data.setInteger("2", index2);
-        packet.data.setInteger("1", index1);
+        packet.data.putInt("2", index2);
+        packet.data.putInt("1", index1);
         PokecubePacketHandler.sendToServer(packet);
         TeleportHandler.swapTeleports(PokecubeCore.getPlayer(null).getCachedUniqueIdString(), index1, index2);
     }
@@ -137,7 +137,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
     {
         PacketPokedex packet = new PacketPokedex();
         packet.message = REMOVE;
-        packet.data.setInteger("I", index);
+        packet.data.putInt("I", index);
         PokecubePacketHandler.sendToServer(packet);
     }
 
@@ -171,7 +171,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         }
         packet.data.put("B", list);
         packet.data.putBoolean("M", watch);
-        packet.data.setInteger("R", PokecubeMod.core.getConfig().baseRadarRange);
+        packet.data.putInt("R", PokecubeMod.core.getConfig().baseRadarRange);
         List<Vector4> meteors = PokecubeSerializer.getInstance().meteors;
         if (!meteors.isEmpty())
         {

@@ -172,7 +172,7 @@ public class TileEntityNest extends TileEntity implements ITickable
             spawnsTag.appendTag(new StringNBT(entry.getTrimmedName()));
         }
         nbt.put("spawns", spawnsTag);
-        nbt.setInteger("time", time);
+        nbt.putInt("time", time);
         return nbt;
     }
 }

@@ -111,7 +111,7 @@ public class EntityPokemobEgg extends MobEntity
     @Override
     public AxisAlignedBB getCollisionBoundingBox()
     {
-        return getEntityBoundingBox();
+        return getBoundingBox();
     }
 
     public Entity getEggOwner()
@@ -293,8 +293,8 @@ public class EntityPokemobEgg extends MobEntity
     public void writeEntityToNBT(CompoundNBT nbt)
     {
         super.writeEntityToNBT(nbt);
-        nbt.setInteger("age", age);
-        nbt.setInteger("hatchtime", hatch);
+        nbt.putInt("age", age);
+        nbt.putInt("hatchtime", hatch);
     }
 
     @Override

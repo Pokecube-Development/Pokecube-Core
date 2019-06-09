@@ -15,7 +15,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import pokecube.core.items.ItemTM;
 import pokecube.core.moves.MovesUtils;
 import thut.core.common.commands.CommandTools;
@@ -62,7 +62,7 @@ public class TMCommand extends CommandBase
                 String name = null;
                 PlayerEntity player = null;
 
-                WorldServer world = (WorldServer) sender.getEntityWorld();
+                ServerWorld world = (ServerWorld) sender.getEntityWorld();
                 if (args.length == 2)
                 {
                     name = args[1];

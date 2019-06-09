@@ -82,7 +82,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     @Override
     public boolean getCanSpawnHere()
     {
-        return this.getEntityWorld().checkNoEntityCollision(this.getEntityBoundingBox());
+        return this.getEntityWorld().checkNoEntityCollision(this.getBoundingBox());
     }
 
     @Override
@@ -150,7 +150,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
                     this.playSound(SoundEvents.ENTITY_GENERIC_SWIM, f,
                             1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
-                    float f1 = MathHelper.floor(this.getEntityBoundingBox().minY);
+                    float f1 = MathHelper.floor(this.getBoundingBox().minY);
                     int i;
                     float f2;
                     float f3;
@@ -218,7 +218,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
     @OnlyIn(Dist.CLIENT)
     public boolean isInRangeToRenderDist(double distance)
     {
-        double d0 = this.getEntityBoundingBox().getAverageEdgeLength();
+        double d0 = this.getBoundingBox().getAverageEdgeLength();
 
         if (Double.isNaN(d0))
         {
@@ -264,7 +264,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
             if (this.isPotionActive(jump))
             {
-                this.motionY += (this.getActivePotionEffect(jump).getAmplifier() + 1) * 0.1F;
+                this.motionY += (this.getActiveEffectInstance(jump).getAmplifier() + 1) * 0.1F;
             }
             if (pokemobCap.getGeneralState(GeneralStates.CONTROLLED))
             {
@@ -329,7 +329,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                 {
                     float f6 = 0.91F;
                     BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos
-                            .retain(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ);
+                            .retain(this.posX, this.getBoundingBox().minY - 1.0D, this.posZ);
 
                     if (this.onGround)
                     {
@@ -356,7 +356,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                     if (this.onGround)
                     {
                         BlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos.setPos(this.posX,
-                                this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+                                this.getBoundingBox().minY - 1.0D, this.posZ));
                         f6 = state.getBlock().getSlipperiness(state, world, blockpos$pooledmutableblockpos, this)
                                 * 0.91F;
                     }
@@ -382,7 +382,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
                     if (this.isPotionActive(MobEffects.LEVITATION))
                     {
-                        this.motionY += (0.05D * (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1)
+                        this.motionY += (0.05D * (this.getActiveEffectInstance(MobEffects.LEVITATION).getAmplifier() + 1)
                                 - this.motionY) * 0.2D;
                     }
                     else

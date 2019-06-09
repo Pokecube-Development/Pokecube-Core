@@ -241,11 +241,11 @@ public abstract class PokemobStats extends PokemobGenes
         {
             e.printStackTrace();
         }
-        getEntity().setEntityBoundingBox(new AxisAlignedBB(getEntity().getEntityBoundingBox().minX,
-                getEntity().getEntityBoundingBox().minY, getEntity().getEntityBoundingBox().minZ,
-                getEntity().getEntityBoundingBox().minX + getEntity().width,
-                getEntity().getEntityBoundingBox().minY + getEntity().height,
-                getEntity().getEntityBoundingBox().minZ + getEntity().width));
+        getEntity().setEntityBoundingBox(new AxisAlignedBB(getEntity().getBoundingBox().minX,
+                getEntity().getBoundingBox().minY, getEntity().getBoundingBox().minZ,
+                getEntity().getBoundingBox().minX + getEntity().width,
+                getEntity().getBoundingBox().minY + getEntity().height,
+                getEntity().getBoundingBox().minZ + getEntity().width));
         double max = Math.max(Math.max(a, b), c);
         World.MAX_ENTITY_RADIUS = Math.max(World.MAX_ENTITY_RADIUS, max);
         mainBox = new Matrix3(a, b, c);

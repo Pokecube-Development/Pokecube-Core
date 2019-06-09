@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -52,7 +52,7 @@ public interface IPokemobUseable
      * @return something happened */
     public default ActionResult<ItemStack> onTick(IPokemob pokemob, ItemStack stack)
     {
-        return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+        return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
     }
 
     /** Called when this item is "used". Normally this means via right clicking
@@ -65,7 +65,7 @@ public interface IPokemobUseable
      * @return something happened */
     public default ActionResult<ItemStack> onUse(IPokemob pokemob, ItemStack stack, LivingEntity user)
     {
-        return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+        return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
     }
 
     /** @param attacker
@@ -73,7 +73,7 @@ public interface IPokemobUseable
      * @return */
     public default ActionResult<ItemStack> onMoveTick(IPokemob attacker, ItemStack stack, MovePacket moveuse)
     {
-        return new ActionResult<ItemStack>(EnumActionResult.FAIL, stack);
+        return new ActionResult<ItemStack>(ActionResultType.FAIL, stack);
     }
 
     public static class Default implements IPokemobUseable

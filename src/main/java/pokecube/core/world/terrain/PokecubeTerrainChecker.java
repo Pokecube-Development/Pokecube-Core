@@ -14,7 +14,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -133,9 +133,9 @@ public class PokecubeTerrainChecker implements ISubBiomeChecker
     {
         if (caveAdjusted)
         {
-            if (world instanceof WorldServer)
+            if (world instanceof ServerWorld)
             {
-                WorldServer worldS = (WorldServer) world;
+                ServerWorld worldS = (ServerWorld) world;
                 IChunkGenerator generator = worldS.getChunkProvider().chunkGenerator;
                 if (generator != null) for (String key : structureSubbiomeMap.keySet())
                 {

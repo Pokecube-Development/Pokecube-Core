@@ -39,7 +39,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
@@ -596,7 +596,7 @@ public class PokedexEntry
                 LootTable loottable = pokemob.getEntity().getEntityWorld().getLootTableManager()
                         .getLootTableFromLocation(action.lootTable);
                 LootContext.Builder lootcontext$builder = (new LootContext.Builder(
-                        (WorldServer) pokemob.getEntity().getEntityWorld())).withLootedEntity(pokemob.getEntity());
+                        (ServerWorld) pokemob.getEntity().getEntityWorld())).withLootedEntity(pokemob.getEntity());
                 for (ItemStack itemstack : loottable.generateLootForPools(pokemob.getEntity().getRNG(),
                         lootcontext$builder.build()))
                 {
@@ -1535,7 +1535,7 @@ public class PokedexEntry
         if (heldTable != null)
         {
             LootTable loottable = mob.getEntityWorld().getLootTableManager().getLootTableFromLocation(heldTable);
-            LootContext.Builder lootcontext$builder = (new LootContext.Builder((WorldServer) mob.getEntityWorld()))
+            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld) mob.getEntityWorld()))
                     .withLootedEntity(mob);
             for (ItemStack itemstack : loottable.generateLootForPools(mob.getRNG(), lootcontext$builder.build()))
             {

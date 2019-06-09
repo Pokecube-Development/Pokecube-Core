@@ -248,7 +248,7 @@ public class TileEntityTMMachine extends TileEntityOwnable implements DefaultInv
             Collections.sort(moves);
 
             PacketTrade packet = new PacketTrade(PacketTrade.SETMOVES);
-            packet.data.setInteger("N", moves.size());
+            packet.data.putInt("N", moves.size());
             for (int i = 0; i < moves.size(); i++)
             {
                 packet.data.putString("M" + i, moves.get(i));

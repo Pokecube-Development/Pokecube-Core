@@ -87,7 +87,7 @@ public interface IGuardAICapability
         public INBT writeNBT(Capability<IGuardAICapability> capability, IGuardAICapability instance, Direction side)
         {
             CompoundNBT ret = new CompoundNBT();
-            ret.setInteger("state", instance.getState().ordinal());
+            ret.putInt("state", instance.getState().ordinal());
             ret.put("tasks", instance.serializeTasks());
             return ret;
         }

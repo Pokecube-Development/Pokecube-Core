@@ -57,10 +57,10 @@ public class SecretBaseManager
         public CompoundNBT writeToNBT()
         {
             CompoundNBT ret = new CompoundNBT();
-            ret.setInteger("x", x);
-            ret.setInteger("y", y);
-            ret.setInteger("z", z);
-            ret.setInteger("w", w);
+            ret.putInt("x", x);
+            ret.putInt("y", y);
+            ret.putInt("z", z);
+            ret.putInt("w", w);
             return ret;
         }
 

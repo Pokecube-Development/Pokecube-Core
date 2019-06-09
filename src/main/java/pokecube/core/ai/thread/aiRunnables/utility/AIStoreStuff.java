@@ -402,22 +402,22 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<CompoundNBT
         CompoundNBT empty = new CompoundNBT();
         if (berryLoc != null)
         {
-            berry.setInteger("x", berryLoc.getX());
-            berry.setInteger("y", berryLoc.getY());
-            berry.setInteger("z", berryLoc.getZ());
+            berry.putInt("x", berryLoc.getX());
+            berry.putInt("y", berryLoc.getY());
+            berry.putInt("z", berryLoc.getZ());
         }
         if (storageLoc != null)
         {
-            storage.setInteger("x", storageLoc.getX());
-            storage.setInteger("y", storageLoc.getY());
-            storage.setInteger("z", storageLoc.getZ());
+            storage.putInt("x", storageLoc.getX());
+            storage.putInt("y", storageLoc.getY());
+            storage.putInt("z", storageLoc.getZ());
             storage.setByte("f", (byte) storageFace.ordinal());
         }
         if (emptyInventory != null)
         {
-            empty.setInteger("x", emptyInventory.getX());
-            empty.setInteger("y", emptyInventory.getY());
-            empty.setInteger("z", emptyInventory.getZ());
+            empty.putInt("x", emptyInventory.getX());
+            empty.putInt("y", emptyInventory.getY());
+            empty.putInt("z", emptyInventory.getZ());
             empty.setByte("f", (byte) emptyFace.ordinal());
         }
         tag.put("b", berry);

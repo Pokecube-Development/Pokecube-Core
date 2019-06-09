@@ -12,7 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -82,7 +82,7 @@ public class ItemPokedex extends Item
         if (!player.isSneaking())
         {
             showGui(player);
-            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+            return new ActionResult<ItemStack>(ActionResultType.SUCCESS, itemstack);
         }
         else
         {
@@ -99,15 +99,15 @@ public class ItemPokedex extends Item
                         CommandTools.sendMessage(player, "pokedex.setteleport");
                         PacketDataSync.sendInitPacket(player, "pokecube-data");
                     }
-                    return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+                    return new ActionResult<ItemStack>(ActionResultType.SUCCESS, itemstack);
                 }
             }
         }
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+        return new ActionResult<ItemStack>(ActionResultType.SUCCESS, itemstack);
     }
 
     @Override
-    public EnumActionResult onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
+    public ActionResultType onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
             Direction side, float hitX, float hitY, float hitZ)
     {
         Vector3 hit = Vector3.getNewVector().set(pos);
@@ -121,7 +121,7 @@ public class ItemPokedex extends Item
                 CommandTools.sendMessage(playerIn, "pokedex.setteleport");
                 PacketDataSync.sendInitPacket(playerIn, "pokecube-data");
             }
-            return EnumActionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         }
 
         if (playerIn.isSneaking() && !worldIn.isRemote)
@@ -138,7 +138,7 @@ public class ItemPokedex extends Item
         }
 
         if (!playerIn.isSneaking()) showGui(playerIn);
-        return EnumActionResult.FAIL;
+        return ActionResultType.FAIL;
     }
 
     private void showGui(PlayerEntity player)

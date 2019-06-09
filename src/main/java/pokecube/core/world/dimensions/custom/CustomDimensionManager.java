@@ -3,7 +3,7 @@ package pokecube.core.world.dimensions.custom;
 import java.util.logging.Level;
 
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.border.IBorderListener;
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import thut.essentials.world.WorldServerMulti;
+import thut.essentials.world.ServerWorldMulti;
 
 public class CustomDimensionManager
 {
@@ -48,7 +48,7 @@ public class CustomDimensionManager
         WorldSettings settings = new WorldSettings(seed == null ? overworld.getSeed() : seed, old.getGameType(),
                 old.isMapFeaturesEnabled(), old.isHardcoreModeEnabled(), WorldType.parseWorldType(worldType));
         settings.setGeneratorOptions(generatorOptions);
-        WorldServer newWorld = CustomDimensionManager.initDimension(dim, settings, worldName);
+        ServerWorld newWorld = CustomDimensionManager.initDimension(dim, settings, worldName);
         DimensionManager.setWorld(dim, newWorld, FMLCommonHandler.instance().getMinecraftServerInstance());
         if (oldWorld != null && newWorld != null)
         {
@@ -66,15 +66,15 @@ public class CustomDimensionManager
         PokecubeDimensionManager.getInstance().syncToAll();
     }
 
-    public static WorldServer initDimension(int dim, WorldSettings settings, String worldName)
+    public static ServerWorld initDimension(int dim, WorldSettings settings, String worldName)
     {
         DimensionManager.initDimension(dim);
-        WorldServer world = DimensionManager.getWorld(dim);
+        ServerWorld world = DimensionManager.getWorld(dim);
         // TODO replace this with a AT.
         ReflectionHelper.setPrivateValue(World.class, world, new WorldInfo(settings, worldName), 27);
-        WorldServerMulti multi = (WorldServerMulti) world;
-        WorldServer delegate = ReflectionHelper.getPrivateValue(WorldServerMulti.class, multi, 0);
-        IBorderListener listener = ReflectionHelper.getPrivateValue(WorldServerMulti.class, multi, 1);
+        ServerWorldMulti multi = (ServerWorldMulti) world;
+        ServerWorld delegate = ReflectionHelper.getPrivateValue(ServerWorldMulti.class, multi, 0);
+        IBorderListener listener = ReflectionHelper.getPrivateValue(ServerWorldMulti.class, multi, 1);
         delegate.getWorldBorder().removeListener(listener);
         PokecubeMod.log("Hotloaded Dim: " + dim);
         return world;

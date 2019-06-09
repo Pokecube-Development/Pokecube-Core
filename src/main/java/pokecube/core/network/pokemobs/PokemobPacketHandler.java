@@ -8,7 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -42,7 +42,7 @@ public class PokemobPacketHandler
                         {
                             byte channel = buffer.readByte();
                             int id = buffer.readInt();
-                            WorldServer world = FMLCommonHandler.instance().getMinecraftServerInstance()
+                            ServerWorld world = FMLCommonHandler.instance().getMinecraftServerInstance()
                                     .getWorld(player.dimension);
                             Entity entity = PokecubeMod.core.getEntityProvider().getEntity(world, id, true);
                             IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);

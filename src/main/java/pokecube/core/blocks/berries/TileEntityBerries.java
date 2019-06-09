@@ -122,8 +122,8 @@ public class TileEntityBerries extends TileEntity
     public CompoundNBT writeToNBT(CompoundNBT nbt)
     {
         super.writeToNBT(nbt);
-        nbt.setInteger("berry", berryId);
-        nbt.setInteger("stage", stage);
+        nbt.putInt("berry", berryId);
+        nbt.putInt("stage", stage);
         nbt.putString("type", type.toString());
         return nbt;
     }

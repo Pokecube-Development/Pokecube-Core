@@ -94,9 +94,9 @@ public abstract class TemplateStructureBase extends Village
             else templatePosition = new BlockPos(boundingBox.minX, boundingBox.minY, boundingBox.minZ);
         }
 
-        tagCompound.setInteger("TPX", this.templatePosition.getX());
-        tagCompound.setInteger("TPY", this.templatePosition.getY());
-        tagCompound.setInteger("TPZ", this.templatePosition.getZ());
+        tagCompound.putInt("TPX", this.templatePosition.getX());
+        tagCompound.putInt("TPY", this.templatePosition.getY());
+        tagCompound.putInt("TPZ", this.templatePosition.getZ());
         tagCompound.putString("TN", ((PokecubeTemplate) getTemplate()).name);
         tagCompound.setByte("Rot", (byte) placeSettings.getRotation().ordinal());
     }

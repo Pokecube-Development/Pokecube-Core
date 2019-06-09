@@ -218,9 +218,9 @@ public class RouteEditHelper
             CompoundNBT data = new CompoundNBT();
             CompoundNBT tag = new CompoundNBT();
             tag.putBoolean("GU", true);
-            tag.setInteger("I", index);
+            tag.putInt("I", index);
             data.put("T", tag);
-            data.setInteger("I", entity.getEntityId());
+            data.putInt("I", entity.getEntityId());
             if (index < guard.getTasks().size()) guard.getTasks().remove(index);
             function.apply(data);
         }
@@ -230,10 +230,10 @@ public class RouteEditHelper
             CompoundNBT data = new CompoundNBT();
             CompoundNBT tag = new CompoundNBT();
             tag.putBoolean("GU", true);
-            tag.setInteger("I", index);
-            tag.setInteger("N", dir);
+            tag.putInt("I", index);
+            tag.putInt("N", dir);
             data.put("T", tag);
-            data.setInteger("I", entity.getEntityId());
+            data.putInt("I", entity.getEntityId());
             int index1 = tag.getInt("I");
             int index2 = index1 + tag.getInt("N");
             IGuardTask temp = guard.getTasks().get(index1);
@@ -262,7 +262,7 @@ public class RouteEditHelper
                 CompoundNBT data = new CompoundNBT();
                 CompoundNBT tag = new CompoundNBT();
                 tag.putBoolean("GU", true);
-                tag.setInteger("I", index);
+                tag.putInt("I", index);
                 // TODO generalize this maybe?
                 IGuardTask task = index < guard.getTasks().size() ? guard.getTasks().get(index)
                         : new GuardAICapability.GuardTask();
@@ -273,7 +273,7 @@ public class RouteEditHelper
                 INBT var = task.serialze();
                 tag.put("V", var);
                 data.put("T", tag);
-                data.setInteger("I", entity.getEntityId());
+                data.putInt("I", entity.getEntityId());
                 function.apply(data);
             }
         }

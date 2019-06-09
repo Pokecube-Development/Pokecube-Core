@@ -10,7 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import pokecube.core.interfaces.IPokemob;
@@ -69,7 +69,7 @@ public class RecallCommand extends CommandBase
         boolean named = !all && !stay && args.length > 0;
         String specificName = named ? args[0] : "";
 
-        WorldServer world = (WorldServer) cSender.getEntityWorld();
+        ServerWorld world = (ServerWorld) cSender.getEntityWorld();
 
         PlayerEntity player = cSender.getEntityWorld().getPlayerEntityByName(sender);
         if (allall && cSender.getEntityWorld().getPlayerEntityByName(sender) != null)
