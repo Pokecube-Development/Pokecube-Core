@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -156,11 +156,11 @@ public class MoveEventsHandler
         World world = attacker.getEntity().getEntityWorld();
         Vector3 nextBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).reverse().norm()
                 .addTo(location);
-        IBlockState nextState = nextBlock.getBlockState(world);
-        IBlockState state = location.getBlockState(world);
+        BlockState nextState = nextBlock.getBlockState(world);
+        BlockState state = location.getBlockState(world);
         Vector3 prevBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).norm()
                 .addTo(location);
-        IBlockState prevState = prevBlock.getBlockState(world);
+        BlockState prevState = prevBlock.getBlockState(world);
         int flamNext = nextState.getBlock().getFlammability(world, nextBlock.getPos(), Direction.UP);
         if (state.getMaterial().isReplaceable() && flamNext != 0)
         {
@@ -203,11 +203,11 @@ public class MoveEventsHandler
         if (move.getPWR() < ELECTRICSTRONG || !PokecubeMod.core.getConfig().defaultElectricActions) { return false; }
 
         World world = attacker.getEntity().getEntityWorld();
-        IBlockState state = location.getBlockState(world);
+        BlockState state = location.getBlockState(world);
         Block block = state.getBlock();
         Vector3 nextBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).reverse().norm()
                 .addTo(location);
-        IBlockState nextState = nextBlock.getBlockState(world);
+        BlockState nextState = nextBlock.getBlockState(world);
         if (block == Blocks.SAND)
         {
             location.setBlock(world, Blocks.GLASS);
@@ -226,7 +226,7 @@ public class MoveEventsHandler
         if (!PokecubeMod.core.getConfig().defaultIceActions) return false;
         World world = attacker.getEntity().getEntityWorld();
         BlockPos pos = location.getPos();
-        IBlockState state = location.getBlockState(world);
+        BlockState state = location.getBlockState(world);
         Block block = state.getBlock();
         if (block.isAir(state, world, location.getPos()))
         {
@@ -266,10 +266,10 @@ public class MoveEventsHandler
     {
         if (!PokecubeMod.core.getConfig().defaultWaterActions) return false;
         World world = attacker.getEntity().getEntityWorld();
-        IBlockState state = location.getBlockState(world);
+        BlockState state = location.getBlockState(world);
         Vector3 prevBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).norm()
                 .addTo(location);
-        IBlockState prevState = prevBlock.getBlockState(world);
+        BlockState prevState = prevBlock.getBlockState(world);
         if (state.getBlock() == Blocks.FIRE)
         {
             location.setAir(world);
@@ -284,7 +284,7 @@ public class MoveEventsHandler
         Block block = state.getBlock();
         Vector3 nextBlock = Vector3.getNewVector().set(attacker.getEntity()).subtractFrom(location).reverse().norm()
                 .addTo(location);
-        IBlockState nextState = nextBlock.getBlockState(world);
+        BlockState nextState = nextBlock.getBlockState(world);
         if (move.getPWR() >= WATERSTRONG)
         {
             if (block == Blocks.LAVA)

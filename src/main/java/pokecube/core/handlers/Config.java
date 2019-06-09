@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
@@ -672,20 +672,20 @@ public class Config extends ConfigBase
     public String[]                      customFossils                = {};
 
     /** List of blocks to be considered for the floor of a cave. */
-    private List<Predicate<IBlockState>> caveBlocks                   = Lists.newArrayList();
+    private List<Predicate<BlockState>> caveBlocks                   = Lists.newArrayList();
     /** List of blocks to be considered for the surface. */
-    private List<Predicate<IBlockState>> surfaceBlocks                = Lists.newArrayList();
+    private List<Predicate<BlockState>> surfaceBlocks                = Lists.newArrayList();
     /** List of blocks to be considered to be rocks for the purpose of rocksmash
      * and lithovore eating */
-    private List<Predicate<IBlockState>> rocks                        = Lists.newArrayList();
+    private List<Predicate<BlockState>> rocks                        = Lists.newArrayList();
     /** List of blocks to be considered to be generic terrain, for dig to reduce
      * drop rates for */
-    private List<Predicate<IBlockState>> terrain                      = Lists.newArrayList();
-    private List<Predicate<IBlockState>> woodTypes                    = Lists.newArrayList();
-    private List<Predicate<IBlockState>> plantTypes                   = Lists.newArrayList();
-    private List<Predicate<IBlockState>> fruitTypes                   = Lists.newArrayList();
-    private List<Predicate<IBlockState>> dirtTypes                    = Lists.newArrayList();
-    private List<Predicate<IBlockState>> industrial                   = Lists.newArrayList();
+    private List<Predicate<BlockState>> terrain                      = Lists.newArrayList();
+    private List<Predicate<BlockState>> woodTypes                    = Lists.newArrayList();
+    private List<Predicate<BlockState>> plantTypes                   = Lists.newArrayList();
+    private List<Predicate<BlockState>> fruitTypes                   = Lists.newArrayList();
+    private List<Predicate<BlockState>> dirtTypes                    = Lists.newArrayList();
+    private List<Predicate<BlockState>> industrial                   = Lists.newArrayList();
 
     private Config()
     {
@@ -958,47 +958,47 @@ public class Config extends ConfigBase
         return prop;
     }
 
-    public List<Predicate<IBlockState>> getCaveBlocks()
+    public List<Predicate<BlockState>> getCaveBlocks()
     {
         return caveBlocks;
     }
 
-    public List<Predicate<IBlockState>> getRocks()
+    public List<Predicate<BlockState>> getRocks()
     {
         return rocks;
     }
 
-    public List<Predicate<IBlockState>> getSurfaceBlocks()
+    public List<Predicate<BlockState>> getSurfaceBlocks()
     {
         return surfaceBlocks;
     }
 
-    public List<Predicate<IBlockState>> getTerrain()
+    public List<Predicate<BlockState>> getTerrain()
     {
         return terrain;
     }
 
-    public List<Predicate<IBlockState>> getWoodTypes()
+    public List<Predicate<BlockState>> getWoodTypes()
     {
         return woodTypes;
     }
 
-    public List<Predicate<IBlockState>> getPlantTypes()
+    public List<Predicate<BlockState>> getPlantTypes()
     {
         return plantTypes;
     }
 
-    public List<Predicate<IBlockState>> getFruitTypes()
+    public List<Predicate<BlockState>> getFruitTypes()
     {
         return fruitTypes;
     }
 
-    public List<Predicate<IBlockState>> getDirtTypes()
+    public List<Predicate<BlockState>> getDirtTypes()
     {
         return dirtTypes;
     }
 
-    public List<Predicate<IBlockState>> getIndustrial()
+    public List<Predicate<BlockState>> getIndustrial()
     {
         return industrial;
     }

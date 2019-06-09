@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
@@ -497,7 +497,7 @@ public class EventsHandler
             TileEntity te = evt.getWorld().getTileEntity(evt.getPos());
             if (te instanceof TileEntityOwnable)
             {
-                IBlockState state = evt.getWorld().getBlockState(evt.getPos());
+                BlockState state = evt.getWorld().getBlockState(evt.getPos());
                 TileEntityOwnable tile = (TileEntityOwnable) te;
                 if (tile.canEdit(evt.getEntity()) && tile.shouldBreak())
                 {

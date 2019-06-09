@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
@@ -83,7 +83,7 @@ public class EntityPokecube extends EntityPokecubeBase
         static LootEntry createFromNBT(CompoundNBT nbt)
         {
             ItemStack loot = new ItemStack(nbt.getCompound("loot"));
-            return new LootEntry(loot, nbt.getInteger("rolls"));
+            return new LootEntry(loot, nbt.getInt("rolls"));
         }
 
         public LootEntry(ItemStack loot, int rolls)
@@ -337,7 +337,7 @@ public class EntityPokecube extends EntityPokecubeBase
         }
 
         BlockPos pos = tilePos == null ? getPosition() : tilePos;
-        IBlockState state = getEntityWorld().getBlockState(pos);
+        BlockState state = getEntityWorld().getBlockState(pos);
 
         Block block = state.getBlock();
         if (state.getMaterial() != Material.AIR)

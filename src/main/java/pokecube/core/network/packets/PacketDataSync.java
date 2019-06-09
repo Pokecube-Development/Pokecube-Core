@@ -253,7 +253,7 @@ public class PacketDataSync implements IMessage, IMessageHandler<PacketDataSync,
             {
                 try
                 {
-                    int l = ints.getInteger(s);
+                    int l = ints.getInt(s);
                     f = defaults.getClass().getDeclaredField(s);
                     f.setAccessible(true);
                     defaults.updateField(f, l + "");

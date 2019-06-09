@@ -86,7 +86,7 @@ public interface IOngoingAffected extends INBTSerializable<ListNBT>
         @Override
         default void deserializeNBT(CompoundNBT nbt)
         {
-            setDuration(nbt.getInteger("D"));
+            setDuration(nbt.getInt("D"));
         }
 
     }

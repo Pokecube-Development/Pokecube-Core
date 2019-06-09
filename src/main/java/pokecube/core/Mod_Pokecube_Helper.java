@@ -28,7 +28,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -47,13 +47,13 @@ public class Mod_Pokecube_Helper
 
     public static HashSet<Block> allBlocks         = new HashSet<Block>();
 
-    private static void addToList(List<Predicate<IBlockState>> list, String... conts)
+    private static void addToList(List<Predicate<BlockState>> list, String... conts)
     {
         if (conts == null) return;
         if (conts.length < 1) return;
         for (String s : conts)
         {
-            Predicate<IBlockState> b = PokecubeItems.getState(s);
+            Predicate<BlockState> b = PokecubeItems.getState(s);
             if (b != null)
             {
                 list.add(b);

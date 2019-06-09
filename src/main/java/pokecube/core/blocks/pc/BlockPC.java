@@ -3,7 +3,7 @@ package pokecube.core.blocks.pc;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.IProperty;
@@ -11,7 +11,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.blocks.TileEntityOwnable;
@@ -50,14 +50,14 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     }
 
     @Override
-    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
+    public BlockState getExtendedState(BlockState state, IBlockReader world, BlockPos pos)
     {
         return super.getExtendedState(state, world, pos);
     }
 
     @Override
     /** Convert the BlockState into the correct metadata value */
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         int ret = state.getValue(FACING).getIndex();
         return ret;
@@ -65,7 +65,7 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
 
     @Override
     /** Convert the given metadata into a BlockState for this Block */
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
         Direction Direction = Direction.getFront(meta & 7);
 
@@ -78,24 +78,24 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     }
 
     @Override
-    public boolean isFullCube(IBlockState state)
+    public boolean isFullCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isOpaqueCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         this.setLightLevel(1f);
         if (!top) { return false; }
-        IBlockState down = worldIn.getBlockState(pos.down());
+        BlockState down = worldIn.getBlockState(pos.down());
         Block idDown = down.getBlock();
         if (!(idDown instanceof BlockPC) || ((BlockPC) idDown).top
                 || !(worldIn.getTileEntity(pos) instanceof TileEntityPC))
@@ -112,7 +112,7 @@ public class BlockPC extends BlockRotatable implements ITileEntityProvider
     }
 
     @Override
-    public IBlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
+    public BlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
             float hitZ, int meta, LivingEntity placer, Hand hand)
     {
         TileEntity te = world.getTileEntity(pos);

@@ -4,7 +4,7 @@ import java.util.Random;
 
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -44,7 +44,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    public void breakBlock(World worldIn, BlockPos pos, BlockState state)
     {
         dropItems(worldIn, pos);
         super.breakBlock(worldIn, pos, state);
@@ -113,7 +113,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
 
     @Override
     /** Convert the BlockState into the correct metadata value */
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         int ret = state.getValue(FACING).getIndex();
         return ret;
@@ -121,7 +121,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
 
     @Override
     /** Convert the given metadata into a BlockState for this Block */
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
         Direction Direction = Direction.getFront(meta);
         if (Direction.getAxis() == Direction.Axis.Y)
@@ -132,19 +132,19 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     }
 
     @Override
-    public boolean isFullCube(IBlockState state)
+    public boolean isFullCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isOpaqueCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
 
@@ -163,7 +163,7 @@ public class BlockTradingTable extends BlockRotatable implements ITileEntityProv
     }
 
     @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, Direction facing, float hitX, float hitY,
+    public BlockState getStateForPlacement(World worldIn, BlockPos pos, Direction facing, float hitX, float hitY,
             float hitZ, int meta, LivingEntity placer)
     {
         return this.getStateFromMeta(meta).withProperty(FACING, placer.getHorizontalFacing().getOpposite());

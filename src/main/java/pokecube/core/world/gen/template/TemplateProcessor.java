@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
@@ -18,7 +18,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 public class TemplateProcessor extends BlockRotationProcessor
 {
     private static final Method GETBIOMEBLOCK = ReflectionHelper.findMethod(StructureVillagePieces.Village.class,
-            "getBiomeSpecificBlockState", "func_175847_a", IBlockState.class);
+            "getBiomeSpecificBlockState", "func_175847_a", BlockState.class);
     static
     {
         GETBIOMEBLOCK.setAccessible(true);
@@ -45,7 +45,7 @@ public class TemplateProcessor extends BlockRotationProcessor
         {
             try
             {
-                IBlockState newstate = (IBlockState) GETBIOMEBLOCK.invoke(init, info.blockState);
+                BlockState newstate = (BlockState) GETBIOMEBLOCK.invoke(init, info.blockState);
                 info = new BlockInfo(info.pos, newstate, info.tileentityData);
             }
             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)

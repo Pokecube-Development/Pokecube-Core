@@ -521,7 +521,7 @@ public class PokecubeCore extends PokecubeMod
                         continue;
                     }
                     CompoundNBT posTag = ticket.getModData().getCompound("pos");
-                    BlockPos pos = new BlockPos(posTag.getInteger("x"), posTag.getInteger("y"), posTag.getInteger("z"));
+                    BlockPos pos = new BlockPos(posTag.getInt("x"), posTag.getInt("y"), posTag.getInt("z"));
                     TileEntity tile = world.getTileEntity(pos);
                     if (!(tile instanceof TileHealTable))
                     {

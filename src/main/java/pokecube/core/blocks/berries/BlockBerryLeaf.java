@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -16,7 +16,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -53,7 +53,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
     /** Get the actual Block state of this Block at the given position. This
      * applies properties not visible in the metadata, such as fence
      * connections. */
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public BlockState getActualState(BlockState state, IBlockReader worldIn, BlockPos pos)
     {
         return Blocks.LEAVES.getDefaultState();
     }
@@ -66,7 +66,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
     }
 
     @Override
-    public java.util.List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public java.util.List<ItemStack> getDrops(IBlockReader world, BlockPos pos, BlockState state, int fortune)
     {
         java.util.List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
         Random rand = world instanceof World ? ((World) world).rand : new Random();
@@ -98,14 +98,14 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
 
     @Override
     /** Get the Item that this Block should drop when harvested. */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    public Item getItemDropped(BlockState state, Random rand, int fortune)
     {
         return null;
     }
 
     @Override
     /** Convert the BlockState into the correct metadata value */
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         int i = 0;
 
@@ -129,7 +129,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
      *            The full target the player is looking at
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, World world, BlockPos pos,
             PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
@@ -138,7 +138,7 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
 
     @Override
     /** Convert the given metadata into a BlockState for this Block */
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState().withProperty(DECAYABLE, Boolean.valueOf((meta & 4) == 0))
                 .withProperty(CHECK_DECAY, Boolean.valueOf((meta & 8) > 0));
@@ -153,13 +153,13 @@ public class BlockBerryLeaf extends BlockLeaves implements ITileEntityProvider
     @Override
     /** Used to determine ambient occlusion and culling when rebuilding chunks
      * for render */
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isOpaqueCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public List<ItemStack> onSheared(ItemStack item, IBlockAccess world, BlockPos pos, int fortune)
+    public List<ItemStack> onSheared(ItemStack item, IBlockReader world, BlockPos pos, int fortune)
     {
         List<ItemStack> ret = Lists.newArrayList();
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);

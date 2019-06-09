@@ -16,7 +16,7 @@ import net.minecraft.pathfinding.Path;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
@@ -249,7 +249,7 @@ public abstract class AIBase implements IAIRunnable
         }
     }
 
-    protected IBlockAccess      world;
+    protected IBlockReader      world;
 
     int                         priority = 0;
 

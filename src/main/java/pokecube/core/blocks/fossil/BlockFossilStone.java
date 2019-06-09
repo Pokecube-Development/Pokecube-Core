@@ -5,10 +5,10 @@ import java.util.Collections;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import pokecube.core.PokecubeItems;
 
 public class BlockFossilStone extends Block
@@ -34,7 +34,7 @@ public class BlockFossilStone extends Block
      *            Breakers fortune level
      * @return A ArrayList containing all items this block drops */
     @Override
-    public ArrayList<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public ArrayList<ItemStack> getDrops(IBlockReader world, BlockPos pos, BlockState state, int fortune)
     {
         ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
         if (Math.random() * (1 + fortune) > 0.5)

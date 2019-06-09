@@ -100,8 +100,8 @@ public abstract class AbstractModelRenderer<T extends MobEntity> extends RenderL
     {
         blend = GL11.glGetBoolean(GL11.GL_BLEND);
         light = GL11.glGetBoolean(GL11.GL_LIGHTING);
-        src = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-        dst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        src = GL11.glgetInt(GL11.GL_BLEND_SRC);
+        dst = GL11.glgetInt(GL11.GL_BLEND_DST);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

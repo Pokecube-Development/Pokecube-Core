@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.IProjectile;
@@ -375,8 +375,8 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
     public void readEntityFromNBT(CompoundNBT CompoundNBT)
     {
         super.readEntityFromNBT(CompoundNBT);
-        tilt = CompoundNBT.getInteger("tilt");
-        time = CompoundNBT.getInteger("time");
+        tilt = CompoundNBT.getInt("tilt");
+        time = CompoundNBT.getInt("time");
         CompoundNBT CompoundNBT1 = CompoundNBT.getCompound("Item");
         this.setItem(new ItemStack(CompoundNBT1));
 
@@ -391,8 +391,8 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
         {
             this.setDead();
         }
-        this.tilePos = new BlockPos(CompoundNBT.getInteger("xTile"), CompoundNBT.getInteger("yTile"),
-                CompoundNBT.getInteger("zTile"));
+        this.tilePos = new BlockPos(CompoundNBT.getInt("xTile"), CompoundNBT.getInt("yTile"),
+                CompoundNBT.getInt("zTile"));
         this.ticksInGround = CompoundNBT.getShort("life");
         this.tile = Block.getBlockById(CompoundNBT.getByte("inTile") & 255);
         this.inData = CompoundNBT.getByte("inData") & 255;
@@ -445,7 +445,7 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
             v = Vector3.getNextSurfacePoint(getEntityWorld(), v, dv, Math.max(2, dv.mag()));
             if (v == null) v = v0.set(this);
             v.set(v.intX() + 0.5, v.y, v.intZ() + 0.5);
-            IBlockState state = v.getBlockState(getEntityWorld());
+            BlockState state = v.getBlockState(getEntityWorld());
             if (state.getMaterial().isSolid()) v.y = Math.ceil(v.y);
             MobEntity entity = pokemob.getEntity();
             entity.fallDistance = 0;
@@ -504,7 +504,7 @@ public class EntityPokecubeBase extends MobEntity implements IEntityAdditionalSp
                     v = Vector3.getNextSurfacePoint(getEntityWorld(), v, dv, Math.max(2, dv.mag()));
                     if (v == null) v = v0.set(this);
                     v.set(v.intX() + 0.5, v.y, v.intZ() + 0.5);
-                    IBlockState state = v.getBlockState(getEntityWorld());
+                    BlockState state = v.getBlockState(getEntityWorld());
                     if (state.getMaterial().isSolid()) v.y = Math.ceil(v.y);
                     v.moveEntity(newMob);
                     getEntityWorld().spawnEntity(newMob);

@@ -8,7 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockStoneBrick;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,7 +18,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.database.PokedexEntry;
@@ -65,7 +65,7 @@ public class BlockNest extends Block implements ITileEntityProvider
 
     @Override
     @Deprecated
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public BlockState getActualState(BlockState state, IBlockReader worldIn, BlockPos pos)
     {
         if (state.getValue(TYPE) == 1) return Blocks.STONEBRICK.getDefaultState().withProperty(BlockStoneBrick.VARIANT,
                 BlockStoneBrick.EnumType.CHISELED);
@@ -75,7 +75,7 @@ public class BlockNest extends Block implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         TileEntity tile_entity = worldIn.getTileEntity(pos);
@@ -103,7 +103,7 @@ public class BlockNest extends Block implements ITileEntityProvider
 
     @Override
     /** Convert the BlockState into the correct metadata value */
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         if (state.getBlock() == this) return state.getValue(TYPE).intValue();
         return state.getBlock().getMetaFromState(state);
@@ -111,20 +111,20 @@ public class BlockNest extends Block implements ITileEntityProvider
 
     @Override
     /** Convert the given metadata into a BlockState for this Block */
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState().withProperty(TYPE, Integer.valueOf(meta));
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state)
+    public boolean hasTileEntity(BlockState state)
     {
         return state.getValue(TYPE).intValue() < 2;
     }
 
     /** Get the Item that this Block should drop when harvested. */
     @Override
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public List<ItemStack> getDrops(IBlockReader world, BlockPos pos, BlockState state, int fortune)
     {
         List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
 

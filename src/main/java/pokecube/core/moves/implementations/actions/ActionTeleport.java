@@ -6,7 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import pokecube.core.events.handlers.EventsHandler;
@@ -68,7 +68,7 @@ public class ActionTeleport implements IMoveAction
                     + toTeleport.getRNG().nextDouble() * toTeleport.height;
             double var28 = par5 + (toTeleport.posZ - par5) * var19
                     + (toTeleport.getRNG().nextDouble() - 0.5D) * toTeleport.width * 2.0D;
-            toTeleport.getEntityWorld().spawnParticle(EnumParticleTypes.PORTAL, var24, var26, var28, var21, var22,
+            toTeleport.getEntityWorld().spawnParticle(ParticleTypes.PORTAL, var24, var26, var28, var21, var22,
                     var23);
         }
 

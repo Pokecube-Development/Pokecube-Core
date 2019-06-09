@@ -1,6 +1,6 @@
 package pokecube.core.moves.implementations.actions;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,7 +33,7 @@ public class ActionHydropump implements IMoveAction
         {
             Entity player = user.getEntity();
             temp.set(dir).scalarMultBy(i).addTo(source);
-            IBlockState state = temp.getBlockState(player.getEntityWorld());
+            BlockState state = temp.getBlockState(player.getEntityWorld());
             if (!state.getMaterial().isReplaceable()) continue;
             if (user.getPokemonOwner() instanceof PlayerEntity)
             {

@@ -1,7 +1,7 @@
 package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
@@ -78,7 +78,7 @@ public class ActionDig implements IMoveAction
                 for (int k = -range; k <= range; k++)
                 {
                     temp.set(v);
-                    IBlockState state = temp.addTo(i, j, k).getBlockState(world);
+                    BlockState state = temp.addTo(i, j, k).getBlockState(world);
                     Block block = state.getBlock();
                     if (PokecubeTerrainChecker.isTerrain(state))
                     {

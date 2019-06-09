@@ -80,7 +80,7 @@ public class ModelRing extends ModelBase
         EnumDyeColor ret = EnumDyeColor.GRAY;
         if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
         {
-            int damage = stack.getTag().getInteger("dyeColour");
+            int damage = stack.getTag().getInt("dyeColour");
             ret = EnumDyeColor.byDyeDamage(damage);
         }
         Color colour = new Color(ret.getColorValue() + 0xFF000000);

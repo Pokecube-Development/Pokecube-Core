@@ -12,7 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.Explosion;
@@ -134,12 +134,12 @@ public class Move_Explode extends Move_Basic
 
                 if (getPWR() > 200)
                 {
-                    mob.getEntityWorld().spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, mob.posX, mob.posY, mob.posZ,
+                    mob.getEntityWorld().spawnParticle(ParticleTypes.EXPLOSION_HUGE, mob.posX, mob.posY, mob.posZ,
                             1.0D, 0.0D, 0.0D, new int[0]);
                 }
                 else
                 {
-                    mob.getEntityWorld().spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, mob.posX, mob.posY, mob.posZ,
+                    mob.getEntityWorld().spawnParticle(ParticleTypes.EXPLOSION_LARGE, mob.posX, mob.posY, mob.posZ,
                             1.0D, 0.0D, 0.0D, new int[0]);
                 }
                 actualAttack(pokemob, Vector3.getNewVector().set(pokemob.getEntity()).add(0,

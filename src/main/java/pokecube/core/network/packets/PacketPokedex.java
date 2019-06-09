@@ -271,7 +271,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
             if (ctx.side == Dist.DEDICATED_SERVER)
             {
                 Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(),
-                        message.data.getInteger("V"), true);
+                        message.data.getInt("V"), true);
                 IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
                 if (pokemob != null) PlayerDataHandler.getInstance().getPlayerData(player)
                         .getData(PokecubePlayerStats.class).inspect(player, pokemob);
@@ -582,8 +582,8 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         }
         if (message.message == REORDER)
         {
-            int index1 = message.data.getInteger("1");
-            int index2 = message.data.getInteger("2");
+            int index1 = message.data.getInt("1");
+            int index2 = message.data.getInt("2");
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
             TeleportHandler.swapTeleports(player.getCachedUniqueIdString(), index1, index2);
             PacketDataSync.sendInitPacket(player, "pokecube-data");
@@ -591,7 +591,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         }
         if (message.message == REMOVE)
         {
-            int index = message.data.getInteger("I");
+            int index = message.data.getInt("I");
             TeleDest loc = TeleportHandler.getTeleport(player.getCachedUniqueIdString(), index);
             TeleportHandler.unsetTeleport(index, player.getCachedUniqueIdString());
             player.sendMessage(new StringTextComponent("Deleted " + loc.getName()));
@@ -602,7 +602,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
         if (message.message == RENAME)
         {
             String name = message.data.getString("N");
-            int index = message.data.getInteger("I");
+            int index = message.data.getInt("I");
             TeleportHandler.renameTeleport(player.getCachedUniqueIdString(), index, name);
             player.sendMessage(new StringTextComponent("Set teleport as " + name));
             PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
@@ -627,7 +627,7 @@ public class PacketPokedex implements IMessage, IMessageHandler<PacketPokedex, I
                 Coordinate c = Coordinate.readNBT(tag);
                 pokecube.core.client.gui.watch.SecretBaseRadarPage.bases.add(c);
             }
-            pokecube.core.client.gui.watch.SecretBaseRadarPage.baseRange = message.data.getInteger("R");
+            pokecube.core.client.gui.watch.SecretBaseRadarPage.baseRange = message.data.getInt("R");
             return;
         }
         if (message.message == INSPECT)

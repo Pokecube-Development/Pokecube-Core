@@ -60,7 +60,7 @@ public class ItemPokedex extends Item
     {
         if (playerIn instanceof ServerPlayerEntity)
         {
-            Chunk chunk = playerIn.getEntityWorld().getChunkFromBlockCoords(playerIn.getPosition());
+            Chunk chunk = playerIn.getEntityWorld().getChunk(playerIn.getPosition());
             PacketHandler.sendTerrainToClient(playerIn.getEntityWorld(), new ChunkPos(chunk.x, chunk.z),
                     (ServerPlayerEntity) playerIn);
             PacketDataSync.sendInitPacket(playerIn, "pokecube-stats");
@@ -145,7 +145,7 @@ public class ItemPokedex extends Item
     {
         if (player instanceof ServerPlayerEntity)
         {
-            Chunk chunk = player.getEntityWorld().getChunkFromBlockCoords(player.getPosition());
+            Chunk chunk = player.getEntityWorld().getChunk(player.getPosition());
             PacketHandler.sendTerrainToClient(player.getEntityWorld(), new ChunkPos(chunk.x, chunk.z),
                     (ServerPlayerEntity) player);
             PacketDataSync.sendInitPacket(player, "pokecube-stats");

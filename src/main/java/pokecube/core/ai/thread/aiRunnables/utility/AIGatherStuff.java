@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -49,10 +49,10 @@ public class AIGatherStuff extends AIBase
     public static int                           COOLDOWN_PATH    = 5;
 
     // Matcher used to determine if a block is a fruit or crop to be picked.
-    private static final Predicate<IBlockState> berryMatcher     = new Predicate<IBlockState>()
+    private static final Predicate<BlockState> berryMatcher     = new Predicate<BlockState>()
                                                                  {
                                                                      @Override
-                                                                     public boolean apply(IBlockState input)
+                                                                     public boolean apply(BlockState input)
                                                                      {
                                                                          return PokecubeTerrainChecker.isFruit(input);
                                                                      }
@@ -305,7 +305,7 @@ public class AIGatherStuff extends AIBase
             if (dist < diff)
             {
                 setCombatState(pokemob, CombatStates.HUNTING, false);
-                IBlockState state = stuffLoc.getBlockState(entity.getEntityWorld());
+                BlockState state = stuffLoc.getBlockState(entity.getEntityWorld());
                 Block plant = stuffLoc.getBlock(entity.getEntityWorld());
                 TickHandler.addBlockChange(stuffLoc, entity.dimension, Blocks.AIR);
                 if (state.getMaterial() != Material.GRASS)
@@ -334,7 +334,7 @@ public class AIGatherStuff extends AIBase
                             if (!stack.isEmpty() && stack.getItem() instanceof IPlantable)
                             {
                                 IPlantable plantable = (IPlantable) stack.getItem();
-                                IBlockState plantState = plantable.getPlant(world, stuffLoc.getPos().up());
+                                BlockState plantState = plantable.getPlant(world, stuffLoc.getPos().up());
                                 if (plantState.getBlock() == state.getBlock())
                                 {
                                     toRun.addElement(new ReplantTask(entity, stack.copy(), stuffLoc.getPos()));

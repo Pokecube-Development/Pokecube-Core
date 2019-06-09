@@ -195,8 +195,8 @@ public class RenderAdvancedPokemobModel<T extends MobEntity> extends RenderPokem
     {
         blend = GL11.glGetBoolean(GL11.GL_BLEND);
         normalize = GL11.glGetBoolean(GL11.GL_NORMALIZE);
-        src = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-        dst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        src = GL11.glgetInt(GL11.GL_BLEND_SRC);
+        dst = GL11.glgetInt(GL11.GL_BLEND_DST);
         if (!normalize) GL11.glEnable(GL11.GL_NORMALIZE);
         if (!blend) GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

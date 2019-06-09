@@ -1,6 +1,6 @@
 package pokecube.core.ai.utils.pathing.node;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.pathfinding.WalkNodeProcessor;
@@ -27,8 +27,8 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
         }
         for (Direction side : Direction.HORIZONTALS)
         {
-            pathpoint = this.getPoint(currentPoint.x + side.getFrontOffsetX(), currentPoint.y - 1,
-                    currentPoint.z + side.getFrontOffsetZ(), Direction.DOWN);
+            pathpoint = this.getPoint(currentPoint.x + side.getXOffset(), currentPoint.y - 1,
+                    currentPoint.z + side.getZOffset(), Direction.DOWN);
             if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
             {
                 pathOptions[i++] = pathpoint;
@@ -62,7 +62,7 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
         boolean laddar = false;
         for (Direction dir : Direction.HORIZONTALS)
         {
-            laddar = laddar || getLadder(x + dir.getFrontOffsetX(), y, z + dir.getFrontOffsetZ()) != null;
+            laddar = laddar || getLadder(x + dir.getXOffset(), y, z + dir.getZOffset()) != null;
         }
         point.nodeType = PathNodeType.OPEN;
         point.costMalus += laddar ? 1 : 5;
@@ -78,9 +78,9 @@ public class WalkNodeLadderProcessor extends WalkNodeProcessor
             {
                 for (int k = z; k < z + this.entitySizeZ; ++k)
                 {
-                    IBlockState iblockstate = this.blockaccess.getBlockState(pos.setPos(i, j, k));
+                    BlockState BlockState = this.blockaccess.getBlockState(pos.setPos(i, j, k));
 
-                    if (iblockstate.getBlock().isLadder(iblockstate, blockaccess, pos, entity))
+                    if (BlockState.getBlock().isLadder(BlockState, blockaccess, pos, entity))
                     {
                         PathPoint point = openPoint(x, y, z);
                         point.nodeType = PathNodeType.OPEN;

@@ -67,7 +67,7 @@ public class SecretBaseManager
         public static Coordinate readNBT(CompoundNBT tag)
         {
             if (!tag.hasKey("x")) return null;
-            return new Coordinate(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"), tag.getInteger("w"));
+            return new Coordinate(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"), tag.getInt("w"));
         }
     }
 

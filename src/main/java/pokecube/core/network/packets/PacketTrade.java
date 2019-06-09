@@ -103,7 +103,7 @@ public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMess
             {
                 TileEntityTMMachine tradeTable = ((ContainerTMCreator) player.openContainer).getTile();
                 ArrayList<String> moves = new ArrayList<String>();
-                for (int i = 0; i < message.data.getInteger("N"); i++)
+                for (int i = 0; i < message.data.getInt("N"); i++)
                     moves.add(message.data.getString("M" + i));
                 tradeTable.moves.put(player.getCachedUniqueIdString(), moves);
             }
@@ -121,7 +121,7 @@ public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMess
             }
             else
             {
-                player = (PlayerEntity) player.getEntityWorld().getEntityByID(message.data.getInteger("I"));
+                player = (PlayerEntity) player.getEntityWorld().getEntityByID(message.data.getInt("I"));
                 int id = message.data.getByte("B");
                 if (id == 1)
                 {

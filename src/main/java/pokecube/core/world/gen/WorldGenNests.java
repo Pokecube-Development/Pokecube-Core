@@ -4,7 +4,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -61,8 +61,8 @@ public class WorldGenNests implements IWorldGenerator
                     int y = ((j + rY) % world.dimension.getActualHeight());
                     int z = ((k + rZ) % 16) + chunkZ * 16;
                     BlockPos pos = new BlockPos(x, y, z);
-                    IBlockState state = world.getBlockState(pos);
-                    IBlockState stateUp = world.getBlockState(pos.up());
+                    BlockState state = world.getBlockState(pos);
+                    BlockState stateUp = world.getBlockState(pos.up());
                     Block b = state.getBlock();
                     Block bUp = stateUp.getBlock();
                     boolean validUp = bUp.isAir(state, world, pos.up());
@@ -99,8 +99,8 @@ public class WorldGenNests implements IWorldGenerator
                     int z = ((k + rZ) % 16) + chunkZ * 16;
 
                     BlockPos pos = new BlockPos(x, y, z);
-                    IBlockState state = world.getBlockState(pos);
-                    IBlockState stateUp = world.getBlockState(pos.up());
+                    BlockState state = world.getBlockState(pos);
+                    BlockState stateUp = world.getBlockState(pos.up());
                     Block b = state.getBlock();
                     Block bUp = stateUp.getBlock();
                     boolean validUp = bUp.isAir(state, world, pos.up());

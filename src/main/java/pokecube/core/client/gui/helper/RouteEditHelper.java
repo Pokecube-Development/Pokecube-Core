@@ -234,8 +234,8 @@ public class RouteEditHelper
             tag.setInteger("N", dir);
             data.put("T", tag);
             data.setInteger("I", entity.getEntityId());
-            int index1 = tag.getInteger("I");
-            int index2 = index1 + tag.getInteger("N");
+            int index1 = tag.getInt("I");
+            int index2 = index1 + tag.getInt("N");
             IGuardTask temp = guard.getTasks().get(index1);
             guard.getTasks().set(index1, guard.getTasks().get(index2));
             guard.getTasks().set(index2, temp);
@@ -339,7 +339,7 @@ public class RouteEditHelper
     public static void applyServerPacket(INBT tag, Entity mob, IGuardAICapability guard)
     {
         CompoundNBT nbt = ((CompoundNBT) tag);
-        int index = nbt.getInteger("I");
+        int index = nbt.getInt("I");
         if (nbt.hasKey("V"))
         {
             // TODO generalize this maybe?
@@ -352,8 +352,8 @@ public class RouteEditHelper
         {
             if (nbt.hasKey("N"))
             {
-                int index1 = nbt.getInteger("I");
-                int index2 = index1 + nbt.getInteger("N");
+                int index1 = nbt.getInt("I");
+                int index2 = index1 + nbt.getInt("N");
                 IGuardTask temp = guard.getTasks().get(index1);
                 guard.getTasks().set(index1, guard.getTasks().get(index2));
                 guard.getTasks().set(index2, temp);

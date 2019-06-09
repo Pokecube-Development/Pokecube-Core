@@ -104,8 +104,8 @@ public abstract class TemplateStructureBase extends Village
     /** (abstract) Helper method to read subclass data from NBT */
     protected void readStructureFromNBT(CompoundNBT tagCompound)
     {
-        this.templatePosition = new BlockPos(tagCompound.getInteger("TPX"), tagCompound.getInteger("TPY"),
-                tagCompound.getInteger("TPZ"));
+        this.templatePosition = new BlockPos(tagCompound.getInt("TPX"), tagCompound.getInt("TPY"),
+                tagCompound.getInt("TPZ"));
         String name = tagCompound.getString("TN");
         if (name.isEmpty()) name = PokecubeTemplates.POKECENTER;
         try

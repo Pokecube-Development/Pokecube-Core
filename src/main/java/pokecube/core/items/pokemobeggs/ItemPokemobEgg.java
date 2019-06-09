@@ -134,7 +134,7 @@ public class ItemPokemobEgg extends Item
     {
         if (!CompatWrapper.isValid(stack) || stack.getTag() == null) return null;
         if (stack.getTag().hasKey("pokemobNumber"))
-            return Database.getEntry(stack.getTag().getInteger("pokemobNumber"));
+            return Database.getEntry(stack.getTag().getInt("pokemobNumber"));
         genes:
         if (stack.getTag().hasKey(GeneticsManager.GENES))
         {

@@ -72,9 +72,9 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read stats tag
         if (!statsTag.hasNoTags())
         {
-            this.setExp(statsTag.getInteger(EXP), false);
+            this.setExp(statsTag.getInt(EXP), false);
             this.setStatus(statsTag.getByte(STATUS));
-            addHappiness(statsTag.getInteger(HAPPY));
+            addHappiness(statsTag.getInt(HAPPY));
         }
         // Read moves tag
         if (!movesTag.hasNoTags())
@@ -94,8 +94,8 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
                     PokecubeMod.log(Level.WARNING, "Error loading new moves for " + getEntity().getName(), e);
                 }
             }
-            this.setMoveIndex(movesTag.getInteger(MOVEINDEX));
-            this.setAttackCooldown(movesTag.getInteger(COOLDOWN));
+            this.setMoveIndex(movesTag.getInt(MOVEINDEX));
+            this.setAttackCooldown(movesTag.getInt(COOLDOWN));
             int[] disables = movesTag.getIntArray(DISABLED);
             if (disables.length == 4) for (int i = 0; i < 4; i++)
             {
@@ -120,12 +120,12 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read Breeding tag
         if (!breedingTag.hasNoTags())
         {
-            this.loveTimer = breedingTag.getInteger(SEXETIME);
+            this.loveTimer = breedingTag.getInt(SEXETIME);
         }
         // Read visuals tag
         if (!visualsTag.hasNoTags())
         {
-            dataSync().set(params.SPECIALINFO, visualsTag.getInteger(SPECIALTAG));
+            dataSync().set(params.SPECIALINFO, visualsTag.getInt(SPECIALTAG));
             setSize((float) (getSize() / PokecubeMod.core.getConfig().scalefactor));
             int[] flavourAmounts = visualsTag.getIntArray(FLAVOURSTAG);
             if (flavourAmounts.length == 5) for (int i = 0; i < flavourAmounts.length; i++)
@@ -142,12 +142,12 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read AI
         if (!aiTag.hasNoTags())
         {
-            setTotalCombatState(aiTag.getInteger(COMBATSTATE));
-            setTotalGeneralState(aiTag.getInteger(GENERALSTATE));
-            setTotalLogicState(aiTag.getInteger(LOGICSTATE));
+            setTotalCombatState(aiTag.getInt(COMBATSTATE));
+            setTotalGeneralState(aiTag.getInt(GENERALSTATE));
+            setTotalLogicState(aiTag.getInt(LOGICSTATE));
             cleanLoadedAIStates();
 
-            setHungerTime(aiTag.getInteger(HUNGER));
+            setHungerTime(aiTag.getInt(HUNGER));
             CompoundNBT routines = aiTag.getCompound(AIROUTINES);
             for (String s : routines.getKeySet())
             {
@@ -166,8 +166,8 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         // Read Misc other
         if (!miscTag.hasNoTags())
         {
-            this.setRNGValue(miscTag.getInteger(RNGVAL));
-            this.uid = miscTag.getInteger(UID);
+            this.setRNGValue(miscTag.getInt(RNGVAL));
+            this.uid = miscTag.getInt(UID);
             this.wasShadow = miscTag.getBoolean(WASSHADOW);
         }
     }

@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryCrafting;
@@ -237,7 +237,7 @@ public class PokemobMoveRecipeParser implements IRecipeParser
         public boolean attemptWorldCraft(IPokemob user, Vector3 location)
         {
             World world = user.getEntity().getEntityWorld();
-            IBlockState state = location.getBlockState(world);
+            BlockState state = location.getBlockState(world);
             if (canCraftBlocks(world, location.getPos(), state)) return true;
             for (Direction dir : Direction.VALUES)
             {
@@ -248,7 +248,7 @@ public class PokemobMoveRecipeParser implements IRecipeParser
         }
 
         @SuppressWarnings("deprecation")
-        public boolean canCraftBlocks(World world, BlockPos pos, IBlockState state)
+        public boolean canCraftBlocks(World world, BlockPos pos, BlockState state)
         {
             ItemStack stack = Move_Basic.createStackedBlock(state);
             if (!CompatWrapper.isValid(stack)) return false;

@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
@@ -34,7 +34,7 @@ public class ActionSecretPower implements IMoveAction
         long time = attacker.getEntity().getEntityData().getLong("lastAttackTick");
         if (time + (20 * 3) > attacker.getEntity().getEntityWorld().getGameTime()) return false;
         ServerPlayerEntity owner = (ServerPlayerEntity) attacker.getPokemonOwner();
-        IBlockState state = location.getBlockState(owner.getEntityWorld());
+        BlockState state = location.getBlockState(owner.getEntityWorld());
         if (!(PokecubeTerrainChecker.isTerrain(state) || PokecubeTerrainChecker.isWood(state)))
         {
             TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.deny.wrongloc");

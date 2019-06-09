@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,9 +36,9 @@ public class BerryGenManager
 {
     public static class GenericGrower implements TreeGrower
     {
-        final IBlockState wood;
+        final BlockState wood;
 
-        public GenericGrower(IBlockState trunk)
+        public GenericGrower(BlockState trunk)
         {
             if (trunk == null)
             {
@@ -168,9 +168,9 @@ public class BerryGenManager
 
     public static class PalmGrower implements TreeGrower
     {
-        final IBlockState wood;
+        final BlockState wood;
 
-        public PalmGrower(IBlockState trunk)
+        public PalmGrower(BlockState trunk)
         {
             if (trunk == null)
             {

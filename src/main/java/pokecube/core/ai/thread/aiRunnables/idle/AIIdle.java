@@ -11,7 +11,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.pathfinding.Path;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import pokecube.core.ai.thread.aiRunnables.AIBase;
 import pokecube.core.ai.utils.pathing.PokemobNavigator;
 import pokecube.core.database.PokedexEntry;
@@ -268,7 +268,7 @@ public class AIIdle extends AIBase
         return true;
     }
 
-    public static Vector3 getRandomPointNear(IBlockAccess world, IPokemob mob, Vector3 v, int distance)
+    public static Vector3 getRandomPointNear(IBlockReader world, IPokemob mob, Vector3 v, int distance)
     {
         Random rand = new Random();
 

@@ -469,7 +469,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     public IPokemob specificSpawnInit()
     {
         IPokemob pokemob = this;
-        int maxXP = getEntity().getEntityData().getInteger("spawnExp");
+        int maxXP = getEntity().getEntityData().getInt("spawnExp");
 
         /*
          * Check to see if the mob has spawnExp defined in its data. If not, it

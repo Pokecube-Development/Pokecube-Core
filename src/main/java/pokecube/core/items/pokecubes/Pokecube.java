@@ -99,7 +99,7 @@ public class Pokecube extends Item implements IPokecube
         if (flag5)
         {
             // TODO better tooltip for dyes?
-            list.add(I18n.format(EnumDyeColor.byDyeDamage(nbt.getInteger("dye")).getUnlocalizedName()));
+            list.add(I18n.format(EnumDyeColor.byDyeDamage(nbt.getInt("dye")).getUnlocalizedName()));
         }
     }
 

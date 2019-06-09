@@ -283,8 +283,8 @@ public class EntityPokemobEgg extends MobEntity
     public void readEntityFromNBT(CompoundNBT nbt)
     {
         super.readEntityFromNBT(nbt);
-        age = nbt.getInteger("age");
-        hatch = nbt.getInteger("hatchtime");
+        age = nbt.getInt("age");
+        hatch = nbt.getInt("hatchtime");
     }
 
     @Override

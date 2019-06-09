@@ -3,7 +3,7 @@ package pokecube.core.blocks.repel;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -39,13 +39,13 @@ public class BlockRepel extends Block implements ITileEntityProvider
      * or not to render the shared face of two adjacent blocks and also whether
      * the player can attach torches, redstone wire, etc to this block. */
     @Override
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isOpaqueCube(BlockState state)
     {
         return true;
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         ItemStack heldStack = playerIn.getHeldItem(hand);
@@ -71,7 +71,7 @@ public class BlockRepel extends Block implements ITileEntityProvider
 
     /** Here we toggle the repel on/off */
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         int power = worldIn.isBlockIndirectlyGettingPowered(pos);
         TileEntity tile = worldIn.getTileEntity(pos);

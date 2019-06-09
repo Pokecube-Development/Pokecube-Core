@@ -21,10 +21,10 @@ public class PokeCentreCreationHandler implements IVillageCreationHandler
         BlockPos pos = new BlockPos(minX, minY, minZ);
         TemplateStructureBase component = new TemplatePokecenter(pos, facing);
         StructureBoundingBox structureboundingbox = component.getBoundingBox();
-        structureboundingbox.maxX += 2 * facing.getFrontOffsetX();
-        structureboundingbox.maxZ += 2 * facing.getFrontOffsetZ();
-        structureboundingbox.minX += 2 * facing.getFrontOffsetX();
-        structureboundingbox.minZ += 2 * facing.getFrontOffsetZ();
+        structureboundingbox.maxX += 2 * facing.getXOffset();
+        structureboundingbox.maxZ += 2 * facing.getZOffset();
+        structureboundingbox.minX += 2 * facing.getXOffset();
+        structureboundingbox.minZ += 2 * facing.getZOffset();
         StructureComponent conf = StructureComponent.findIntersecting(pieces, structureboundingbox);
         boolean conflict = conf == null;
         return conflict ? component : null;

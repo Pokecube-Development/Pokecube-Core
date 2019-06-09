@@ -3,7 +3,7 @@
  */
 package pokecube.core.entity.pokemobs.helper;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
@@ -16,7 +16,7 @@ import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -159,7 +159,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                     {
                         f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
                         f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        this.getEntityWorld().spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX + f2, f1 + 1.0F,
+                        this.getEntityWorld().spawnParticle(ParticleTypes.WATER_BUBBLE, this.posX + f2, f1 + 1.0F,
                                 this.posZ + f3, this.motionX, this.motionY - this.rand.nextFloat() * 0.2F,
                                 this.motionZ);
                     }
@@ -168,7 +168,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                     {
                         f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
                         f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        this.getEntityWorld().spawnParticle(EnumParticleTypes.WATER_SPLASH, this.posX + f2, f1 + 1.0F,
+                        this.getEntityWorld().spawnParticle(ParticleTypes.WATER_SPLASH, this.posX + f2, f1 + 1.0F,
                                 this.posZ + f3, this.motionX, this.motionY, this.motionZ);
                     }
                 }
@@ -333,7 +333,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
                     if (this.onGround)
                     {
-                        IBlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos);
+                        BlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos);
                         f6 = state.getBlock().getSlipperiness(state, world, blockpos$pooledmutableblockpos, this)
                                 * 0.91F;
                     }
@@ -355,7 +355,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
 
                     if (this.onGround)
                     {
-                        IBlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos.setPos(this.posX,
+                        BlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos.setPos(this.posX,
                                 this.getEntityBoundingBox().minY - 1.0D, this.posZ));
                         f6 = state.getBlock().getSlipperiness(state, world, blockpos$pooledmutableblockpos, this)
                                 * 0.91F;
@@ -390,7 +390,7 @@ public abstract class EntityAiPokemob extends EntityMountablePokemob
                         blockpos$pooledmutableblockpos.setPos(this.posX, 0.0D, this.posZ);
 
                         if (!this.world.isRemote || this.world.isBlockLoaded(blockpos$pooledmutableblockpos)
-                                && this.world.getChunkFromBlockCoords(blockpos$pooledmutableblockpos).isLoaded())
+                                && this.world.getChunk(blockpos$pooledmutableblockpos).isLoaded())
                         {
                             if (!this.hasNoGravity())
                             {

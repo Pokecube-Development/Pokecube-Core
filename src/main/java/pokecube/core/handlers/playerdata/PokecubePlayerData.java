@@ -48,7 +48,7 @@ public class PokecubePlayerData extends PlayerData
     public void readFromNBT(CompoundNBT tag)
     {
         hasStarter = tag.getBoolean("hasStarter");
-        teleIndex = tag.getInteger("teleIndex");
+        teleIndex = tag.getInt("teleIndex");
         INBT temp2 = tag.getTag("telelocs");
         telelocs.clear();
         if (temp2 instanceof ListNBT)

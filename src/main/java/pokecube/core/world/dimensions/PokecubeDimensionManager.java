@@ -91,7 +91,7 @@ public class PokecubeDimensionManager
         CompoundNBT tag = PokecubePlayerDataHandler.getCustomDataTag(player);
         if (tag.hasKey("secretPowerDimID"))
         {
-            dim = tag.getInteger("secretPowerDimID");
+            dim = tag.getInt("secretPowerDimID");
             if (!getInstance().dimOwners.containsKey(dim)) getInstance().dimOwners.put(dim, player);
         }
         else
@@ -118,7 +118,7 @@ public class PokecubeDimensionManager
         {
             CompoundNBT base = tag.getCompound("secretBase");
             if (base.hasKey(dim + "X"))
-                ret = new BlockPos(base.getInteger(dim + "X"), base.getInteger(dim + "Y"), base.getInteger(dim + "Z"));
+                ret = new BlockPos(base.getInt(dim + "X"), base.getInt(dim + "Y"), base.getInt(dim + "Z"));
         }
         return ret;
     }

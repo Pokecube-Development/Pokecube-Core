@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.glScalef;
 import static org.lwjgl.opengl.GL11.glTranslated;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -36,7 +36,7 @@ public class RenderTradingTable extends TileEntitySpecialRenderer
     public void render(TileEntity tileentity, double x, double y, double z, float f, int i1, float f1)
     {
         TileEntityTradingTable table = (TileEntityTradingTable) tileentity;
-        IBlockState state = table.getWorld().getBlockState(table.getPos());
+        BlockState state = table.getWorld().getBlockState(table.getPos());
         if (!(state.getBlock() instanceof BlockTradingTable)) return;
 
         glPushMatrix();

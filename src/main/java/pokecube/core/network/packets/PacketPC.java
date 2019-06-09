@@ -151,7 +151,7 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
         case SETPAGE:
             if (container != null)
             {
-                container.gotoInventoryPage(message.data.getInteger("P"));
+                container.gotoInventoryPage(message.data.getInt("P"));
             }
             break;
         case RENAME:
@@ -166,10 +166,10 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
             pc.seenOwner = message.data.getBoolean("O");
             pc.autoToPC = message.data.getBoolean("A");
-            if (message.data.hasKey("C")) pc.setPage(message.data.getInteger("C"));
+            if (message.data.hasKey("C")) pc.setPage(message.data.getInt("C"));
             if (message.data.hasKey("N"))
             {
-                int num = message.data.getInteger("N");
+                int num = message.data.getInt("N");
                 pc.boxes = new String[num];
                 for (int i = 0; i < pc.boxes.length; i++)
                 {
@@ -185,7 +185,7 @@ public class PacketPC implements IMessage, IMessageHandler<PacketPC, IMessage>
             }
             else
             {
-                int page = message.data.getInteger("page");
+                int page = message.data.getInt("page");
                 pc = InventoryPC.getPC(message.data.getUniqueId(OWNER));
                 for (int i = 0; i < 54; i++)
                 {

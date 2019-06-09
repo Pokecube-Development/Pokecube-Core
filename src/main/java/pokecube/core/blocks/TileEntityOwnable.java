@@ -2,7 +2,7 @@ package pokecube.core.blocks;
 
 import java.util.UUID;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -59,7 +59,7 @@ public class TileEntityOwnable extends TileEntity implements IOwnableTE
      * @return true forcing the invalidation of the existing TE, false not to
      *         invalidate the existing TE */
     @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate)
+    public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate)
     {
         return oldState.getBlock() != newSate.getBlock();
     }

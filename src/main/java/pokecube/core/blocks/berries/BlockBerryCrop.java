@@ -6,7 +6,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.IProperty;
@@ -14,7 +14,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.blocks.berries.TileEntityBerries.Type;
@@ -59,7 +59,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
     /** Get the actual Block state of this Block at the given position. This
      * applies properties not visible in the metadata, such as fence
      * connections. */
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public BlockState getActualState(BlockState state, IBlockReader worldIn, BlockPos pos)
     {
         TileEntityBerries tile = (TileEntityBerries) worldIn.getTileEntity(pos);
         String name = BerryManager.berryNames.get(tile.getBerryId());
@@ -70,7 +70,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
     }
 
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(BlockState state, IBlockReader source, BlockPos pos)
     {
         return BUSH_AABB;
     }
@@ -87,7 +87,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
      * @param fortune
      *            Breakers fortune level
      * @return A ArrayList containing all items this block drops */
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public List<ItemStack> getDrops(IBlockReader world, BlockPos pos, BlockState state, int fortune)
     {
         List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
 
@@ -113,7 +113,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
      *            The full target the player is looking at
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, World world, BlockPos pos,
             PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
@@ -121,7 +121,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
     }
 
     @Override
-    public void grow(World worldIn, BlockPos pos, IBlockState state)
+    public void grow(World worldIn, BlockPos pos, BlockState state)
     {
         TileEntityBerries tile = (TileEntityBerries) worldIn.getTileEntity(pos);
         tile.growCrop();
@@ -135,7 +135,7 @@ public class BlockBerryCrop extends BlockCrops implements ITileEntityProvider
     }
 
     @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void updateTick(World worldIn, BlockPos pos, BlockState state, Random rand)
     {
     }
 }

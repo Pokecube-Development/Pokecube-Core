@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +14,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -117,7 +117,7 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
             Direction side, float hitX, float hitY, float hitZ)
     {
         ItemStack stack = playerIn.getHeldItem(hand);
-        net.minecraft.block.state.IBlockState state = worldIn.getBlockState(pos);
+        net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         if (side == Direction.UP && playerIn.canPlayerEdit(pos.offset(side), side, stack)
                 && state.getBlock().canSustainPlant(state, worldIn, pos, Direction.UP, (IPlantable) Items.WHEAT_SEEDS)
                 && worldIn.isAirBlock(pos.up()))
@@ -131,13 +131,13 @@ public class ItemBerry extends Item implements IMoveConstants, IPlantable
     }
 
     @Override
-    public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos)
+    public EnumPlantType getPlantType(IBlockReader world, BlockPos pos)
     {
         return EnumPlantType.Crop;
     }
 
     @Override
-    public IBlockState getPlant(IBlockAccess world, BlockPos pos)
+    public BlockState getPlant(IBlockReader world, BlockPos pos)
     {
         return BerryManager.berryCrop.getDefaultState();
     }

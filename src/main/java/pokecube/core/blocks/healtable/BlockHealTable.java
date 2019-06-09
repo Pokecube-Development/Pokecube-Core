@@ -5,7 +5,7 @@ import java.util.Random;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -40,7 +40,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     }
 
     @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state)
+    public void breakBlock(World world, BlockPos pos, BlockState state)
     {
         dropItems(world, pos);
         if (!world.isRemote)
@@ -97,7 +97,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
 
     /** Convert the BlockState into the correct metadata value */
     @Override
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         int ret = state.getValue(FACING).getIndex();
         if ((state.getValue(FIXED))) ret += 8;
@@ -105,7 +105,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     }
 
     @Override
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
         Direction Direction = Direction.getFront(meta & 7);
         boolean top = (meta & 8) > 0;
@@ -117,7 +117,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         TileEntity tile_entity = worldIn.getTileEntity(pos);
@@ -139,7 +139,7 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     @Override
     /** Called when a block is placed using its ItemBlock. Args: World, X, Y, Z,
      * side, hitX, hitY, hitZ, block metadata */
-    public IBlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
+    public BlockState getStateForPlacement(World world, BlockPos pos, Direction facing, float hitX, float hitY,
             float hitZ, int meta, LivingEntity placer)
     {
         if (!world.isRemote) PokecubeSerializer.getInstance().addChunks(world, pos, placer);
@@ -148,13 +148,13 @@ public class BlockHealTable extends BlockRotatable implements ITileEntityProvide
     }
 
     @Override
-    public boolean isFullCube(IBlockState state)
+    public boolean isFullCube(BlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isOpaqueCube(BlockState state)
     {
         return false;
     }

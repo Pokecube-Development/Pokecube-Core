@@ -3,7 +3,7 @@ package pokecube.core.moves.implementations.actions;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -90,7 +90,7 @@ public class ActionSmash implements IMoveAction
                 for (int k = -range; k <= range; k++)
                 {
                     temp.set(v);
-                    IBlockState state = temp.addTo(i, j, k).getBlockState(world);
+                    BlockState state = temp.addTo(i, j, k).getBlockState(world);
                     if (PokecubeTerrainChecker.isRock(state))
                     {
                         if (!count)

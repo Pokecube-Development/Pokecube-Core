@@ -4,12 +4,12 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.interfaces.IPokemobUseable;
 import pokecube.core.interfaces.Nature;
@@ -110,9 +110,9 @@ public abstract class PokemobHungry extends PokemobMoves
     }
 
     @Override
-    public float getBlockPathWeight(IBlockAccess world, Vector3 location)
+    public float getBlockPathWeight(IBlockReader world, Vector3 location)
     {
-        IBlockState state = location.getBlockState(world);
+        BlockState state = location.getBlockState(world);
         if (state == null) state = Blocks.AIR.getDefaultState();
         Block block = state.getBlock();
         boolean water = getPokedexEntry().swims();

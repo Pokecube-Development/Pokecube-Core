@@ -107,12 +107,12 @@ public class GuiPokemobStorage extends GuiContainer
                 if (!berry.hasNoTags())
                 {
                     this.berry
-                            .setText(berry.getInteger("x") + " " + berry.getInteger("y") + " " + berry.getInteger("z"));
+                            .setText(berry.getInt("x") + " " + berry.getInt("y") + " " + berry.getInt("z"));
                 }
                 if (!storage.hasNoTags())
                 {
                     this.storage.setText(
-                            storage.getInteger("x") + " " + storage.getInteger("y") + " " + storage.getInteger("z"));
+                            storage.getInt("x") + " " + storage.getInt("y") + " " + storage.getInt("z"));
                     storageFace.setText(Direction.values()[storage.getByte("f")] + "");
                 }
                 else
@@ -122,7 +122,7 @@ public class GuiPokemobStorage extends GuiContainer
                 if (!empty.hasNoTags())
                 {
                     this.empty
-                            .setText(empty.getInteger("x") + " " + empty.getInteger("y") + " " + empty.getInteger("z"));
+                            .setText(empty.getInt("x") + " " + empty.getInt("y") + " " + empty.getInt("z"));
                     emptyFace.setText(Direction.values()[empty.getByte("f")] + "");
                 }
                 else

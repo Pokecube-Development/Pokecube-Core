@@ -79,8 +79,8 @@ public class RenderHealth
     {
         blend = GL11.glGetBoolean(GL11.GL_BLEND);
         normalize = GL11.glGetBoolean(GL11.GL_NORMALIZE);
-        src = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-        dst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        src = GL11.glgetInt(GL11.GL_BLEND_SRC);
+        dst = GL11.glgetInt(GL11.GL_BLEND_DST);
         lighting = GL11.glGetBoolean(GL11.GL_LIGHTING);
         if (lighting) GlStateManager.disableLighting();
         if (!normalize) GL11.glEnable(GL11.GL_NORMALIZE);

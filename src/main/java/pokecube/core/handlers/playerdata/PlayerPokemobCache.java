@@ -108,7 +108,7 @@ public class PlayerPokemobCache extends PlayerData
                 ItemStack stack = new ItemStack(var);
                 if (var.hasKey("uid"))
                 {
-                    id = var.getInteger("uid");
+                    id = var.getInt("uid");
                 }
                 else
                 {

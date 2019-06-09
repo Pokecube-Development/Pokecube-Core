@@ -13,7 +13,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.java.games.input.Keyboard;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -110,7 +110,7 @@ public class ClientProxy extends CommonProxy {
 				int z = screen.z;
 				World world = Minecraft.getInstance().world;
 				BlockPos pos = new BlockPos(x, y, z);
-				IBlockState state = world.getBlockState(pos);
+				BlockState state = world.getBlockState(pos);
 				Block block = world.getBlockState(pos).getBlock();
 				if (block != null) {
 					//block.setBlockBoundsBasedOnState(world, pos);

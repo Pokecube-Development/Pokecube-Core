@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.LivingEntity;
@@ -53,7 +53,7 @@ import thut.lib.Accessor;
 /** @author Manchou */
 public class Move_Basic extends Move_Base implements IMoveConstants
 {
-    public static ItemStack createStackedBlock(IBlockState state)
+    public static ItemStack createStackedBlock(BlockState state)
     {
         int i = 0;
         Item item = Item.getItemFromBlock(state.getBlock());
@@ -72,7 +72,7 @@ public class Move_Basic extends Move_Base implements IMoveConstants
         return pokemob.getLevel() > 90 && ability.toString().equalsIgnoreCase("hypercutter");
     }
 
-    public static void silkHarvest(IBlockState state, BlockPos pos, World worldIn, PlayerEntity player)
+    public static void silkHarvest(BlockState state, BlockPos pos, World worldIn, PlayerEntity player)
     {
         java.util.ArrayList<ItemStack> items = new java.util.ArrayList<ItemStack>();
         ItemStack itemstack = createStackedBlock(state);

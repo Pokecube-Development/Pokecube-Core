@@ -5,7 +5,7 @@ import java.util.Random;
 
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -18,7 +18,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraftforge.common.EnumPlantType;
@@ -45,7 +45,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     /** Can this block stay at this position. Similar to canPlaceBlockAt except
      * gets checked often with plants. */
     @Override
-    public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state)
+    public boolean canBlockStay(World worldIn, BlockPos pos, BlockState state)
     {
         return worldIn.getBlockState(pos.down()).getBlock() instanceof BlockBerryCrop || worldIn.getBlockState(pos.up())
                 .getBlock().isLeaves(worldIn.getBlockState(pos.up()), worldIn, pos.up());
@@ -66,7 +66,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     @Override
     /** Spawns ItemEntity in the world for the given ItemStack if the world is
      * not remote. */
-    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, BlockState state, float chance, int fortune)
     {
         if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots)
         {
@@ -102,7 +102,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     /** Get the actual Block state of this Block at the given position. This
      * applies properties not visible in the metadata, such as fence
      * connections. */
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public BlockState getActualState(BlockState state, IBlockReader worldIn, BlockPos pos)
     {
         if (!(worldIn.getTileEntity(pos) instanceof TileEntityBerries))
             return state.withProperty(BerryManager.type, "null");
@@ -114,7 +114,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public ItemStack getBerryStack(IBlockAccess world, BlockPos pos)
+    public ItemStack getBerryStack(IBlockReader world, BlockPos pos)
     {
         if (!(world.getTileEntity(pos) instanceof TileEntityBerries)) return ItemStack.EMPTY;
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
@@ -123,7 +123,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(BlockState state, IBlockReader source, BlockPos pos)
     {
         if (!(source.getTileEntity(pos) instanceof TileEntityBerries)) return BUSH_AABB;
         TileEntityBerries tile = (TileEntityBerries) source.getTileEntity(pos);
@@ -132,7 +132,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public void getDrops(NonNullList<ItemStack> drops, IBlockReader world, BlockPos pos, BlockState state, int fortune)
     {
         List<ItemStack> ret = drops;
         Random rand = world instanceof World ? ((World) world).rand : RANDOM;
@@ -145,14 +145,14 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
 
     /** Returns the ID of the items to drop on destruction. */
     @Override
-    public Item getItemDropped(IBlockState state, Random p_149650_2_, int p_149650_3_)
+    public Item getItemDropped(BlockState state, Random p_149650_2_, int p_149650_3_)
     {
         return PokecubeItems.nullberry;
     }
 
     /** Convert the BlockState into the correct metadata value */
     @Override
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         return 0;
     }
@@ -164,7 +164,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
      *            The full target the player is looking at
      * @return A ItemStack to add to the player's inventory, Null if nothing
      *         should be added. */
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, World world, BlockPos pos,
             PlayerEntity player)
     {
         TileEntityBerries tile = (TileEntityBerries) world.getTileEntity(pos);
@@ -172,7 +172,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn,
+    public boolean onBlockActivated(World worldIn, BlockPos pos, BlockState state, PlayerEntity playerIn,
             Hand hand, Direction side, float hitX, float hitY, float hitZ)
     {
         this.onBlockHarvested(worldIn, pos, state, playerIn);
@@ -181,7 +181,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, PlayerEntity player)
+    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player)
     {
         Random rand = worldIn != null ? worldIn.rand : RANDOM;
 
@@ -205,7 +205,7 @@ public class BlockBerryFruit extends BlockBush implements IBerryFruitBlock, ITil
     }
 
     @Override
-    public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos)
+    public EnumPlantType getPlantType(IBlockReader world, BlockPos pos)
     {
         return EnumPlantType.Crop;
     }

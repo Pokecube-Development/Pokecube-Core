@@ -5,9 +5,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import pokecube.core.PokecubeCore;
 import pokecube.core.handlers.playerdata.PlayerPokemobCache;
 import pokecube.core.interfaces.PokecubeMod;
@@ -183,7 +183,7 @@ public abstract class PokemobAI extends PokemobEvolves
     }
 
     @Override
-    public boolean fits(IBlockAccess world, Vector3 location, @Nullable Vector3 directionFrom)
+    public boolean fits(IBlockReader world, Vector3 location, @Nullable Vector3 directionFrom)
     {
         Vector3 diffs = Vector3.getNewVector();
         mainBox.boxMin().clear();
@@ -243,7 +243,7 @@ public abstract class PokemobAI extends PokemobEvolves
                         getEntity().posY + 0.5D + rand.nextFloat() * getEntity().height,
                         getEntity().posZ + rand.nextFloat() * getEntity().width * 2.0F - getEntity().width);
                 PokecubeMod.core.spawnParticle(getEntity().getEntityWorld(),
-                        EnumParticleTypes.VILLAGER_HAPPY.getParticleName(), particleLoc, null);
+                        ParticleTypes.VILLAGER_HAPPY.getParticleName(), particleLoc, null);
             }
         }
         // Update genes settings.

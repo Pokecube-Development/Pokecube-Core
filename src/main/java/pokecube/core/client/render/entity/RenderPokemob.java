@@ -19,7 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ItemDye;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -70,14 +70,14 @@ public class RenderPokemob<T extends MobEntity> extends RenderPokemobInfos<T>
                 loc.y += rand.nextDouble();
                 loc.z += (rand.nextDouble() - 0.5) * width;
                 PokecubeMod.core.spawnParticle(entity.getEntityWorld(),
-                        EnumParticleTypes.WATER_BUBBLE.getParticleName(), loc, vel);
+                        ParticleTypes.WATER_BUBBLE.getParticleName(), loc, vel);
             }
             if (sealTag.getBoolean("Flames"))
             {
                 loc.x += (rand.nextDouble() - 0.5) * width;
                 loc.y += rand.nextDouble();
                 loc.z += (rand.nextDouble() - 0.5) * width;
-                PokecubeMod.core.spawnParticle(entity.getEntityWorld(), EnumParticleTypes.FLAME.getParticleName(), loc,
+                PokecubeMod.core.spawnParticle(entity.getEntityWorld(), ParticleTypes.FLAME.getParticleName(), loc,
                         vel);
             }
             // *
@@ -100,7 +100,7 @@ public class RenderPokemob<T extends MobEntity> extends RenderPokemobInfos<T>
                 loc.y += width * rand.nextGaussian() / 2;
                 loc.z += width * rand.nextGaussian() / 2;
                 PokecubeMod.core.spawnParticle(entity.getEntityWorld(), "powder", loc, vel,
-                        ItemDye.DYE_COLORS[sealTag.getInteger("dye")] | 0xFF000000);
+                        ItemDye.DYE_COLORS[sealTag.getInt("dye")] | 0xFF000000);
             }
         }
     }
@@ -350,8 +350,8 @@ public class RenderPokemob<T extends MobEntity> extends RenderPokemobInfos<T>
     {
         blend = GL11.glGetBoolean(GL11.GL_BLEND);
         normalize = GL11.glGetBoolean(GL11.GL_NORMALIZE);
-        src = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-        dst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        src = GL11.glgetInt(GL11.GL_BLEND_SRC);
+        dst = GL11.glgetInt(GL11.GL_BLEND_DST);
         if (!normalize) GL11.glEnable(GL11.GL_NORMALIZE);
         if (!blend) GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -74,7 +74,7 @@ public interface IGuardAICapability
             if (nbt instanceof CompoundNBT)
             {
                 CompoundNBT data = (CompoundNBT) nbt;
-                instance.setState(GuardState.values()[data.getInteger("state")]);
+                instance.setState(GuardState.values()[data.getInt("state")]);
                 if (data.hasKey("tasks"))
                 {
                     ListNBT tasks = (ListNBT) data.getTag("tasks");

@@ -4,7 +4,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import pokecube.core.ai.utils.pathing.MultiNodeNavigator;
 
 public class MultiNodeWrapper extends NodeProcessor
@@ -19,7 +19,7 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
-    public void init(IBlockAccess sourceIn, MobEntity mob)
+    public void init(IBlockReader sourceIn, MobEntity mob)
     {
         super.init(sourceIn, mob);
         navi.a.init(sourceIn, mob);
@@ -70,7 +70,7 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, MobEntity MobEntityIn,
+    public PathNodeType getPathNodeType(IBlockReader blockaccessIn, int x, int y, int z, MobEntity MobEntityIn,
             int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn)
     {
         PathNodeType a = navi.a.getPathNodeType(blockaccessIn, x, y, z, MobEntityIn, xSize, ySize, zSize,
@@ -83,7 +83,7 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z)
+    public PathNodeType getPathNodeType(IBlockReader blockaccessIn, int x, int y, int z)
     {
         PathNodeType a = navi.a.getPathNodeType(blockaccessIn, x, y, z);
         if (a == PathNodeType.WALKABLE) { return a; }

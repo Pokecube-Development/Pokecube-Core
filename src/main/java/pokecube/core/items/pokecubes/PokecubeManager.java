@@ -66,10 +66,10 @@ public class PokecubeManager
         if (!CompatWrapper.isValid(itemStack) || !itemStack.hasTag()) return 0;
         CompoundNBT poketag = TagNames.getPokecubePokemobTag(itemStack.getTag());
         if (poketag == null || poketag.hasNoTags()) return 0;
-        int number = poketag.getCompound(TagNames.OWNERSHIPTAG).getInteger(TagNames.POKEDEXNB);
+        int number = poketag.getCompound(TagNames.OWNERSHIPTAG).getInt(TagNames.POKEDEXNB);
         // TODO remove this legacy support as well
         if (poketag.hasNoTags() || number == 0) return itemStack.getTag().hasKey("PokedexNb")
-                ? itemStack.getTag().getInteger("PokedexNb") : 0;
+                ? itemStack.getTag().getInt("PokedexNb") : 0;
         return number;
     }
 
@@ -77,7 +77,7 @@ public class PokecubeManager
     {
         if (!CompatWrapper.isValid(itemStack) || !itemStack.hasTag()) return null;
         CompoundNBT poketag = TagNames.getPokecubePokemobTag(itemStack.getTag());
-        int number = poketag.getCompound(TagNames.OWNERSHIPTAG).getInteger(TagNames.POKEDEXNB);
+        int number = poketag.getCompound(TagNames.OWNERSHIPTAG).getInt(TagNames.POKEDEXNB);
         if (!poketag.hasKey(TagNames.OWNERSHIPTAG)) return null;
         if (poketag.hasNoTags() || number == 0) return Database.getEntry(getPokedexNb(itemStack));
         String forme = poketag.getCompound(TagNames.VISUALSTAG).getString(TagNames.FORME);
@@ -114,7 +114,7 @@ public class PokecubeManager
     public static int getTilt(ItemStack itemStack)
     {
         return itemStack.hasTag() && itemStack.getTag().hasKey("tilt")
-                ? itemStack.getTag().getInteger("tilt") : 0;
+                ? itemStack.getTag().getInt("tilt") : 0;
     }
 
     public static boolean isFilled(ItemStack stack)
@@ -320,6 +320,6 @@ public class PokecubeManager
     {
         if (!isFilled(stack)) return null;
         CompoundNBT poketag = TagNames.getPokecubePokemobTag(stack.getTag());
-        return poketag.getCompound(TagNames.MISCTAG).getInteger(TagNames.UID);
+        return poketag.getCompound(TagNames.MISCTAG).getInt(TagNames.UID);
     }
 }

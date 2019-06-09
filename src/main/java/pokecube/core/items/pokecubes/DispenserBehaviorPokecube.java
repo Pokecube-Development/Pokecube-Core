@@ -1,6 +1,6 @@
 package pokecube.core.items.pokecubes;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.item.ItemStack;
@@ -20,7 +20,7 @@ public class DispenserBehaviorPokecube implements IBehaviorDispenseItem
     public ItemStack dispense(IBlockSource source, ItemStack stack)
     {
         Direction dir = null;
-        IBlockState state = source.getBlockState();
+        BlockState state = source.getBlockState();
         for (IProperty<?> prop : state.getPropertyKeys())
         {
             if (prop.getValueClass() == Direction.class)

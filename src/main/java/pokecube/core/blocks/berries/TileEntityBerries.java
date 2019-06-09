@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -99,8 +99,8 @@ public class TileEntityBerries extends TileEntity
     public void readFromNBT(CompoundNBT nbt)
     {
         super.readFromNBT(nbt);
-        berryId = nbt.getInteger("berry");
-        stage = nbt.getInteger("stage");
+        berryId = nbt.getInt("berry");
+        stage = nbt.getInt("stage");
         type = Type.valueOf(nbt.getString("type"));
     }
 
@@ -110,7 +110,7 @@ public class TileEntityBerries extends TileEntity
     }
 
     @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate)
+    public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate)
     {
         return oldState.getBlock() != newSate.getBlock();
     }

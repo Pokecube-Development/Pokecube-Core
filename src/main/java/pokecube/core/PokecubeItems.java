@@ -24,7 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -494,7 +494,7 @@ public class PokecubeItems extends Items
             return;
         }
         times.clear();
-        int num = nbt.getInteger("count");
+        int num = nbt.getInt("count");
         for (int i = 0; i < num; i++)
         {
             if (Long.valueOf(nbt.getLong("" + i)) != 0) times.add(Long.valueOf(nbt.getLong("" + i)));
@@ -571,7 +571,7 @@ public class PokecubeItems extends Items
         nbt.setInteger("count", num);
     }
 
-    public static Predicate<IBlockState> getState(String arguments)
+    public static Predicate<BlockState> getState(String arguments)
     {
         String[] args = arguments.split(" ");
 
@@ -589,14 +589,14 @@ public class PokecubeItems extends Items
         }
         final String key = keyTemp;
         final String val = valTemp;
-        return new Predicate<IBlockState>()
+        return new Predicate<BlockState>()
         {
             final Pattern                  modidPattern = Pattern.compile(modid);
             final Pattern                  blockPattern = Pattern.compile(blockName);
             Map<ResourceLocation, Boolean> checks       = Maps.newHashMap();
 
             @Override
-            public boolean apply(IBlockState input)
+            public boolean apply(BlockState input)
             {
                 if (input == null || input.getBlock() == null) return false;
                 Block block = input.getBlock();

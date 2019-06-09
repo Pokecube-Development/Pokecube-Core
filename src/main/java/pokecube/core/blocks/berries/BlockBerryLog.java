@@ -2,7 +2,7 @@ package pokecube.core.blocks.berries;
 
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.state.IProperty;
 import net.minecraft.world.chunk.BlockStateContainer;
 import pokecube.core.interfaces.PokecubeMod;
@@ -52,7 +52,7 @@ public class BlockBerryLog extends BlockLog
     public BlockBerryLog(String name)
     {
         super();
-        IBlockState state = this.blockState.getBaseState();
+        BlockState state = this.blockState.getBaseState();
         this.setDefaultState(state.withProperty(BlockLog.LOG_AXIS, EnumAxis.Y));
         this.name = name;
         this.setRegistryName(PokecubeMod.ID, name);
@@ -68,7 +68,7 @@ public class BlockBerryLog extends BlockLog
     }
 
     @Override
-    public int getMetaFromState(IBlockState state)
+    public int getMetaFromState(BlockState state)
     {
         byte b0 = 0;
         int i = b0;
@@ -87,16 +87,16 @@ public class BlockBerryLog extends BlockLog
         return i;
     }
 
-    public IBlockState getStateForTree(String berryName)
+    public BlockState getStateForTree(String berryName)
     {
         return getStateFromMeta(0).withProperty(BlockLog.LOG_AXIS, EnumAxis.Y);
     }
 
     /** Convert the given metadata into a BlockState for this Block */
     @Override
-    public IBlockState getStateFromMeta(int meta)
+    public BlockState getStateFromMeta(int meta)
     {
-        IBlockState state = getDefaultState();
+        BlockState state = getDefaultState();
         switch (meta & 12)
         {
         case 0:

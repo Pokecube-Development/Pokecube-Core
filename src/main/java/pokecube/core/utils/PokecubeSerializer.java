@@ -51,7 +51,7 @@ public class PokecubeSerializer
         {
             Vector4 loc = new Vector4(nbt);
             String name = nbt.getString("name");
-            int index = nbt.getInteger("i");
+            int index = nbt.getInt("i");
             return new TeleDest(loc).setName(name).setIndex(index);
         }
 
@@ -229,7 +229,7 @@ public class PokecubeSerializer
                     pos.setInteger("y", location.getY());
                     pos.setInteger("z", location.getZ());
                     ticket.getModData().put("pos", pos);
-                    ChunkPos chunk = world.getChunkFromBlockCoords(location).getPos();
+                    ChunkPos chunk = world.getChunk(location).getPos();
                     PokecubeMod.log("Forcing Chunk at " + location);
                     ForgeChunkManager.forceChunk(ticket, chunk);
                     tickets.put(location, ticket);
@@ -314,7 +314,7 @@ public class PokecubeSerializer
 
     public void readFromNBT(CompoundNBT CompoundNBT)
     {
-        lastId = CompoundNBT.getInteger(LASTUID);
+        lastId = CompoundNBT.getInt(LASTUID);
         INBT temp;
         temp = CompoundNBT.getTag(METEORS);
         if (temp instanceof ListNBT)
@@ -333,10 +333,10 @@ public class PokecubeSerializer
                         // TODO remove this in a few versions.
                         if (pokemobData.hasKey(METEORS + "x"))
                         {
-                            int posX = pokemobData.getInteger(METEORS + "x");
-                            int posY = pokemobData.getInteger(METEORS + "y");
-                            int posZ = pokemobData.getInteger(METEORS + "z");
-                            int w = pokemobData.getInteger(METEORS + "w");
+                            int posX = pokemobData.getInt(METEORS + "x");
+                            int posY = pokemobData.getInt(METEORS + "y");
+                            int posZ = pokemobData.getInt(METEORS + "z");
+                            int w = pokemobData.getInt(METEORS + "w");
                             location = new Vector4(posX, posY, posZ, w);
                         }
                         else location = new Vector4(pokemobData);

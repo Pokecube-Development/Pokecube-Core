@@ -14,7 +14,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockGrass;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerChunkMap;
@@ -66,7 +66,7 @@ public class ActionNaturePower implements IMoveAction
             for (Vector3 loc : checker.blocks)
             {
                 loc.setBiome(biome, world);
-                affected.add(world.getChunkFromBlockCoords(loc.getPos()));
+                affected.add(world.getChunk(loc.getPos()));
                 sWorld.getPlayerChunkMap().markBlockForUpdate(loc.getPos());
                 minY = Math.min(minY, loc.intY() / 16);
                 maxY = Math.max(maxY, loc.intY() / 16);
@@ -125,7 +125,7 @@ public class ActionNaturePower implements IMoveAction
         // contains, but lists iterate more GC friendly.
         List<Vector3>             blocks  = new LinkedList<Vector3>();
         List<Vector3>             checked = new LinkedList<Vector3>();
-        List<IBlockState>         states  = Lists.newArrayList();
+        List<BlockState>         states  = Lists.newArrayList();
         final Predicate<BlockPos> validCheck;
         boolean                   yaxis   = false;
         int                       maxRSq  = 8 * 8;
@@ -240,8 +240,8 @@ public class ActionNaturePower implements IMoveAction
                 @Override
                 public boolean test(BlockPos t)
                 {
-                    IBlockState stateHere = world.getBlockState(t);
-                    IBlockState stateUp = world.getBlockState(t.up());
+                    BlockState stateHere = world.getBlockState(t);
+                    BlockState stateUp = world.getBlockState(t.up());
                     Block blockHere = stateHere.getBlock();
                     Block blockUp = stateUp.getBlock();
 
@@ -260,8 +260,8 @@ public class ActionNaturePower implements IMoveAction
             };
             // Used on a tree, spreads outwards from tree along dirt and grass
             // blocks, and converts the area to forest.
-            IBlockState state = world.getBlockState(pos);
-            IBlockState below = world.getBlockState(pos.down());
+            BlockState state = world.getBlockState(pos);
+            BlockState below = world.getBlockState(pos.down());
 
             // Has to be wood on dirt, ie at least originally a tree.
             if (state.getBlock().isWood(world, pos) && below.getBlock() == Blocks.DIRT)
@@ -292,8 +292,8 @@ public class ActionNaturePower implements IMoveAction
                 @Override
                 public boolean test(BlockPos t)
                 {
-                    IBlockState stateHere = world.getBlockState(t);
-                    IBlockState stateUp = world.getBlockState(t.up());
+                    BlockState stateHere = world.getBlockState(t);
+                    BlockState stateUp = world.getBlockState(t.up());
                     Block blockHere = stateHere.getBlock();
                     // If already plains biome, this isn't valid, so
                     // we can return false.
@@ -309,7 +309,7 @@ public class ActionNaturePower implements IMoveAction
             };
             // Used on a grass, spreads sideways and only converts blocks that
             // have plants on top of the grass.
-            IBlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(pos);
 
             // Has to be used on grass.
             if (state.getBlock() instanceof BlockGrass)
@@ -340,8 +340,8 @@ public class ActionNaturePower implements IMoveAction
                 @Override
                 public boolean test(BlockPos t)
                 {
-                    IBlockState stateHere = world.getBlockState(t);
-                    IBlockState stateUp = world.getBlockState(t.up());
+                    BlockState stateHere = world.getBlockState(t);
+                    BlockState stateUp = world.getBlockState(t.up());
                     Block blockHere = stateHere.getBlock();
                     Block blockUp = stateUp.getBlock();
                     // If already desert biome, this isn't valid, so
@@ -356,7 +356,7 @@ public class ActionNaturePower implements IMoveAction
             };
             // Used on a sand block, will only apply and return true if there is
             // some cactus found though.
-            IBlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(pos);
 
             // Has to be used on sand
             if (state.getBlock() == Blocks.SAND)
@@ -366,7 +366,7 @@ public class ActionNaturePower implements IMoveAction
                 // Check if any cactus is found, will only allow this change if
                 // at least 1 is found.
                 boolean cactus = false;
-                for (IBlockState found : checker.states)
+                for (BlockState found : checker.states)
                 {
                     cactus = found.getBlock() instanceof BlockCactus;
                     if (cactus) break;
@@ -399,7 +399,7 @@ public class ActionNaturePower implements IMoveAction
                 @Override
                 public boolean test(BlockPos t)
                 {
-                    IBlockState stateHere = world.getBlockState(t);
+                    BlockState stateHere = world.getBlockState(t);
                     Block blockHere = stateHere.getBlock();
                     // If already hills biome, this isn't valid, so
                     // we can return false.
@@ -412,7 +412,7 @@ public class ActionNaturePower implements IMoveAction
                 }
             };
             // Used on a stone, spreads sideways
-            IBlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(pos);
 
             // Has to be used on stone.
             if (state.getBlock() == Blocks.STONE)
@@ -450,7 +450,7 @@ public class ActionNaturePower implements IMoveAction
                     if (natural != here)
                     {
                         Vector3.getNewVector().set(temp).setBiome(natural, world);
-                        affected.add(world.getChunkFromBlockCoords(temp));
+                        affected.add(world.getChunk(temp));
                         mod = true;
                     }
                 }

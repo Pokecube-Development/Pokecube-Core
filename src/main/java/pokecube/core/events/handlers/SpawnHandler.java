@@ -20,7 +20,7 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -240,7 +240,7 @@ public final class SpawnHandler
         if (!temp.set(location).addTo(0, 0, entry.width / 2).clearOfBlocks(world)) return false;
         if (!temp.set(location).addTo(0, 0, -entry.width / 2).clearOfBlocks(world)) return false;
         if (!temp.set(location).addTo(-entry.width / 2, 0, 0).clearOfBlocks(world)) return false;
-        IBlockState state = temp.set(location).addTo(0, -1, 0).getBlockState(world);
+        BlockState state = temp.set(location).addTo(0, -1, 0).getBlockState(world);
         Block down = state.getBlock();
         net.minecraft.entity.MobEntity.SpawnPlacementType type = SpawnPlacementType.ON_GROUND;
         if (entry.flys())
@@ -348,7 +348,7 @@ public final class SpawnHandler
         boolean setToSurface = false;
         if (!setToSurface) return loc.copy();
         int tries = 0;
-        IBlockState state;
+        BlockState state;
         while (tries++ <= range)
         {
             state = loc.getBlockState(world);

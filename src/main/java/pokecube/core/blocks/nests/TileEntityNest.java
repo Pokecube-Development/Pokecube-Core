@@ -101,7 +101,7 @@ public class TileEntityNest extends TileEntity implements ITickable
                 if (entry != null) spawns.add(entry);
             }
         }
-        time = nbt.getInteger("time");
+        time = nbt.getInt("time");
     }
 
     public void removeResident(IPokemob resident)

@@ -73,7 +73,7 @@ public class StructureCommand extends CommandBase
         if (generator != null)
         {
             BlockPos pos = cSender.getPosition();
-            Chunk chunk = world.getChunkFromBlockCoords(pos);
+            Chunk chunk = world.getChunk(pos);
 
             int chunkX = chunk.x;
             int chunkZ = chunk.z;

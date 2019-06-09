@@ -6,7 +6,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.ItemEntity;
@@ -229,7 +229,7 @@ public class AIHungry extends AIBase
      * @return found and ate rocks. */
     protected boolean checkRockEat()
     {
-        IBlockState state = v.offset(Direction.DOWN).getBlockState(world);
+        BlockState state = v.offset(Direction.DOWN).getBlockState(world);
         Block b = state.getBlock();
         // Look for nearby rocks.
         if (!PokecubeTerrainChecker.isRock(state))
@@ -401,7 +401,7 @@ public class AIHungry extends AIBase
      *            the berry
      * @param distance
      *            to the berry */
-    protected void eatBerry(IBlockState b, double distance)
+    protected void eatBerry(BlockState b, double distance)
     {
         ItemStack fruit = ((IBerryFruitBlock) b.getBlock()).getBerryStack(world, foodLoc.getPos());
 
@@ -452,7 +452,7 @@ public class AIHungry extends AIBase
      *            where the plant is
      * @param dist
      *            distance to the plant */
-    protected void eatPlant(IBlockState b, Vector3 location, double dist)
+    protected void eatPlant(BlockState b, Vector3 location, double dist)
     {
         double diff = 1;
         diff = Math.max(diff, entity.width);
@@ -513,7 +513,7 @@ public class AIHungry extends AIBase
      *            where the rock is
      * @param dist
      *            distance to the rock */
-    protected void eatRocks(IBlockState b, Vector3 location, double dist)
+    protected void eatRocks(BlockState b, Vector3 location, double dist)
     {
         double diff = 2;
         diff = Math.max(diff, entity.width);
@@ -720,7 +720,7 @@ public class AIHungry extends AIBase
             // Go find and eat the block
             double d = foodLoc.addTo(0.5, 0.5, 0.5).distToEntity(entity);
             foodLoc.addTo(-0.5, -0.5, -0.5);
-            IBlockState b = foodLoc.getBlockState(world);
+            BlockState b = foodLoc.getBlockState(world);
             if (b == null)
             {
                 foodLoc = null;

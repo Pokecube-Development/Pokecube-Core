@@ -70,7 +70,7 @@ public class ItemMegawearable extends Item
     {
         if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
         {
-            int damage = stack.getTag().getInteger("dyeColour");
+            int damage = stack.getTag().getInt("dyeColour");
             EnumDyeColor colour = EnumDyeColor.byDyeDamage(damage);
             String s = I18n.format(colour.getUnlocalizedName());
             tooltip.add(s);

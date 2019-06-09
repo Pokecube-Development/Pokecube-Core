@@ -7,7 +7,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
@@ -48,7 +48,7 @@ public class DispenseBehaviourInteract implements IBehaviorDispenseItem
     public ItemStack dispense(IBlockSource source, ItemStack stack)
     {
         Direction dir = null;
-        IBlockState state = source.getBlockState();
+        BlockState state = source.getBlockState();
         for (IProperty<?> prop : state.getPropertyKeys())
         {
             if (prop.getValueClass() == Direction.class)

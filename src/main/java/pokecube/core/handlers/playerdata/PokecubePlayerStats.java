@@ -132,7 +132,7 @@ public class PokecubePlayerStats extends PlayerData
         hasFirst = tag.getBoolean("F");
         for (String s : temp.getKeySet())
         {
-            int num = temp.getInteger(s);
+            int num = temp.getInt(s);
             if (num > 0 && (entry = Database.getEntry(s)) != null)
             {
                 for (int i = 0; i < num; i++)
@@ -142,7 +142,7 @@ public class PokecubePlayerStats extends PlayerData
         temp = tag.getCompound("captures");
         for (String s : temp.getKeySet())
         {
-            int num = temp.getInteger(s);
+            int num = temp.getInt(s);
             if (num > 0 && (entry = Database.getEntry(s)) != null)
             {
                 for (int i = 0; i < num; i++)
@@ -152,7 +152,7 @@ public class PokecubePlayerStats extends PlayerData
         temp = tag.getCompound("hatches");
         for (String s : temp.getKeySet())
         {
-            int num = temp.getInteger(s);
+            int num = temp.getInt(s);
             if (num > 0 && (entry = Database.getEntry(s)) != null)
             {
                 for (int i = 0; i < num; i++)

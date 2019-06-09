@@ -9,7 +9,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -56,7 +56,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<CompoundNBT
         this.pokemob = entity;
     }
 
-    private BlockPos checkDir(IBlockAccess world, Direction dir, BlockPos centre, Direction side)
+    private BlockPos checkDir(IBlockReader world, Direction dir, BlockPos centre, Direction side)
     {
         if (centre == null) return null;
         if (dir != null)
@@ -67,7 +67,7 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<CompoundNBT
         return null;
     }
 
-    private IItemHandlerModifiable getInventory(IBlockAccess world, BlockPos pos, Direction side)
+    private IItemHandlerModifiable getInventory(IBlockReader world, BlockPos pos, Direction side)
     {
         if (pos == null) return null;
         if (pokemob.getOwner() instanceof PlayerEntity)
@@ -434,18 +434,18 @@ public class AIStoreStuff extends AIBase implements INBTSerializable<CompoundNBT
         CompoundNBT empty = nbt.getCompound("e");
         if (!berry.hasNoTags())
         {
-            berryLoc = new BlockPos(berry.getInteger("x"), berry.getInteger("y"), berry.getInteger("z"));
+            berryLoc = new BlockPos(berry.getInt("x"), berry.getInt("y"), berry.getInt("z"));
         }
         else berryLoc = null;
         if (!storage.hasNoTags())
         {
-            storageLoc = new BlockPos(storage.getInteger("x"), storage.getInteger("y"), storage.getInteger("z"));
+            storageLoc = new BlockPos(storage.getInt("x"), storage.getInt("y"), storage.getInt("z"));
             storageFace = Direction.values()[storage.getByte("f")];
         }
         else storageLoc = null;
         if (!empty.hasNoTags())
         {
-            emptyInventory = new BlockPos(empty.getInteger("x"), empty.getInteger("y"), empty.getInteger("z"));
+            emptyInventory = new BlockPos(empty.getInt("x"), empty.getInt("y"), empty.getInt("z"));
             emptyFace = Direction.values()[empty.getByte("f")];
         }
         else emptyInventory = null;

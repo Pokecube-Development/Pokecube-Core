@@ -406,7 +406,7 @@ public class InventoryPC implements IInventory, INBTSerializable<CompoundNBT>
 
     public void deserializeBox(CompoundNBT nbt)
     {
-        int start = nbt.getInteger("box") * 54;
+        int start = nbt.getInt("box") * 54;
         for (int i = start; i < start + 54; i++)
         {
             this.setInventorySlotContents(i, ItemStack.EMPTY);
@@ -464,7 +464,7 @@ public class InventoryPC implements IInventory, INBTSerializable<CompoundNBT>
             {
                 this.autoToPC = boxes.getBoolean("autoSend");
                 this.seenOwner = boxes.getBoolean("seenOwner");
-                this.setPage(boxes.getInteger("page"));
+                this.setPage(boxes.getInt("page"));
             }
             if (boxes.getString("name" + k) != null)
             {

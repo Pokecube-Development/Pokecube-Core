@@ -18,7 +18,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.capabilities.Capability;
@@ -87,7 +87,7 @@ public abstract class EntityTameablePokemob extends AnimalEntity implements IShe
     }
 
     @Override
-    public boolean isShearable(ItemStack item, IBlockAccess world, BlockPos pos)
+    public boolean isShearable(ItemStack item, IBlockReader world, BlockPos pos)
     {
         /** Checks if the pokedex entry has shears listed, if so, then apply to
          * any mod shears as well. */
@@ -109,7 +109,7 @@ public abstract class EntityTameablePokemob extends AnimalEntity implements IShe
     }
 
     @Override
-    public List<ItemStack> onSheared(ItemStack item, IBlockAccess world, BlockPos pos, int fortune)
+    public List<ItemStack> onSheared(ItemStack item, IBlockReader world, BlockPos pos, int fortune)
     {
         ItemStack key = new ItemStack(Items.SHEARS);
         if (pokemobCap.getPokedexEntry().interact(key))
