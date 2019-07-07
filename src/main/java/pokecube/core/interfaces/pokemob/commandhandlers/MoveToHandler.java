@@ -24,25 +24,25 @@ public class MoveToHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob) throws Exception
     {
-        speed = (float) Math.min(speed,
-                pokemob.getEntity().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
-        pokemob.getEntity().getNavigator()
-                .setPath(pokemob.getEntity().getNavigator().getPathToXYZ(location.x, location.y, location.z), speed);
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-        location.writeToBuff(buf);
-        buf.writeFloat(speed);
+        this.speed = (float) Math.min(this.speed, pokemob.getEntity().getAttribute(
+                SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+        pokemob.getEntity().getNavigator().setPath(pokemob.getEntity().getNavigator().getPathToXYZ(this.location.x,
+                this.location.y, this.location.z), this.speed);
     }
 
     @Override
     public void readFromBuf(ByteBuf buf)
     {
         super.readFromBuf(buf);
-        location = Vector3.readFromBuff(buf);
-        speed = buf.readFloat();
+        this.location = Vector3.readFromBuff(buf);
+        this.speed = buf.readFloat();
+    }
+
+    @Override
+    public void writeToBuf(ByteBuf buf)
+    {
+        super.writeToBuf(buf);
+        this.location.writeToBuff(buf);
+        buf.writeFloat(this.speed);
     }
 }

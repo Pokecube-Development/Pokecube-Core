@@ -3,7 +3,7 @@ package pokecube.core.interfaces.pokemob.commandhandlers;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.MinecraftForge;
+import pokecube.core.PokecubeCore;
 import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
@@ -28,44 +28,44 @@ public class AttackLocationHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob)
     {
-        int currentMove = pokemob.getMoveIndex();
-        CommandAttackEvent evt = new CommandAttackEvent(pokemob.getEntity(), null);
-        MinecraftForge.EVENT_BUS.post(evt);
+        final int currentMove = pokemob.getMoveIndex();
+        final CommandAttackEvent evt = new CommandAttackEvent(pokemob.getEntity(), null);
+        PokecubeCore.POKEMOB_BUS.post(evt);
 
         if (!evt.isCanceled() && currentMove != 5 && MovesUtils.canUseMove(pokemob))
         {
-            Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
+            final Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
             // Send move use message first.
-            ITextComponent mess = new TranslationTextComponent("pokemob.action.usemove",
-                    pokemob.getPokemonDisplayName(),
-                    new TranslationTextComponent(MovesUtils.getUnlocalizedMove(move.getName())));
-            if (fromOwner()) pokemob.displayMessageToOwner(mess);
+            ITextComponent mess = new TranslationTextComponent("pokemob.action.usemove", pokemob
+                    .getDisplayName(), new TranslationTextComponent(MovesUtils.getUnlocalizedMove(move
+                            .getName())));
+            if (this.fromOwner()) pokemob.displayMessageToOwner(mess);
 
             // If too hungry, send message about that.
             if (pokemob.getHungerTime() > 0)
             {
-                mess = new TranslationTextComponent("pokemob.action.hungry", pokemob.getPokemonDisplayName());
-                if (fromOwner()) pokemob.displayMessageToOwner(mess);
+                mess = new TranslationTextComponent("pokemob.action.hungry", pokemob.getDisplayName());
+                if (this.fromOwner()) pokemob.displayMessageToOwner(mess);
                 return;
             }
 
             // Otherwise set the location for execution of move.
             pokemob.setCombatState(CombatStates.NEWEXECUTEMOVE, true);
-            pokemob.setTargetPos(location);
+            pokemob.setTargetPos(this.location);
         }
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-        location.writeToBuff(buf);
     }
 
     @Override
     public void readFromBuf(ByteBuf buf)
     {
         super.readFromBuf(buf);
-        location = Vector3.readFromBuff(buf);
+        this.location = Vector3.readFromBuff(buf);
+    }
+
+    @Override
+    public void writeToBuf(ByteBuf buf)
+    {
+        super.writeToBuf(buf);
+        this.location.writeToBuff(buf);
     }
 }

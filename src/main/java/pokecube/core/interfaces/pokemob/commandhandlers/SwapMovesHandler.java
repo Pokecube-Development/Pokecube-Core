@@ -22,22 +22,22 @@ public class SwapMovesHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob)
     {
-        pokemob.exchangeMoves(indexA, indexB);
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-        buf.writeByte(indexA);
-        buf.writeByte(indexB);
+        pokemob.exchangeMoves(this.indexA, this.indexB);
     }
 
     @Override
     public void readFromBuf(ByteBuf buf)
     {
         super.readFromBuf(buf);
-        indexA = buf.readByte();
-        indexB = buf.readByte();
+        this.indexA = buf.readByte();
+        this.indexB = buf.readByte();
+    }
+
+    @Override
+    public void writeToBuf(ByteBuf buf)
+    {
+        super.writeToBuf(buf);
+        buf.writeByte(this.indexA);
+        buf.writeByte(this.indexB);
     }
 }

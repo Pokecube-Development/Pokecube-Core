@@ -1,64 +1,90 @@
 package pokecube.core.client.gui.watch.util;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-
-import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.text.ITextComponent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.watch.GuiPokeWatch;
-import pokecube.core.interfaces.PokecubeMod;
 
-public abstract class PageWithSubPages extends WatchPage
+public abstract class PageWithSubPages<T extends WatchPage> extends WatchPage
 {
-    protected List<WatchPage> pages = Lists.newArrayList();
-    protected int             index = 0;
+    protected T   current_page;
+    protected int index = 0;
 
-    public PageWithSubPages(GuiPokeWatch watch)
+    public PageWithSubPages(final ITextComponent title, final GuiPokeWatch watch)
     {
-        super(watch);
+        super(title, watch);
     }
+
+    public void changePage(final int newIndex)
+    {
+        this.closeSubPage();
+        this.index = newIndex;
+        if (this.index < 0) this.index = this.pageCount() - 1;
+        if (this.index > this.pageCount() - 1) this.index = 0;
+        this.openSubPage();
+    }
+
+    protected void closeSubPage()
+    {
+        this.current_page.onPageClosed();
+        this.children().remove(this.current_page);
+    }
+
+    protected abstract T createPage(int index);
 
     @Override
     public void onPageClosed()
     {
-        super.onPageClosed();
-        preSubClosed();
+        this.preSubClosed();
         try
         {
-            pages.get(index).onPageClosed();
+            if (this.current_page != null) this.current_page.onPageClosed();
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            PokecubeMod.log(Level.WARNING, "Error with page " + pages.get(index).getTitle(), e);
+            PokecubeCore.LOGGER.warn("Error with page " + this.current_page.getTitle(), e);
         }
+        super.onPageClosed();
     }
 
     @Override
     public void onPageOpened()
     {
         super.onPageOpened();
-        preSubOpened();
-        try
-        {
-            pages.get(index).initGui();
-            pages.get(index).onPageOpened();
-        }
-        catch (Exception e)
-        {
-            PokecubeMod.log(Level.WARNING, "Error with page " + pages.get(index).getTitle(), e);
-        }
+        this.preSubOpened();
+        this.openSubPage();
     }
 
-    public void changePage(int newIndex)
+    protected void openSubPage()
     {
-        pages.get(index).onPageClosed();
-        index = newIndex;
-        if (index < 0) index = pages.size() - 1;
-        if (index > pages.size() - 1) index = 0;
-        pages.get(index).onPageOpened();
+        this.current_page = this.createPage(this.index);
+        try
+        {
+            this.current_page.init();
+            this.current_page.onPageOpened();
+        }
+        catch (final Exception e)
+        {
+            PokecubeCore.LOGGER.warn("Error with page " + this.current_page.getTitle(), e);
+        }
+        @SuppressWarnings("unchecked")
+        final List<IGuiEventListener> list = (List<IGuiEventListener>) this.children();
+        list.add(this.current_page);
+    }
+
+    protected abstract int pageCount();
+
+    public void postPageDraw(final int mouseX, final int mouseY, final float partialTicks)
+    {
+
+    }
+
+    public void prePageDraw(final int mouseX, final int mouseY, final float partialTicks)
+    {
+
     }
 
     public void preSubClosed()
@@ -71,66 +97,21 @@ public abstract class PageWithSubPages extends WatchPage
 
     }
 
-    public void prePageDraw(int mouseX, int mouseY, float partialTicks)
+    @Override
+    public void render(final int mouseX, final int mouseY, final float partialTicks)
     {
-
-    }
-
-    public void postPageDraw(int mouseX, int mouseY, float partialTicks)
-    {
-
+        if (this.font == null) this.font = Minecraft.getInstance().fontRenderer;
+        this.prePageDraw(mouseX, mouseY, partialTicks);
+        this.current_page.render(mouseX, mouseY, partialTicks);
+        this.postPageDraw(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void handleMouseInput() throws IOException
+    public void resize(final Minecraft p_resize_1_, final int p_resize_2_, final int p_resize_3_)
     {
-        super.handleMouseInput();
-        pages.get(index).handleMouseInput();
-    }
-
-    @Override
-    public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
-    {
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        pages.get(index).mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-    }
-
-    @Override
-    public void mouseReleased(int mouseX, int mouseY, int state)
-    {
-        super.mouseReleased(mouseX, mouseY, state);
-        pages.get(index).mouseReleased(mouseX, mouseY, state);
-    }
-
-    @Override
-    public void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        super.keyTyped(typedChar, keyCode);
-        pages.get(index).keyTyped(typedChar, keyCode);
-    }
-
-    @Override
-    public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
-    {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        pages.get(index).mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void actionPerformed(GuiButton button) throws IOException
-    {
-        super.actionPerformed(button);
-        pages.get(index).actionPerformed(button);
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        if (this.fontRenderer == null) this.fontRenderer = Minecraft.getInstance().fontRenderer;
-        prePageDraw(mouseX, mouseY, partialTicks);
-        pages.get(index).drawScreen(mouseX, mouseY, partialTicks);
-        postPageDraw(mouseX, mouseY, partialTicks);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        this.closeSubPage();
+        super.resize(p_resize_1_, p_resize_2_, p_resize_3_);
     }
 
 }

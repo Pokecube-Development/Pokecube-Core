@@ -12,38 +12,17 @@ import thut.api.entity.genetics.Gene;
 
 public class SpeciesGene implements Gene
 {
-    public static byte getSexe(int baseValue, Random random)
-    {
-        if (baseValue == 255) { return IPokemob.NOSEXE; }
-        if (random.nextInt(255) >= baseValue) { return IPokemob.MALE; }
-        return IPokemob.FEMALE;
-    }
-
     public static class SpeciesInfo
     {
         public byte         value;
         public PokedexEntry entry;
 
-        CompoundNBT save()
-        {
-            CompoundNBT tag = new CompoundNBT();
-            tag.setByte("G", value);
-            if (entry != null) tag.putString("E", entry.getName());
-            return tag;
-        }
-
-        void load(CompoundNBT tag)
-        {
-            value = tag.getByte("G");
-            entry = Database.getEntry(tag.getString("E"));
-        }
-
         @Override
         public SpeciesInfo clone()
         {
-            SpeciesInfo info = new SpeciesInfo();
-            info.value = value;
-            info.entry = entry;
+            final SpeciesInfo info = new SpeciesInfo();
+            info.value = this.value;
+            info.entry = this.entry;
             return info;
         }
 
@@ -51,15 +30,36 @@ public class SpeciesGene implements Gene
         public boolean equals(Object obj)
         {
             if (!(obj instanceof SpeciesInfo)) return false;
-            SpeciesInfo info = (SpeciesInfo) obj;
-            return value == info.value && (entry == null ? true : entry.equals(info.entry));
+            final SpeciesInfo info = (SpeciesInfo) obj;
+            return this.value == info.value && (this.entry == null ? true : this.entry.equals(info.entry));
+        }
+
+        void load(CompoundNBT tag)
+        {
+            this.value = tag.getByte("G");
+            this.entry = Database.getEntry(tag.getString("E"));
+        }
+
+        CompoundNBT save()
+        {
+            final CompoundNBT tag = new CompoundNBT();
+            tag.putByte("G", this.value);
+            if (this.entry != null) tag.putString("E", this.entry.getName());
+            return tag;
         }
 
         @Override
         public String toString()
         {
-            return entry + " " + value;
+            return this.entry + " " + this.value;
         }
+    }
+
+    public static byte getSexe(int baseValue, Random random)
+    {
+        if (baseValue == 255) return IPokemob.NOSEXE;
+        if (random.nextInt(255) >= baseValue) return IPokemob.MALE;
+        return IPokemob.FEMALE;
     }
 
     SpeciesInfo info = new SpeciesInfo();
@@ -68,33 +68,13 @@ public class SpeciesGene implements Gene
     /** The value here is of format {gender, ratio}. */
     public SpeciesGene()
     {
-        info.value = 0;
+        this.info.value = 0;
     }
 
     @Override
-    public Gene interpolate(Gene other)
+    public float getEpigeneticRate()
     {
-        SpeciesGene newGene = new SpeciesGene();
-        SpeciesGene otherG = (SpeciesGene) other;
-        SpeciesGene mother = info.value == IPokemob.FEMALE ? this : info.value > 0 ? this : otherG;
-        if (info.value == otherG.info.value) mother = rand.nextFloat() < 0.5 ? this : otherG;
-        SpeciesGene father = mother == otherG ? this : otherG;
-        newGene.setValue(mother.info.clone());
-        if (newGene.info.entry.isMega) newGene.info.entry = newGene.info.entry.getBaseForme();
-        newGene.info.entry = newGene.info.entry.getChild(father.info.entry);
-        newGene.mutate();
-        return newGene;
-    }
-
-    @Override
-    public Gene mutate()
-    {
-        SpeciesGene newGene = new SpeciesGene();
-        newGene.setValue(info.clone());
-        newGene.info.value = getSexe(newGene.info.entry.getSexeRatio(), rand);
-        // Prevents mobs from hatching with wrong forms.
-        newGene.info.entry = info.entry.getChild();
-        return newGene;
+        return GeneticsManager.mutationRates.get(this.getKey());
     }
 
     @Override
@@ -103,48 +83,68 @@ public class SpeciesGene implements Gene
         return GeneticsManager.SPECIESGENE;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getValue()
-    {
-        return (T) info;
-    }
-
-    @Override
-    public <T> void setValue(T value)
-    {
-        info = (SpeciesInfo) value;
-    }
-
-    @Override
-    public float getEpigeneticRate()
-    {
-        return GeneticsManager.mutationRates.get(getKey());
-    }
-
     @Override
     public float getMutationRate()
     {
         return 1;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public CompoundNBT save()
+    public <T> T getValue()
     {
-        CompoundNBT tag = new CompoundNBT();
-        tag.put("V", info.save());
-        return tag;
+        return (T) this.info;
+    }
+
+    @Override
+    public Gene interpolate(Gene other)
+    {
+        final SpeciesGene newGene = new SpeciesGene();
+        final SpeciesGene otherG = (SpeciesGene) other;
+        SpeciesGene mother = this.info.value == IPokemob.FEMALE ? this : this.info.value > 0 ? this : otherG;
+        if (this.info.value == otherG.info.value) mother = this.rand.nextFloat() < 0.5 ? this : otherG;
+        final SpeciesGene father = mother == otherG ? this : otherG;
+        newGene.setValue(mother.info.clone());
+        if (newGene.info.entry.isMega) newGene.info.entry = newGene.info.entry.getBaseForme();
+        newGene.info.entry = newGene.info.entry.getChild(father.info.entry);
+        newGene.mutate();
+        return newGene;
     }
 
     @Override
     public void load(CompoundNBT tag)
     {
-        info.load(tag.getCompound("V"));
+        this.info.load(tag.getCompound("V"));
+    }
+
+    @Override
+    public Gene mutate()
+    {
+        final SpeciesGene newGene = new SpeciesGene();
+        newGene.setValue(this.info.clone());
+        newGene.info.value = SpeciesGene.getSexe(newGene.info.entry.getSexeRatio(), this.rand);
+        // Prevents mobs from hatching with wrong forms.
+        newGene.info.entry = this.info.entry.getChild();
+        return newGene;
+    }
+
+    @Override
+    public CompoundNBT save()
+    {
+        final CompoundNBT tag = new CompoundNBT();
+        tag.put("V", this.info.save());
+        return tag;
+    }
+
+    @Override
+    public <T> void setValue(T value)
+    {
+        this.info = (SpeciesInfo) value;
     }
 
     @Override
     public String toString()
     {
-        return info.toString();
+        return this.info.toString();
     }
 }

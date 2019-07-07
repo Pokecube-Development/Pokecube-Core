@@ -13,11 +13,11 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.Database;
 import pokecube.core.database.stats.CaptureStats;
 import pokecube.core.events.PokedexInspectEvent;
 import pokecube.core.handlers.playerdata.PokecubePlayerCustomData;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.utils.Tools;
 import thut.core.common.handlers.PlayerDataHandler;
 
@@ -46,14 +46,14 @@ public class PokedexInspector
         private boolean check(Entity entity, String configArg, CompoundNBT tag, ItemStack reward, int num,
                 boolean giveReward)
         {
-            if (reward == null || tag.getBoolean(tagString)) return false;
-            if (matches(num, configArg))
+            if (reward == null || tag.getBoolean(this.tagString)) return false;
+            if (this.matches(num, configArg))
             {
                 if (giveReward)
                 {
-                    tag.putBoolean(tagString, true);
-                    entity.sendMessage(new TranslationTextComponent(message));
-                    PlayerEntity PlayerEntity = (PlayerEntity) entity;
+                    tag.putBoolean(this.tagString, true);
+                    entity.sendMessage(new TranslationTextComponent(this.message));
+                    final PlayerEntity PlayerEntity = (PlayerEntity) entity;
                     Tools.giveItem(PlayerEntity, reward);
                     PokecubePlayerDataHandler.saveCustomData(entity.getCachedUniqueIdString());
                 }
@@ -62,51 +62,34 @@ public class PokedexInspector
             return false;
         }
 
-        private boolean matches(int num, String arg)
-        {
-            int required = 0;
-            if (arg.contains("%"))
-            {
-                required = (int) (Double.parseDouble(arg.replace("%", "")) * Database.spawnables.size() / 100d);
-            }
-            else
-            {
-                required = (int) (Double.parseDouble(arg));
-            }
-            return required <= num;
-        }
-
         @Override
         public boolean inspect(PokecubePlayerCustomData data, Entity entity, boolean giveReward)
         {
-            int num = CaptureStats.getNumberUniqueCaughtBy(entity.getUniqueID());
+            final int num = CaptureStats.getNumberUniqueCaughtBy(entity.getUniqueID());
             try
             {
-                return check(entity, (String) configField.get(PokecubeMod.core.getConfig()), data.tag, reward, num,
-                        giveReward);
+                return this.check(entity, (String) this.configField.get(PokecubeCore.getConfig()), data.tag,
+                        this.reward, num, giveReward);
             }
-            catch (IllegalArgumentException e)
+            catch (final IllegalArgumentException e)
             {
                 e.printStackTrace();
             }
-            catch (IllegalAccessException e)
+            catch (final IllegalAccessException e)
             {
                 e.printStackTrace();
             }
             return false;
         }
-    }
 
-    public static boolean inspect(PlayerEntity player, boolean reward)
-    {
-        PokedexInspectEvent evt;
-        MinecraftForge.EVENT_BUS.post(evt = new PokedexInspectEvent(player, reward));
-        if (evt.isCanceled())
+        private boolean matches(int num, String arg)
         {
-            String uuid = evt.getEntity().getCachedUniqueIdString();
-            PlayerDataHandler.getInstance().save(uuid);
+            int required = 0;
+            if (arg.contains("%")) required = (int) (Double.parseDouble(arg.replace("%", "")) * Database.spawnables
+                    .size() / 100d);
+            else required = (int) Double.parseDouble(arg);
+            return required <= num;
         }
-        return evt.isCanceled();
     }
 
     public static Set<IInspectReward> rewards = Sets.newHashSet();
@@ -116,23 +99,35 @@ public class PokedexInspector
         Database.loadRewards();
     }
 
+    public static boolean inspect(PlayerEntity player, boolean reward)
+    {
+        PokedexInspectEvent evt;
+        MinecraftForge.EVENT_BUS.post(evt = new PokedexInspectEvent(player, reward));
+        if (evt.isCanceled())
+        {
+            final String uuid = evt.getEntity().getCachedUniqueIdString();
+            PlayerDataHandler.getInstance().save(uuid);
+        }
+        return evt.isCanceled();
+    }
+
     public PokedexInspector()
     {
         MinecraftForge.EVENT_BUS.register(this);
-        rewards.clear();
-        init();
+        PokedexInspector.rewards.clear();
+        PokedexInspector.init();
     }
 
     @SubscribeEvent(receiveCanceled = false, priority = EventPriority.LOWEST)
     public void inspectEvent(PokedexInspectEvent evt)
     {
-        String uuid = evt.getEntity().getCachedUniqueIdString();
-        PokecubePlayerCustomData data = PlayerDataHandler.getInstance().getPlayerData(uuid)
-                .getData(PokecubePlayerCustomData.class);
+        final String uuid = evt.getEntity().getCachedUniqueIdString();
+        final PokecubePlayerCustomData data = PlayerDataHandler.getInstance().getPlayerData(uuid).getData(
+                PokecubePlayerCustomData.class);
         boolean done = false;
-        for (IInspectReward reward : rewards)
+        for (final IInspectReward reward : PokedexInspector.rewards)
         {
-            boolean has = reward.inspect(data, evt.getEntity(), evt.shouldReward);
+            final boolean has = reward.inspect(data, evt.getEntity(), evt.shouldReward);
             done = done || has;
             if (done && !evt.shouldReward) break;
         }

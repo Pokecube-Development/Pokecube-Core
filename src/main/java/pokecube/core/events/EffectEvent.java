@@ -7,12 +7,14 @@ import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.entity.impl.NonPersistantStatusEffect.Effect;
 
-/** This event is called to apply the effects of the status. It will by default
+/**
+ * This event is called to apply the effects of the status. It will by default
  * be handled by Pokecube, with priority listener of LOWEST. Cancel this event
  * to prevent pokecube dealing with it<br>
  * <br>
  * These events are fired on the
- * {@link pokecube.core.interfaces.PokecubeMod#MOVE_BUS} */
+ * {@link pokecube.core.interfaces.PokecubeMod#MOVE_BUS}
+ */
 @Cancelable
 public class EffectEvent extends EntityEvent
 {
@@ -26,14 +28,14 @@ public class EffectEvent extends EntityEvent
         this.pokemob = CapabilityPokemob.getPokemobFor(entity);
     }
 
-    public Effect getStatus()
-    {
-        return status;
-    }
-
     public IPokemob getPokemob()
     {
-        return pokemob;
+        return this.pokemob;
+    }
+
+    public Effect getStatus()
+    {
+        return this.status;
     }
 
 }

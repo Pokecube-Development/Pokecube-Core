@@ -5,140 +5,157 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.common.PlantType;
 import pokecube.core.PokecubeCore;
-import pokecube.core.blocks.berries.TileEntityBerries;
+import pokecube.core.PokecubeItems;
+import pokecube.core.blocks.berries.BerryGenManager;
 import pokecube.core.entity.pokemobs.ContainerPokemob;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Nature;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.UsableItemEffects.BerryUsable.BerryEffect;
 
-/** @author Oracion
- * @author Manchou */
+/**
+ * @author Oracion
+ * @author Manchou
+ */
 public class ItemBerry extends Item implements IMoveConstants, IPlantable
 {
-    public final int    index;
-    public final String name;
-
-    public ItemBerry(String name, int index, int spicy, int dry, int sweet, int bitter, int sour, BerryEffect effect)
+    public static class BerryType extends Properties
     {
-        super();
-        this.setMaxDamage(0);
-        String id = Loader.instance().activeModContainer().getModId();
-        this.setCreativeTab(PokecubeMod.creativeTabPokecubeBerries).setRegistryName(id, "berry_" + name);
-        this.setUnlocalizedName("berry_" + name);
-        this.index = index;
-        this.name = name;
-        BerryManager.berryItems.put(index, this);
-        BerryManager.addBerry(name, index, spicy, dry, sweet, bitter, sour, effect);
+        public final int         index;
+        public final int[]       flavours;
+        public final String      name;
+        public final BerryEffect effect;
+
+        public BerryType(final String name, final BerryEffect effect, final int index, final int... flavours)
+        {
+            this.name = name;
+            this.effect = effect;
+            this.index = index;
+            this.flavours = flavours;
+            if (BerryManager.berryItems.containsKey(index))
+            {
+                PokecubeCore.LOGGER.error("Duplicate Berry Index for " + index, new IllegalStateException());
+                return;
+            }
+            this.group(PokecubeItems.POKECUBEBERRIES);
+            final ItemBerry berry = new ItemBerry(this);
+            BerryManager.berryItems.put(index, berry);
+            if (index == 0) PokecubeItems.POKECUBE_BERRIES = new ItemStack(berry);
+        }
+
     }
 
-    /** allows items to add custom lines of information to the mouseover
-     * description */
+    public final BerryType type;
+
+    public ItemBerry(final BerryType type)
+    {
+        super(type);
+        this.type = type;
+        BerryManager.addBerry(this);
+    }
+
+    /**
+     * allows items to add custom lines of information to the mouseover
+     * description
+     */
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(final ItemStack stack, @Nullable final World playerIn,
+            final List<ITextComponent> tooltip, final ITooltipFlag advanced)
     {
-        String info = "";
-        if (advanced.isAdvanced()) tooltip.add("ID: " + index);
-        tooltip.add(I18n.format("item.berry.desc"));
-        String berryName = name;
-        info = I18n.format("item.berry_" + berryName + ".desc");
-        if (info.startsWith("Format error: ")) info = info.replaceFirst("Format error: ", "");
+        ITextComponent info = null;
+        if (advanced.isAdvanced()) tooltip.add(new StringTextComponent("ID: " + this.type.index));
+        tooltip.add(new TranslationTextComponent("item.pokecube.berry.desc"));
+        final String berryName = this.type.name;
+        info = new TranslationTextComponent("item.pokecube.berry_" + berryName + ".desc");
         tooltip.add(info);
-        if (TileEntityBerries.trees.containsKey(index))
+        if (BerryGenManager.trees.containsKey(this.type.index))
         {
-            info = I18n.format("item.berry.istree.desc");
+            info = new TranslationTextComponent("item.berry.istree.desc");
             tooltip.add(info);
         }
-        if (PokecubeCore.getPlayer(null) == null) return;
-        if (PokecubeCore.getPlayer(null).openContainer instanceof ContainerPokemob)
+        if (PokecubeCore.proxy.getPlayer() == null) return;
+        if (PokecubeCore.proxy.getPlayer().openContainer instanceof ContainerPokemob)
         {
-            ContainerPokemob container = (ContainerPokemob) PokecubeCore.getPlayer(null).openContainer;
-            IPokemob pokemob = container.getPokemob();
-            Nature nature = pokemob.getNature();
-            int fav = Nature.getFavouriteBerryIndex(nature);
-            if (fav == index)
+            final ContainerPokemob container = (ContainerPokemob) PokecubeCore.proxy.getPlayer().openContainer;
+            final IPokemob pokemob = container.getPokemob();
+            if (pokemob == null || pokemob.getEntity() == null) return;
+            final Nature nature = pokemob.getNature();
+            final int fav = Nature.getFavouriteBerryIndex(nature);
+            if (fav == this.type.index)
             {
-                info = I18n.format("item.berry.favourite.desc", pokemob.getPokemonDisplayName().getFormattedText());
+                info = new TranslationTextComponent("item.berry.favourite.desc", pokemob.getDisplayName()
+                        .getFormattedText());
                 tooltip.add(info);
+                info = null;
             }
-            int weight = Nature.getBerryWeight(index, nature);
-            if (weight == 0)
-            {
-                info = I18n.format("item.berry.nomind.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight >= 10)
-            {
-                info = I18n.format("item.berry.like1.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight >= 20)
-            {
-                info = I18n.format("item.berry.like2.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight >= 30)
-            {
-                info = I18n.format("item.berry.like3.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight <= -10)
-            {
-                info = I18n.format("item.berry.hate1.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight <= -20)
-            {
-                info = I18n.format("item.berry.hate2.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            if (weight <= -30)
-            {
-                info = I18n.format("item.berry.hate3.desc", pokemob.getPokemonDisplayName().getFormattedText());
-            }
-            tooltip.add(info);
+            final int weight = Nature.getBerryWeight(this.type.index, nature);
+            if (weight == 0) info = new TranslationTextComponent("item.berry.nomind.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight >= 10) info = new TranslationTextComponent("item.berry.like1.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight >= 20) info = new TranslationTextComponent("item.berry.like2.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight >= 30) info = new TranslationTextComponent("item.berry.like3.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight <= -10) info = new TranslationTextComponent("item.berry.hate1.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight <= -20) info = new TranslationTextComponent("item.berry.hate2.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (weight <= -30) info = new TranslationTextComponent("item.berry.hate3.desc", pokemob.getDisplayName()
+                    .getFormattedText());
+            if (info != null) tooltip.add(info);
         }
     }
 
     @Override
-    public ActionResultType onItemUse(PlayerEntity playerIn, World worldIn, BlockPos pos, Hand hand,
-            Direction side, float hitX, float hitY, float hitZ)
+    public BlockState getPlant(final IBlockReader world, final BlockPos pos)
     {
-        ItemStack stack = playerIn.getHeldItem(hand);
-        net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
-        if (side == Direction.UP && playerIn.canPlayerEdit(pos.offset(side), side, stack)
-                && state.getBlock().canSustainPlant(state, worldIn, pos, Direction.UP, (IPlantable) Items.WHEAT_SEEDS)
-                && worldIn.isAirBlock(pos.up()))
+        return BerryManager.getCrop(this).getDefaultState();
+    }
+
+    @Override
+    public PlantType getPlantType(final IBlockReader world, final BlockPos pos)
+    {
+        return PlantType.Crop;
+    }
+
+    @Override
+    public ActionResultType onItemUse(final ItemUseContext context)
+    {
+        final PlayerEntity playerIn = context.getPlayer();
+        final World worldIn = context.getWorld();
+        final BlockPos pos = context.getPos();
+        final Hand hand = context.getHand();
+        final Direction side = context.getFace();
+
+        final ItemStack stack = playerIn.getHeldItem(hand);
+        final BlockState state = worldIn.getBlockState(pos);
+        if (side == Direction.UP && playerIn.canPlayerEdit(pos.offset(side), side, stack) && state.getBlock()
+                .canSustainPlant(state, worldIn, pos, Direction.UP, this) && worldIn.isAirBlock(pos.up()))
         {
-            worldIn.setBlockState(pos.up(), BerryManager.berryCrop.getDefaultState());
-            TileEntityBerries tile = (TileEntityBerries) worldIn.getTileEntity(pos.up());
-            tile.setBerryId(index);
-            stack.splitStack(1);
+            worldIn.setBlockState(pos.up(), BerryManager.getCrop(this).getDefaultState());
+            stack.split(1);
         }
         return ActionResultType.SUCCESS;
-    }
-
-    @Override
-    public EnumPlantType getPlantType(IBlockReader world, BlockPos pos)
-    {
-        return EnumPlantType.Crop;
-    }
-
-    @Override
-    public BlockState getPlant(IBlockReader world, BlockPos pos)
-    {
-        return BerryManager.berryCrop.getDefaultState();
     }
 }

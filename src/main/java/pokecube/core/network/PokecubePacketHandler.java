@@ -6,25 +6,13 @@ package pokecube.core.network;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.xml.ws.handler.MessageContext;
-
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
 import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.commands.MakeCommand;
@@ -35,21 +23,17 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IHealer;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
-import pokecube.core.interfaces.pokemob.commandhandlers.TeleportHandler;
 import pokecube.core.items.pokecubes.PokecubeManager;
-import pokecube.core.network.PokecubePacketHandler.PokecubeClientPacket.PokecubeMessageHandlerClient;
-import pokecube.core.network.PokecubePacketHandler.PokecubeServerPacket.PokecubeMessageHandlerServer;
 import pokecube.core.network.packets.PacketChoose;
 import pokecube.core.network.packets.PacketDataSync;
+import pokecube.core.network.packets.PacketHeal;
 import pokecube.core.network.packets.PacketPC;
-import pokecube.core.network.packets.PacketParticle;
 import pokecube.core.network.packets.PacketPokecube;
 import pokecube.core.network.packets.PacketPokedex;
-import pokecube.core.network.packets.PacketSyncDimIds;
 import pokecube.core.network.packets.PacketSyncRoutes;
 import pokecube.core.network.packets.PacketSyncTerrain;
+import pokecube.core.network.packets.PacketTMs;
 import pokecube.core.network.packets.PacketTrade;
 import pokecube.core.network.pokemobs.PacketAIRoutine;
 import pokecube.core.network.pokemobs.PacketChangeForme;
@@ -63,223 +47,15 @@ import pokecube.core.network.pokemobs.PacketSyncGene;
 import pokecube.core.network.pokemobs.PacketSyncModifier;
 import pokecube.core.network.pokemobs.PacketSyncMoveUse;
 import pokecube.core.network.pokemobs.PacketSyncNewMoves;
+import pokecube.core.network.pokemobs.PacketTeleport;
 import pokecube.core.network.pokemobs.PacketUpdateAI;
-import pokecube.core.network.pokemobs.PokemobPacketHandler.MessageServer;
-import pokecube.core.network.pokemobs.PokemobPacketHandler.MessageServer.MessageHandlerServer;
+import pokecube.core.network.pokemobs.PokemobPacketHandler;
 import pokecube.core.utils.PokecubeSerializer;
 import pokecube.core.utils.Tools;
-import thut.api.maths.Vector3;
 
 /** @author Manchou */
 public class PokecubePacketHandler
 {
-
-    public static class PokecubeClientPacket implements IMessage
-    {
-
-        public static class PokecubeMessageHandlerClient
-                implements IMessageHandler<PokecubeClientPacket, PokecubeServerPacket>
-        {
-            static class PacketHandler
-            {
-                final PlayerEntity player;
-                final PacketBuffer buffer;
-
-                public PacketHandler(PlayerEntity p, PacketBuffer b)
-                {
-                    this.player = p;
-                    this.buffer = b;
-                    Runnable toRun = new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            byte channel = buffer.readByte();
-                            if (channel == 6)
-                            {
-                                Thread.dumpStack();
-                            }
-                            else if (channel == MOVEENTITY)
-                            {
-                                int id = buffer.readInt();
-                                Entity e = player.getEntityWorld().getEntityByID(id);
-                                Vector3 v = Vector3.readFromBuff(buffer);
-
-                                if (e != null)
-                                {
-                                    v.moveEntity(e);
-                                }
-                            }
-                        }
-                    };
-                    PokecubeCore.proxy.getMainThreadListener().addScheduledTask(toRun);
-                }
-            }
-
-            @Override
-            public PokecubeServerPacket onMessage(PokecubeClientPacket message, MessageContext ctx)
-            {
-                PlayerEntity player = PokecubeCore.getPlayer(null);
-                if (player == null)
-                {
-                    System.err.println(FMLClientHandler.instance().getClientPlayerEntity());
-                    // Thread.dumpStack();
-                    return null;
-                }
-                new PacketHandler(player, message.buffer);
-                return null;
-            }
-        }
-
-        public static final byte MOVEENTITY = 12;
-
-        PacketBuffer             buffer;;
-
-        public PokecubeClientPacket()
-        {
-        }
-
-        public PokecubeClientPacket(byte[] data)
-        {
-            this.buffer = new PacketBuffer(Unpooled.copiedBuffer(data));
-        }
-
-        public PokecubeClientPacket(ByteBuf buffer)
-        {
-            if (buffer instanceof PacketBuffer) this.buffer = (PacketBuffer) buffer;
-            else this.buffer = new PacketBuffer(buffer);
-        }
-
-        public PokecubeClientPacket(int channel, CompoundNBT nbt)
-        {
-            this.buffer = new PacketBuffer(Unpooled.buffer());
-            buffer.writeByte((byte) channel);
-            buffer.writeCompoundTag(nbt);
-        }
-
-        @Override
-        public void fromBytes(ByteBuf buf)
-        {
-            if (buffer == null)
-            {
-                buffer = new PacketBuffer(Unpooled.buffer());
-            }
-            buffer.writeBytes(buf);
-        }
-
-        @Override
-        public void toBytes(ByteBuf buf)
-        {
-            if (buffer == null)
-            {
-                buffer = new PacketBuffer(Unpooled.buffer());
-            }
-            buf.writeBytes(buffer);
-        }
-    }
-
-    public static class PokecubeServerPacket implements IMessage
-    {
-
-        public static class PokecubeMessageHandlerServer implements IMessageHandler<PokecubeServerPacket, IMessage>
-        {
-            static class PacketHandler
-            {
-                final PlayerEntity player;
-                final PacketBuffer buffer;
-
-                public PacketHandler(PlayerEntity p, PacketBuffer b)
-                {
-                    this.player = p;
-                    this.buffer = b;
-                    Runnable toRun = new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            byte channel = buffer.readByte();
-                            if (channel == 1)
-                            {
-                                new Exception().printStackTrace();
-                            }
-                            else if (channel == POKECENTER)
-                            {
-                                handlePokecenterPacket((ServerPlayerEntity) player);
-                            }
-                            else if (channel == TELEPORT)
-                            {
-                                int index = buffer.readInt();
-                                TeleportHandler.setTeleIndex(player.getCachedUniqueIdString(), index);
-                            }
-                        }
-                    };
-                    PokecubeCore.proxy.getMainThreadListener().addScheduledTask(toRun);
-                }
-            }
-
-            @Override
-            public PokecubeServerPacket onMessage(PokecubeServerPacket message, MessageContext ctx)
-            {
-                PlayerEntity player = ctx.getServerHandler().player;
-                new PacketHandler(player, message.buffer);
-                return null;
-            }
-        }
-
-        // public static final byte CHOOSE1ST = 0;
-        public static final byte POKECENTER     = 3;
-        public static final byte POKEMOBSPAWNER = 4;
-        public static final byte TELEPORT       = 5;
-
-        PacketBuffer             buffer;;
-
-        public PokecubeServerPacket()
-        {
-        }
-
-        public PokecubeServerPacket(byte channel, CompoundNBT nbt)
-        {
-            this.buffer = new PacketBuffer(Unpooled.buffer());
-            buffer.writeByte(channel);
-            buffer.writeCompoundTag(nbt);
-        }
-
-        public PokecubeServerPacket(byte[] data)
-        {
-            this.buffer = new PacketBuffer(Unpooled.copiedBuffer(data));
-        }
-
-        public PokecubeServerPacket(ByteBuf buffer)
-        {
-            this.buffer = (PacketBuffer) buffer;
-        }
-
-        public PokecubeServerPacket(byte channel)
-        {
-            this.buffer = new PacketBuffer(Unpooled.buffer());
-            buffer.writeByte(channel);
-        }
-
-        @Override
-        public void fromBytes(ByteBuf buf)
-        {
-            if (buffer == null)
-            {
-                buffer = new PacketBuffer(Unpooled.buffer(buf.capacity()));
-            }
-            buffer.writeBytes(buf);
-        }
-
-        @Override
-        public void toBytes(ByteBuf buf)
-        {
-            if (buffer == null)
-            {
-                buffer = new PacketBuffer(Unpooled.buffer(buf.capacity()));
-            }
-            buf.writeBytes(buffer);
-        }
-    }
 
     public static class StarterInfo
     {
@@ -287,51 +63,40 @@ public class PokecubePacketHandler
 
         public static void processStarterInfo()
         {
-            specialStarters.clear();
-            for (String s : infos)
+            PokecubePacketHandler.specialStarters.clear();
+            for (final String s : StarterInfo.infos)
             {
-                String[] data = s.split(";");
-                if (data.length < 2)
-                {
-                    continue;
-                }
-                Contributor contrib = ContributorManager.instance()
-                        .getContributor(new GameProfile(null, data[0].trim()));
+                final String[] data = s.split(";");
+                if (data.length < 2) continue;
+                final Contributor contrib = ContributorManager.instance().getContributor(new GameProfile(null, data[0]
+                        .trim()));
                 if (contrib == null)
                 {
-                    if (PokecubeMod.debug) PokecubeMod.log("Error with contributor for " + data[0]);
+                    PokecubeCore.LOGGER.error("Error with contributor for " + data[0]);
                     continue;
                 }
-                if (specialStarters.containsKey(contrib)) continue;
-                String[] pokemonData = new String[data.length - 1];
+                if (PokecubePacketHandler.specialStarters.containsKey(contrib)) continue;
+                final String[] pokemonData = new String[data.length - 1];
                 for (int i = 1; i < data.length; i++)
-                {
                     pokemonData[i - 1] = data[i];
-                }
-                StarterInfo[] info = new StarterInfo[pokemonData.length];
+                final StarterInfo[] info = new StarterInfo[pokemonData.length];
                 for (int i = 0; i < info.length; i++)
                 {
-                    String s1 = pokemonData[i];
-                    String[] dat = s1.split(" ");
-                    String name = dat[0];
-                    if (Database.getEntry(name) != null)
-                    {
-                        info[i] = new StarterInfo(dat);
-                    }
-                    else
-                    {
-                        info[i] = new StarterInfo(null);
-                    }
+                    final String s1 = pokemonData[i];
+                    final String[] dat = s1.split(" ");
+                    final String name = dat[0];
+                    if (Database.getEntry(name) != null) info[i] = new StarterInfo(dat);
+                    else info[i] = new StarterInfo(null);
                 }
-                StarterInfoContainer cont = new StarterInfoContainer(info);
-                specialStarters.put(contrib, cont);
+                final StarterInfoContainer cont = new StarterInfoContainer(info);
+                PokecubePacketHandler.specialStarters.put(contrib, cont);
             }
         }
 
         public final String   name;
         public final String[] args;
 
-        public StarterInfo(String[] args)
+        public StarterInfo(final String[] args)
         {
             if (args == null)
             {
@@ -345,33 +110,27 @@ public class PokecubePacketHandler
             }
         }
 
-        public ItemStack makeStack(PlayerEntity owner)
+        public ItemStack makeStack(final PlayerEntity owner)
         {
-            ItemStack ret = ItemStack.EMPTY;
-            if (name == null) return ret;
-            PokedexEntry entry = Database.getEntry(name);
+            final ItemStack ret = ItemStack.EMPTY;
+            if (this.name == null) return ret;
+            final PokedexEntry entry = Database.getEntry(this.name);
             if (entry != null)
             {
-                World worldObj = owner.getEntityWorld();
-                IPokemob pokemob = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, worldObj));
+                final World worldObj = owner.getEntityWorld();
+                final IPokemob pokemob = CapabilityPokemob.getPokemobFor(PokecubeCore.createPokemob(entry, worldObj));
                 if (pokemob != null)
                 {
-                    pokemob.setPokemonOwner(owner.getUniqueID());
-                    Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
-                    if (contrib != null)
-                    {
-                        pokemob.setPokecube(contrib.getStarterCube());
-                    }
+                    pokemob.setOwner(owner.getUniqueID());
+                    final Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
+                    if (contrib != null) pokemob.setPokecube(contrib.getStarterCube());
                     else pokemob.setPokecube(new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE)));
                     pokemob.setExp(Tools.levelToXp(pokemob.getExperienceMode(), 5), true);
                     pokemob.getEntity().setHealth(pokemob.getEntity().getMaxHealth());
-                    if (args.length > 1)
-                    {
-                        MakeCommand.setToArgs(args, pokemob, 1, null, false);
-                    }
-                    ItemStack item = PokecubeManager.pokemobToItem(pokemob);
+                    if (this.args.length > 1) MakeCommand.setToArgs(this.args, pokemob, 1, null, false);
+                    final ItemStack item = PokecubeManager.pokemobToItem(pokemob);
                     PokecubeManager.heal(item);
-                    pokemob.getEntity().isDead = true;
+                    pokemob.getEntity().remove();
                     return item;
                 }
                 return PokecubeSerializer.getInstance().starter(entry, owner);
@@ -382,7 +141,7 @@ public class PokecubePacketHandler
         @Override
         public String toString()
         {
-            return name + " " + Arrays.toString(args);
+            return this.name + " " + Arrays.toString(this.args);
         }
     }
 
@@ -390,180 +149,67 @@ public class PokecubePacketHandler
     {
         public final StarterInfo[] info;
 
-        public StarterInfoContainer(StarterInfo[] info)
+        public StarterInfoContainer(final StarterInfo[] info)
         {
             this.info = info;
         }
     }
 
-    public final static byte                                 CHANNEL_ID_ChooseFirstPokemob = 0;
-    public final static byte                                 CHANNEL_ID_PokemobMove        = 1;
+    public final static byte CHANNEL_ID_ChooseFirstPokemob = 0;
+    public final static byte CHANNEL_ID_PokemobMove        = 1;
 
-    public final static byte                                 CHANNEL_ID_EntityPokemob      = 2;
-    public final static byte                                 CHANNEL_ID_HealTable          = 3;
+    public final static byte CHANNEL_ID_EntityPokemob = 2;
+    public final static byte CHANNEL_ID_HealTable     = 3;
 
-    public final static byte                                 CHANNEL_ID_PokemobSpawner     = 4;
+    public final static byte CHANNEL_ID_PokemobSpawner = 4;
 
-    public final static byte                                 CHANNEL_ID_STATS              = 6;
+    public final static byte CHANNEL_ID_STATS = 6;
 
-    public static boolean                                    giveHealer                    = true;
+    public static boolean giveHealer = true;
 
-    public static HashMap<Contributor, StarterInfoContainer> specialStarters               = Maps.newHashMap();
+    public static HashMap<Contributor, StarterInfoContainer> specialStarters = Maps.newHashMap();
 
-    public static void init()
-    {
-        // General Pokecube Packets
-        PokecubeMod.packetPipeline.registerMessage(PokecubeMessageHandlerClient.class, PokecubeClientPacket.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PokecubeMessageHandlerServer.class, PokecubeServerPacket.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(MessageHandlerServer.class, MessageServer.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        // Packets for blocks
-        PokecubeMod.packetPipeline.registerMessage(PacketPC.class, PacketPC.class, PokecubeCore.getMessageID(),
-                Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketPC.class, PacketPC.class, PokecubeCore.getMessageID(),
-                Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketTrade.class, PacketTrade.class, PokecubeCore.getMessageID(),
-                Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketTrade.class, PacketTrade.class, PokecubeCore.getMessageID(),
-                Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketChoose.class, PacketChoose.class, PokecubeCore.getMessageID(),
-                Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketChoose.class, PacketChoose.class, PokecubeCore.getMessageID(),
-                Dist.DEDICATED_SERVER);
-
-        // Packets for Pokemobs
-        PokecubeMod.packetPipeline.registerMessage(PacketChangeForme.class, PacketChangeForme.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketChangeForme.class, PacketChangeForme.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketPokedex.class, PacketPokedex.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketPokedex.class, PacketPokedex.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketMountedControl.class, PacketMountedControl.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketMountedControl.class, PacketMountedControl.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncRoutes.class, PacketSyncRoutes.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncRoutes.class, PacketSyncRoutes.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        // Server processing only
-        PokecubeMod.packetPipeline.registerMessage(PacketNickname.class, PacketNickname.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-        PokecubeMod.packetPipeline.registerMessage(PacketCommand.class, PacketCommand.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-        PokecubeMod.packetPipeline.registerMessage(PacketAIRoutine.class, PacketAIRoutine.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-        PokecubeMod.packetPipeline.registerMessage(PacketUpdateAI.class, PacketUpdateAI.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-        PokecubeMod.packetPipeline.registerMessage(PacketPokemobGui.class, PacketPokemobGui.class,
-                PokecubeCore.getMessageID(), Dist.DEDICATED_SERVER);
-
-        // Client processing only
-        PokecubeMod.packetPipeline.registerMessage(PacketPokemobMessage.class, PacketPokemobMessage.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketParticle.class, PacketParticle.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncTerrain.class, PacketSyncTerrain.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketDataSync.class, PacketDataSync.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncDimIds.class, PacketSyncDimIds.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketPokecube.class, PacketPokecube.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncModifier.class, PacketSyncModifier.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncGene.class, PacketSyncGene.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncExp.class, PacketSyncExp.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncMoveUse.class, PacketSyncMoveUse.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-        PokecubeMod.packetPipeline.registerMessage(PacketSyncNewMoves.class, PacketSyncNewMoves.class,
-                PokecubeCore.getMessageID(), Dist.CLIENT);
-    }
-
-    public static void handlePokecenterPacket(ServerPlayerEntity sender)
+    public static void handlePokecenterPacket(final ServerPlayerEntity sender)
     {
         if (sender.openContainer instanceof IHealer)
         {
-            IHealer healer = (IHealer) sender.openContainer;
+            final IHealer healer = (IHealer) sender.openContainer;
             healer.heal();
         }
     }
 
-    public static PokecubeClientPacket makeClientPacket(byte channel, byte[] data)
+    public static void init()
     {
-        byte[] packetData = new byte[data.length + 1];
-        packetData[0] = channel;
+        // General Pokecube Packets
+        PokecubeCore.packets.registerMessage(PacketSyncTerrain.class, PacketSyncTerrain::new);
+        PokecubeCore.packets.registerMessage(PacketSyncRoutes.class, PacketSyncRoutes::new);
+        PokecubeCore.packets.registerMessage(PacketPokecube.class, PacketPokecube::new);
+        PokecubeCore.packets.registerMessage(PacketPokedex.class, PacketPokedex::new);
+        PokecubeCore.packets.registerMessage(PacketDataSync.class, PacketDataSync::new);
+        PokecubeCore.packets.registerMessage(PacketChoose.class, PacketChoose::new);
 
-        for (int i = 1; i < packetData.length; i++)
-        {
-            packetData[i] = data[i - 1];
-        }
-        return new PokecubeClientPacket(packetData);
-    }
+        // Packets for blocks
+        PokecubeCore.packets.registerMessage(PacketPC.class, PacketPC::new);
+        PokecubeCore.packets.registerMessage(PacketHeal.class, PacketHeal::new);
+        PokecubeCore.packets.registerMessage(PacketTrade.class, PacketTrade::new);
+        PokecubeCore.packets.registerMessage(PacketTMs.class, PacketTMs::new);
 
-    public static PokecubeClientPacket makeClientPacket(byte channel, CompoundNBT nbt)
-    {
-        PacketBuffer packetData = new PacketBuffer(Unpooled.buffer());
-        packetData.writeByte(channel);
-        packetData.writeCompoundTag(nbt);
-
-        return new PokecubeClientPacket(packetData);
-    }
-
-    public static PokecubeServerPacket makeServerPacket(byte channel, byte[] data)
-    {
-        byte[] packetData = new byte[data.length + 1];
-        packetData[0] = channel;
-
-        for (int i = 1; i < packetData.length; i++)
-        {
-            packetData[i] = data[i - 1];
-        }
-        return new PokecubeServerPacket(packetData);
-    }
-
-    public static void sendToAll(IMessage toSend)
-    {
-        PokecubeMod.packetPipeline.sendToAll(toSend);
-    }
-
-    public static void sendToAllNear(IMessage toSend, Vector3 point, int dimID, double distance)
-    {
-        PokecubeMod.packetPipeline.sendToAllAround(toSend, new TargetPoint(dimID, point.x, point.y, point.z, distance));
-    }
-
-    public static void sendToClient(IMessage toSend, PlayerEntity player)
-    {
-        if (player == null)
-        {
-            System.out.println("null player");
-            return;
-        }
-        if (!(player instanceof ServerPlayerEntity))
-        {
-            new ClassCastException("Cannot cast " + player + " to ServerPlayerEntity").printStackTrace();
-            return;
-        }
-        PokecubeMod.packetPipeline.sendTo(toSend, (ServerPlayerEntity) player);
-    }
-
-    public static void sendToServer(IMessage toSend)
-    {
-        PokecubeMod.packetPipeline.sendToServer(toSend);
+        // Packets for Pokemobs
+        PokecubeCore.packets.registerMessage(PacketAIRoutine.class, PacketAIRoutine::new);
+        PokecubeCore.packets.registerMessage(PacketChangeForme.class, PacketChangeForme::new);
+        PokecubeCore.packets.registerMessage(PacketCommand.class, PacketCommand::new);
+        PokecubeCore.packets.registerMessage(PacketMountedControl.class, PacketMountedControl::new);
+        PokecubeCore.packets.registerMessage(PacketNickname.class, PacketNickname::new);
+        PokecubeCore.packets.registerMessage(PacketPokemobGui.class, PacketPokemobGui::new);
+        PokecubeCore.packets.registerMessage(PacketPokemobMessage.class, PacketPokemobMessage::new);
+        PokecubeCore.packets.registerMessage(PacketSyncExp.class, PacketSyncExp::new);
+        PokecubeCore.packets.registerMessage(PacketSyncGene.class, PacketSyncGene::new);
+        PokecubeCore.packets.registerMessage(PacketSyncModifier.class, PacketSyncModifier::new);
+        PokecubeCore.packets.registerMessage(PacketSyncMoveUse.class, PacketSyncMoveUse::new);
+        PokecubeCore.packets.registerMessage(PacketSyncNewMoves.class, PacketSyncNewMoves::new);
+        PokecubeCore.packets.registerMessage(PacketTeleport.class, PacketTeleport::new);
+        PokecubeCore.packets.registerMessage(PokemobPacketHandler.MessageServer.class,
+                PokemobPacketHandler.MessageServer::new);
+        PokecubeCore.packets.registerMessage(PacketUpdateAI.class, PacketUpdateAI::new);
     }
 }

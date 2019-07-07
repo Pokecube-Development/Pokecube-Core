@@ -1,102 +1,71 @@
 package pokecube.core.entity.professor;
 
-import java.io.IOException;
-
-import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.INpc;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIMoveIndoors;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
-import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
-import net.minecraft.entity.ai.EntityAIOpenDoor;
-import net.minecraft.entity.ai.EntityAIRestrictOpenDoor;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.ai.EntityAIWatchClosest2;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.INPC;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
 import pokecube.core.PokecubeCore;
-import pokecube.core.ai.utils.GuardAI;
-import pokecube.core.contributors.Contributor;
-import pokecube.core.contributors.ContributorManager;
-import pokecube.core.events.handlers.EventsHandler;
-import pokecube.core.events.handlers.SpawnHandler;
-import pokecube.core.handlers.Config;
+import pokecube.core.database.Database;
 import pokecube.core.interfaces.PokecubeMod;
-import pokecube.core.items.ItemLuckyEgg;
-import pokecube.core.network.PokecubePacketHandler;
+import pokecube.core.inventory.healer.HealerContainer;
 import pokecube.core.network.packets.PacketChoose;
-import pokecube.core.utils.PokecubeSerializer;
-import pokecube.core.utils.TimePeriod;
 import thut.api.maths.Vector3;
-import thut.api.network.PacketHandler;
-import thut.core.common.commands.CommandTools;
+import thut.core.common.network.EntityUpdate;
 
-public class EntityProfessor extends EntityAgeable implements IEntityAdditionalSpawnData, INpc
+public class EntityProfessor extends AgeableEntity implements IEntityAdditionalSpawnData, INPC
 {
     public static enum ProfessorType
     {
         PROFESSOR, HEALER;
     }
 
+    public static final EntityType<EntityProfessor> TYPE;
+
+    static
+    {
+        TYPE = EntityType.Builder.create(EntityProfessor::new, EntityClassification.CREATURE).setCustomClientFactory((s,
+                w) -> EntityProfessor.TYPE.create(w)).build("professor");
+    }
+
+    public static final ResourceLocation PROFTEX  = new ResourceLocation(PokecubeMod.ID + ":textures/professor.png");
+    public static final ResourceLocation NURSETEX = new ResourceLocation(PokecubeMod.ID + ":textures/nurse.png");
+
     public ProfessorType type       = ProfessorType.PROFESSOR;
     public String        name       = "";
     public String        playerName = "";
+    public String        urlSkin    = "";
     public boolean       male       = true;
     public boolean       stationary = false;
     public Vector3       location   = null;
-    public GuardAI       guardAI;
 
-    public EntityProfessor(World par1World)
+    protected EntityProfessor(final EntityType<? extends AgeableEntity> type, final World world)
     {
-        this(par1World, null);
-    }
-
-    public EntityProfessor(World world, Vector3 location)
-    {
-        this(world, location, false);
-    }
-
-    public EntityProfessor(World par1World, Vector3 location, boolean stationary)
-    {
-        super(par1World);
-        this.setSize(0.6F, 1.8F);
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(3, new EntityAIMoveTowardsTarget(this, 0.6, 10));
-        this.tasks.addTask(2, new EntityAIMoveIndoors(this));
-        this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
-        this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
-        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
-        this.tasks.addTask(5, new EntityAILookIdle(this));
-        this.tasks.addTask(9, new EntityAIWatchClosest2(this, PlayerEntity.class, 5.0F, 1.0F));
-        this.tasks.addTask(10, new EntityAIWatchClosest(this, LivingEntity.class, 8.0F, 1.0f));
-        this.guardAI = new GuardAI(this, this.getCapability(EventsHandler.GUARDAI_CAP, null));
-        this.tasks.addTask(1, guardAI);
-        if (location != null)
-        {
-            location.moveEntity(this);
-            setStationary(location);
-        }
+        super(type, world);
+        this.enablePersistence();
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float i)
+    public boolean attackEntityFrom(final DamageSource source, final float i)
     {
-        Entity e = source.getTrueSource();
-        if (e instanceof PlayerEntity && ((PlayerEntity) e).capabilities.isCreativeMode)
+        final Entity e = source.getTrueSource();
+        if (e instanceof PlayerEntity && ((PlayerEntity) e).abilities.isCreativeMode)
         {
-            PlayerEntity player = (PlayerEntity) e;
-            if (player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() instanceof ItemLuckyEgg)
+            final PlayerEntity player = (PlayerEntity) e;
+            if (!player.getHeldItemMainhand().isEmpty())
             {
                 if (!this.getEntityWorld().isRemote)
                 {
@@ -104,150 +73,106 @@ public class EntityProfessor extends EntityAgeable implements IEntityAdditionalS
                     else if (this.type == ProfessorType.HEALER) this.type = ProfessorType.PROFESSOR;
                     if (this.type == ProfessorType.PROFESSOR) this.male = true;
                     else this.male = false;
-                    PacketHandler.sendEntityUpdate(this);
+                    System.out.println("test");
+                    EntityUpdate.sendEntityUpdate(this);
+                    return false;
                 }
             }
-            else this.setDead();
+            else this.remove();
         }
         return super.attackEntityFrom(source, i);
     }
 
     @Override
-    protected boolean canDespawn()
+    public AgeableEntity createChild(final AgeableEntity ageable)
     {
-        return false;
-    }
-
-    @Override
-    public EntityAgeable createChild(EntityAgeable p_90011_1_)
-    {
+        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean processInteract(PlayerEntity player, Hand hand)
+    public IPacket<?> createSpawnPacket()
     {
-        if (!getEntityWorld().isRemote && hand == Hand.MAIN_HAND)
-        {
-            if (!SpawnHandler.canSpawnInWorld(player.getEntityWorld())) return false;
-            if (type == ProfessorType.PROFESSOR)
-            {
-                if (!PokecubeSerializer.getInstance().hasStarter(player))
-                {
-                    PacketChoose packet;
-                    packet = new PacketChoose(PacketChoose.OPENGUI);
-                    boolean hasStarter = PokecubeSerializer.getInstance().hasStarter(player);
-                    if (hasStarter)
-                    {
-                        packet.data.putBoolean("C", false);
-                        packet.data.putBoolean("H", hasStarter);
-                    }
-                    else
-                    {
-                        Contributor contrib = ContributorManager.instance().getContributor(player.getGameProfile());
-                        boolean special = false;
-                        boolean pick = false;
-                        if (PokecubePacketHandler.specialStarters.containsKey(contrib))
-                        {
-                            special = true;
-                            pick = PacketChoose.canPick(player.getGameProfile());
-                        }
-                        packet = PacketChoose.createOpenPacket(special, pick, PokecubeMod.core.getStarters());
-                    }
-                    PokecubePacketHandler.sendToClient(packet, player);
-                }
-                else
-                {
-                    CommandTools.sendError(player, "pokecube.professor.deny");
-                }
-            }
-            else if (type == ProfessorType.HEALER)
-            {
-                BlockPos pos = getPosition();
-                player.openGui(PokecubeCore.instance, Config.GUIPOKECENTER_ID, world, pos.getX(), pos.getY() + 1,
-                        pos.getZ());
-                return true;
-            }
-        }
-        return true;
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    public ResourceLocation getTex()
+    {
+        if (!this.playerName.isEmpty()) return PokecubeCore.proxy.getPlayerSkin(this.playerName);
+        return this.type == ProfessorType.PROFESSOR ? EntityProfessor.PROFTEX : EntityProfessor.NURSETEX;
     }
 
     @Override
-    public void readEntityFromNBT(CompoundNBT nbt)
+    public boolean processInteract(final PlayerEntity player, final Hand hand)
     {
-        super.readEntityFromNBT(nbt);
-        stationary = nbt.getBoolean("stationary");
-        male = nbt.getBoolean("gender");
-        name = nbt.getString("name");
-        playerName = nbt.getString("playerName");
+        switch (this.type)
+        {
+        case HEALER:
+            if (player instanceof ServerPlayerEntity) player.openContainer(new SimpleNamedContainerProvider((id,
+                    playerInventory, playerIn) -> new HealerContainer(id, playerInventory, IWorldPosCallable.of(
+                            this.world, this.getPosition())), player.getDisplayName()));
+            return true;
+        case PROFESSOR:
+            if (player instanceof ServerPlayerEntity)
+            {
+                final boolean canPick = PacketChoose.canPick(player.getGameProfile());
+                final PacketChoose packet = PacketChoose.createOpenPacket(false, true, Database.getStarters());
+                System.out.println(canPick);
+                PokecubeCore.packets.sendTo(packet, (ServerPlayerEntity) player);
+            }
+            break;
+        default:
+            break;
+
+        }
+        return super.processInteract(player, hand);
+    }
+
+    @Override
+    public void readAdditional(final CompoundNBT nbt)
+    {
+        super.readAdditional(nbt);
+        this.stationary = nbt.getBoolean("stationary");
+        this.male = nbt.getBoolean("gender");
+        this.name = nbt.getString("name");
+        this.playerName = nbt.getString("playerName");
+        this.urlSkin = nbt.getString("urlSkin");
         try
         {
-            type = ProfessorType.valueOf(nbt.getString("type"));
+            if (nbt.contains("type")) this.type = ProfessorType.valueOf(nbt.getString("type"));
+            else this.type = ProfessorType.PROFESSOR;
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            type = ProfessorType.PROFESSOR;
+            this.type = ProfessorType.PROFESSOR;
             e.printStackTrace();
         }
     }
 
-    public void setStationary(boolean stationary)
+    @Override
+    public void readSpawnData(final PacketBuffer additionalData)
     {
-        if (stationary && !this.stationary) setStationary(Vector3.getNewVector().set(this));
-        else if (!stationary && this.stationary)
-        {
-            for (Object o : this.tasks.taskEntries)
-                if (o instanceof GuardAI) this.tasks.removeTask((EntityAIBase) o);
-            this.stationary = stationary;
-        }
-    }
-
-    public void setStationary(Vector3 location)
-    {
-        this.location = location;
-        if (location == null)
-        {
-            stationary = false;
-            guardAI.setPos(new BlockPos(0, 0, 0));
-            guardAI.setTimePeriod(new TimePeriod(0, 0));
-            return;
-        }
-        guardAI.setTimePeriod(TimePeriod.fullDay);
-        guardAI.setPos(getPosition());
-        stationary = true;
+        this.readAdditional(additionalData.readCompoundTag());
     }
 
     @Override
-    public void writeEntityToNBT(CompoundNBT nbt)
+    public void writeAdditional(final CompoundNBT nbt)
     {
-        super.writeEntityToNBT(nbt);
-        nbt.putBoolean("gender", male);
-        nbt.putString("name", name);
-        nbt.putBoolean("stationary", stationary);
-        nbt.putString("playerName", playerName);
-        nbt.putString("type", type.toString());
+        super.writeAdditional(nbt);
+        nbt.putBoolean("gender", this.male);
+        nbt.putString("name", this.name);
+        nbt.putBoolean("stationary", this.stationary);
+        nbt.putString("playerName", this.playerName);
+        nbt.putString("urlSkin", this.urlSkin);
+        nbt.putString("type", this.type.toString());
     }
 
     @Override
-    public void writeSpawnData(ByteBuf buffer)
+    public void writeSpawnData(final PacketBuffer buffer)
     {
-        CompoundNBT tag = new CompoundNBT();
-        this.writeEntityToNBT(tag);
-        new PacketBuffer(buffer).writeCompoundTag(tag);
-    }
-
-    @Override
-    public void readSpawnData(ByteBuf additionalData)
-    {
-        try
-        {
-            CompoundNBT tag = new PacketBuffer(additionalData).readCompoundTag();
-            this.readEntityFromNBT(tag);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        final CompoundNBT tag = new CompoundNBT();
+        this.writeAdditional(tag);
+        buffer.writeCompoundTag(tag);
     }
 
 }

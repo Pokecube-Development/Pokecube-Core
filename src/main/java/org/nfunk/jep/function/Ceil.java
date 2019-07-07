@@ -1,7 +1,9 @@
-/***************************************************************************** JEP
+/*****************************************************************************
+ * JEP
  * - Java Math Expression Parser 2.3.1 January 26 2006 (c) Copyright 2004,
  * Nathan Funk and Richard Morris See LICENSE.txt for license
- * information. *****************************************************************************/
+ * information.
+ *****************************************************************************/
 package org.nfunk.jep.function;
 
 import java.util.Stack;
@@ -14,16 +16,13 @@ public class Ceil extends PostfixMathCommand
 {
     public Ceil()
     {
-        numberOfParameters = 1;
+        this.numberOfParameters = 1;
     }
 
     public Object abs(Object param) throws ParseException
     {
-        if (param instanceof Complex)
-        {
-            return Math.ceil(new Double(((Complex) param).abs()));
-        }
-        else if (param instanceof Number) { return Math.ceil(new Double(Math.abs(((Number) param).doubleValue()))); }
+        if (param instanceof Complex) return Math.ceil(new Double(((Complex) param).abs()));
+        else if (param instanceof Number) return Math.ceil(new Double(Math.abs(((Number) param).doubleValue())));
 
         throw new ParseException("Invalid parameter type");
     }
@@ -31,9 +30,9 @@ public class Ceil extends PostfixMathCommand
     @Override
     public void run(Stack inStack) throws ParseException
     {
-        checkStack(inStack);// check the stack
-        Object param = inStack.pop();
-        inStack.push(abs(param));// push the result on the inStack
+        this.checkStack(inStack);// check the stack
+        final Object param = inStack.pop();
+        inStack.push(this.abs(param));// push the result on the inStack
         return;
     }
 

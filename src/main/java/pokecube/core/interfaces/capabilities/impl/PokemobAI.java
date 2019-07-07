@@ -2,265 +2,173 @@ package pokecube.core.interfaces.capabilities.impl;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.IBlockReader;
-import pokecube.core.PokecubeCore;
+import pokecube.core.ai.logic.Logic;
 import pokecube.core.handlers.playerdata.PlayerPokemobCache;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
 import pokecube.core.utils.PokecubeSerializer;
-import thut.api.maths.Matrix3;
 import thut.api.maths.Vector3;
 import thut.core.common.handlers.PlayerDataHandler;
 
 public abstract class PokemobAI extends PokemobEvolves
 {
-    private boolean[]                               routineStates = new boolean[AIRoutine.values().length];
-    private int                                     cachedGeneralState;
-    private int                                     cachedCombatState;
-    private int                                     cachedLogicState;
+    private final boolean[] routineStates = new boolean[AIRoutine.values().length];
+    private int             cachedGeneralState;
+    private int             cachedCombatState;
+    private int             cachedLogicState;
+
+    @Override
+    public boolean getCombatState(final CombatStates state)
+    {
+        if (this.getEntity().getEntityWorld().isRemote) this.cachedCombatState = this.dataSync().get(
+                this.params.COMBATSTATESDW);
+        return (this.cachedCombatState & state.getMask()) != 0;
+    }
 
     @Override
     public float getDirectionPitch()
     {
-        return dataSync().get(params.DIRECTIONPITCHDW);
+        return this.dataSync().get(this.params.DIRECTIONPITCHDW);
     }
 
     @Override
-    public boolean getGeneralState(GeneralStates state)
+    public boolean getGeneralState(final GeneralStates state)
     {
-        if (getEntity().getEntityWorld().isRemote) cachedGeneralState = dataSync().get(params.GENERALSTATESDW);
-        return (cachedGeneralState & state.getMask()) != 0;
+        if (this.getEntity().getEntityWorld().isRemote) this.cachedGeneralState = this.dataSync().get(
+                this.params.GENERALSTATESDW);
+        return (this.cachedGeneralState & state.getMask()) != 0;
     }
 
     @Override
-    public int getTotalGeneralState()
+    public boolean getLogicState(final LogicStates state)
     {
-        return dataSync().get(params.GENERALSTATESDW);
-    }
-
-    @Override
-    public void setTotalGeneralState(int state)
-    {
-        cachedGeneralState = state;
-        dataSync().set(params.GENERALSTATESDW, state);
-    }
-
-    @Override
-    public void setGeneralState(GeneralStates state, boolean flag)
-    {
-        int byte0 = dataSync().get(params.GENERALSTATESDW);
-        int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
-        setTotalGeneralState(newState);
-    }
-
-    @Override
-    public boolean getCombatState(CombatStates state)
-    {
-        if (getEntity().getEntityWorld().isRemote) cachedCombatState = dataSync().get(params.COMBATSTATESDW);
-        return (cachedCombatState & state.getMask()) != 0;
-    }
-
-    @Override
-    public int getTotalCombatState()
-    {
-        return dataSync().get(params.COMBATSTATESDW);
-    }
-
-    @Override
-    public void setTotalCombatState(int state)
-    {
-        cachedCombatState = state;
-        dataSync().set(params.COMBATSTATESDW, state);
-    }
-
-    @Override
-    public void setCombatState(CombatStates state, boolean flag)
-    {
-        int byte0 = dataSync().get(params.COMBATSTATESDW);
-        int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
-        setTotalCombatState(newState);
-    }
-
-    @Override
-    public boolean getLogicState(LogicStates state)
-    {
-        if (getEntity().getEntityWorld().isRemote) cachedLogicState = dataSync().get(params.LOGICSTATESDW);
-        return (cachedLogicState & state.getMask()) != 0;
-    }
-
-    @Override
-    public int getTotalLogicState()
-    {
-        return dataSync().get(params.LOGICSTATESDW);
-    }
-
-    @Override
-    public void setTotalLogicState(int state)
-    {
-        cachedLogicState = state;
-        dataSync().set(params.LOGICSTATESDW, state);
-    }
-
-    @Override
-    public void setLogicState(LogicStates state, boolean flag)
-    {
-        int byte0 = dataSync().get(params.LOGICSTATESDW);
-        int newState = flag ? (byte0 | state.getMask()) : (byte0 & -state.getMask() - 1);
-        setTotalLogicState(newState);
+        if (this.getEntity().getEntityWorld().isRemote) this.cachedLogicState = this.dataSync().get(
+                this.params.LOGICSTATESDW);
+        return (this.cachedLogicState & state.getMask()) != 0;
     }
 
     @Override
     public ItemStack getPokecube()
     {
-        return pokecube;
+        return this.pokecube;
     }
 
     @Override
     public int getPokemonUID()
     {
-        if (uid == -1 && this.isPlayerOwned()) this.uid = PokecubeSerializer.getInstance().getNextID();
-        return uid;
+        if (this.uid == -1 && this.isPlayerOwned()) this.uid = PokecubeSerializer.getInstance().getNextID();
+        return this.uid;
     }
 
     @Override
     public Vector3 getTargetPos()
     {
-        return target;
+        return this.target;
     }
 
     @Override
-    public void setTargetPos(Vector3 pos)
+    public List<Logic> getTickLogic()
     {
-        this.target = pos;
-    }
-
-    public List<AxisAlignedBB> getTileCollsionBoxes()
-    {
-        if (this.getEntity().getEntityWorld().isRemote && getEntity().isBeingRidden()
-                && (getEntity().getServer() == null || getEntity().getServer().isDedicatedServer())
-                && this.getOwner() == PokecubeCore.proxy.getPlayer((String) null))
-        {
-            Vector3 vec = Vector3.getNewVector();
-            Vector3 vec2 = Vector3.getNewVector();
-            double x = getPokedexEntry().width * getSize();
-            double z = getPokedexEntry().length * getSize();
-            double y = getPokedexEntry().height * getSize();
-            double v = vec.setToVelocity(getEntity()).mag();
-            vec.set(getEntity());
-            vec2.set(x + v, y + v, z + v);
-            Matrix3 mainBox = new Matrix3();
-            Vector3 offset = Vector3.getNewVector();
-            mainBox.boxMin().clear();
-            mainBox.boxMax().x = x;
-            mainBox.boxMax().z = y;
-            mainBox.boxMax().y = z;
-            offset.set(-mainBox.boxMax().x / 2, 0, -mainBox.boxMax().z / 2);
-            double ar = mainBox.boxMax().x / mainBox.boxMax().z;
-            if (ar > 2 || ar < 0.5)
-                mainBox.set(2, mainBox.rows[2].set(0, 0, (-getEntity().rotationYaw) * Math.PI / 180));
-            mainBox.addOffsetTo(offset).addOffsetTo(vec);
-            AxisAlignedBB box = mainBox.getBoundingBox();
-            AxisAlignedBB box1 = box.expand(2 + x, 2 + y, 2 + z);
-            box1 = box1.grow(getEntity().motionX, getEntity().motionY, getEntity().motionZ);
-            aabbs = mainBox.getCollidingBoxes(box1, getEntity().getEntityWorld(), getEntity().getEntityWorld());
-            // Matrix3.mergeAABBs(aabbs, x/2, y/2, z/2);
-            Matrix3.expandAABBs(aabbs, box);
-            if (box.getAverageEdgeLength() < 3) Matrix3.mergeAABBs(aabbs, 0.01, 0.01, 0.01);
-        }
-        return aabbs;
-    }
-
-    public void setTileCollsionBoxes(List<AxisAlignedBB> list)
-    {
-        aabbs = list;
+        return this.logic;
     }
 
     @Override
-    public boolean fits(IBlockReader world, Vector3 location, @Nullable Vector3 directionFrom)
+    public int getTotalCombatState()
     {
-        Vector3 diffs = Vector3.getNewVector();
-        mainBox.boxMin().clear();
-        mainBox.boxMax().x = getPokedexEntry().width * getSize();
-        mainBox.boxMax().z = getPokedexEntry().length * getSize();
-        mainBox.boxMax().y = getPokedexEntry().height * getSize();
-        float diff = (float) Math.max(mainBox.boxMax().y, Math.max(mainBox.boxMax().x, mainBox.boxMax().z));
-        offset.set(-mainBox.boxMax().x / 2, 0, -mainBox.boxMax().z / 2);
-        double ar = mainBox.boxMax().x / mainBox.boxMax().z;
-        if (ar > 2 || ar < 0.5) mainBox.set(2, mainBox.rows[2].set(0, 0, (-getEntity().rotationYaw) * Math.PI / 180));
-        mainBox.set(2, mainBox.rows[2].set(0, 0, (-getEntity().rotationYaw) * Math.PI / 180));
-        Vector3 pos = offset.add(location);
-        AxisAlignedBB aabb = mainBox.addOffsetTo(pos).getBoundingBox();
-        if (aabb.maxX - aabb.minX > 3)
-        {
-            double meanX = aabb.minX + (aabb.maxX - aabb.minX) / 2;
-            aabb = new AxisAlignedBB(meanX - 3, aabb.minY, aabb.minZ, meanX + 3, aabb.maxY, aabb.maxZ);
-        }
-        if (aabb.maxZ - aabb.minZ > 3)
-        {
-            double meanZ = aabb.minZ + (aabb.maxZ - aabb.minZ) / 2;
-            aabb = new AxisAlignedBB(aabb.minX, aabb.minY, meanZ - 3, aabb.maxX, aabb.maxY, meanZ + 3);
-        }
-        if (aabb.maxY - aabb.minY > 3)
-        {
-            aabb = aabb.setMaxY(aabb.minY + 3);
-        }
-        aabb = aabb.grow(Math.min(3, diff));
-        List<AxisAlignedBB> aabbs = new Matrix3().getCollidingBoxes(aabb, getEntity().getEntityWorld(), world);
-        Matrix3.expandAABBs(aabbs, aabb);
-        if (aabb.getAverageEdgeLength() < 3) Matrix3.mergeAABBs(aabbs, 0.01, 0.01, 0.01);
-        boolean collides = mainBox.doTileCollision(world, aabbs, Vector3.empty, getEntity(), diffs);
-        return !collides;
+        return this.dataSync().get(this.params.COMBATSTATESDW);
     }
 
     @Override
-    public void popFromPokecube()
+    public int getTotalGeneralState()
+    {
+        return this.dataSync().get(this.params.GENERALSTATESDW);
+    }
+
+    @Override
+    public int getTotalLogicState()
+    {
+        return this.dataSync().get(this.params.LOGICSTATESDW);
+    }
+
+    @Override
+    public boolean isGrounded()
+    {
+        return this.getLogicState(LogicStates.GROUNDED) || !this.isRoutineEnabled(AIRoutine.AIRBORNE);
+    }
+
+    @Override
+    public boolean isRoutineEnabled(final AIRoutine routine)
+    {
+        return this.routineStates[routine.ordinal()];
+    }
+
+    @Override
+    public void onSendOut()
     {
         // Reset some values to prevent spontaneous damage.
-        getEntity().fallDistance = 0;
-        getEntity().extinguish();
+        this.getEntity().fallDistance = 0;
+        this.getEntity().extinguish();
         // After here is server side only.
-        if (getEntity().getEntityWorld().isRemote) return;
+        if (this.getEntity().getEntityWorld().isRemote) return;
         // Flag as not evolving
         this.setGeneralState(GeneralStates.EVOLVING, false);
 
         // Play the sound for the mob.
-        getEntity().playSound(this.getSound(), 0.25f, 1);
+        this.getEntity().playSound(this.getSound(), 0.25f, 1);
 
         // Do the shiny particle effect.
         if (this.isShiny())
         {
-            Vector3 particleLoc = Vector3.getNewVector();
+            final Vector3 particleLoc = Vector3.getNewVector();
             for (int i = 0; i < 20; ++i)
             {
-                particleLoc.set(getEntity().posX + rand.nextFloat() * getEntity().width * 2.0F - getEntity().width,
-                        getEntity().posY + 0.5D + rand.nextFloat() * getEntity().height,
-                        getEntity().posZ + rand.nextFloat() * getEntity().width * 2.0F - getEntity().width);
-                PokecubeMod.core.spawnParticle(getEntity().getEntityWorld(),
-                        ParticleTypes.VILLAGER_HAPPY.getParticleName(), particleLoc, null);
+                particleLoc.set(this.getEntity().posX + this.rand.nextFloat() * this.getEntity().getWidth() * 2.0F
+                        - this.getEntity().getWidth(), this.getEntity().posY + 0.5D + this.rand.nextFloat() * this
+                                .getEntity().getHeight(), this.getEntity().posZ + this.rand.nextFloat() * this
+                                        .getEntity().getWidth() * 2.0F - this.getEntity().getWidth());
+                this.getEntity().getEntityWorld().addParticle(ParticleTypes.HAPPY_VILLAGER, particleLoc.x,
+                        particleLoc.y, particleLoc.z, 0, 0, 0);
             }
         }
         // Update genes settings.
-        onGenesChanged();
+        this.onGenesChanged();
 
         // Update/add cache.
-        if (this.isPlayerOwned() && getOwnerId() != null)
-        {
-            PlayerDataHandler.getInstance().getPlayerData(getOwnerId()).getData(PlayerPokemobCache.class)
-                    .addPokemob(this);
-        }
+        if (this.isPlayerOwned() && this.getOwnerId() != null) PlayerDataHandler.getInstance().getPlayerData(this
+                .getOwnerId()).getData(PlayerPokemobCache.class).addPokemob(this);
     }
 
     @Override
-    public void setDirectionPitch(float pitch)
+    public void setCombatState(final CombatStates state, final boolean flag)
     {
-        dataSync().set(params.DIRECTIONPITCHDW, pitch);
+        final int byte0 = this.dataSync().get(this.params.COMBATSTATESDW);
+        final int newState = flag ? byte0 | state.getMask() : byte0 & -state.getMask() - 1;
+        this.setTotalCombatState(newState);
+    }
+
+    @Override
+    public void setDirectionPitch(final float pitch)
+    {
+        this.dataSync().set(this.params.DIRECTIONPITCHDW, pitch);
+    }
+
+    @Override
+    public void setGeneralState(final GeneralStates state, final boolean flag)
+    {
+        final int byte0 = this.dataSync().get(this.params.GENERALSTATESDW);
+        final int newState = flag ? byte0 | state.getMask() : byte0 & -state.getMask() - 1;
+        this.setTotalGeneralState(newState);
+    }
+
+    @Override
+    public void setLogicState(final LogicStates state, final boolean flag)
+    {
+        final int byte0 = this.dataSync().get(this.params.LOGICSTATESDW);
+        final int newState = flag ? byte0 | state.getMask() : byte0 & -state.getMask() - 1;
+        this.setTotalLogicState(newState);
     }
 
     @Override
@@ -271,27 +179,41 @@ public abstract class PokemobAI extends PokemobEvolves
             pokeballId = pokeballId.copy();
             pokeballId.setCount(1);
             // Remove the extra tag containing data about this pokemob
-            if (pokeballId.hasTag() && pokeballId.getTag().hasKey("Pokemob"))
-                pokeballId.getTag().remove("Pokemob");
+            if (pokeballId.hasTag() && pokeballId.getTag().contains("Pokemob")) pokeballId.getTag().remove("Pokemob");
         }
-        pokecube = pokeballId;
+        this.pokecube = pokeballId;
     }
 
     @Override
-    public boolean isRoutineEnabled(AIRoutine routine)
+    public void setRoutineState(final AIRoutine routine, final boolean enabled)
     {
-        return routineStates[routine.ordinal()];
+        this.routineStates[routine.ordinal()] = enabled;
     }
 
     @Override
-    public void setRoutineState(AIRoutine routine, boolean enabled)
+    public void setTargetPos(final Vector3 pos)
     {
-        routineStates[routine.ordinal()] = enabled;
+        this.target = pos;
     }
 
     @Override
-    public boolean isGrounded()
+    public void setTotalCombatState(final int state)
     {
-        return getLogicState(LogicStates.GROUNDED) || !isRoutineEnabled(AIRoutine.AIRBORNE);
+        this.cachedCombatState = state;
+        this.dataSync().set(this.params.COMBATSTATESDW, state);
+    }
+
+    @Override
+    public void setTotalGeneralState(final int state)
+    {
+        this.cachedGeneralState = state;
+        this.dataSync().set(this.params.GENERALSTATESDW, state);
+    }
+
+    @Override
+    public void setTotalLogicState(final int state)
+    {
+        this.cachedLogicState = state;
+        this.dataSync().set(this.params.LOGICSTATESDW, state);
     }
 }

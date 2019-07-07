@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event.HasResult;
+import net.minecraftforge.eventbus.api.Event;
 import pokecube.core.database.PokedexEntry;
 
 public class StarterEvent extends Event
@@ -41,8 +41,8 @@ public class StarterEvent extends Event
     public StarterEvent(PlayerEntity player, Collection<ItemStack> pack, PokedexEntry numberPicked)
     {
         this.player = player;
-        if (pack != null) starterPack.addAll(pack);
-        pick = numberPicked;
+        if (pack != null) this.starterPack.addAll(pack);
+        this.pick = numberPicked;
     }
 
 }

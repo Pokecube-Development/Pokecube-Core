@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.advancements.critereon.AbstractCriterionInstance;
+import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.interfaces.PokecubeMod;
@@ -22,9 +22,7 @@ import pokecube.core.utils.PokeType;
 
 public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance>
 {
-    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "use_move");
-
-    public static class Instance extends AbstractCriterionInstance
+    public static class Instance extends CriterionInstance
     {
         String   attack;
         PokeType type;
@@ -33,7 +31,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
 
         public Instance(MovePacket move)
         {
-            super(ID);
+            super(UseMoveTrigger.ID);
             this.attack = move.attack;
             this.type = move.attackType;
             this.power = move.PWR;
@@ -41,7 +39,7 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
 
         public boolean test(ServerPlayerEntity player, MovePacket packet)
         {
-            return packet.attack.equals(attack);
+            return packet.attack.equals(this.attack);
         }
 
     }
@@ -56,14 +54,14 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
             this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean isEmpty()
-        {
-            return this.listeners.isEmpty();
-        }
-
         public void add(ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener)
         {
             this.listeners.add(listener);
+        }
+
+        public boolean isEmpty()
+        {
+            return this.listeners.isEmpty();
         }
 
         public void remove(ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener)
@@ -75,38 +73,24 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
         {
             List<ICriterionTrigger.Listener<UseMoveTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener : this.listeners)
-            {
+            for (final ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener : this.listeners)
                 if (listener.getCriterionInstance().test(player, packet))
                 {
-                    if (list == null)
-                    {
-                        list = Lists.<ICriterionTrigger.Listener<UseMoveTrigger.Instance>> newArrayList();
-                    }
+                    if (list == null) list = Lists.<ICriterionTrigger.Listener<UseMoveTrigger.Instance>> newArrayList();
 
                     list.add(listener);
                 }
-            }
-            if (list != null)
-            {
-                for (ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener1 : list)
-                {
-                    listener1.grantCriterion(this.playerAdvancements);
-                }
-            }
+            if (list != null) for (final ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener1 : list)
+                listener1.grantCriterion(this.playerAdvancements);
         }
     }
+
+    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "use_move");
 
     private final Map<PlayerAdvancements, UseMoveTrigger.Listeners> listeners = Maps.<PlayerAdvancements, UseMoveTrigger.Listeners> newHashMap();
 
     public UseMoveTrigger()
     {
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
     }
 
     @Override
@@ -124,21 +108,23 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
         bredanimalstrigger$listeners.add(listener);
     }
 
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the
+     * JSON.
+     */
     @Override
-    public void removeListener(PlayerAdvancements playerAdvancementsIn,
-            ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener)
+    public UseMoveTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        UseMoveTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        final String attack = json.get("move").getAsString();
+        // TODO get this done better.
+        final MovePacket packet = new MovePacket(null, null, MovesUtils.getMoveFromName(attack));
+        return new UseMoveTrigger.Instance(packet);
+    }
 
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.remove(listener);
-
-            if (bredanimalstrigger$listeners.isEmpty())
-            {
-                this.listeners.remove(playerAdvancementsIn);
-            }
-        }
+    @Override
+    public ResourceLocation getId()
+    {
+        return UseMoveTrigger.ID;
     }
 
     @Override
@@ -147,23 +133,23 @@ public class UseMoveTrigger implements ICriterionTrigger<UseMoveTrigger.Instance
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    /** Deserialize a ICriterionInstance of this trigger from the data in the
-     * JSON. */
     @Override
-    public UseMoveTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn,
+            ICriterionTrigger.Listener<UseMoveTrigger.Instance> listener)
     {
-        String attack = json.get("move").getAsString();
-        // TODO get this done better.
-        MovePacket packet = new MovePacket(null, null, MovesUtils.getMoveFromName(attack));
-        return new UseMoveTrigger.Instance(packet);
+        final UseMoveTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+
+        if (bredanimalstrigger$listeners != null)
+        {
+            bredanimalstrigger$listeners.remove(listener);
+
+            if (bredanimalstrigger$listeners.isEmpty()) this.listeners.remove(playerAdvancementsIn);
+        }
     }
 
     public void trigger(ServerPlayerEntity player, MovePacket packet)
     {
-        UseMoveTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.trigger(player, packet);
-        }
+        final UseMoveTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
+        if (bredanimalstrigger$listeners != null) bredanimalstrigger$listeners.trigger(player, packet);
     }
 }

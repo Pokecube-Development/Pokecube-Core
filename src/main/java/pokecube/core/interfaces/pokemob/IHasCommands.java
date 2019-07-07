@@ -1,40 +1,15 @@
 package pokecube.core.interfaces.pokemob;
 
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 
 import io.netty.buffer.ByteBuf;
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 
 public interface IHasCommands
 {
-    public static interface IMobCommandHandler
-    {
-        IMobCommandHandler setFromOwner(boolean owner);
-
-        boolean fromOwner();
-
-        /** Handles the command for the pokemob
-         * 
-         * @param pokemob
-         * @throws Exception
-         *             - Something goes wrong, throw this, it will be logged. */
-        void handleCommand(IPokemob pokemob) throws Exception;
-
-        /** Write message to server.
-         * 
-         * @param buf */
-        void writeToBuf(ByteBuf buf);
-
-        /** Read message on server.
-         * 
-         * @param buf */
-        void readFromBuf(ByteBuf buf);
-    }
-
     public static enum Command
     {
         /** Sent to attack an entity. */
@@ -57,25 +32,57 @@ public interface IHasCommands
         TELEPORT;
     }
 
+    public static interface IMobCommandHandler
+    {
+        boolean fromOwner();
+
+        /**
+         * Handles the command for the pokemob
+         *
+         * @param pokemob
+         * @throws Exception
+         *             - Something goes wrong, throw this, it will be logged.
+         */
+        void handleCommand(IPokemob pokemob) throws Exception;
+
+        /**
+         * Read message on server.
+         *
+         * @param buf
+         */
+        void readFromBuf(ByteBuf buf);
+
+        IMobCommandHandler setFromOwner(boolean owner);
+
+        /**
+         * Write message to server.
+         *
+         * @param buf
+         */
+        void writeToBuf(ByteBuf buf);
+    }
+
     /** These are what will be used to handle the commands sent in. */
     public static final Map<Command, Class<? extends IMobCommandHandler>> COMMANDHANDLERS = Maps.newHashMap();
 
-    /** Handles the given command
-     * 
+    /**
+     * Handles the given command
+     *
      * @param command
-     * @param handler */
+     * @param handler
+     */
     default void handleCommand(Command command, IMobCommandHandler handler)
     {
-        IPokemob pokemob = (IPokemob) this;
+        final IPokemob pokemob = (IPokemob) this;
         try
         {
             handler.handleCommand(pokemob);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            PokecubeMod.log(Level.SEVERE,
-                    "Error Handling command for type " + command + " for mob " + pokemob.getEntity(), e);
-            PokecubeMod.log(Level.SEVERE, "Owner: " + pokemob.getOwner());
+            PokecubeCore.LOGGER.error("Error Handling command for type " + command + " for mob " + pokemob.getEntity(),
+                    e);
+            PokecubeCore.LOGGER.error("Owner: " + pokemob.getOwner());
         }
     }
 }

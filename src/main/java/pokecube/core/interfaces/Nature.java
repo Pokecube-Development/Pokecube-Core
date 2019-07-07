@@ -35,30 +35,32 @@ public enum Nature
     public static int getBerryWeight(int berryIndex, Nature type)
     {
         int ret = 0;
-        int[] flavours = BerryManager.berryFlavours.get(berryIndex);
+        final int[] flavours = BerryManager.berryItems.get(berryIndex).type.flavours;
         if (type.goodFlavour == type.badFlavour || flavours == null) return ret;
         ret = flavours[type.goodFlavour] - flavours[type.badFlavour];
         return ret;
     }
 
-    /** Returns the prefered berry for this nature, if it returns -1, it likes
+    /**
+     * Returns the prefered berry for this nature, if it returns -1, it likes
      * all berries equally.
-     * 
+     *
      * @param type
-     * @return */
+     * @return
+     */
     public static int getFavouriteBerryIndex(Nature type)
     {
         int ret = -1;
-        byte good = type.goodFlavour;
-        byte bad = type.badFlavour;
-        if (good == bad) { return ret; }
+        final byte good = type.goodFlavour;
+        final byte bad = type.badFlavour;
+        if (good == bad) return ret;
         if (type.favourteBerry != -1) return type.favourteBerry;
 
         int max = 0;
         int current;
-        for (Integer i : BerryManager.berryFlavours.keySet())
+        for (final Integer i : BerryManager.berryItems.keySet())
         {
-            current = getBerryWeight(i, type);
+            current = Nature.getBerryWeight(i, type);
             if (current > max)
             {
                 ret = i;
@@ -71,11 +73,11 @@ public enum Nature
 
     public final byte[] stats;
 
-    final byte   badFlavour;
+    final byte badFlavour;
 
-    final byte   goodFlavour;
+    final byte goodFlavour;
 
-    int          favourteBerry = -1;
+    int favourteBerry = -1;
 
     private Nature(byte[] stats)
     {
@@ -84,21 +86,15 @@ public enum Nature
         byte bad = -1;
         for (int i = 1; i < 6; i++)
         {
-            if (stats[i] == 1)
-            {
-                good = (byte) (i - 1);
-            }
-            if (stats[i] == -1)
-            {
-                bad = (byte) (i - 1);
-            }
+            if (stats[i] == 1) good = (byte) (i - 1);
+            if (stats[i] == -1) bad = (byte) (i - 1);
         }
-        goodFlavour = good;
-        badFlavour = bad;
+        this.goodFlavour = good;
+        this.badFlavour = bad;
     }
 
     public byte[] getStatsMod()
     {
-        return stats;
+        return this.stats;
     }
 }

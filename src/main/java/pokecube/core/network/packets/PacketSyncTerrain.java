@@ -1,97 +1,78 @@
 package pokecube.core.network.packets;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
 import pokecube.core.PokecubeCore;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.moves.PokemobTerrainEffects;
 import pokecube.core.moves.animations.MoveAnimationHelper;
 import thut.api.terrain.TerrainManager;
 import thut.api.terrain.TerrainSegment;
+import thut.core.common.network.Packet;
 
-public class PacketSyncTerrain implements IMessage, IMessageHandler<PacketSyncTerrain, IMessage>
+public class PacketSyncTerrain extends Packet
 {
     public static void sendTerrainEffects(Entity player, int x, int y, int z, PokemobTerrainEffects terrain)
     {
-        PacketSyncTerrain packet = new PacketSyncTerrain();
+        final PacketSyncTerrain packet = new PacketSyncTerrain();
         packet.x = x;
         packet.y = y;
         packet.z = z;
         for (int i = 0; i < 16; i++)
             packet.effects[i] = terrain.effects[i];
-        PokecubeMod.packetPipeline.sendToAllAround(packet,
-                new TargetPoint(player.dimension, player.posX, player.posY, player.posZ, 64));
+        PokecubeCore.packets.sendToTracking(packet, player.getEntityWorld().getChunk(new BlockPos(x * 16, y * 16, z
+                * 16)));
     }
+
+    int         x;
+    int         y;
+    int         z;
+    long[]      effects = new long[16];
+    CompoundNBT data    = new CompoundNBT();
 
     public PacketSyncTerrain()
     {
+        super(null);
     }
 
-    int            x;
-    int            y;
-    int            z;
-    long[]         effects = new long[16];
-    CompoundNBT data    = new CompoundNBT();
-
-    @Override
-    public IMessage onMessage(final PacketSyncTerrain message, final MessageContext ctx)
+    public PacketSyncTerrain(PacketBuffer buf)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
-        x = buf.readInt();
-        y = buf.readInt();
-        z = buf.readInt();
+        super(buf);
+        this.x = buf.readInt();
+        this.y = buf.readInt();
+        this.z = buf.readInt();
         for (int i = 0; i < 16; i++)
-        {
-            effects[i] = buf.readLong();
-        }
+            this.effects[i] = buf.readLong();
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
-    {
-        buf.writeInt(x);
-        buf.writeInt(y);
-        buf.writeInt(z);
-        for (int i = 0; i < 16; i++)
-        {
-            buf.writeLong(effects[i]);
-        }
-    }
-
-    void processMessage(MessageContext ctx, PacketSyncTerrain message)
+    public void handleClient()
     {
         PlayerEntity player;
-        player = PokecubeCore.getPlayer(null);
-        TerrainSegment t = TerrainManager.getInstance().getTerrain(player.getEntityWorld(), message.x * 16,
-                message.y * 16, message.z * 16);
-        PokemobTerrainEffects effect = (PokemobTerrainEffects) t.geTerrainEffect("pokemobEffects");
+        player = PokecubeCore.proxy.getPlayer();
+        final TerrainSegment t = TerrainManager.getInstance().getTerrain(player.getEntityWorld(), this.x * 16, this.y
+                * 16, this.z * 16);
+        final PokemobTerrainEffects effect = (PokemobTerrainEffects) t.geTerrainEffect("pokemobEffects");
         boolean empty = true;
         for (int i = 0; i < 16; i++)
         {
-            effect.effects[i] = message.effects[i];
-            empty = empty && message.effects[i] <= 0;
+            effect.effects[i] = this.effects[i];
+            empty = empty && this.effects[i] <= 0;
         }
         if (!empty) MoveAnimationHelper.Instance().addEffect();
         else MoveAnimationHelper.Instance().clearEffect();
     }
+
+    @Override
+    public void write(PacketBuffer buf)
+    {
+        buf.writeInt(this.x);
+        buf.writeInt(this.y);
+        buf.writeInt(this.z);
+        for (int i = 0; i < 16; i++)
+            buf.writeLong(this.effects[i]);
+    }
+
 }

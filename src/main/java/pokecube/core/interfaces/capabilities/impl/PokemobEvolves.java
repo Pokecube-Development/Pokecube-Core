@@ -6,29 +6,31 @@ public abstract class PokemobEvolves extends PokemobHungry
 {
 
     @Override
-    public void setEvolutionStack(ItemStack stack)
-    {
-        this.stack = stack;
-    }
-
-    @Override
     public ItemStack getEvolutionStack()
     {
-        return stack;
+        return this.stack;
     }
 
     /** @return the evolutionTicks */
     @Override
     public int getEvolutionTicks()
     {
-        return dataSync().get(params.EVOLTICKDW);
+        return this.dataSync().get(this.params.EVOLTICKDW);
     }
 
-    /** @param evolutionTicks
-     *            the evolutionTicks to set */
+    @Override
+    public void setEvolutionStack(ItemStack stack)
+    {
+        this.stack = stack;
+    }
+
+    /**
+     * @param evolutionTicks
+     *            the evolutionTicks to set
+     */
     @Override
     public void setEvolutionTicks(int evolutionTicks)
     {
-        dataSync().set(params.EVOLTICKDW, new Integer(evolutionTicks));
+        this.dataSync().set(this.params.EVOLTICKDW, new Integer(evolutionTicks));
     }
 }

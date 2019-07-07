@@ -1,3 +1,6 @@
 {
-    "parent": "block/cross"
+    "parent": "block/cross",
+    "textures": {
+        "cross": "pokecube:block/berryseed"
+    }
 }

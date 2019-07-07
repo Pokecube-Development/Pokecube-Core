@@ -1,15 +1,16 @@
 package pokecube.core.client.gui.config;
 
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.client.config.GuiConfig;
-import pokecube.core.interfaces.PokecubeMod;
-import thut.core.common.config.ConfigBase;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.text.TranslationTextComponent;
 
-public class ModGuiConfig extends GuiConfig
+public class ModGuiConfig extends Screen
 {
-    public ModGuiConfig(GuiScreen guiScreen)
+    public ModGuiConfig(Screen guiScreen)
     {
-        super(guiScreen, ConfigBase.getConfigElements(PokecubeMod.core.getConfig()), PokecubeMod.ID, false, false,
-                GuiConfig.getAbridgedConfigPath(PokecubeMod.core.getConfig().getConfigFile().getAbsolutePath()));
+        super(new TranslationTextComponent("pokecube.config.screen"));
+        // super(guiScreen,
+        // ConfigBase.getConfigElements(PokecubeMod.core.getConfig()),
+        // PokecubeMod.ID, false, false,
+        // GuiConfig.getAbridgedConfigPath(PokecubeMod.core.getConfig().getConfigFile().getAbsolutePath()));
     }
 }

@@ -10,26 +10,34 @@ import pokecube.core.database.PokedexEntry;
 
 public class AdvancementGenerator
 {
-    static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().create();
+    static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static AdvancementRewards makeReward(PokedexEntry entry)
+    public static JsonObject fromCriteria(PokedexEntry entry, String id)
     {
-        return null;
+        final JsonObject critmap = new JsonObject();
+        final JsonObject sub = new JsonObject();
+        sub.addProperty("trigger", "pokecube:" + id);
+        final JsonObject conditions = new JsonObject();
+        if (id.equals("catch") || id.equals("kill")) conditions.addProperty("lenient", true);
+        conditions.addProperty("entry", entry.getName());
+        sub.add("conditions", conditions);
+        critmap.add(id + "_" + entry.getName(), sub);
+        return critmap;
     }
 
     public static JsonObject fromInfo(PokedexEntry entry, String id)
     {
-        JsonObject displayJson = new JsonObject();
-        JsonObject icon = new JsonObject();
+        final JsonObject displayJson = new JsonObject();
+        final JsonObject icon = new JsonObject();
         icon.addProperty("item", "pokecube:pokecube");
-        JsonObject title = new JsonObject();
+        final JsonObject title = new JsonObject();
         title.addProperty("translate", "achievement.pokecube." + id);
-        JsonArray item = new JsonArray();
-        JsonObject pokemobName = new JsonObject();
+        final JsonArray item = new JsonArray();
+        final JsonObject pokemobName = new JsonObject();
         pokemobName.addProperty("translate", entry.getUnlocalizedName());
         item.add(pokemobName);
         title.add("with", item);
-        JsonObject description = new JsonObject();
+        final JsonObject description = new JsonObject();
         description.addProperty("translate", "achievement.pokecube." + id + ".desc");
         description.add("with", item);
         displayJson.add("icon", icon);
@@ -39,33 +47,22 @@ public class AdvancementGenerator
         return displayJson;
     }
 
+    public static String makeJson(PokedexEntry entry, String id, String parent)
+    {
+        final JsonObject json = new JsonObject();
+        json.add("display", AdvancementGenerator.fromInfo(entry, id));
+        json.add("criteria", AdvancementGenerator.fromCriteria(entry, id));
+        if (parent != null) json.addProperty("parent", parent);
+        return AdvancementGenerator.GSON.toJson(json);
+    }
+
     public static String[][] makeRequirements(PokedexEntry entry)
     {
         return new String[][] { { entry.getName() } };
     }
 
-    public static JsonObject fromCriteria(PokedexEntry entry, String id)
+    public static AdvancementRewards makeReward(PokedexEntry entry)
     {
-        JsonObject critmap = new JsonObject();
-        JsonObject sub = new JsonObject();
-        sub.addProperty("trigger", "pokecube:" + id);
-        JsonObject conditions = new JsonObject();
-        if (id.equals("catch") || id.equals("kill")) conditions.addProperty("lenient", true);
-        conditions.addProperty("entry", entry.getName());
-        sub.add("conditions", conditions);
-        critmap.add(id + "_" + entry.getName(), sub);
-        return critmap;
-    }
-
-    public static String makeJson(PokedexEntry entry, String id, String parent)
-    {
-        JsonObject json = new JsonObject();
-        json.add("display", fromInfo(entry, id));
-        json.add("criteria", fromCriteria(entry, id));
-        if (parent != null)
-        {
-            json.addProperty("parent", parent);
-        }
-        return GSON.toJson(json);
+        return null;
     }
 }

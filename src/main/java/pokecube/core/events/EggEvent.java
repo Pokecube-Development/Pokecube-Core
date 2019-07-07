@@ -2,6 +2,7 @@ package pokecube.core.events;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
 
 public class EggEvent extends Event
@@ -15,8 +16,10 @@ public class EggEvent extends Event
     }
 
     @Cancelable
-    /** This is called when a pokemob or nest tries to lay the egg, cancelling
-     * it will prevent the egg from being laid. */
+    /**
+     * This is called when a pokemob or nest tries to lay the egg, cancelling
+     * it will prevent the egg from being laid.
+     */
     public static class Lay extends EggEvent
     {
         public Lay(Entity egg)
@@ -25,8 +28,10 @@ public class EggEvent extends Event
         }
     }
 
-    /** This event is fired whenever a player places an egg, it cannot be
-     * cancelled. */
+    /**
+     * This event is fired whenever a player places an egg, it cannot be
+     * cancelled.
+     */
     public static class Place extends EggEvent
     {
         public Place(Entity egg)
@@ -36,8 +41,10 @@ public class EggEvent extends Event
     }
 
     @Cancelable
-    /** This event is fired right before the egg hatches, cancelling it will
-     * prevent it from hatching. */
+    /**
+     * This event is fired right before the egg hatches, cancelling it will
+     * prevent it from hatching.
+     */
     public static class PreHatch extends EggEvent
     {
         public PreHatch(Entity egg)
@@ -46,7 +53,7 @@ public class EggEvent extends Event
         }
     }
 
-    public final Entity           placer;
+    public final Entity placer;
 
     public final EntityPokemobEgg egg;
 

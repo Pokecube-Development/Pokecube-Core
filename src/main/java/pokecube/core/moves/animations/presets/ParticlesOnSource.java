@@ -2,7 +2,7 @@ package pokecube.core.moves.animations.presets;
 
 import java.util.Random;
 
-import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.PokecubeCore;
 import pokecube.core.moves.animations.AnimPreset;
 import thut.api.maths.Vector3;
 
@@ -17,14 +17,14 @@ public class ParticlesOnSource extends ParticlesOnTarget
     @Override
     public void spawnClientEntities(MovePacketInfo info)
     {
-        if (Math.random() > density) return;
-        initColour((info.attacker.getEntityWorld().getDayTime()), 0, info.move);
-        Vector3 temp = Vector3.getNewVector().set(info.source);
-        Random rand = new Random();
+        if (Math.random() > this.density) return;
+        this.initColour(info.attacker.getEntityWorld().getDayTime(), 0, info.move);
+        final Vector3 temp = Vector3.getNewVector().set(info.source);
+        final Random rand = new Random();
         float dw = 0.25f;
-        if (info.attacker != null) dw = info.attacker.width;
-        float width = this.width * dw;
+        if (info.attacker != null) dw = info.attacker.getWidth();
+        final float width = this.width * dw;
         temp.addTo(rand.nextGaussian() * width, rand.nextGaussian() * width, rand.nextGaussian() * width);
-        PokecubeMod.core.spawnParticle(info.attacker.getEntityWorld(), particle, temp, null, rgba);
+        PokecubeCore.spawnParticle(info.attacker.getEntityWorld(), this.particle, temp, null, this.rgba);
     }
 }

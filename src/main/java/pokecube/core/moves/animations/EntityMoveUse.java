@@ -1,26 +1,43 @@
 package pokecube.core.moves.animations;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.extensions.IForgeTileEntity;
+import net.minecraftforge.fml.network.NetworkHooks;
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IMoveAnimation.MovePacketInfo;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.moves.MovesUtils;
 import thut.api.maths.Vector3;
 
-public class EntityMoveUse extends Entity
+public class EntityMoveUse extends ThrowableEntity
 {
+    public static EntityType<EntityMoveUse> TYPE;
+    static
+    {
+        EntityMoveUse.TYPE = EntityType.Builder.create(EntityMoveUse::new, EntityClassification.MISC).disableSummoning()
+                .immuneToFire().setTrackingRange(64).setShouldReceiveVelocityUpdates(true).setUpdateInterval(1).size(1f,
+                        1f).setCustomClientFactory((spawnEntity, world) ->
+                        {
+                            return EntityMoveUse.TYPE.create(world);
+                        }).build("move_use");
+    }
+
     static final DataParameter<String>  MOVENAME  = EntityDataManager.<String> createKey(EntityMoveUse.class,
             DataSerializers.STRING);
     static final DataParameter<Float>   ENDX      = EntityDataManager.<Float> createKey(EntityMoveUse.class,
@@ -46,245 +63,247 @@ public class EntityMoveUse extends Entity
     static final DataParameter<Integer> APPLYTICK = EntityDataManager.<Integer> createKey(EntityMoveUse.class,
             DataSerializers.VARINT);
 
-    Vector3                             end       = Vector3.getNewVector();
-    Vector3                             start     = Vector3.getNewVector();
-    boolean                             applied   = false;
+    Vector3 end     = Vector3.getNewVector();
+    Vector3 start   = Vector3.getNewVector();
+    boolean applied = false;
 
-    public EntityMoveUse(World worldIn)
+    public EntityMoveUse(final EntityType<EntityMoveUse> type, final World worldIn)
     {
-        super(worldIn);
-        this.setSize(1f, 1f);
+        super(type, worldIn);
         this.ignoreFrustumCheck = true;
     }
 
-    public EntityMoveUse setMove(Move_Base move, int tickOffset)
-    {
-        this.setMove(move);
-        getDataManager().set(STARTTICK, tickOffset);
-        return this;
-    }
-
-    public EntityMoveUse setMove(Move_Base move)
-    {
-        String name = "";
-        if (move != null)
-        {
-            name = move.name;
-        }
-        this.getDataManager().set(MOVENAME, name);
-        IPokemob user = CapabilityPokemob.getPokemobFor(getUser());
-        if (move.getAnimation(user) != null)
-        {
-            getDataManager().set(TICK, move.getAnimation(user).getDuration() + 1);
-            setApplicationTick(getAge() - move.getAnimation(user).getApplicationTick());
-        }
-        else getDataManager().set(TICK, 1);
-        return this;
-    }
-
-    public Move_Base getMove()
-    {
-        return MovesUtils.getMoveFromName(this.getDataManager().get(MOVENAME));
-    }
-
-    public EntityMoveUse setStart(Vector3 location)
-    {
-        start.set(location);
-        start.moveEntity(this);
-        getDataManager().set(STARTX, (float) start.x);
-        getDataManager().set(STARTY, (float) start.y);
-        getDataManager().set(STARTZ, (float) start.z);
-        return this;
-    }
-
-    public EntityMoveUse setEnd(Vector3 location)
-    {
-        end.set(location);
-        getDataManager().set(ENDX, (float) end.x);
-        getDataManager().set(ENDY, (float) end.y);
-        getDataManager().set(ENDZ, (float) end.z);
-        return this;
-    }
-
-    public Vector3 getStart()
-    {
-        start.x = getDataManager().get(STARTX);
-        start.y = getDataManager().get(STARTY);
-        start.z = getDataManager().get(STARTZ);
-        return start;
-    }
-
-    public Vector3 getEnd()
-    {
-        end.x = getDataManager().get(ENDX);
-        end.y = getDataManager().get(ENDY);
-        end.z = getDataManager().get(ENDZ);
-        return end;
-    }
-
-    public EntityMoveUse setUser(Entity user)
-    {
-        getDataManager().set(USER, user.getEntityId());
-        return this;
-    }
-
-    public Entity getUser()
-    {
-        return PokecubeMod.core.getEntityProvider().getEntity(getEntityWorld(), getDataManager().get(USER), true);
-    }
-
-    public EntityMoveUse setTarget(Entity target)
-    {
-        if (target != null) getDataManager().set(TARGET, target.getEntityId());
-        else getDataManager().set(TARGET, -1);
-        return this;
-    }
-
-    public Entity getTarget()
-    {
-        return getEntityWorld().getEntityByID(getDataManager().get(TARGET));
-    }
-
-    public int getStartTick()
-    {
-        return getDataManager().get(STARTTICK);
-    }
-
-    public int getAge()
-    {
-        return getDataManager().get(TICK);
-    }
-
-    public void setAge(int age)
-    {
-        getDataManager().set(TICK, age);
-    }
-
-    public int getApplicationTick()
-    {
-        return getDataManager().get(APPLYTICK);
-    }
-
-    public void setApplicationTick(int tick)
-    {
-        getDataManager().set(APPLYTICK, tick);
-    }
-
-    public boolean isDone()
-    {
-        return this.applied || this.isDead;
-    }
-
     @Override
-    public void onUpdate()
+    public IPacket<?> createSpawnPacket()
     {
-        int start = getStartTick() - 1;
-        getDataManager().set(STARTTICK, start);
-        if (start > 0) return;
-
-        int age = getAge() - 1;
-        setAge(age);
-
-        if (getMove() == null || this.isDead || age < 0)
-        {
-            this.setDead();
-            return;
-        }
-        Move_Base attack = getMove();
-        Entity user;
-        valid:
-        if ((user = getUser()) == null || this.isDead || user.isDead || !user.addedToChunk)
-        {
-            if (user != null && !user.addedToChunk)
-            {
-                if (user.getEntityData().getBoolean("isPlayer")) break valid;
-            }
-            this.setDead();
-            return;
-        }
-        IPokemob userMob = CapabilityPokemob.getPokemobFor(user);
-        if (user instanceof LivingEntity && ((LivingEntity) user).getHealth() <= 1)
-        {
-            this.setDead();
-            return;
-        }
-        if (getEntityWorld().isRemote && attack.getAnimation(userMob) != null)
-            attack.getAnimation(userMob).spawnClientEntities(getMoveInfo());
-
-        if (!applied && age <= getApplicationTick())
-        {
-            applied = true;
-            this.doMoveUse();
-        }
-
-        if (age == 0)
-        {
-            this.setDead();
-        }
-    }
-
-    public MovePacketInfo getMoveInfo()
-    {
-        MovePacketInfo info = new MovePacketInfo(getMove(), getUser(), getTarget(), getStart(), getEnd());
-        IPokemob userMob = CapabilityPokemob.getPokemobFor(info.attacker);
-        info.currentTick = info.move.getAnimation(userMob).getDuration() - (getAge());
-        return info;
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     private void doMoveUse()
     {
-        Move_Base attack = getMove();
+        final Move_Base attack = this.getMove();
         Entity user;
-        if ((user = getUser()) == null || this.isDead || user.isDead) return;
-        if (!getEntityWorld().isRemote)
+        if ((user = this.getUser()) == null || !this.isAlive() || !user.isAlive()) return;
+        if (!this.getEntityWorld().isRemote)
         {
-            IPokemob userMob = CapabilityPokemob.getPokemobFor(user);
-            Entity target = getTarget();
-            if (attack.move.isNotIntercepable() && target != null)
-            {
-                MovesUtils.doAttack(attack.name, userMob, target);
-            }
+            final IPokemob userMob = CapabilityPokemob.getPokemobFor(user);
+            final Entity target = this.getTarget();
+            if (attack.move.isNotIntercepable() && target != null) MovesUtils.doAttack(attack.name, userMob, target);
             else
             {
-                if (attack.getPRE(userMob, target) <= 0 && target != null) setEnd(Vector3.getNewVector().set(target));
-                MovesUtils.doAttack(attack.name, userMob, getEnd());
+                if (attack.getPRE(userMob, target) <= 0 && target != null) this.setEnd(Vector3.getNewVector().set(
+                        target));
+                MovesUtils.doAttack(attack.name, userMob, this.getEnd());
             }
         }
     }
 
-    @Override
-    protected void entityInit()
+    public int getAge()
     {
-        this.getDataManager().register(MOVENAME, "");
-        this.getDataManager().register(ENDX, 0f);
-        this.getDataManager().register(ENDY, 0f);
-        this.getDataManager().register(ENDZ, 0f);
-        this.getDataManager().register(STARTX, 0f);
-        this.getDataManager().register(STARTY, 0f);
-        this.getDataManager().register(STARTZ, 0f);
-        this.getDataManager().register(USER, -1);
-        this.getDataManager().register(TARGET, -1);
-        this.getDataManager().register(TICK, 0);
-        this.getDataManager().register(APPLYTICK, 0);
-        this.getDataManager().register(STARTTICK, 0);
+        return this.getDataManager().get(EntityMoveUse.TICK);
     }
 
-    @Override
-    protected void readEntityFromNBT(CompoundNBT compound)
+    public int getApplicationTick()
     {
-        // Do nothing, if it needs to load/save, it should delete itself
-        // instead.
+        return this.getDataManager().get(EntityMoveUse.APPLYTICK);
     }
 
-    @Override
-    protected void writeEntityToNBT(CompoundNBT compound)
+    public Vector3 getEnd()
     {
+        this.end.x = this.getDataManager().get(EntityMoveUse.ENDX);
+        this.end.y = this.getDataManager().get(EntityMoveUse.ENDY);
+        this.end.z = this.getDataManager().get(EntityMoveUse.ENDZ);
+        return this.end;
+    }
+
+    public Move_Base getMove()
+    {
+        return MovesUtils.getMoveFromName(this.getDataManager().get(EntityMoveUse.MOVENAME));
+    }
+
+    public MovePacketInfo getMoveInfo()
+    {
+        final MovePacketInfo info = new MovePacketInfo(this.getMove(), this.getUser(), this.getTarget(), this
+                .getStart(), this.getEnd());
+        final IPokemob userMob = CapabilityPokemob.getPokemobFor(info.attacker);
+        info.currentTick = info.move.getAnimation(userMob).getDuration() - this.getAge();
+        return info;
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
     public AxisAlignedBB getRenderBoundingBox()
     {
-        return TileEntity.INFINITE_EXTENT_AABB;
+        return IForgeTileEntity.INFINITE_EXTENT_AABB;
+    }
+
+    public Vector3 getStart()
+    {
+        this.start.x = this.getDataManager().get(EntityMoveUse.STARTX);
+        this.start.y = this.getDataManager().get(EntityMoveUse.STARTY);
+        this.start.z = this.getDataManager().get(EntityMoveUse.STARTZ);
+        return this.start;
+    }
+
+    public int getStartTick()
+    {
+        return this.getDataManager().get(EntityMoveUse.STARTTICK);
+    }
+
+    public Entity getTarget()
+    {
+        return this.getEntityWorld().getEntityByID(this.getDataManager().get(EntityMoveUse.TARGET));
+    }
+
+    public Entity getUser()
+    {
+        return PokecubeCore.getEntityProvider().getEntity(this.getEntityWorld(), this.getDataManager().get(
+                EntityMoveUse.USER), true);
+    }
+
+    public boolean isDone()
+    {
+        return this.applied || !this.isAlive();
+    }
+
+    @Override
+    protected void onImpact(final RayTraceResult result)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void readAdditional(final CompoundNBT compound)
+    {
+        // Do nothing, if it needs to load/save, it should delete itself
+        // instead.
+    }
+
+    @Override
+    protected void registerData()
+    {
+        this.getDataManager().register(EntityMoveUse.MOVENAME, "");
+        this.getDataManager().register(EntityMoveUse.ENDX, 0f);
+        this.getDataManager().register(EntityMoveUse.ENDY, 0f);
+        this.getDataManager().register(EntityMoveUse.ENDZ, 0f);
+        this.getDataManager().register(EntityMoveUse.STARTX, 0f);
+        this.getDataManager().register(EntityMoveUse.STARTY, 0f);
+        this.getDataManager().register(EntityMoveUse.STARTZ, 0f);
+        this.getDataManager().register(EntityMoveUse.USER, -1);
+        this.getDataManager().register(EntityMoveUse.TARGET, -1);
+        this.getDataManager().register(EntityMoveUse.TICK, 0);
+        this.getDataManager().register(EntityMoveUse.APPLYTICK, 0);
+        this.getDataManager().register(EntityMoveUse.STARTTICK, 0);
+    }
+
+    public void setAge(final int age)
+    {
+        this.getDataManager().set(EntityMoveUse.TICK, age);
+    }
+
+    public void setApplicationTick(final int tick)
+    {
+        this.getDataManager().set(EntityMoveUse.APPLYTICK, tick);
+    }
+
+    public EntityMoveUse setEnd(final Vector3 location)
+    {
+        this.end.set(location);
+        this.getDataManager().set(EntityMoveUse.ENDX, (float) this.end.x);
+        this.getDataManager().set(EntityMoveUse.ENDY, (float) this.end.y);
+        this.getDataManager().set(EntityMoveUse.ENDZ, (float) this.end.z);
+        return this;
+    }
+
+    public EntityMoveUse setMove(final Move_Base move)
+    {
+        String name = "";
+        if (move != null) name = move.name;
+        this.getDataManager().set(EntityMoveUse.MOVENAME, name);
+        final IPokemob user = CapabilityPokemob.getPokemobFor(this.getUser());
+        if (move.getAnimation(user) != null)
+        {
+            this.getDataManager().set(EntityMoveUse.TICK, move.getAnimation(user).getDuration() + 1);
+            this.setApplicationTick(this.getAge() - move.getAnimation(user).getApplicationTick());
+        }
+        else this.getDataManager().set(EntityMoveUse.TICK, 1);
+        return this;
+    }
+
+    public EntityMoveUse setMove(final Move_Base move, final int tickOffset)
+    {
+        this.setMove(move);
+        this.getDataManager().set(EntityMoveUse.STARTTICK, tickOffset);
+        return this;
+    }
+
+    public EntityMoveUse setStart(final Vector3 location)
+    {
+        this.start.set(location);
+        this.start.moveEntity(this);
+        this.getDataManager().set(EntityMoveUse.STARTX, (float) this.start.x);
+        this.getDataManager().set(EntityMoveUse.STARTY, (float) this.start.y);
+        this.getDataManager().set(EntityMoveUse.STARTZ, (float) this.start.z);
+        return this;
+    }
+
+    public EntityMoveUse setTarget(final Entity target)
+    {
+        if (target != null) this.getDataManager().set(EntityMoveUse.TARGET, target.getEntityId());
+        else this.getDataManager().set(EntityMoveUse.TARGET, -1);
+        return this;
+    }
+
+    public EntityMoveUse setUser(final Entity user)
+    {
+        this.getDataManager().set(EntityMoveUse.USER, user.getEntityId());
+        return this;
+    }
+
+    @Override
+    public void tick()
+    {
+        final int start = this.getStartTick() - 1;
+        this.getDataManager().set(EntityMoveUse.STARTTICK, start);
+        if (start > 0) return;
+        final int age = this.getAge() - 1;
+        this.setAge(age);
+
+        if (this.getMove() == null || !this.isAlive() || age < 0)
+        {
+            this.remove();
+            return;
+        }
+        final Move_Base attack = this.getMove();
+        Entity user;
+        valid:
+        if ((user = this.getUser()) == null || !this.isAlive() || !user.isAlive() || !user.addedToChunk)
+        {
+            if (user != null && !user.addedToChunk) if (user.getEntityData().getBoolean("isPlayer")) break valid;
+            this.remove();
+            return;
+        }
+        final IPokemob userMob = CapabilityPokemob.getPokemobFor(user);
+        if (user instanceof LivingEntity && ((LivingEntity) user).getHealth() <= 1)
+        {
+            this.remove();
+            return;
+        }
+        if (this.getEntityWorld().isRemote && attack.getAnimation(userMob) != null) attack.getAnimation(userMob)
+                .spawnClientEntities(this.getMoveInfo());
+
+        if (!this.applied && age <= this.getApplicationTick())
+        {
+            this.applied = true;
+            this.doMoveUse();
+        }
+
+        if (age == 0) this.remove();
+    }
+
+    @Override
+    public void writeAdditional(final CompoundNBT compound)
+    {
     }
 }

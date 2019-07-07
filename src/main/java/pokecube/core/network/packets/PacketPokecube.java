@@ -1,22 +1,19 @@
 package pokecube.core.network.packets;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import pokecube.core.PokecubeCore;
 import pokecube.core.items.pokecubes.EntityPokecube;
-import pokecube.core.network.PokecubePacketHandler;
+import thut.core.common.network.Packet;
 
-public class PacketPokecube implements IMessage, IMessageHandler<PacketPokecube, IMessage>
+public class PacketPokecube extends Packet
 {
     public static void sendMessage(PlayerEntity player, int id, long renderTime)
     {
-        PacketPokecube toSend = new PacketPokecube(id, renderTime);
-        PokecubePacketHandler.sendToClient(toSend, player);
+        final PacketPokecube toSend = new PacketPokecube(id, renderTime);
+        PokecubeCore.packets.sendTo(toSend, (ServerPlayerEntity) player);
     }
 
     int  id;
@@ -28,41 +25,27 @@ public class PacketPokecube implements IMessage, IMessageHandler<PacketPokecube,
 
     public PacketPokecube(int id, long renderTime)
     {
-        time = renderTime;
+        this.time = renderTime;
         this.id = id;
     }
 
-    @Override
-    public IMessage onMessage(final PacketPokecube message, final MessageContext ctx)
+    public PacketPokecube(PacketBuffer buf)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
+        this.time = buf.readLong();
+        this.id = buf.readInt();
     }
 
     @Override
-    public void fromBytes(ByteBuf buf)
+    public void handleClient()
     {
-        time = buf.readLong();
-        id = buf.readInt();
+        final Entity e = PokecubeCore.proxy.getWorld().getEntityByID(this.id);
+        if (e instanceof EntityPokecube) ((EntityPokecube) e).reset = this.time;
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void write(PacketBuffer buf)
     {
-        buf.writeLong(time);
-        buf.writeInt(id);
-    }
-
-    void processMessage(MessageContext ctx, PacketPokecube message)
-    {
-        Entity e = PokecubeCore.proxy.getWorld().getEntityByID(message.id);
-        if (e instanceof EntityPokecube) ((EntityPokecube) e).reset = message.time;
+        buf.writeLong(this.time);
+        buf.writeInt(this.id);
     }
 }

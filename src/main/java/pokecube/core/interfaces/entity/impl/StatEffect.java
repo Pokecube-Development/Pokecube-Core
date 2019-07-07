@@ -2,9 +2,11 @@ package pokecube.core.interfaces.entity.impl;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob.Stats;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.entity.IOngoingAffected;
@@ -14,12 +16,12 @@ public class StatEffect extends BaseEffect
 {
     public final static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "stat_effect");
 
-    Stats                                stat;
-    byte                                 amount;
+    Stats stat;
+    byte  amount;
 
     public StatEffect()
     {
-        super(ID);
+        super(StatEffect.ID);
         this.setDuration(5);
     }
 
@@ -31,9 +33,64 @@ public class StatEffect extends BaseEffect
     }
 
     @Override
-    public boolean onSavePersistant()
+    public void affectTarget(IOngoingAffected target)
     {
-        return true;
+        if (this.amount == 0)
+        {
+            this.setDuration(0);
+            return;
+        }
+        final boolean up = this.amount > 0;
+        final LivingEntity entity = target.getEntity();
+        final int duration = PokecubeCore.getConfig().attackCooldown + 10;
+        switch (this.stat)
+        {
+        case ACCURACY:
+            break;
+        case ATTACK:
+            final Effect atkD = Effects.WEAKNESS;
+            final Effect atkU = Effects.STRENGTH;
+            if (up)
+            {
+                if (entity.isPotionActive(atkD)) entity.removePotionEffect(atkD);
+                entity.addPotionEffect(new EffectInstance(atkU, duration, this.amount));
+            }
+            else
+            {
+                if (entity.isPotionActive(atkU)) entity.removePotionEffect(atkU);
+                entity.addPotionEffect(new EffectInstance(atkD, duration, this.amount));
+            }
+            break;
+        case DEFENSE:
+            final Effect defU = Effects.RESISTANCE;
+            if (up) entity.addPotionEffect(new EffectInstance(defU, duration, this.amount));
+            break;
+        case EVASION:
+            break;
+        case HP:
+            break;
+        case SPATTACK:
+            break;
+        case SPDEFENSE:
+            break;
+        case VIT:
+            final Effect vitD = Effects.SLOWNESS;
+            final Effect vitU = Effects.SPEED;
+            if (up)
+            {
+                if (entity.isPotionActive(vitD)) entity.removePotionEffect(vitD);
+                entity.addPotionEffect(new EffectInstance(vitU, duration, this.amount));
+            }
+            else
+            {
+                if (entity.isPotionActive(vitU)) entity.removePotionEffect(vitU);
+                entity.addPotionEffect(new EffectInstance(vitD, duration, this.amount));
+            }
+            break;
+        default:
+            break;
+
+        }
     }
 
     @Override
@@ -49,8 +106,8 @@ public class StatEffect extends BaseEffect
         // capped.
         if (toAdd instanceof StatEffect)
         {
-            StatEffect effect = (StatEffect) toAdd;
-            if (effect.stat == stat)
+            final StatEffect effect = (StatEffect) toAdd;
+            if (effect.stat == this.stat)
             {
                 if (this.amount > 4 || this.amount < 4) return AddType.DENY;
                 this.amount += effect.amount;
@@ -62,82 +119,6 @@ public class StatEffect extends BaseEffect
     }
 
     @Override
-    public void affectTarget(IOngoingAffected target)
-    {
-        if (amount == 0)
-        {
-            setDuration(0);
-            return;
-        }
-        boolean up = amount > 0;
-        LivingEntity entity = target.getEntity();
-        int duration = PokecubeMod.core.getConfig().attackCooldown + 10;
-        switch (stat)
-        {
-        case ACCURACY:
-            break;
-        case ATTACK:
-            Potion atkD = Potion.getPotionFromResourceLocation("weakness");
-            Potion atkU = Potion.getPotionFromResourceLocation("strength");
-            if (up)
-            {
-                if (entity.isPotionActive(atkD))
-                {
-                    entity.removeEffectInstance(atkD);
-                }
-                entity.addEffectInstance(new EffectInstance(atkU, duration, amount));
-            }
-            else
-            {
-                if (entity.isPotionActive(atkU))
-                {
-                    entity.removeEffectInstance(atkU);
-                }
-                entity.addEffectInstance(new EffectInstance(atkD, duration, amount));
-            }
-            break;
-        case DEFENSE:
-            Potion defU = Potion.getPotionFromResourceLocation("resistance");
-            if (up)
-            {
-                entity.addEffectInstance(new EffectInstance(defU, duration, amount));
-            }
-            break;
-        case EVASION:
-            break;
-        case HP:
-            break;
-        case SPATTACK:
-            break;
-        case SPDEFENSE:
-            break;
-        case VIT:
-            Potion vitD = Potion.getPotionFromResourceLocation("slowness");
-            Potion vitU = Potion.getPotionFromResourceLocation("speed");
-            if (up)
-            {
-                if (entity.isPotionActive(vitD))
-                {
-                    entity.removeEffectInstance(vitD);
-                }
-                entity.addEffectInstance(new EffectInstance(vitU, duration, amount));
-            }
-            else
-            {
-                if (entity.isPotionActive(vitU))
-                {
-                    entity.removeEffectInstance(vitU);
-                }
-                entity.addEffectInstance(new EffectInstance(vitD, duration, amount));
-            }
-            break;
-        default:
-            break;
-
-        }
-    }
-
-    @Override
     public void deserializeNBT(CompoundNBT nbt)
     {
         this.stat = Stats.values()[nbt.getByte("S")];
@@ -146,11 +127,17 @@ public class StatEffect extends BaseEffect
     }
 
     @Override
+    public boolean onSavePersistant()
+    {
+        return true;
+    }
+
+    @Override
     public CompoundNBT serializeNBT()
     {
-        CompoundNBT tag = super.serializeNBT();
-        tag.setByte("S", (byte) stat.ordinal());
-        tag.setByte("A", amount);
+        final CompoundNBT tag = super.serializeNBT();
+        tag.putByte("S", (byte) this.stat.ordinal());
+        tag.putByte("A", this.amount);
         return tag;
     }
 

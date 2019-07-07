@@ -1,79 +1,57 @@
 package pokecube.core.client.gui.watch.pokemob;
 
-import java.io.IOException;
-
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.widget.list.AbstractList;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.client.gui.watch.PokemobInfoPage;
-import pokecube.core.interfaces.IPokemob;
 
-public abstract class ListPage extends PokeInfoPage
+public abstract class ListPage<T extends AbstractList.AbstractListEntry<T>> extends PokeInfoPage
 {
-    ScrollGui list;
+    ScrollGui<T> list;
 
-    public ListPage(PokemobInfoPage parent, IPokemob pokemob, String title)
+    public ListPage(final PokemobInfoPage parent, final String title)
     {
-        super(parent, pokemob, title);
+        super(parent, title);
     }
 
     @Override
-    public void initGui()
+    void drawInfo(final int mouseX, final int mouseY, final float partialTicks)
     {
-        super.initGui();
-        initList();
+
+    }
+
+    protected void drawTitle(final int mouseX, final int mouseY, final float partialTicks)
+    {
+        final int x = (this.watch.width - 160) / 2 + 80;
+        final int y = (this.watch.height - 160) / 2 + 8;
+        this.drawCenteredString(this.font, this.getTitle().getFormattedText(), x, y, 0xFFFFFFFF);
+    }
+
+    @Override
+    public void init()
+    {
+        super.init();
+        this.initList();
+        this.children.add(this.list);
+    }
+
+    public void initList()
+    {
+        if (this.list != null) this.children.remove(this.list);
     }
 
     @Override
     public void onPageOpened()
     {
         super.onPageOpened();
-        initList();
-    }
-
-    abstract void initList();
-
-    protected void drawTitle(int mouseX, int mouseY, float partialTicks)
-    {
-        int x = (watch.width - 160) / 2 + 80;
-        int y = (watch.height - 160) / 2 + 8;
-        drawCenteredString(fontRenderer, getTitle(), x, y, 0xFFFFFFFF);
+        this.initList();
+        this.children.add(this.list);
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    public void render(final int mouseX, final int mouseY, final float partialTicks)
     {
-        list.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void handleMouseInput() throws IOException
-    {
-        super.handleMouseInput();
-        this.list.handleMouseInput();
-    }
-
-    @Override
-    public void actionPerformed(GuiButton button) throws IOException
-    {
-        list.actionPerformed(button);
-    }
-
-    @Override
-    public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
-    {
-    }
-
-    @Override
-    public void mouseReleased(int mouseX, int mouseY, int state)
-    {
-        list.mouseReleased(mouseX, mouseY, state);
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        list.drawScreen(mouseX, mouseY, partialTicks);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
+        this.list.render(mouseX, mouseY, partialTicks);
     }
 
 }

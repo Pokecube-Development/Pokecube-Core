@@ -12,32 +12,32 @@ public class ShinyGene extends GeneBoolean
     Random rand = new Random();
 
     @Override
+    public ResourceLocation getKey()
+    {
+        return GeneticsManager.SHINYGENE;
+    }
+
+    @Override
+    public float getMutationRate()
+    {
+        return GeneticsManager.mutationRates.get(this.getKey());
+    }
+
+    @Override
     public Gene interpolate(Gene other)
     {
-        ShinyGene newGene = new ShinyGene();
-        ShinyGene otherG = (ShinyGene) other;
-        newGene.value = otherG.value && value;
+        final ShinyGene newGene = new ShinyGene();
+        final ShinyGene otherG = (ShinyGene) other;
+        newGene.value = otherG.value && this.value;
         return newGene;
     }
 
     @Override
     public Gene mutate()
     {
-        ShinyGene newGene = new ShinyGene();
+        final ShinyGene newGene = new ShinyGene();
         newGene.value = Boolean.TRUE;
         return newGene;
-    }
-
-    @Override
-    public float getMutationRate()
-    {
-        return GeneticsManager.mutationRates.get(getKey());
-    }
-
-    @Override
-    public ResourceLocation getKey()
-    {
-        return GeneticsManager.SHINYGENE;
     }
 
 }

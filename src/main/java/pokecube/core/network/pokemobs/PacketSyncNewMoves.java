@@ -1,10 +1,5 @@
 package pokecube.core.network.pokemobs;
 
-import java.io.IOException;
-
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -12,91 +7,67 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.utils.TagNames;
+import thut.core.common.network.Packet;
 
-public class PacketSyncNewMoves implements IMessage, IMessageHandler<PacketSyncNewMoves, IMessage>
+public class PacketSyncNewMoves extends Packet
 {
-    public int            entityId;
-    public CompoundNBT data = new CompoundNBT();
-
     public static void sendUpdatePacket(IPokemob pokemob)
     {
-        if (pokemob.getPokemonOwner() instanceof ServerPlayerEntity)
+        if (pokemob.getOwner() instanceof ServerPlayerEntity)
         {
-            ServerPlayerEntity player = (ServerPlayerEntity) pokemob.getPokemonOwner();
-            ListNBT newMoves = new ListNBT();
-            for (String s : pokemob.getMoveStats().newMoves)
-            {
-                newMoves.appendTag(new StringNBT(s));
-            }
-            PacketSyncNewMoves packet = new PacketSyncNewMoves();
+            final ServerPlayerEntity player = (ServerPlayerEntity) pokemob.getOwner();
+            final ListNBT newMoves = new ListNBT();
+            for (final String s : pokemob.getMoveStats().newMoves)
+                newMoves.add(new StringNBT(s));
+            final PacketSyncNewMoves packet = new PacketSyncNewMoves();
             packet.data.put(TagNames.NEWMOVES, newMoves);
             packet.entityId = pokemob.getEntity().getEntityId();
-            PokecubeMod.packetPipeline.sendTo(packet, player);
+            PokecubeCore.packets.sendTo(packet, player);
         }
     }
+
+    public int entityId;
+
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketSyncNewMoves()
     {
+        super(null);
+    }
+
+    public PacketSyncNewMoves(PacketBuffer buffer)
+    {
+        super(buffer);
+        this.entityId = buffer.readInt();
+        this.data = buffer.readCompoundTag();
     }
 
     @Override
-    public IMessage onMessage(final PacketSyncNewMoves message, final MessageContext ctx)
+    public void handleClient()
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        entityId = buffer.readInt();
-        try
-        {
-            data = buffer.readCompoundTag();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeInt(entityId);
-        buffer.writeCompoundTag(data);
-    }
-
-    void processMessage(MessageContext ctx, PacketSyncNewMoves message)
-    {
-        PlayerEntity player = PokecubeCore.getPlayer(null);
-        int id = message.entityId;
-        CompoundNBT data = message.data;
-        Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final int id = this.entityId;
+        final CompoundNBT data = this.data;
+        final Entity e = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
         if (pokemob != null)
         {
-            ListNBT newMoves = (ListNBT) data.getTag(TagNames.NEWMOVES);
+            final ListNBT newMoves = (ListNBT) data.get(TagNames.NEWMOVES);
             pokemob.getMoveStats().newMoves.clear();
             for (int i = 0; i < newMoves.size(); i++)
-                if (!pokemob.getMoveStats().newMoves.contains(newMoves.getStringTagAt(i)))
-                    pokemob.getMoveStats().newMoves.add(newMoves.getStringTagAt(i));
+                if (!pokemob.getMoveStats().newMoves.contains(newMoves.getString(i))) pokemob.getMoveStats().newMoves
+                        .add(newMoves.getString(i));
         }
+    }
+
+    @Override
+    public void write(PacketBuffer buffer)
+    {
+        buffer.writeInt(this.entityId);
+        buffer.writeCompoundTag(this.data);
     }
 }

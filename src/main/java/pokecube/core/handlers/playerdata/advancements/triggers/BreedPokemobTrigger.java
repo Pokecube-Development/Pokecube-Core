@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.advancements.critereon.AbstractCriterionInstance;
+import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
@@ -22,40 +22,38 @@ import pokecube.core.interfaces.PokecubeMod;
 
 public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigger.Instance>
 {
-    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "breed");
-
-    public static class Instance extends AbstractCriterionInstance
+    public static class Instance extends CriterionInstance
     {
         final PokedexEntry mate1;
         final PokedexEntry mate2;
 
         public Instance(PokedexEntry mate1, PokedexEntry mate2)
         {
-            super(ID);
+            super(BreedPokemobTrigger.ID);
             this.mate1 = mate1 != null ? mate1 : Database.missingno;
             this.mate2 = mate2 != null ? mate2 : Database.missingno;
         }
 
         public boolean test(ServerPlayerEntity player, IPokemob first, IPokemob second)
         {
-            if (!(first.getPokemonOwner() == player || second.getPokemonOwner() == player)) return false;
+            if (!(first.getOwner() == player || second.getOwner() == player)) return false;
 
             IPokemob firstmate = null;
             IPokemob secondmate = null;
 
-            if (first.getPokedexEntry() == mate1)
+            if (first.getPokedexEntry() == this.mate1)
             {
                 firstmate = first;
                 secondmate = second;
             }
-            else if (first.getPokedexEntry() == mate2)
+            else if (first.getPokedexEntry() == this.mate2)
             {
                 firstmate = second;
                 secondmate = first;
             }
 
-            boolean firstMatch = firstmate.getPokedexEntry() == mate1 || mate1 == Database.missingno;
-            boolean secondMatch = secondmate.getPokedexEntry() == mate2 || mate2 == Database.missingno;
+            final boolean firstMatch = firstmate.getPokedexEntry() == this.mate1 || this.mate1 == Database.missingno;
+            final boolean secondMatch = secondmate.getPokedexEntry() == this.mate2 || this.mate2 == Database.missingno;
 
             return firstMatch && secondMatch;
         }
@@ -72,14 +70,14 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
             this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean isEmpty()
-        {
-            return this.listeners.isEmpty();
-        }
-
         public void add(ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener)
         {
             this.listeners.add(listener);
+        }
+
+        public boolean isEmpty()
+        {
+            return this.listeners.isEmpty();
         }
 
         public void remove(ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener)
@@ -91,38 +89,25 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
         {
             List<ICriterionTrigger.Listener<BreedPokemobTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener : this.listeners)
-            {
+            for (final ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener : this.listeners)
                 if (listener.getCriterionInstance().test(player, first, second))
                 {
                     if (list == null)
-                    {
                         list = Lists.<ICriterionTrigger.Listener<BreedPokemobTrigger.Instance>> newArrayList();
-                    }
 
                     list.add(listener);
                 }
-            }
-            if (list != null)
-            {
-                for (ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener1 : list)
-                {
-                    listener1.grantCriterion(this.playerAdvancements);
-                }
-            }
+            if (list != null) for (final ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener1 : list)
+                listener1.grantCriterion(this.playerAdvancements);
         }
     }
+
+    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "breed");
 
     private final Map<PlayerAdvancements, BreedPokemobTrigger.Listeners> listeners = Maps.<PlayerAdvancements, BreedPokemobTrigger.Listeners> newHashMap();
 
     public BreedPokemobTrigger()
     {
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
     }
 
     @Override
@@ -140,21 +125,22 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
         bredanimalstrigger$listeners.add(listener);
     }
 
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the
+     * JSON.
+     */
     @Override
-    public void removeListener(PlayerAdvancements playerAdvancementsIn,
-            ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener)
+    public BreedPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        BreedPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        final String mate1 = json.has("mate1") ? json.get("mate1").getAsString() : "";
+        final String mate2 = json.has("mate2") ? json.get("mate2").getAsString() : "";
+        return new BreedPokemobTrigger.Instance(Database.getEntry(mate1), Database.getEntry(mate2));
+    }
 
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.remove(listener);
-
-            if (bredanimalstrigger$listeners.isEmpty())
-            {
-                this.listeners.remove(playerAdvancementsIn);
-            }
-        }
+    @Override
+    public ResourceLocation getId()
+    {
+        return BreedPokemobTrigger.ID;
     }
 
     @Override
@@ -163,22 +149,23 @@ public class BreedPokemobTrigger implements ICriterionTrigger<BreedPokemobTrigge
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    /** Deserialize a ICriterionInstance of this trigger from the data in the
-     * JSON. */
     @Override
-    public BreedPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn,
+            ICriterionTrigger.Listener<BreedPokemobTrigger.Instance> listener)
     {
-        String mate1 = json.has("mate1") ? json.get("mate1").getAsString() : "";
-        String mate2 = json.has("mate2") ? json.get("mate2").getAsString() : "";
-        return new BreedPokemobTrigger.Instance(Database.getEntry(mate1), Database.getEntry(mate2));
+        final BreedPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+
+        if (bredanimalstrigger$listeners != null)
+        {
+            bredanimalstrigger$listeners.remove(listener);
+
+            if (bredanimalstrigger$listeners.isEmpty()) this.listeners.remove(playerAdvancementsIn);
+        }
     }
 
     public void trigger(ServerPlayerEntity player, IPokemob first, IPokemob second)
     {
-        BreedPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.trigger(player, first, second);
-        }
+        final BreedPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
+        if (bredanimalstrigger$listeners != null) bredanimalstrigger$listeners.trigger(player, first, second);
     }
 }

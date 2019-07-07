@@ -39,111 +39,96 @@ public class MoveAnimationHelper
         try
         {
             foundClasses = ClassFinder.find(MoveAnimationHelper.class.getPackage().getName());
-            for (Class<?> candidateClass : foundClasses)
+            for (final Class<?> candidateClass : foundClasses)
             {
-                AnimPreset preset = candidateClass.getAnnotation(AnimPreset.class);
+                final AnimPreset preset = candidateClass.getAnnotation(AnimPreset.class);
                 if (preset != null && MoveAnimationBase.class.isAssignableFrom(candidateClass))
                 {
                     @SuppressWarnings("unchecked")
-                    Class<? extends MoveAnimationBase> presetClass = (Class<? extends MoveAnimationBase>) candidateClass;
-                    presets.put(preset.getPreset(), presetClass);
+                    final Class<? extends MoveAnimationBase> presetClass = (Class<? extends MoveAnimationBase>) candidateClass;
+                    MoveAnimationHelper.presets.put(preset.getPreset(), presetClass);
                 }
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             e.printStackTrace();
         }
     }
 
+    private static MoveAnimationHelper instance;
+
     public static IMoveAnimation getAnimationPreset(String anim)
     {
         IMoveAnimation animation = null;
         if (anim == null || anim.isEmpty()) return animation;
-        String preset = anim.split(":")[0];
-        Class<? extends MoveAnimationBase> presetClass = presets.get(preset);
-        if (presetClass != null)
+        final String preset = anim.split(":")[0];
+        final Class<? extends MoveAnimationBase> presetClass = MoveAnimationHelper.presets.get(preset);
+        if (presetClass != null) try
         {
-            try
-            {
-                animation = presetClass.newInstance();
-                ((MoveAnimationBase) animation).init(anim);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            animation = presetClass.newInstance();
+            ((MoveAnimationBase) animation).init(anim);
+        }
+        catch (final Exception e)
+        {
+            e.printStackTrace();
         }
         return animation;
     }
 
-    private static MoveAnimationHelper instance;
-
     public static MoveAnimationHelper Instance()
     {
-        if (instance == null)
+        if (MoveAnimationHelper.instance == null)
         {
-            instance = new MoveAnimationHelper();
-            MinecraftForge.EVENT_BUS.register(instance);
+            MoveAnimationHelper.instance = new MoveAnimationHelper();
+            MinecraftForge.EVENT_BUS.register(MoveAnimationHelper.instance);
         }
-        return instance;
+        return MoveAnimationHelper.instance;
     }
 
     final Vector3 source = Vector3.getNewVector();
     final Vector3 target = Vector3.getNewVector();
     final int     index;
 
+    private int effects = 0;
+
+    Map<BlockPos, TerrainSegment> terrainMap = Maps.newHashMap();
+
     public MoveAnimationHelper()
     {
-        TerrainSegment dummy = new TerrainSegment(0, 0, 0);
+        final TerrainSegment dummy = new TerrainSegment(0, 0, 0);
         int found = -1;
         for (int i = 0; i < dummy.effectArr.length; i++)
-        {
             if (dummy.effectArr[i] instanceof PokemobTerrainEffects)
             {
                 found = i;
                 break;
             }
-        }
-        index = found;
-    }
-
-    private int effects = 0;
-
-    public void clear()
-    {
-        effects = 0;
+        this.index = found;
     }
 
     public void addEffect()
     {
-        effects++;
-    }
-
-    public void clearEffect()
-    {
-        effects = Math.max(0, effects - 1);
-    }
-
-    Map<BlockPos, TerrainSegment> terrainMap = Maps.newHashMap();
-
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void worldLoad(WorldEvent.Load evt)
-    {
-        if (!evt.getWorld().isRemote) return;
-        terrainMap.clear();
+        this.effects++;
     }
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void chunkUnload(ChunkEvent.Unload evt)
     {
-        if (!evt.getWorld().isRemote) return;
+        if (!evt.getWorld().isRemote()) return;
         for (int i = 0; i < 16; i++)
-        {
-            terrainMap.remove(new BlockPos(evt.getChunk().x, i, evt.getChunk().z));
-        }
+            this.terrainMap.remove(new BlockPos(evt.getChunk().getPos().x, i, evt.getChunk().getPos().z));
+    }
+
+    public void clear()
+    {
+        this.effects = 0;
+    }
+
+    public void clearEffect()
+    {
+        this.effects = Math.max(0, this.effects - 1);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -153,12 +138,10 @@ public class MoveAnimationHelper
         if (!event.getObject().getWorld().isRemote) return;
         if (event.getCapabilities().containsKey(TerrainManager.TERRAINCAP))
         {
-            ITerrainProvider provider = (ITerrainProvider) event.getCapabilities().get(TerrainManager.TERRAINCAP);
+            final ITerrainProvider provider = (ITerrainProvider) event.getCapabilities().get(TerrainManager.TERRAINCAP);
             for (int i = 0; i < 16; i++)
-            {
-                terrainMap.put(new BlockPos(event.getObject().x, i, event.getObject().z),
+                this.terrainMap.put(new BlockPos(event.getObject().getPos().x, i, event.getObject().getPos().z),
                         provider.getTerrainSegment(i));
-            }
         }
     }
 
@@ -166,47 +149,51 @@ public class MoveAnimationHelper
     @SubscribeEvent
     public void onRenderWorldPost(RenderFogEvent event)
     {
-        if (effects == 0) return;
+        if (this.effects == 0) return;
         int num = 0;
         try
         {
-            if (index == -1) return;
-            PlayerEntity player = Minecraft.getInstance().player;
-            source.set(player);
-            int range = 4;
-            MutableBlockPos pos = new MutableBlockPos();
+            if (this.index == -1) return;
+            final PlayerEntity player = Minecraft.getInstance().player;
+            this.source.set(player);
+            final int range = 4;
+            final MutableBlockPos pos = new MutableBlockPos();
             for (int i = -range; i <= range; i++)
-            {
                 for (int j = -range; j <= range; j++)
-                {
                     for (int k = -range; k <= range; k++)
                     {
-                        source.set(player);
+                        this.source.set(player);
                         pos.setPos(player.chunkCoordX + i, player.chunkCoordY + j, player.chunkCoordZ + k);
-                        TerrainSegment segment = terrainMap.get(pos);
+                        final TerrainSegment segment = this.terrainMap.get(pos);
                         if (segment == null) continue;
-                        PokemobTerrainEffects teffect = (PokemobTerrainEffects) segment.effectArr[index];
+                        final PokemobTerrainEffects teffect = (PokemobTerrainEffects) segment.effectArr[this.index];
                         if (teffect == null || !teffect.hasEffects()) continue;
-                        target.set(segment.getCentre());
-                        source.set(target.subtractFrom(source));
+                        this.target.set(segment.getCentre());
+                        this.source.set(this.target.subtractFrom(this.source));
                         // Clear out the jitteryness from rendering
-                        double d0 = (-player.posX + player.lastTickPosX) * event.getRenderPartialTicks();
-                        double d1 = (-player.posY + player.lastTickPosY) * event.getRenderPartialTicks();
-                        double d2 = (-player.posZ + player.lastTickPosZ) * event.getRenderPartialTicks();
-                        source.addTo(d0, d1, d2);
+                        final double d0 = (-player.posX + player.lastTickPosX) * event.getRenderPartialTicks();
+                        final double d1 = (-player.posY + player.lastTickPosY) * event.getRenderPartialTicks();
+                        final double d2 = (-player.posZ + player.lastTickPosZ) * event.getRenderPartialTicks();
+                        this.source.addTo(d0, d1, d2);
                         GL11.glPushMatrix();
-                        GL11.glTranslated(source.x, source.y, source.z);
+                        GL11.glTranslated(this.source.x, this.source.y, this.source.z);
                         teffect.renderTerrainEffects(event);
                         GL11.glPopMatrix();
                         num++;
                     }
-                }
-            }
         }
-        catch (Throwable e)
+        catch (final Throwable e)
         {
             e.printStackTrace();
         }
-        effects = num;
+        this.effects = num;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public void worldLoad(WorldEvent.Load evt)
+    {
+        if (!evt.getWorld().isRemote()) return;
+        this.terrainMap.clear();
     }
 }

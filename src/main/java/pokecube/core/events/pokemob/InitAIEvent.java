@@ -3,7 +3,10 @@ package pokecube.core.events.pokemob;
 import net.minecraftforge.event.entity.EntityEvent;
 import pokecube.core.interfaces.IPokemob;
 
-/** Called after initiating the pokemob's AI. */
+/**
+ * Called after initiating the pokemob's AI. fired on the
+ * PokecubeCore.POKEMOB_BUS
+ */
 public class InitAIEvent extends EntityEvent
 {
     private final IPokemob pokemob;
@@ -16,6 +19,6 @@ public class InitAIEvent extends EntityEvent
 
     public IPokemob getPokemob()
     {
-        return pokemob;
+        return this.pokemob;
     }
 }

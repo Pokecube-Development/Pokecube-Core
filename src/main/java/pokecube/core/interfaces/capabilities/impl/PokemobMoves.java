@@ -2,7 +2,6 @@ package pokecube.core.interfaces.capabilities.impl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 
@@ -11,11 +10,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.ITextComponent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityAffected;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.entity.IOngoingAffected;
@@ -36,152 +35,154 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public void executeMove(Entity target, Vector3 targetLocation, float f)
     {
-        String attack = getMove(getMoveIndex());
+        String attack = this.getMove(this.getMoveIndex());
         // If no move selected, just return here.
-        if (attack == MOVE_NONE || attack == null) { return; }
+        if (attack == IMoveConstants.MOVE_NONE || attack == null) return;
 
         // If no target location selected, set it accordingly.
-        if (targetLocation == null)
-        {
-            if (target != null) targetLocation = Vector3.getNewVector().set(target);
-            else targetLocation = Vector3.getNewVector().set(getEntity());
-        }
+        if (targetLocation == null) if (target != null) targetLocation = Vector3.getNewVector().set(target);
+        else targetLocation = Vector3.getNewVector().set(this.getEntity());
 
         // If all moves are disabled, use struggle instead.
-        int index = getMoveIndex();
-        if (index < 4 && index >= 0)
-        {
-            if (getDisableTimer(index) > 0)
-            {
-                attack = "struggle";
-            }
-        }
+        final int index = this.getMoveIndex();
+        if (index < 4 && index >= 0) if (this.getDisableTimer(index) > 0) attack = "struggle";
 
-        Move_Base move = MovesUtils.getMoveFromName(attack);
+        final Move_Base move = MovesUtils.getMoveFromName(attack);
         // If the move is somehow null, report it and return early.
         if (move == null || move.move == null)
         {
-            PokecubeMod.log(Level.SEVERE,
-                    getPokemonDisplayName().getFormattedText() + " Has Used Unregistered Move: " + attack + " " + index,
-                    new IllegalArgumentException());
+            PokecubeCore.LOGGER.error(this.getDisplayName().getFormattedText() + " Has Used Unregistered Move: "
+                    + attack + " " + index, new IllegalArgumentException());
             return;
         }
 
         // Check ranged vs contact and set cooldown accordinly.
-        boolean distanced = (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0;
+        final boolean distanced = (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) > 0;
         this.setAttackCooldown(MovesUtils.getAttackDelay(this, attack, distanced, target instanceof PlayerEntity));
         // Syncs that the move has at least been attempted, this is used for the
         // graphical indicator of move cooldowns
         PacketSyncMoveUse.sendUpdate(this);
 
-        if (target != getEntity())
+        if (target != this.getEntity())
         {
             if (target instanceof MobEntity)
             {
-                MobEntity t = (MobEntity) target;
-                if (t.getAttackTarget() != getEntity())
-                {
-                    t.setAttackTarget(getEntity());
-                }
+                final MobEntity t = (MobEntity) target;
+                if (t.getAttackTarget() != this.getEntity()) t.setAttackTarget(this.getEntity());
             }
-            if (target instanceof LivingEntity)
+            if (target instanceof LivingEntity) if (((LivingEntity) target).getRevengeTarget() != this.getEntity())
             {
-                if (((LivingEntity) target).getRevengeTarget() != getEntity())
-                {
-                    ((LivingEntity) target).setRevengeTarget(getEntity());
-                    getEntity().setRevengeTarget((LivingEntity) target);
-                }
+                ((LivingEntity) target).setRevengeTarget(this.getEntity());
+                this.getEntity().setRevengeTarget((LivingEntity) target);
             }
         }
-        int statusChange = getChanges();
-        if ((statusChange & CHANGE_FLINCH) != 0)
+        final int statusChange = this.getChanges();
+        if ((statusChange & IMoveConstants.CHANGE_FLINCH) != 0)
         {
-            ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.flinch", "red",
-                    getPokemonDisplayName());
-            displayMessageToOwner(mess);
-            IPokemob targetMob = CapabilityPokemob.getPokemobFor(getEntity().getAttackTarget());
+            ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.flinch", "red", this
+                    .getDisplayName());
+            this.displayMessageToOwner(mess);
+            final IPokemob targetMob = CapabilityPokemob.getPokemobFor(this.getEntity().getAttackTarget());
             if (targetMob != null)
             {
-                mess = CommandTools.makeTranslatedMessage("pokemob.status.flinch", "green", getPokemonDisplayName());
+                mess = CommandTools.makeTranslatedMessage("pokemob.status.flinch", "green", this
+                        .getDisplayName());
                 targetMob.displayMessageToOwner(mess);
             }
-            removeChange(CHANGE_FLINCH);
+            this.removeChange(IMoveConstants.CHANGE_FLINCH);
             return;
         }
 
-        if ((statusChange & CHANGE_CONFUSED) != 0)
+        if ((statusChange & IMoveConstants.CHANGE_CONFUSED) != 0) if (Math.random() > 0.75)
         {
-            if (Math.random() > 0.75)
+            this.removeChange(IMoveConstants.CHANGE_CONFUSED);
+            ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.confuse.remove", "green", this
+                    .getDisplayName());
+            final IPokemob targetMob = CapabilityPokemob.getPokemobFor(this.getEntity().getAttackTarget());
+            if (targetMob != null)
             {
-                removeChange(CHANGE_CONFUSED);
-                ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.confuse.remove", "green",
-                        getPokemonDisplayName());
-                IPokemob targetMob = CapabilityPokemob.getPokemobFor(getEntity().getAttackTarget());
-                if (targetMob != null)
-                {
-                    mess = CommandTools.makeTranslatedMessage("pokemob.status.confuse.remove", "red",
-                            getPokemonDisplayName());
-                    targetMob.displayMessageToOwner(mess);
-                }
-                displayMessageToOwner(mess);
+                mess = CommandTools.makeTranslatedMessage("pokemob.status.confuse.remove", "red", this
+                        .getDisplayName());
+                targetMob.displayMessageToOwner(mess);
             }
-            else if (Math.random() > 0.5)
+            this.displayMessageToOwner(mess);
+        }
+        else if (Math.random() > 0.5)
+        {
+            MovesUtils.doAttack("pokemob.status.confusion", this, this.getEntity());
+            ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.confusion", "red", this
+                    .getDisplayName());
+            final IPokemob targetMob = CapabilityPokemob.getPokemobFor(this.getEntity().getAttackTarget());
+            if (targetMob != null)
             {
-                MovesUtils.doAttack("pokemob.status.confusion", this, getEntity());
-                ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.confusion", "red",
-                        getPokemonDisplayName());
-                IPokemob targetMob = CapabilityPokemob.getPokemobFor(getEntity().getAttackTarget());
-                if (targetMob != null)
-                {
-                    mess = CommandTools.makeTranslatedMessage("pokemob.status.confusion", "green",
-                            getPokemonDisplayName());
-                    targetMob.displayMessageToOwner(mess);
-                }
-                displayMessageToOwner(mess);
-                return;
+                mess = CommandTools.makeTranslatedMessage("pokemob.status.confusion", "green", this
+                        .getDisplayName());
+                targetMob.displayMessageToOwner(mess);
             }
+            this.displayMessageToOwner(mess);
+            return;
         }
 
-        if (getMoveStats().infatuateTarget != null)
+        if (this.getMoveStats().infatuateTarget != null) if (!this.getMoveStats().infatuateTarget.isAlive()) this
+                .getMoveStats().infatuateTarget = null;
+        else if (Math.random() > 0.5)
         {
-            if (getMoveStats().infatuateTarget.isDead)
-            {
-                getMoveStats().infatuateTarget = null;
-            }
-            else if (Math.random() > 0.5)
-            {
-                ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.infatuate", "red",
-                        getPokemonDisplayName());
-                displayMessageToOwner(mess);
-                return;
-            }
+            final ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.status.infatuate", "red", this
+                    .getDisplayName());
+            this.displayMessageToOwner(mess);
+            return;
         }
-        if (here == null) here = Vector3.getNewVector();
-        here.set(getEntity()).addTo(0, getEntity().getEyeHeight(), 0);
-        MovesUtils.useMove(move, getEntity(), target, here, targetLocation);
-        here.set(getEntity());
+        if (this.here == null) this.here = Vector3.getNewVector();
+        this.here.set(this.getEntity()).addTo(0, this.getEntity().getEyeHeight(), 0);
+        MovesUtils.useMove(move, this.getEntity(), target, this.here, targetLocation);
+        this.here.set(this.getEntity());
+    }
+
+    @Override
+    public EntityMoveUse getActiveMove()
+    {
+        final int id = this.dataSync().get(this.params.ACTIVEMOVEID);
+        if (id == -1) return null;
+        if (this.activeMove == null || this.activeMove.getEntityId() != id)
+        {
+            final Entity move = this.getEntity().getEntityWorld().getEntityByID(id);
+            if (move instanceof EntityMoveUse) this.activeMove = (EntityMoveUse) move;
+        }
+        return this.activeMove;
+    }
+
+    @Override
+    public int getAttackCooldown()
+    {
+        return this.dataSync().get(this.params.ATTACKCOOLDOWN);
+    }
+
+    @Override
+    public int getDisableTimer(int index)
+    {
+        return this.dataSync().get(this.params.DISABLE[index]);
     }
 
     @Override
     public int getExplosionState()
     {
-        return moveInfo.boomState;
+        return this.moveInfo.boomState;
     }
 
     @Override
     public int getMoveIndex()
     {
-        byte ret = dataSync().get(params.MOVEINDEXDW);
+        final byte ret = this.dataSync().get(this.params.MOVEINDEXDW);
         return Math.max(0, ret);
     }
 
     @Override
     public String[] getMoves()
     {
-        IPokemob transformed = CapabilityPokemob.getPokemobFor(getTransformedTo());
+        final IPokemob transformed = CapabilityPokemob.getPokemobFor(this.getTransformedTo());
         if (transformed != null && transformed.getTransformedTo() == null)
         {
-            IPokemob to = transformed;
+            final IPokemob to = transformed;
             if (to != this) return to.getMoves();
         }
         return super.getMoves();
@@ -190,30 +191,36 @@ public abstract class PokemobMoves extends PokemobSexed
     @Override
     public PokemobMoveStats getMoveStats()
     {
-        return moveInfo;
+        return this.moveInfo;
+    }
+
+    @Override
+    public boolean isOnGround()
+    {
+        return this.getEntity().onGround;
     }
 
     @Override
     public byte getStatus()
     {
-        Byte val = dataSync().get(params.STATUSDW);
+        final Byte val = this.dataSync().get(this.params.STATUSDW);
         return (byte) Math.max(0, val);
     }
 
     @Override
     public short getStatusTimer()
     {
-        return dataSync().get(params.STATUSTIMERDW);
+        return this.dataSync().get(this.params.STATUSTIMERDW);
     }
 
     @Override
     public Entity getTransformedTo()
     {
-        int id = this.dataSync().get(params.TRANSFORMEDTODW);
+        final int id = this.dataSync().get(this.params.TRANSFORMEDTODW);
         if (id == -1) return null;
-        Entity to = getMoveStats().transformedTo;
+        Entity to = this.getMoveStats().transformedTo;
         if (to != null && id == to.getEntityId()) return to;
-        to = getEntity().getEntityWorld().getEntityByID(id);
+        to = this.getEntity().getEntityWorld().getEntityByID(id);
         this.setTransformedTo(to);
         return to;
     }
@@ -222,43 +229,57 @@ public abstract class PokemobMoves extends PokemobSexed
     public void healStatus()
     {
         // Ensure max health, etc are correct.
-        updateHealth();
+        this.updateHealth();
         // Clear off any persistant effects.
-        IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
-        if (affected != null)
-        {
-            affected.removeEffects(PersistantStatusEffect.ID);
-        }
-        dataSync().set(params.STATUSDW, (byte) 0);
+        final IOngoingAffected affected = CapabilityAffected.getAffected(this.getEntity());
+        if (affected != null) affected.removeEffects(PersistantStatusEffect.ID);
+        this.dataSync().set(this.params.STATUSDW, (byte) 0);
+    }
+
+    @Override
+    public void setActiveMove(EntityMoveUse move)
+    {
+        this.activeMove = move;
+        final int id = move == null ? -1 : move.getEntityId();
+        this.dataSync().set(this.params.ACTIVEMOVEID, id);
+    }
+
+    @Override
+    public void setAttackCooldown(int timer)
+    {
+        this.dataSync().set(this.params.ATTACKCOOLDOWN, timer);
+    }
+
+    @Override
+    public void setDisableTimer(int index, int timer)
+    {
+        this.dataSync().set(this.params.DISABLE[index], timer);
     }
 
     @Override
     public void setExplosionState(int i)
     {
-        if (i >= 0) moveInfo.Exploding = true;
-        moveInfo.boomState = i;
+        if (i >= 0) this.moveInfo.Exploding = true;
+        this.moveInfo.boomState = i;
     }
 
     @Override
     public void setMoveIndex(int moveIndex)
     {
-        if (!getEntity().isServerWorld())
+        if (!this.getEntity().isServerWorld())
         {
             // Do nothing, packet should be handled by gui handler, not us.
         }
         else
         {
-            if (moveIndex == getMoveIndex() || getCombatState(CombatStates.NOMOVESWAP)) return;
-            if (getMove(moveIndex) == null)
-            {
-                setMoveIndex(5);
-            }
-            moveInfo.ROLLOUTCOUNTER = 0;
-            moveInfo.FURYCUTTERCOUNTER = 0;
-            moveInfo.BLOCKCOUNTER = 0;
-            moveInfo.blocked = false;
-            moveInfo.blockTimer = 0;
-            dataSync().set(params.MOVEINDEXDW, (byte) moveIndex);
+            if (moveIndex == this.getMoveIndex() || this.getCombatState(CombatStates.NOMOVESWAP)) return;
+            if (this.getMove(moveIndex) == null) this.setMoveIndex(5);
+            this.moveInfo.ROLLOUTCOUNTER = 0;
+            this.moveInfo.FURYCUTTERCOUNTER = 0;
+            this.moveInfo.BLOCKCOUNTER = 0;
+            this.moveInfo.blocked = false;
+            this.moveInfo.blockTimer = 0;
+            this.dataSync().set(this.params.MOVEINDEXDW, (byte) moveIndex);
         }
     }
 
@@ -266,125 +287,65 @@ public abstract class PokemobMoves extends PokemobSexed
     public boolean setStatus(byte status, int turns)
     {
         non:
-        if (getStatus() != STATUS_NON)
+        if (this.getStatus() != IMoveConstants.STATUS_NON)
         {
             // Check if we actually have a status, if we do not, then we can
             // apply one.
-            IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
+            final IOngoingAffected affected = CapabilityAffected.getAffected(this.getEntity());
             if (affected != null) if (affected.getEffects(PersistantStatusEffect.ID) == null) break non;
             return false;
         }
-        else if (status == STATUS_NON)
+        else if (status == IMoveConstants.STATUS_NON)
         {
-            IOngoingAffected affected = CapabilityAffected.getAffected(getEntity());
+            final IOngoingAffected affected = CapabilityAffected.getAffected(this.getEntity());
             affected.removeEffects(PersistantStatusEffect.ID);
-            dataSync().set(params.STATUSDW, status);
+            this.dataSync().set(this.params.STATUSDW, status);
             return true;
         }
-        Status actual = Status.getStatus(status);
+        final Status actual = Status.getStatus(status);
         if (actual == null)
         {
-            List<Status> options = Lists.newArrayList();
-            for (Status temp : Status.values())
-            {
-                if ((temp.getMask() & status) != 0)
-                {
-                    options.add(temp);
-                }
-            }
+            final List<Status> options = Lists.newArrayList();
+            for (final Status temp : Status.values())
+                if ((temp.getMask() & status) != 0) options.add(temp);
             if (options.isEmpty()) return false;
             if (options.size() > 1) Collections.shuffle(options);
             status = options.get(0).getMask();
         }
-        if (status == STATUS_BRN && isType(PokeType.getType("fire"))) return false;
-        if (status == STATUS_PAR && isType(PokeType.getType("electric"))) return false;
-        if (status == STATUS_FRZ && isType(PokeType.getType("ice"))) return false;
-        if ((status == STATUS_PSN || status == STATUS_PSN2)
-                && (isType(PokeType.getType("poison")) || isType(PokeType.getType("steel"))))
-            return false;
-        dataSync().set(params.STATUSDW, status);
-        if ((status == STATUS_SLP || status == STATUS_FRZ) && turns == -1) turns = 5;
-        short timer = (short) (turns == -1 ? PokecubeMod.core.getConfig().attackCooldown * 5
-                : turns * PokecubeMod.core.getConfig().attackCooldown);
-        setStatusTimer(timer);
-        PersistantStatusEffect statusEffect = new PersistantStatusEffect(status, turns);
-        return CapabilityAffected.addEffect(getEntity(), statusEffect);
+        if (status == IMoveConstants.STATUS_BRN && this.isType(PokeType.getType("fire"))) return false;
+        if (status == IMoveConstants.STATUS_PAR && this.isType(PokeType.getType("electric"))) return false;
+        if (status == IMoveConstants.STATUS_FRZ && this.isType(PokeType.getType("ice"))) return false;
+        if ((status == IMoveConstants.STATUS_PSN || status == IMoveConstants.STATUS_PSN2) && (this.isType(PokeType
+                .getType("poison")) || this.isType(PokeType.getType("steel")))) return false;
+        this.dataSync().set(this.params.STATUSDW, status);
+        if ((status == IMoveConstants.STATUS_SLP || status == IMoveConstants.STATUS_FRZ) && turns == -1) turns = 5;
+        final short timer = (short) (turns == -1 ? PokecubeCore.getConfig().attackCooldown * 5
+                : turns * PokecubeCore.getConfig().attackCooldown);
+        this.setStatusTimer(timer);
+        final PersistantStatusEffect statusEffect = new PersistantStatusEffect(status, turns);
+        return CapabilityAffected.addEffect(this.getEntity(), statusEffect);
     }
 
     @Override
     public void setStatusTimer(short timer)
     {
-        dataSync().set(params.STATUSTIMERDW, (int) timer);
+        this.dataSync().set(this.params.STATUSTIMERDW, (int) timer);
     }
 
     @Override
     public void setTransformedTo(Entity to)
     {
-        int id = to == null ? -1 : to.getEntityId();
-        PokedexEntry newEntry = getPokedexEntry();
+        final int id = to == null ? -1 : to.getEntityId();
+        PokedexEntry newEntry = this.getPokedexEntry();
         if (id != -1)
         {
-            IPokemob pokemob = CapabilityPokemob.getPokemobFor(to);
-            if (pokemob != null)
-            {
-                newEntry = pokemob.getPokedexEntry();
-            }
+            final IPokemob pokemob = CapabilityPokemob.getPokemobFor(to);
+            if (pokemob != null) newEntry = pokemob.getPokedexEntry();
         }
         this.getMoveStats().transformedTo = to;
         this.setType1(newEntry.getType1());
         this.setType2(newEntry.getType2());
-        this.dataSync().set(params.TRANSFORMEDTODW, id);
-    }
-
-    @Override
-    public int getAttackCooldown()
-    {
-        return this.dataSync().get(params.ATTACKCOOLDOWN);
-    }
-
-    @Override
-    public void setAttackCooldown(int timer)
-    {
-        this.dataSync().set(params.ATTACKCOOLDOWN, timer);
-    }
-
-    @Override
-    public boolean getOnGround()
-    {
-        return getEntity().onGround;
-    }
-
-    @Override
-    public void setDisableTimer(int index, int timer)
-    {
-        this.dataSync().set(params.DISABLE[index], timer);
-    }
-
-    @Override
-    public int getDisableTimer(int index)
-    {
-        return this.dataSync().get(params.DISABLE[index]);
-    }
-
-    @Override
-    public void setActiveMove(EntityMoveUse move)
-    {
-        this.activeMove = move;
-        int id = move == null ? -1 : move.getEntityId();
-        this.dataSync().set(params.ACTIVEMOVEID, id);
-    }
-
-    @Override
-    public EntityMoveUse getActiveMove()
-    {
-        int id = this.dataSync().get(params.ACTIVEMOVEID);
-        if (id == -1) return null;
-        if (this.activeMove == null || this.activeMove.getEntityId() != id)
-        {
-            Entity move = this.getEntity().getEntityWorld().getEntityByID(id);
-            if (move instanceof EntityMoveUse) this.activeMove = (EntityMoveUse) move;
-        }
-        return this.activeMove;
+        this.dataSync().set(this.params.TRANSFORMEDTODW, id);
     }
 
 }

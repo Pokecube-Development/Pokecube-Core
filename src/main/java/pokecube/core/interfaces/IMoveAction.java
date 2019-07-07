@@ -10,8 +10,10 @@ public interface IMoveAction
     /** The name of the move associated with this action */
     String getMoveName();
 
-    /** Called when the action is created, if the action exists by postinit,
-     * this is called then, otherwise it is called when it is created. */
+    /**
+     * Called when the action is created, if the action exists by postinit,
+     * this is called then, otherwise it is called when it is created.
+     */
     default void init()
     {
 

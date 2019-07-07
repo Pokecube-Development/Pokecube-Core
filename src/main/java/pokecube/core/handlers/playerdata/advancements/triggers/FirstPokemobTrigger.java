@@ -12,20 +12,18 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.advancements.critereon.AbstractCriterionInstance;
+import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigger.Instance>
 {
-    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "get_first_pokemob");
-
-    public static class Instance extends AbstractCriterionInstance
+    public static class Instance extends CriterionInstance
     {
         public Instance()
         {
-            super(ID);
+            super(FirstPokemobTrigger.ID);
         }
 
         public boolean test()
@@ -45,14 +43,14 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
             this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean isEmpty()
-        {
-            return this.listeners.isEmpty();
-        }
-
         public void add(ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener)
         {
             this.listeners.add(listener);
+        }
+
+        public boolean isEmpty()
+        {
+            return this.listeners.isEmpty();
         }
 
         public void remove(ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener)
@@ -64,38 +62,25 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
         {
             List<ICriterionTrigger.Listener<FirstPokemobTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener : this.listeners)
-            {
+            for (final ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener : this.listeners)
                 if (listener.getCriterionInstance().test())
                 {
                     if (list == null)
-                    {
                         list = Lists.<ICriterionTrigger.Listener<FirstPokemobTrigger.Instance>> newArrayList();
-                    }
 
                     list.add(listener);
                 }
-            }
-            if (list != null)
-            {
-                for (ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener1 : list)
-                {
-                    listener1.grantCriterion(this.playerAdvancements);
-                }
-            }
+            if (list != null) for (final ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener1 : list)
+                listener1.grantCriterion(this.playerAdvancements);
         }
     }
+
+    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "get_first_pokemob");
 
     private final Map<PlayerAdvancements, FirstPokemobTrigger.Listeners> listeners = Maps.<PlayerAdvancements, FirstPokemobTrigger.Listeners> newHashMap();
 
     public FirstPokemobTrigger()
     {
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
     }
 
     @Override
@@ -113,21 +98,20 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
         bredanimalstrigger$listeners.add(listener);
     }
 
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the
+     * JSON.
+     */
     @Override
-    public void removeListener(PlayerAdvancements playerAdvancementsIn,
-            ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener)
+    public FirstPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        FirstPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        return new FirstPokemobTrigger.Instance();
+    }
 
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.remove(listener);
-
-            if (bredanimalstrigger$listeners.isEmpty())
-            {
-                this.listeners.remove(playerAdvancementsIn);
-            }
-        }
+    @Override
+    public ResourceLocation getId()
+    {
+        return FirstPokemobTrigger.ID;
     }
 
     @Override
@@ -136,20 +120,23 @@ public class FirstPokemobTrigger implements ICriterionTrigger<FirstPokemobTrigge
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    /** Deserialize a ICriterionInstance of this trigger from the data in the
-     * JSON. */
     @Override
-    public FirstPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn,
+            ICriterionTrigger.Listener<FirstPokemobTrigger.Instance> listener)
     {
-        return new FirstPokemobTrigger.Instance();
+        final FirstPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+
+        if (bredanimalstrigger$listeners != null)
+        {
+            bredanimalstrigger$listeners.remove(listener);
+
+            if (bredanimalstrigger$listeners.isEmpty()) this.listeners.remove(playerAdvancementsIn);
+        }
     }
 
     public void trigger(ServerPlayerEntity player)
     {
-        FirstPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.trigger(player);
-        }
+        final FirstPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
+        if (bredanimalstrigger$listeners != null) bredanimalstrigger$listeners.trigger(player);
     }
 }

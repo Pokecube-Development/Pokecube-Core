@@ -14,36 +14,36 @@ public class SizeGene extends GeneFloat
 
     public SizeGene()
     {
-        value = 1f;
-    }
-
-    @Override
-    public Gene interpolate(Gene other)
-    {
-        SizeGene newGene = new SizeGene();
-        SizeGene otherG = (SizeGene) other;
-        newGene.value = rand.nextBoolean() ? otherG.value : value;
-        return newGene;
-    }
-
-    @Override
-    public Gene mutate()
-    {
-        SizeGene newGene = new SizeGene();
-        newGene.value = (this.value + scaleFactor * (float) (new Random()).nextGaussian());
-        return newGene;
-    }
-
-    @Override
-    public float getMutationRate()
-    {
-        return GeneticsManager.mutationRates.get(getKey());
+        this.value = 1f;
     }
 
     @Override
     public ResourceLocation getKey()
     {
         return GeneticsManager.SIZEGENE;
+    }
+
+    @Override
+    public float getMutationRate()
+    {
+        return GeneticsManager.mutationRates.get(this.getKey());
+    }
+
+    @Override
+    public Gene interpolate(Gene other)
+    {
+        final SizeGene newGene = new SizeGene();
+        final SizeGene otherG = (SizeGene) other;
+        newGene.value = this.rand.nextBoolean() ? otherG.value : this.value;
+        return newGene;
+    }
+
+    @Override
+    public Gene mutate()
+    {
+        final SizeGene newGene = new SizeGene();
+        newGene.value = this.value + SizeGene.scaleFactor * (float) new Random().nextGaussian();
+        return newGene;
     }
 
 }

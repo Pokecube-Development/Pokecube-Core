@@ -9,7 +9,9 @@ import com.google.common.collect.Sets;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import pokecube.core.PokecubeCore;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import thut.core.common.handlers.PlayerDataHandler;
@@ -22,22 +24,16 @@ public class PlayerPokemobCache extends PlayerData
     {
         if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
         final ItemStack stack = PokecubeManager.pokemobToItem(mob);
+        final MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         // Schedule this to run at some point, as it takes a while.
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                UpdateCache(stack, false, false);
-            }
-        });
+        server.execute(() -> PlayerPokemobCache.UpdateCache(stack, false, false));
     }
 
     public static void UpdateCache(ItemStack stack, boolean pc, boolean deleted)
     {
-        String owner = PokecubeManager.getOwner(stack);
+        final String owner = PokecubeManager.getOwner(stack);
         if (owner.isEmpty()) return;
-        Integer uid = PokecubeManager.getUID(stack);
+        final Integer uid = PokecubeManager.getUID(stack);
         if (uid == null || uid == -1) return;
         PlayerDataHandler.getInstance().getPlayerData(owner).getData(PlayerPokemobCache.class).addPokemob(stack, pc,
                 deleted);
@@ -55,79 +51,30 @@ public class PlayerPokemobCache extends PlayerData
     public void addPokemob(IPokemob mob)
     {
         if (!mob.isPlayerOwned() || mob.getOwnerId() == null) return;
-        ItemStack stack = PokecubeManager.pokemobToItem(mob);
-        addPokemob(stack, false, false);
-    }
-
-    public void addPokemob(String owner, ItemStack stack, boolean pc, boolean deleted)
-    {
-        Integer uid = PokecubeManager.getUID(stack);
-        if (uid == null || uid == -1) return;
-        cache.put(uid, stack);
-        pc = pc ? inPC.add(uid) : inPC.remove(uid);
-        if (deleted) genesDeleted.add(uid);
-        PlayerDataHandler.getInstance().save(owner, getIdentifier());
+        final ItemStack stack = PokecubeManager.pokemobToItem(mob);
+        this.addPokemob(stack, false, false);
     }
 
     public void addPokemob(ItemStack stack, boolean pc, boolean deleted)
     {
-        String owner = PokecubeManager.getOwner(stack);
-        addPokemob(owner, stack, pc, deleted);
+        final String owner = PokecubeManager.getOwner(stack);
+        this.addPokemob(owner, stack, pc, deleted);
+    }
+
+    public void addPokemob(String owner, ItemStack stack, boolean pc, boolean deleted)
+    {
+        final Integer uid = PokecubeManager.getUID(stack);
+        if (uid == null || uid == -1) return;
+        this.cache.put(uid, stack);
+        pc = pc ? this.inPC.add(uid) : this.inPC.remove(uid);
+        if (deleted) this.genesDeleted.add(uid);
+        PlayerDataHandler.getInstance().save(owner, this.getIdentifier());
     }
 
     @Override
-    public void writeToNBT(CompoundNBT tag)
+    public String dataFileName()
     {
-        ListNBT list = new ListNBT();
-        for (Integer id : cache.keySet())
-        {
-            CompoundNBT var = new CompoundNBT();
-            var.putInt("uid", id);
-            var.putBoolean("_in_pc_", inPC.contains(id));
-            var.putBoolean("_dead_", genesDeleted.contains(id));
-            ItemStack stack = cache.get(id);
-            stack.writeToNBT(var);
-            list.appendTag(var);
-        }
-        tag.put("data", list);
-    }
-
-    @Override
-    public void readFromNBT(CompoundNBT tag)
-    {
-        cache.clear();
-        inPC.clear();
-        genesDeleted.clear();
-        if (tag.hasKey("data"))
-        {
-            ListNBT list = (ListNBT) tag.getTag("data");
-            for (int i = 0; i < list.size(); i++)
-            {
-                CompoundNBT var = list.getCompound(i);
-                Integer id = -1;
-                ItemStack stack = new ItemStack(var);
-                if (var.hasKey("uid"))
-                {
-                    id = var.getInt("uid");
-                }
-                else
-                {
-                    id = PokecubeManager.getUID(stack);
-                }
-                if (id != -1)
-                {
-                    cache.put(id, stack);
-                    if (var.getBoolean("_in_pc_"))
-                    {
-                        inPC.add(id);
-                    }
-                    if (var.getBoolean("_dead_"))
-                    {
-                        genesDeleted.add(id);
-                    }
-                }
-            }
-        }
+        return "pokecube_pokemob_cache";
     }
 
     @Override
@@ -137,14 +84,51 @@ public class PlayerPokemobCache extends PlayerData
     }
 
     @Override
+    public void readFromNBT(CompoundNBT tag)
+    {
+        this.cache.clear();
+        this.inPC.clear();
+        this.genesDeleted.clear();
+        if (tag.contains("data"))
+        {
+            final ListNBT list = (ListNBT) tag.get("data");
+            for (int i = 0; i < list.size(); i++)
+            {
+                final CompoundNBT var = list.getCompound(i);
+                Integer id = -1;
+                final ItemStack stack = ItemStack.read(var);
+                if (var.contains("uid")) id = var.getInt("uid");
+                else id = PokecubeManager.getUID(stack);
+                if (id != -1)
+                {
+                    this.cache.put(id, stack);
+                    if (var.getBoolean("_in_pc_")) this.inPC.add(id);
+                    if (var.getBoolean("_dead_")) this.genesDeleted.add(id);
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean shouldSync()
     {
         return false;
     }
 
     @Override
-    public String dataFileName()
+    public void writeToNBT(CompoundNBT tag)
     {
-        return "pokecube_pokemob_cache";
+        final ListNBT list = new ListNBT();
+        for (final Integer id : this.cache.keySet())
+        {
+            final CompoundNBT var = new CompoundNBT();
+            var.putInt("uid", id);
+            var.putBoolean("_in_pc_", this.inPC.contains(id));
+            var.putBoolean("_dead_", this.genesDeleted.contains(id));
+            final ItemStack stack = this.cache.get(id);
+            stack.write(var);
+            list.add(var);
+        }
+        tag.put("data", list);
     }
 }

@@ -9,9 +9,11 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 
-/** This event is called before the pokemob receives orders to execute an
+/**
+ * This event is called before the pokemob receives orders to execute an
  * attack. Cancelling this event will prevent the pokemob from actually
- * recieving said order. */
+ * recieving said order. Fired on the PokecubeCore.POKEMOB_BUS
+ */
 @Cancelable
 public class CommandAttackEvent extends EntityEvent
 {
@@ -23,24 +25,28 @@ public class CommandAttackEvent extends EntityEvent
         this.target = target;
     }
 
-    /** Target of this attack command.
-     * 
-     * @return */
-    public Entity getTarget()
+    public IPokemob getPokemob()
     {
-        return target;
+        return CapabilityPokemob.getPokemobFor(this.getEntity());
     }
 
-    /** Sets the target of the attack command.
-     * 
-     * @param target */
+    /**
+     * Target of this attack command.
+     *
+     * @return
+     */
+    public Entity getTarget()
+    {
+        return this.target;
+    }
+
+    /**
+     * Sets the target of the attack command.
+     *
+     * @param target
+     */
     public void setTarget(@Nullable Entity target)
     {
         this.target = target;
-    }
-
-    public IPokemob getPokemob()
-    {
-        return CapabilityPokemob.getPokemobFor(getEntity());
     }
 }

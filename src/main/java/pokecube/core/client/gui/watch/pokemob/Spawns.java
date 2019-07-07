@@ -1,51 +1,46 @@
 package pokecube.core.client.gui.watch.pokemob;
 
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.client.gui.watch.PokemobInfoPage;
+import pokecube.core.client.gui.watch.util.LineEntry;
 import pokecube.core.client.gui.watch.util.SpawnListEntry;
 import pokecube.core.database.SpawnBiomeMatcher;
-import pokecube.core.interfaces.IPokemob;
 import pokecube.core.network.packets.PacketPokedex;
 
-public class Spawns extends ListPage
+public class Spawns extends ListPage<LineEntry>
 {
 
     int last = 0;
 
-    public Spawns(PokemobInfoPage parent, IPokemob pokemob)
+    public Spawns(final PokemobInfoPage parent)
     {
-        super(parent, pokemob, "spawns");
+        super(parent, "spawns");
     }
 
     @Override
-    void initList()
-    {
-        List<IGuiListEntry> entries = Lists.newArrayList();
-        int offsetX = (watch.width - 160) / 2 + 45;
-        int offsetY = (watch.height - 160) / 2 + 27;
-        int height = 110;
-        int max = fontRenderer.FONT_HEIGHT;
-        for (SpawnBiomeMatcher matcher : PacketPokedex.selectedMob)
-        {
-            SpawnListEntry entry = new SpawnListEntry(this, fontRenderer, matcher, null, 100, height, offsetY);
-            entries.addAll(entry.getLines(null));
-        }
-        list = new ScrollGui(mc, 110, 10 * max, max, offsetX, offsetY, entries);
-    }
-
-    @Override
-    void drawInfo(int mouseX, int mouseY, float partialTicks)
+    void drawInfo(final int mouseX, final int mouseY, final float partialTicks)
     {
         // This is to give extra time for packet syncing.
-        if (last != PacketPokedex.selectedMob.size())
+        if (this.last != PacketPokedex.selectedMob.size())
         {
-            initList();
-            last = PacketPokedex.selectedMob.size();
+            this.initList();
+            this.last = PacketPokedex.selectedMob.size();
+        }
+    }
+
+    @Override
+    public void initList()
+    {
+        super.initList();
+        final int offsetX = (this.watch.width - 160) / 2 + 45;
+        final int offsetY = (this.watch.height - 160) / 2 + 27;
+        final int height = 110;
+        final int max = this.font.FONT_HEIGHT;
+        this.list = new ScrollGui<>(this, this.minecraft, 110, 10 * max, max, offsetX, offsetY);
+        for (final SpawnBiomeMatcher matcher : PacketPokedex.selectedMob)
+        {
+            final SpawnListEntry entry = new SpawnListEntry(this, this.font, matcher, null, 100, height, offsetY);
+            entry.getLines(this.list, null).forEach(c -> this.list.addEntry(c));
         }
     }
 

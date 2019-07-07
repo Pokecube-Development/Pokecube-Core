@@ -11,15 +11,13 @@ public class ItemVitamin extends Item
 {
     public static List<String> vitamins = Lists.newArrayList();
 
-    public final String        type;
+    public final String type;
 
-    public ItemVitamin(String type)
+    public ItemVitamin(Properties properties, String type)
     {
-        super();
+        super(properties);
         this.type = type;
         this.setRegistryName(PokecubeMod.ID, "vitamin_" + type);
-        this.setCreativeTab(PokecubeMod.creativeTabPokecube);
-        this.setUnlocalizedName(this.getRegistryName().getResourcePath());
     }
 
 }

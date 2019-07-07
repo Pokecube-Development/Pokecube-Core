@@ -12,26 +12,20 @@ public class OngoingMoveEffect extends BaseEffect
 {
     public static final ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "move_effects");
 
+    public Move_Ongoing move;
+
     public OngoingMoveEffect()
     {
-        super(ID);
+        super(OngoingMoveEffect.ID);
     }
-
-    public Move_Ongoing move;
 
     @Override
     public void affectTarget(IOngoingAffected target)
     {
-        if (move != null) move.doOngoingEffect(target, this);
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(target.getEntity());
-        boolean toRemove = pokemob != null ? false : Math.random() > 0.8;
-        if (toRemove) setDuration(0);
-    }
-
-    @Override
-    public boolean onSavePersistant()
-    {
-        return false;
+        if (this.move != null) this.move.doOngoingEffect(target, this);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(target.getEntity());
+        final boolean toRemove = pokemob != null ? false : Math.random() > 0.8;
+        if (toRemove) this.setDuration(0);
     }
 
     @Override
@@ -43,8 +37,14 @@ public class OngoingMoveEffect extends BaseEffect
     @Override
     public AddType canAdd(IOngoingAffected affected, IOngoingEffect toAdd)
     {
-        if (toAdd instanceof OngoingMoveEffect && ((OngoingMoveEffect) toAdd).move == move) return AddType.DENY;
+        if (toAdd instanceof OngoingMoveEffect && ((OngoingMoveEffect) toAdd).move == this.move) return AddType.DENY;
         return AddType.ACCEPT;
+    }
+
+    @Override
+    public boolean onSavePersistant()
+    {
+        return false;
     }
 
 }

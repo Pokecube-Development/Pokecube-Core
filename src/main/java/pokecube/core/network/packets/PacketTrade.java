@@ -1,157 +1,233 @@
 package pokecube.core.network.packets;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.UUID;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 import pokecube.core.PokecubeCore;
-import pokecube.core.blocks.tradingTable.ContainerTMCreator;
-import pokecube.core.blocks.tradingTable.ContainerTradingTable;
-import pokecube.core.blocks.tradingTable.TileEntityTMMachine;
-import pokecube.core.blocks.tradingTable.TileEntityTradingTable;
+import pokecube.core.PokecubeItems;
+import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
+import pokecube.core.interfaces.IPokemob;
+import pokecube.core.inventory.trade.TradeContainer;
 import pokecube.core.items.pokecubes.PokecubeManager;
-import thut.api.network.PacketHandler;
+import pokecube.core.items.pokecubes.RecipePokeseals;
+import thut.core.common.network.Packet;
 
-public class PacketTrade implements IMessage, IMessageHandler<PacketTrade, IMessage>
+public class PacketTrade extends Packet
 {
-    public static final byte SETTRADER = 0;
-    public static final byte TRADE     = 1;
-    public static final byte MAKETM    = 2;
-    public static final byte SETMOVES  = 3;
-
-    byte                     message;
-    public CompoundNBT    data      = new CompoundNBT();
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketTrade()
     {
     }
 
-    public PacketTrade(byte message)
+    public PacketTrade(final PacketBuffer buf)
     {
-        this.message = message;
+        this.data = buf.readCompoundTag();
     }
 
     @Override
-    public IMessage onMessage(final PacketTrade message, final MessageContext ctx)
+    public void handleClient()
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final Container cont = player.openContainer;
+        if (!(cont instanceof TradeContainer)) return;
+        final TradeContainer container = (TradeContainer) cont;
+        if (this.data.contains("r"))
         {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
-        message = buf.readByte();
-        PacketBuffer buffer = new PacketBuffer(buf);
-        try
-        {
-            data = buffer.readCompoundTag();
+            container.tile.confirmed[0] = false;
+            container.tile.confirmed[1] = false;
+            PokecubeCore.LOGGER.debug("Resetting trade status, users: " + container.tile.users);
+            return;
         }
-        catch (IOException e)
+        if (this.data.contains("0"))
         {
-            e.printStackTrace();
+            final byte slot = 0;
+            container.tile.confirmed[slot] = this.data.getBoolean("0");
+        }
+        if (this.data.contains("1"))
+        {
+            final byte slot = 1;
+            container.tile.confirmed[slot] = this.data.getBoolean("1");
         }
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void handleServer(final ServerPlayerEntity player)
     {
-        buf.writeByte(message);
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeCompoundTag(data);
-    }
+        final Container cont = player.openContainer;
+        if (!(cont instanceof TradeContainer)) return;
+        final TradeContainer container = (TradeContainer) cont;
+        System.out.println(this.data);
+        final InvWrapper inv = (InvWrapper) container.tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+                .orElse(null);
+        if (this.data.contains("r"))
+        {
+            container.tile.confirmed[0] = false;
+            container.tile.confirmed[1] = false;
+            PokecubeCore.packets.sendTo(this, player);
+            return;
+        }
 
-    void processMessage(MessageContext ctx, PacketTrade message)
-    {
-        PlayerEntity player;
-        if (ctx.side == Dist.CLIENT)
+        if (this.data.contains("s"))
         {
-            player = PokecubeCore.getPlayer(null);
-        }
-        else
-        {
-            player = ctx.getServerHandler().player;
-        }
-        if (message.message == MAKETM)
-        {
-            if (player.openContainer instanceof ContainerTMCreator)
+            final byte slot = this.data.getByte("s");
+            final ItemStack stack = inv.getStackInSlot(slot);
+
+            boolean canInteract = !stack.isEmpty();
+            final boolean filled = PokecubeManager.isFilled(stack);
+            if (filled) canInteract = PokecubeManager.getOwner(stack).equals(player.getCachedUniqueIdString());
+
+            if (!canInteract)
             {
-                TileEntityTMMachine tradeTable = ((ContainerTMCreator) player.openContainer).getTile();
-                tradeTable.addMoveToTM(message.data.getString("M"));
-            }
-        }
-        else if (message.message == SETMOVES)
-        {
-            if (player.openContainer instanceof ContainerTMCreator)
-            {
-                TileEntityTMMachine tradeTable = ((ContainerTMCreator) player.openContainer).getTile();
-                ArrayList<String> moves = new ArrayList<String>();
-                for (int i = 0; i < message.data.getInt("N"); i++)
-                    moves.add(message.data.getString("M" + i));
-                tradeTable.moves.put(player.getCachedUniqueIdString(), moves);
-            }
-        }
-        else if (message.message == SETTRADER)
-        {
-            int[] coords = message.data.getIntArray("L");
-            BlockPos pos = new BlockPos(coords[0], coords[1], coords[2]);
-            TileEntityTradingTable tradeTable = (TileEntityTradingTable) player.getEntityWorld().getTileEntity(pos);
-            boolean remove = message.data.getBoolean("R");
-            if (remove)
-            {
-                tradeTable.player1 = null;
-                tradeTable.player2 = null;
-            }
-            else
-            {
-                player = (PlayerEntity) player.getEntityWorld().getEntityByID(message.data.getInt("I"));
-                int id = message.data.getByte("B");
-                if (id == 1)
+                // Reset status of selections.
+                final PacketTrade trade = new PacketTrade();
+                trade.data.putBoolean("r", true);
+                container.tile.confirmed[0] = false;
+                container.tile.confirmed[1] = false;
+                for (final UUID id : container.tile.users)
                 {
-                    ItemStack cube = tradeTable.getStackInSlot(0);
-                    String owner = PokecubeManager.getOwner(cube);
-                    if (!PokecubeManager.isFilled(cube) || owner == null || owner.isEmpty()
-                            || owner.equals(player.getCachedUniqueIdString()))
-                        tradeTable.player1 = tradeTable.player1 == null ? player : null;
+                    final ServerPlayerEntity user = player.getServer().getPlayerList().getPlayerByUUID(id);
+                    if (user != null) PokecubeCore.packets.sendTo(trade, user);
                 }
-                if (id == 2)
-                {
-                    ItemStack cube = tradeTable.getStackInSlot(1);
-                    String owner = PokecubeManager.getOwner(cube);
-                    if (!PokecubeManager.isFilled(cube) || owner == null || owner.isEmpty()
-                            || owner.equals(player.getCachedUniqueIdString()))
-                        tradeTable.player2 = tradeTable.player2 == null ? player : null;
-                }
-                if (tradeTable.player1 != null && tradeTable.player2 != null) tradeTable.trade();
+                return;
             }
-            if (!player.getEntityWorld().isRemote) PacketHandler.sendTileUpdate(tradeTable);
 
-        }
-        else if (message.message == TRADE)
-        {
-            if (player.openContainer instanceof ContainerTradingTable)
+            container.tile.confirmed[slot] = !container.tile.confirmed[slot];
+
+            final boolean slot0 = container.tile.confirmed[0];
+            final boolean slot1 = container.tile.confirmed[1];
+
+            if (slot0 && slot1)
             {
-                TileEntityTradingTable tradeTable = ((ContainerTradingTable) player.openContainer).getTile();
-                tradeTable.trade();
-                PacketHandler.sendTileUpdate(tradeTable);
+                ItemStack pokecube0 = ItemStack.EMPTY;
+                ItemStack pokecube1 = ItemStack.EMPTY;
+                boolean toTrade = true;
+                boolean pokeseal = false;
+                boolean reskin = false;
+                ItemStack seal = ItemStack.EMPTY;
+                ItemStack skin = ItemStack.EMPTY;
+                ItemStack cube = ItemStack.EMPTY;
+                int cubeIndex = -1;
+
+                if (PokecubeManager.isFilled(inv.getStackInSlot(0))) pokecube0 = inv.getStackInSlot(0);
+                else toTrade = false;
+                if (PokecubeManager.isFilled(inv.getStackInSlot(1))) pokecube1 = inv.getStackInSlot(1);
+                else toTrade = false;
+
+                /**
+                 * We only work on filled cubes, so if none are filled, return
+                 * here.
+                 */
+                if (pokecube0.isEmpty() && pokecube1.isEmpty())
+                {
+                    // Reset status of selections.
+                    final PacketTrade trade = new PacketTrade();
+                    trade.data.putBoolean("r", true);
+                    container.tile.confirmed[0] = false;
+                    container.tile.confirmed[1] = false;
+                    for (final UUID id : container.tile.users)
+                    {
+                        final ServerPlayerEntity user = player.getServer().getPlayerList().getPlayerByUUID(id);
+                        if (user != null) PokecubeCore.packets.sendTo(trade, user);
+                    }
+                    return;
+                }
+
+                /**
+                 * Check if we are applying a pokeseal first.
+                 */
+                if (!toTrade)
+                {
+                    if (pokecube0.isEmpty())
+                    {
+                        pokeseal = (seal = inv.getStackInSlot(0)).getItem() == PokecubeItems.getEmptyCube(
+                                PokecubeBehavior.POKESEAL);
+                        cube = pokecube1;
+                    }
+                    if (pokecube1.isEmpty())
+                    {
+                        pokeseal = (seal = inv.getStackInSlot(1)).getItem() == PokecubeItems.getEmptyCube(
+                                PokecubeBehavior.POKESEAL);
+                        cube = pokecube0;
+                    }
+                }
+                // Otherwise check if we are trying to re-skin the cube.
+                if (!(toTrade || pokeseal))
+                {
+                    if (pokecube0.isEmpty())
+                    {
+                        reskin = PokecubeItems.getCubeId(skin = inv.getStackInSlot(0)) != null;
+                        cube = pokecube1;
+                        cubeIndex = 1;
+                    }
+                    if (pokecube1.isEmpty())
+                    {
+                        reskin = PokecubeItems.getCubeId(skin = inv.getStackInSlot(1)) != null;
+                        cube = pokecube0;
+                        cubeIndex = 0;
+                    }
+                }
+
+                System.out.println(pokecube0 + " " + pokecube1 + " " + toTrade + " " + pokeseal + " " + reskin + " "
+                        + seal + " " + skin);
+
+                if (toTrade)
+                {
+                    final IPokemob pokemob0 = PokecubeManager.itemToPokemob(pokecube0, player.getEntityWorld());
+                    final IPokemob pokemob1 = PokecubeManager.itemToPokemob(pokecube1, player.getEntityWorld());
+                    final UUID owner0 = pokemob0.getOwnerId();
+                    final UUID owner1 = pokemob1.getOwnerId();
+                    pokemob0.setOwner(owner1);
+                    pokemob1.setOwner(owner0);
+                    pokemob0.setTraded(true);
+                    pokemob1.setTraded(true);
+                    inv.setStackInSlot(0, PokecubeManager.pokemobToItem(pokemob0));
+                    inv.setStackInSlot(1, PokecubeManager.pokemobToItem(pokemob1));
+                }
+                else if (pokeseal) RecipePokeseals.process(seal, cube);
+                else if (reskin)
+                {
+                    final IPokemob pokemob = PokecubeManager.itemToPokemob(cube, player.getEntityWorld());
+                    pokemob.setPokecube(skin);
+                    inv.setStackInSlot(cubeIndex, PokecubeManager.pokemobToItem(pokemob));
+                    inv.setStackInSlot(cubeIndex == 0 ? 1 : 0, ItemStack.EMPTY);
+                }
+
+                // Reset trade gui.
+                final PacketTrade trade = new PacketTrade();
+                trade.data.putBoolean("r", true);
+                container.tile.confirmed[0] = false;
+                container.tile.confirmed[1] = false;
+                for (final UUID id : container.tile.users)
+                {
+                    final ServerPlayerEntity user = player.getServer().getPlayerList().getPlayerByUUID(id);
+                    if (user != null) PokecubeCore.packets.sendTo(trade, user);
+                    container.clearContainer(user, user.getEntityWorld(), inv.getInv());
+                }
+                return;
+
             }
+
+            System.out.println(slot + " " + slot0 + " " + slot1 + " " + stack);
+            final PacketTrade trade = new PacketTrade();
+            trade.data.putBoolean("0", slot0);
+            trade.data.putBoolean("1", slot1);
+            PokecubeCore.packets.sendTo(trade, player);
         }
+
+    }
+
+    @Override
+    public void write(final PacketBuffer buf)
+    {
+        final PacketBuffer buffer = new PacketBuffer(buf);
+        buffer.writeCompoundTag(this.data);
     }
 }

@@ -9,25 +9,15 @@ public class EVsGene extends GeneByteArr
 {
     public EVsGene()
     {
-        value = new byte[6];
+        this.value = new byte[6];
         for (int i = 0; i < 6; i++)
-            value[i] = Byte.MIN_VALUE;
+            this.value[i] = Byte.MIN_VALUE;
     }
 
     @Override
-    public Gene interpolate(Gene other)
+    public float getEpigeneticRate()
     {
-        // Don't actually interpolate the EVs.
-        EVsGene newGene = new EVsGene();
-        return newGene;
-    }
-
-    @Override
-    public Gene mutate()
-    {
-        EVsGene newGene = new EVsGene();
-        newGene.value = value.clone();
-        return newGene;
+        return 0.75f;
     }
 
     @Override
@@ -37,9 +27,19 @@ public class EVsGene extends GeneByteArr
     }
 
     @Override
-    public float getEpigeneticRate()
+    public Gene interpolate(Gene other)
     {
-        return 0.75f;
+        // Don't actually interpolate the EVs.
+        final EVsGene newGene = new EVsGene();
+        return newGene;
+    }
+
+    @Override
+    public Gene mutate()
+    {
+        final EVsGene newGene = new EVsGene();
+        newGene.value = this.value.clone();
+        return newGene;
     }
 
 }

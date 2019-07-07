@@ -23,25 +23,25 @@ public class ChangeFormHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob) throws Exception
     {
-        PokedexEntry entry = Database.getEntry(forme);
-        if (entry == null) throw new NullPointerException("No Entry found for " + forme);
-        if (entry.getPokedexNb() != pokemob.getPokedexNb())
-            throw new IllegalArgumentException("Cannot change form to a different pokedex number.");
+        final PokedexEntry entry = Database.getEntry(this.forme);
+        if (entry == null) throw new NullPointerException("No Entry found for " + this.forme);
+        if (entry.getPokedexNb() != pokemob.getPokedexNb()) throw new IllegalArgumentException(
+                "Cannot change form to a different pokedex number.");
         pokemob.megaEvolve(entry);
-    }
-
-    @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-        new PacketBuffer(buf).writeString(forme);
     }
 
     @Override
     public void readFromBuf(ByteBuf buf)
     {
         super.readFromBuf(buf);
-        forme = new PacketBuffer(buf).readString(20);
+        this.forme = new PacketBuffer(buf).readString(20);
+    }
+
+    @Override
+    public void writeToBuf(ByteBuf buf)
+    {
+        super.writeToBuf(buf);
+        new PacketBuffer(buf).writeString(this.forme);
     }
 
 }

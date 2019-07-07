@@ -1,39 +1,38 @@
 package pokecube.core.interfaces.capabilities.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import pokecube.core.PokecubeCore;
-import pokecube.core.ai.thread.logicRunnables.LogicMountedControl;
+import pokecube.core.ai.logic.LogicMountedControl;
 import pokecube.core.client.gui.GuiInfoMessages;
 import pokecube.core.database.abilities.AbilityManager;
 import pokecube.core.database.stats.StatsCollector;
 import pokecube.core.entity.pokemobs.AnimalChest;
-import pokecube.core.events.MoveMessageEvent;
 import pokecube.core.events.PCEvent;
-import pokecube.core.events.SpawnEvent;
-import pokecube.core.events.handlers.SpawnHandler;
 import pokecube.core.events.pokemob.RecallEvent;
+import pokecube.core.events.pokemob.SpawnEvent;
+import pokecube.core.events.pokemob.combat.MoveMessageEvent;
 import pokecube.core.handlers.TeamManager;
+import pokecube.core.handlers.events.SpawnHandler;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -41,7 +40,6 @@ import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.items.pokecubes.EntityPokecube;
 import pokecube.core.items.pokecubes.PokecubeManager;
-import pokecube.core.network.PokecubePacketHandler;
 import pokecube.core.network.pokemobs.PacketPokemobMessage;
 import pokecube.core.network.pokemobs.PokemobPacketHandler.MessageServer;
 import pokecube.core.utils.TagNames;
@@ -51,341 +49,333 @@ import thut.api.maths.Vector3;
 public abstract class PokemobOwned extends PokemobAI implements IInventoryChangedListener
 {
     @Override
-    public void displayMessageToOwner(ITextComponent message)
+    public void displayMessageToOwner(final ITextComponent message)
     {
-        if (!getEntity().isServerWorld())
+        if (!this.getEntity().isServerWorld())
         {
-            Entity owner = this.getPokemonOwner();
-            if (owner == PokecubeCore.proxy.getPlayer((String) null))
-            {
-                GuiInfoMessages.addMessage(message);
-            }
+            final Entity owner = this.getOwner();
+            if (owner == PokecubeCore.proxy.getPlayer()) GuiInfoMessages.addMessage(message);
         }
         else
         {
-            Entity owner = this.getPokemonOwner();
-            if (owner instanceof ServerPlayerEntity && !getEntity().isDead)
+            final Entity owner = this.getOwner();
+            if (owner instanceof ServerPlayerEntity && this.getEntity().isAlive())
             {
-                if (PokecubeMod.debug)
-                {
-                    PokecubeMod.log(Level.INFO, message.getFormattedText());
-                }
-                MoveMessageEvent event = new MoveMessageEvent(this, message);
-                MinecraftForge.EVENT_BUS.post(event);
-                PacketPokemobMessage.sendMessage((PlayerEntity) owner, getEntity().getEntityId(), event.message);
+                if (PokecubeMod.debug) PokecubeCore.LOGGER.info(message.getFormattedText());
+                final MoveMessageEvent event = new MoveMessageEvent(this, message);
+                PokecubeCore.MOVE_BUS.post(event);
+                PacketPokemobMessage.sendMessage((PlayerEntity) owner, this.getEntity().getEntityId(), event.message);
             }
         }
     }
 
     @Override
-    public String getPokemobTeam()
+    public LogicMountedControl getController()
     {
-        if (team.isEmpty())
-        {
-            team = TeamManager.getTeam(getEntity());
-        }
-        return team;
+        return this.controller;
     }
 
     @Override
-    public void setPokemobTeam(String team)
+    public int getDyeColour()
     {
-        this.team = team;
+        int info = this.dataSync().get(this.params.DYECOLOUR);
+        if (info == -1) info = this.isShiny() ? this.getPokedexEntry().defaultSpecials
+                : this.getPokedexEntry().defaultSpecial;
+        return info;
     }
 
     @Override
     public BlockPos getHome()
     {
-        if (guardCap.getActiveTask() != null) return guardCap.getActiveTask().getPos();
-        return guardCap.getPrimaryTask().getPos();
+        if (this.guardCap.getActiveTask() != null) return this.guardCap.getActiveTask().getPos();
+        return this.guardCap.getPrimaryTask().getPos();
     }
 
     @Override
     public float getHomeDistance()
     {
-        if (guardCap.getActiveTask() != null) return guardCap.getActiveTask().getRoamDistance();
-        return guardCap.getPrimaryTask().getRoamDistance();
+        if (this.guardCap.getActiveTask() != null) return this.guardCap.getActiveTask().getRoamDistance();
+        return this.guardCap.getPrimaryTask().getRoamDistance();
+    }
+
+    @Override
+    public AnimalChest getInventory()
+    {
+        if (this.pokeChest == null) this.initInventory();
+        return this.pokeChest;
     }
 
     @Override
     public UUID getOriginalOwnerUUID()
     {
-        return OTID;
+        return this.OTID;
     }
 
     @Override
-    public AnimalChest getPokemobInventory()
+    public LivingEntity getOwner()
     {
-        if (pokeChest == null) initInventory();
-        return pokeChest;
-    }
-
-    @Override
-    public LivingEntity getPokemonOwner()
-    {
-        UUID ownerID = this.getOwnerId();
+        final UUID ownerID = this.getOwnerId();
         if (ownerID == null) return null;
+        if (this.getOwnerHolder().getOwner() != null) return this.getOwnerHolder().getOwner();
+        LivingEntity mob = null;
         try
         {
-            PlayerEntity o = getEntity().getEntityWorld().getPlayerEntityByUUID(ownerID);
-            players = o != null;
-            if (o != null) return o;
+            final PlayerEntity o = this.getEntity().getEntityWorld().getPlayerByUuid(ownerID);
+            mob = o;
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
 
         }
-        List<Object> entities = null;
-        entities = new ArrayList<Object>(getEntity().getEntityWorld().loadedEntityList);
-        for (Object o : entities)
+        if (this.getEntity().isServerWorld() && mob == null)
         {
-            if (o instanceof LivingEntity)
-            {
-                LivingEntity e = (LivingEntity) o;
-                players = o instanceof PlayerEntity;
-                if (e.getUniqueID().equals(ownerID)) { return e; }
-            }
+            final ServerWorld world = (ServerWorld) this.getEntity().getEntityWorld();
+            Stream<Entity> mobs = world.getEntities();
+            mobs = mobs.filter(e -> e instanceof LivingEntity && e.getUniqueID().equals(ownerID));
+            mob = (LivingEntity) mobs.findFirst().orElse(null);
         }
-        return null;
+        if (mob != null) this.getOwnerHolder().setOwner(mob);
+        return this.getOwnerHolder().getOwner();
     }
 
     @Override
-    public UUID getPokemonOwnerID()
+    public UUID getOwnerId()
     {
-        return ownerID;
+        UUID ownerId = this.getOwnerHolder().getOwnerId();
+        if (this.getEntity() instanceof TameableEntity)
+        {
+            ownerId = ((TameableEntity) this.getEntity()).getOwnerId();
+            this.getOwnerHolder().setOwner(ownerId);
+        }
+        return ownerId;
     }
 
     @Override
-    public int getSpecialInfo()
+    public String getPokemobTeam()
     {
-        int info = dataSync().get(params.SPECIALINFO);
-        if (info == -1)
-        {
-            info = isShiny() ? getPokedexEntry().defaultSpecials : getPokedexEntry().defaultSpecial;
-        }
-        return info;
+        if (this.team.isEmpty()) this.team = TeamManager.getTeam(this.getEntity());
+        return this.team;
     }
 
     @Override
     public boolean hasHomeArea()
     {
-        return getHome() != null && getHomeDistance() > 0;
+        return this.getHome() != null && this.getHomeDistance() > 0;
     }
 
     protected void initInventory()
     {
         AnimalChest animalchest = this.pokeChest;
-        this.pokeChest = new AnimalChest("PokeChest", this.invSize());
+        this.pokeChest = new AnimalChest();
         if (animalchest != null)
         {
-            animalchest.removeInventoryChangeListener(this);
-            int i = Math.min(animalchest.getSizeInventory(), this.pokeChest.getSizeInventory());
+            animalchest.removeListener(this);
+            final int i = Math.min(animalchest.getSizeInventory(), this.pokeChest.getSizeInventory());
 
             for (int j = 0; j < i; ++j)
             {
-                ItemStack itemstack = animalchest.getStackInSlot(j);
+                final ItemStack itemstack = animalchest.getStackInSlot(j);
 
-                if (itemstack != ItemStack.EMPTY)
-                {
-                    this.pokeChest.setInventorySlotContents(j, itemstack.copy());
-                }
+                if (itemstack != ItemStack.EMPTY) this.pokeChest.setInventorySlotContents(j, itemstack.copy());
             }
             animalchest = null;
         }
-        this.pokeChest.addInventoryChangeListener(this);
-    }
-
-    private int invSize()
-    {
-        return 7;
+        this.pokeChest.addListener(this);
     }
 
     @Override
-    public void onInventoryChanged(IInventory inventory)
+    public boolean isPlayerOwned()
     {
+        return this.getOwnerHolder().isPlayerOwned();
     }
 
     @Override
-    public void returnToPokecube()
+    public boolean moveToShoulder(final PlayerEntity player)
     {
-        if (returning) return;
-        returning = true;
-        if (!getEntity().isServerWorld())
+        final float scale = this.getSize();
+        final float width = this.getPokedexEntry().width * scale;
+        final float height = this.getPokedexEntry().height * scale;
+        final float length = this.getPokedexEntry().length * scale;
+        boolean rightSize = width < 1 && height < 1 && length < 1;
+        rightSize |= this.getPokedexEntry().canSitShoulder;
+        if (!rightSize) return false;
+        final CompoundNBT CompoundNBT = new CompoundNBT();
+        CompoundNBT.putString("id", this.getEntity().getType().getRegistryName().toString());
+        this.getEntity().writeAdditional(CompoundNBT);
+
+        if (player.addShoulderEntity(CompoundNBT))
         {
-            try
-            {
-                MessageServer packet = new MessageServer(MessageServer.RETURN, getEntity().getEntityId());
-                PokecubePacketHandler.sendToServer(packet);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
+            this.getEntity().remove();
+            return true;
+        }
+        else return false;
+    }
+
+    @Override
+    public void onInventoryChanged(final IInventory inventory)
+    {
+    }
+
+    @Override
+    public void onRecall()
+    {
+        if (this.returning) return;
+        this.returning = true;
+        if (!this.getEntity().isServerWorld()) try
+        {
+            final MessageServer packet = new MessageServer(MessageServer.RETURN, this.getEntity().getEntityId());
+            PokecubeCore.packets.sendToServer(packet);
+        }
+        catch (final Exception ex)
+        {
+            ex.printStackTrace();
         }
         else
         {
-            if (this.getTransformedTo() != null)
-            {
-                this.setTransformedTo(null);
-            }
-            RecallEvent pre = new RecallEvent.Pre(this);
-            MinecraftForge.EVENT_BUS.post(pre);
+            if (this.getTransformedTo() != null) this.setTransformedTo(null);
+            final RecallEvent pre = new RecallEvent.Pre(this);
+            PokecubeCore.POKEMOB_BUS.post(pre);
             if (pre.isCanceled()) return;
-            RecallEvent evtrec = new RecallEvent(this);
-            MinecraftForge.EVENT_BUS.post(evtrec);
-            if (this.getHealth() > 0 && evtrec.isCanceled()) { return; }
+            final RecallEvent evtrec = new RecallEvent(this);
+            PokecubeCore.POKEMOB_BUS.post(evtrec);
+            if (this.getHealth() > 0 && evtrec.isCanceled()) return;
             this.setEvolutionTicks(0);
             this.setGeneralState(GeneralStates.EXITINGCUBE, false);
             this.setGeneralState(GeneralStates.EVOLVING, false);
-            if (getCombatState(CombatStates.MEGAFORME) || getPokedexEntry().isMega)
+            if (this.getCombatState(CombatStates.MEGAFORME) || this.getPokedexEntry().isMega)
             {
                 this.setCombatState(CombatStates.MEGAFORME, false);
-                float hp = this.getHealth();
-                IPokemob base = megaEvolve(getPokedexEntry().getBaseForme());
+                final float hp = this.getHealth();
+                final IPokemob base = this.megaEvolve(this.getPokedexEntry().getBaseForme());
                 base.setHealth(hp);
-                if (base == this) returning = false;
-                if (getEntity().getEntityData().hasKey(TagNames.ABILITY))
-                    base.setAbility(AbilityManager.getAbility(getEntity().getEntityData().getString(TagNames.ABILITY)));
-                base.returnToPokecube();
+                if (base == this) this.returning = false;
+                if (this.getEntity().getEntityData().contains(TagNames.ABILITY)) base.setAbility(AbilityManager
+                        .getAbility(this.getEntity().getEntityData().getString(TagNames.ABILITY)));
+                base.onRecall();
                 return;
             }
 
-            if (PokecubeMod.debug) PokecubeMod.log("Recalling " + this.getEntity());
+            if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Recalling " + this.getEntity());
 
             /** If this has fainted, status should be reset. */
             if (this.getHealth() <= 0)
             {
-                healStatus();
-                healChanges();
+                this.healStatus();
+                this.healChanges();
             }
 
-            Entity owner = getPokemonOwner();
-            /** If we have a target, and we were recalled with health, assign
-             * the target to our owner instead. */
-            if (this.getCombatState(CombatStates.ANGRY) && this.getEntity().getAttackTarget() != null
-                    && this.getHealth() > 0)
+            final Entity owner = this.getOwner();
+            /**
+             * If we have a target, and we were recalled with health, assign
+             * the target to our owner instead.
+             */
+            if (this.getCombatState(CombatStates.ANGRY) && this.getEntity().getAttackTarget() != null && this
+                    .getHealth() > 0) if (owner instanceof LivingEntity)
             {
-                if (owner instanceof LivingEntity)
+                final IPokemob targetMob = CapabilityPokemob.getPokemobFor(this.getEntity().getAttackTarget());
+                if (targetMob != null)
                 {
-                    IPokemob targetMob = CapabilityPokemob.getPokemobFor(this.getEntity().getAttackTarget());
-                    if (targetMob != null)
-                    {
-                        this.getEntity().isDead = true;
-                        targetMob.getEntity().setAttackTarget(getPokemonOwner());
-                        targetMob.setCombatState(CombatStates.ANGRY, true);
-                        this.getEntity().isDead = false;
-                        if (PokecubeMod.debug) PokecubeMod.log("Swapping agro to cowardly owner!");
-                    }
-                    else
-                    {
-                        this.getEntity().getAttackTarget().setRevengeTarget(getPokemonOwner());
-                    }
+                    targetMob.getEntity().setAttackTarget(this.getOwner());
+                    targetMob.setCombatState(CombatStates.ANGRY, true);
+                    if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Swapping agro to cowardly owner!");
                 }
+                else this.getEntity().getAttackTarget().setRevengeTarget(this.getOwner());
             }
 
             this.setCombatState(CombatStates.NOMOVESWAP, false);
             this.setCombatState(CombatStates.ANGRY, false);
-            getEntity().setAttackTarget(null);
-            getEntity().captureDrops = true;
-            PlayerEntity tosser = PokecubeMod.getFakePlayer(getEntity().getEntityWorld());
+            this.getEntity().setAttackTarget(null);
+            this.getEntity().captureDrops(Lists.newArrayList());
+            final PlayerEntity tosser = PokecubeMod.getFakePlayer(this.getEntity().getEntityWorld());
             if (owner instanceof PlayerEntity)
             {
-                ItemStack itemstack = PokecubeManager.pokemobToItem(this);
-                PlayerEntity player = (PlayerEntity) owner;
+                final ItemStack itemstack = PokecubeManager.pokemobToItem(this);
+                final PlayerEntity player = (PlayerEntity) owner;
                 boolean noRoom = false;
-                boolean ownerDead = player.isDead || player.getHealth() <= 0;
-                if (ownerDead || player.inventory.getFirstEmptyStack() == -1)
-                {
-                    noRoom = true;
-                }
+                final boolean ownerDead = !player.isAlive() || player.getHealth() <= 0;
+                if (ownerDead || player.inventory.getFirstEmptyStack() == -1) noRoom = true;
                 if (noRoom)
                 {
-                    PCEvent event = new PCEvent(itemstack.copy(), tosser);
+                    final PCEvent event = new PCEvent(itemstack.copy(), tosser);
                     MinecraftForge.EVENT_BUS.post(event);
-                    if (!event.isCanceled())
-                    {
-                        onToss(tosser, itemstack.copy());
-                    }
+                    if (!event.isCanceled()) this.onToss(tosser, itemstack.copy());
                 }
                 else
                 {
-                    boolean added = player.inventory.addItemStackToInventory(itemstack);
+                    final boolean added = player.inventory.addItemStackToInventory(itemstack);
                     if (!added)
                     {
-                        PCEvent event = new PCEvent(itemstack.copy(), tosser);
+                        final PCEvent event = new PCEvent(itemstack.copy(), tosser);
                         MinecraftForge.EVENT_BUS.post(event);
-                        if (!event.isCanceled())
-                        {
-                            onToss(tosser, itemstack.copy());
-                        }
+                        if (!event.isCanceled()) this.onToss(tosser, itemstack.copy());
                     }
                 }
-                if (!owner.isSneaking() && !getEntity().isDead && !ownerDead)
+                if (!owner.isSneaking() && this.getEntity().isAlive() && !ownerDead)
                 {
-                    boolean has = StatsCollector.getCaptured(getPokedexEntry(), player) > 0;
-                    has = has || StatsCollector.getHatched(getPokedexEntry(), player) > 0;
-                    if (!has)
-                    {
-                        StatsCollector.addCapture(this);
-                    }
+                    boolean has = StatsCollector.getCaptured(this.getPokedexEntry(), player) > 0;
+                    has = has || StatsCollector.getHatched(this.getPokedexEntry(), player) > 0;
+                    if (!has) StatsCollector.addCapture(this);
                 }
-                ITextComponent mess = new TranslationTextComponent("pokemob.action.return", getPokemonDisplayName());
-                displayMessageToOwner(mess);
+                final ITextComponent mess = new TranslationTextComponent("pokemob.action.return", this
+                        .getDisplayName());
+                this.displayMessageToOwner(mess);
             }
-            else if (getPokemonOwnerID() != null)
+            else if (this.getOwnerId() != null)
             {
-                ItemStack itemstack = PokecubeManager.pokemobToItem(this);
+                final ItemStack itemstack = PokecubeManager.pokemobToItem(this);
                 if (owner == null)
                 {
-                    PCEvent event = new PCEvent(itemstack.copy(), tosser);
+                    final PCEvent event = new PCEvent(itemstack.copy(), tosser);
                     MinecraftForge.EVENT_BUS.post(event);
-                    if (!event.isCanceled())
-                    {
-                        onToss(tosser, itemstack.copy());
-                    }
+                    if (!event.isCanceled()) this.onToss(tosser, itemstack.copy());
                 }
                 else
                 {
-                    PCEvent event = new PCEvent(itemstack.copy(), (LivingEntity) owner);
+                    final PCEvent event = new PCEvent(itemstack.copy(), (LivingEntity) owner);
                     MinecraftForge.EVENT_BUS.post(event);
-                    if (!event.isCanceled())
-                    {
-                        onToss((LivingEntity) owner, itemstack.copy());
-                    }
+                    if (!event.isCanceled()) this.onToss((LivingEntity) owner, itemstack.copy());
                 }
             }
-            getEntity().capturedDrops.clear();
-            getEntity().captureDrops = false;
+            this.getEntity().captureDrops(null);
 
             // Set Dead for deletion
-            this.getEntity().setDead();
+            this.getEntity().remove();
         }
     }
 
-    private void onToss(LivingEntity owner, ItemStack itemstack)
+    private void onToss(final LivingEntity owner, final ItemStack itemstack)
     {
-        EntityPokecube entity = new EntityPokecube(getEntity().getEntityWorld(), owner, itemstack);
-        here.set(getEntity());
-        here.moveEntity(entity);
-        here.clear().setVelocities(entity);
+        final EntityPokecube entity = new EntityPokecube(EntityPokecube.TYPE, owner.getEntityWorld());
+        entity.shootingEntity = owner;
+        entity.shooter = owner.getUniqueID();
+        entity.setItem(itemstack);
+        this.here.set(this.getEntity());
+        this.here.moveEntity(entity);
+        this.here.clear().setVelocities(entity);
         entity.targetEntity = null;
         entity.targetLocation.clear();
-        getEntity().getEntityWorld().spawnEntity(entity);
+        this.getEntity().getEntityWorld().addEntity(entity);
     }
 
     @Override
-    public void setHeldItem(ItemStack itemStack)
+    public void setDyeColour(final int info)
+    {
+        this.dataSync().set(this.params.DYECOLOUR, Integer.valueOf(info));
+    }
+
+    @Override
+    public void setHeldItem(final ItemStack itemStack)
     {
         try
         {
-            ItemStack oldStack = getHeldItem();
-            this.getPokemobInventory().setInventorySlotContents(1, itemStack);
-            getPokedexEntry().onHeldItemChange(oldStack, itemStack, this);
+            final ItemStack oldStack = this.getHeldItem();
+            this.getInventory().setInventorySlotContents(1, itemStack);
+            this.getPokedexEntry().onHeldItemChange(oldStack, itemStack, this);
             super.setHeldItem(itemStack);
-            dataSync().set(params.HELDITEMDW, itemStack);
+            this.dataSync().set(this.params.HELDITEMDW, itemStack);
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             // Should not happen anymore
             e.printStackTrace();
@@ -393,29 +383,27 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     }
 
     @Override
-    public void setHome(int x, int y, int z, int distance)
+    public void setHome(final int x, final int y, final int z, final int distance)
     {
-        guardCap.getPrimaryTask().setPos(new BlockPos(x, y, z));
-        guardCap.getPrimaryTask().setRoamDistance(distance);
-        if (getEntity() instanceof AnimalEntity)
-            ((AnimalEntity) getEntity()).setHomePosAndDistance(guardCap.getPrimaryTask().getPos(), distance);
+        this.guardCap.getPrimaryTask().setPos(new BlockPos(x, y, z));
+        this.guardCap.getPrimaryTask().setRoamDistance(distance);
     }
 
     @Override
-    public void setOriginalOwnerUUID(UUID original)
+    public void setOriginalOwnerUUID(final UUID original)
     {
-        OTID = original;
+        this.OTID = original;
     }
 
     @Override
-    public void setPokemonOwner(LivingEntity e)
+    public void setOwner(final LivingEntity e)
     {
         if (e == null)
         {
             // Clear team
             this.setPokemobTeam("");
             // Clear uuid
-            setPokemonOwner((UUID) null);
+            this.getOwnerHolder().setOwner((UUID) null);
             /*
              * unset tame.
              */
@@ -434,42 +422,36 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
         /*
          * Set owner, and set original owner if none already exists.
          */
-        setPokemonOwner(e.getUniqueID());
-        if (getOriginalOwnerUUID() == null)
-        {
-            setOriginalOwnerUUID(e.getUniqueID());
-        }
+        this.getOwnerHolder().setOwner(e);
+        if (this.getOriginalOwnerUUID() == null) this.setOriginalOwnerUUID(e.getUniqueID());
         /*
          * Trigger vanilla event for taming a mob.
          */
-        if (e instanceof ServerPlayerEntity && getEntity() instanceof AnimalEntity)
-            CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayerEntity) e, (AnimalEntity) getEntity());
+        if (e instanceof ServerPlayerEntity && this.getEntity() instanceof AnimalEntity) CriteriaTriggers.TAME_ANIMAL
+                .trigger((ServerPlayerEntity) e, (AnimalEntity) this.getEntity());
     }
 
     @Override
-    public void setPokemonOwner(UUID owner)
+    public void setOwner(final UUID owner)
     {
-        ownerID = owner;
+        this.getOwnerHolder().setOwner(owner);
         // Clear team, it will refresh it whenever it is actually checked.
         this.setPokemobTeam("");
 
-        if (getEntity() instanceof EntityTameable)
-        {
-            ((EntityTameable) getEntity()).setOwnerId(owner);
-        }
+        if (this.getEntity() instanceof TameableEntity) ((TameableEntity) this.getEntity()).setOwnerId(owner);
     }
 
     @Override
-    public void setSpecialInfo(int info)
+    public void setPokemobTeam(final String team)
     {
-        this.dataSync().set(params.SPECIALINFO, Integer.valueOf(info));
+        this.team = team;
     }
 
     @Override
-    public IPokemob specificSpawnInit()
+    public IPokemob spawnInit()
     {
         IPokemob pokemob = this;
-        int maxXP = getEntity().getEntityData().getInt("spawnExp");
+        int maxXP = this.getEntity().getEntityData().getInt("spawnExp");
 
         /*
          * Check to see if the mob has spawnExp defined in its data. If not, it
@@ -478,28 +460,28 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
          */
         if (maxXP == 0)
         {
-            if (!getEntity().getEntityData().getBoolean("initSpawn"))
+            if (!this.getEntity().getEntityData().getBoolean("initSpawn"))
             {
-                pokemob.setHeldItem(pokemob.wildHeldItem(getEntity()));
+                pokemob.setHeldItem(pokemob.wildHeldItem(this.getEntity()));
                 if (pokemob instanceof PokemobOwned) ((PokemobOwned) pokemob).updateHealth();
                 pokemob.setHealth(pokemob.getMaxHealth());
                 return pokemob;
             }
-            getEntity().getEntityData().remove("initSpawn");
-            Vector3 spawnPoint = Vector3.getNewVector().set(getEntity());
-            maxXP = SpawnHandler.getSpawnXp(getEntity().getEntityWorld(), spawnPoint, pokemob.getPokedexEntry());
-            SpawnEvent.Level event = new SpawnEvent.Level(pokemob.getPokedexEntry(), spawnPoint,
-                    getEntity().getEntityWorld(), Tools.xpToLevel(pokemob.getPokedexEntry().getEvolutionMode(), -1),
+            this.getEntity().getEntityData().remove("initSpawn");
+            final Vector3 spawnPoint = Vector3.getNewVector().set(this.getEntity());
+            maxXP = SpawnHandler.getSpawnXp(this.getEntity().getEntityWorld(), spawnPoint, pokemob.getPokedexEntry());
+            final SpawnEvent.Level event = new SpawnEvent.Level(pokemob.getPokedexEntry(), spawnPoint, this.getEntity()
+                    .getEntityWorld(), Tools.xpToLevel(pokemob.getPokedexEntry().getEvolutionMode(), -1),
                     SpawnHandler.DEFAULT_VARIANCE);
-            MinecraftForge.EVENT_BUS.post(event);
-            int level = event.getLevel();
+            PokecubeCore.POKEMOB_BUS.post(event);
+            final int level = event.getLevel();
             maxXP = Tools.levelToXp(pokemob.getPokedexEntry().getEvolutionMode(), level);
         }
-        getEntity().getEntityData().remove("spawnExp");
+        this.getEntity().getEntityData().remove("spawnExp");
 
         // Set exp and held items.
         pokemob = pokemob.setForSpawn(maxXP);
-        pokemob.setHeldItem(pokemob.wildHeldItem(getEntity()));
+        pokemob.setHeldItem(pokemob.wildHeldItem(this.getEntity()));
 
         // Make sure heath is valid numbers.
         if (pokemob instanceof PokemobOwned) ((PokemobOwned) pokemob).updateHealth();
@@ -509,48 +491,5 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
         this.resetLoveStatus();
 
         return pokemob;
-    }
-
-    @Override
-    public boolean isPlayerOwned()
-    {
-        return this.getGeneralState(GeneralStates.TAMED) && players;
-    }
-
-    @Override
-    public LogicMountedControl getController()
-    {
-        return controller;
-    }
-
-    @Override
-    public boolean moveToShoulder(PlayerEntity player)
-    {
-        float scale = getSize();
-        float width = getPokedexEntry().width * scale;
-        float height = getPokedexEntry().height * scale;
-        float length = getPokedexEntry().length * scale;
-        boolean rightSize = width < 1 && height < 1 && length < 1;
-        rightSize |= getPokedexEntry().canSitShoulder;
-        if (!rightSize) return false;
-        CompoundNBT CompoundNBT = new CompoundNBT();
-        CompoundNBT.putString("id", this.getEntityString());
-        this.getEntity().writeToNBT(CompoundNBT);
-
-        if (player.addShoulderEntity(CompoundNBT))
-        {
-            this.getEntity().getEntityWorld().removeEntity(this.getEntity());
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    protected final String getEntityString()
-    {
-        ResourceLocation resourcelocation = EntityList.getKey(this.getEntity());
-        return resourcelocation == null ? null : resourcelocation.toString();
     }
 }

@@ -1,20 +1,15 @@
 package pokecube.core.network.pokemobs;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import pokecube.core.PokecubeCore;
-import pokecube.core.ai.thread.logicRunnables.LogicMountedControl;
+import pokecube.core.ai.logic.LogicMountedControl;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import thut.core.common.network.Packet;
 
-public class PacketMountedControl implements IMessage, IMessageHandler<PacketMountedControl, IMessage>
+public class PacketMountedControl extends Packet
 {
     private static final byte FORWARD  = 1;
     private static final byte BACK     = 2;
@@ -24,84 +19,64 @@ public class PacketMountedControl implements IMessage, IMessageHandler<PacketMou
     private static final byte DOWN     = 32;
     private static final byte SYNCLOOK = 64;
 
-    int                       entityId;
-    byte                      message;
-    float                     throttle;
-
     public static void sendControlPacket(Entity pokemob, LogicMountedControl controller)
     {
-        PacketMountedControl packet = new PacketMountedControl();
+        final PacketMountedControl packet = new PacketMountedControl();
         packet.entityId = pokemob.getEntityId();
-        if (controller.backInputDown) packet.message += BACK;
-        if (controller.forwardInputDown) packet.message += FORWARD;
-        if (controller.leftInputDown) packet.message += LEFT;
-        if (controller.rightInputDown) packet.message += RIGHT;
-        if (controller.upInputDown) packet.message += UP;
-        if (controller.downInputDown) packet.message += DOWN;
-        if (controller.followOwnerLook) packet.message += SYNCLOOK;
+        if (controller.backInputDown) packet.message += PacketMountedControl.BACK;
+        if (controller.forwardInputDown) packet.message += PacketMountedControl.FORWARD;
+        if (controller.leftInputDown) packet.message += PacketMountedControl.LEFT;
+        if (controller.rightInputDown) packet.message += PacketMountedControl.RIGHT;
+        if (controller.upInputDown) packet.message += PacketMountedControl.UP;
+        if (controller.downInputDown) packet.message += PacketMountedControl.DOWN;
+        if (controller.followOwnerLook) packet.message += PacketMountedControl.SYNCLOOK;
         packet.throttle = (float) controller.throttle;
-        PokecubeMod.packetPipeline.sendToServer(packet);
+        PokecubeCore.packets.sendToServer(packet);
     }
+
+    int  entityId;
+    byte message;
+
+    float throttle;
 
     public PacketMountedControl()
     {
+        super(null);
+    }
+
+    public PacketMountedControl(PacketBuffer buf)
+    {
+        super(buf);
+        this.entityId = buf.readInt();
+        this.message = buf.readByte();
+        this.throttle = buf.readFloat();
     }
 
     @Override
-    public IMessage onMessage(final PacketMountedControl message, final MessageContext ctx)
+    public void handleServer(ServerPlayerEntity player)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
-        entityId = buf.readInt();
-        message = buf.readByte();
-        throttle = buf.readFloat();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        buf.writeInt(entityId);
-        buf.writeByte(message);
-        buf.writeFloat(throttle);
-    }
-
-    void processMessage(MessageContext ctx, PacketMountedControl message)
-    {
-        PlayerEntity player;
-        if (ctx.side == Dist.CLIENT)
-        {
-            player = PokecubeCore.getPlayer(null);
-        }
-        else
-        {
-            player = ctx.getServerHandler().player;
-        }
-        Entity mob = player.getEntityWorld().getEntityByID(message.entityId);
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
+        final Entity mob = player.getEntityWorld().getEntityByID(this.entityId);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         if (pokemob != null && pokemob.getController() != null)
         {
             if (pokemob.getOwner() != player) return;
-            LogicMountedControl controller = pokemob.getController();
-            controller.forwardInputDown = (message.message & FORWARD) > 0;
-            controller.backInputDown = (message.message & BACK) > 0;
-            controller.leftInputDown = (message.message & LEFT) > 0;
-            controller.rightInputDown = (message.message & RIGHT) > 0;
-            controller.upInputDown = (message.message & UP) > 0;
-            controller.downInputDown = (message.message & DOWN) > 0;
-            controller.followOwnerLook = (message.message & SYNCLOOK) > 0;
-            controller.throttle = message.throttle;
+            final LogicMountedControl controller = pokemob.getController();
+            controller.forwardInputDown = (this.message & PacketMountedControl.FORWARD) > 0;
+            controller.backInputDown = (this.message & PacketMountedControl.BACK) > 0;
+            controller.leftInputDown = (this.message & PacketMountedControl.LEFT) > 0;
+            controller.rightInputDown = (this.message & PacketMountedControl.RIGHT) > 0;
+            controller.upInputDown = (this.message & PacketMountedControl.UP) > 0;
+            controller.downInputDown = (this.message & PacketMountedControl.DOWN) > 0;
+            controller.followOwnerLook = (this.message & PacketMountedControl.SYNCLOOK) > 0;
+            controller.throttle = this.throttle;
         }
+    }
+
+    @Override
+    public void write(PacketBuffer buf)
+    {
+        buf.writeInt(this.entityId);
+        buf.writeByte(this.message);
+        buf.writeFloat(this.throttle);
     }
 }

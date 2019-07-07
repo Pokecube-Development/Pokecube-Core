@@ -26,27 +26,29 @@ public enum GeneralStates
     final int     mask;
     final boolean persist;
 
-    private GeneralStates(int mask, boolean persist)
-    {
-        this.mask = mask;
-        this.persist = persist;
-    }
-
     private GeneralStates(int mask)
     {
         this.mask = mask;
         this.persist = true;
     }
 
-    public int getMask()
+    private GeneralStates(int mask, boolean persist)
     {
-        return mask;
+        this.mask = mask;
+        this.persist = persist;
     }
 
-    /** if this is false, then the value will be cleared whenever the pokemob is
-     * loaded from nbt. */
+    public int getMask()
+    {
+        return this.mask;
+    }
+
+    /**
+     * if this is false, then the value will be cleared whenever the pokemob is
+     * loaded from nbt.
+     */
     public boolean persists()
     {
-        return persist;
+        return this.persist;
     }
 }

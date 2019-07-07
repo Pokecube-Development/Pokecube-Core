@@ -15,20 +15,22 @@ public interface IHasEntry extends IHasMobAIStates
     /** @return the int pokedex number */
     default Integer getPokedexNb()
     {
-        return getPokedexEntry().getPokedexNb();
+        return this.getPokedexEntry().getPokedexNb();
     }
 
     /** @return is this a shadow pokemob */
     default boolean isShadow()
     {
-        return getPokedexEntry().isShadowForme;
+        return this.getPokedexEntry().isShadowForme;
     }
 
     /** @return is the pokemob shiny */
     boolean isShiny();
 
-    /** @param entityIn
-     *            Sets the vanilla entity for this pokemob */
+    /**
+     * @param entityIn
+     *            Sets the vanilla entity for this pokemob
+     */
     void setEntity(MobEntity entityIn);
 
     /** @return the {@link PokedexEntry} of the species of this Pokemob */

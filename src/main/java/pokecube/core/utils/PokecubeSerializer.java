@@ -7,11 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Vector;
-import java.util.logging.Level;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -19,14 +16,9 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Ticket;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.world.storage.SaveHandler;
 import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.contributors.Contributor;
@@ -35,11 +27,11 @@ import pokecube.core.database.PokedexEntry;
 import pokecube.core.handlers.playerdata.PokecubePlayerData;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import thut.api.maths.Vector3;
 import thut.api.maths.Vector4;
+import thut.core.common.ThutCore;
 import thut.core.common.handlers.PlayerDataHandler;
 
 /** @author Manchou */
@@ -47,11 +39,11 @@ public class PokecubeSerializer
 {
     public static class TeleDest
     {
-        public static TeleDest readFromNBT(CompoundNBT nbt)
+        public static TeleDest readFromNBT(final CompoundNBT nbt)
         {
-            Vector4 loc = new Vector4(nbt);
-            String name = nbt.getString("name");
-            int index = nbt.getInt("i");
+            final Vector4 loc = new Vector4(nbt);
+            final String name = nbt.getString("name");
+            final int index = nbt.getInt("i");
             return new TeleDest(loc).setName(name).setIndex(index);
         }
 
@@ -60,407 +52,288 @@ public class PokecubeSerializer
         String         name;
         public int     index;
 
-        public TeleDest(Vector4 loc)
+        public TeleDest(final Vector4 loc)
         {
             this.loc = loc;
-            subLoc = Vector3.getNewVector().set(loc.x, loc.y, loc.z);
-            name = loc.toIntString();
+            this.subLoc = Vector3.getNewVector().set(loc.x, loc.y, loc.z);
+            this.name = loc.toIntString();
         }
 
         public int getDim()
         {
-            return (int) loc.w;
+            return (int) this.loc.w;
         }
 
         public Vector3 getLoc()
         {
-            return subLoc;
+            return this.subLoc;
         }
 
         public String getName()
         {
-            return name;
+            return this.name;
         }
 
-        public TeleDest setName(String name)
-        {
-            this.name = name;
-            return this;
-        }
-
-        public TeleDest setIndex(int index)
+        public TeleDest setIndex(final int index)
         {
             this.index = index;
             return this;
         }
 
-        public void writeToNBT(CompoundNBT nbt)
+        public TeleDest setName(final String name)
         {
-            loc.writeToNBT(nbt);
-            nbt.putString("name", name);
-            nbt.putInt("i", index);
+            this.name = name;
+            return this;
+        }
+
+        public void writeToNBT(final CompoundNBT nbt)
+        {
+            this.loc.writeToNBT(nbt);
+            nbt.putString("name", this.name);
+            nbt.putInt("i", this.index);
         }
     }
 
-    private static final String      POKECUBE       = "pokecube";
-    private static final String      DATA           = "data";
-    private static final String      METEORS        = "meteors";
-    private static final String      LASTUID        = "lastUid";
+    private static final String POKECUBE = "pokecube";
+    private static final String DATA     = "data";
+    private static final String METEORS  = "meteors";
+    private static final String LASTUID  = "lastUid";
 
-    public static int                MeteorDistance = 3000 * 3000;
+    public static int MeteorDistance = 3000 * 3000;
 
-    public static PokecubeSerializer instance       = null;
+    public static PokecubeSerializer instance = null;
 
-    public static int[] byteArrayAsIntArray(byte[] stats)
+    public static double distSq(final Vector4 location, final Vector4 meteor)
     {
-        if (stats.length != 6) return new int[] { 0, 0 };
-
-        int value0 = 0;
-        for (int i = 3; i >= 0; i--)
-        {
-            value0 = (value0 << 8) + (stats[i] & 0xff);
-        }
-
-        int value1 = 0;
-        for (int i = 5; i >= 4; i--)
-        {
-            value1 = (value1 << 8) + (stats[i] & 0xff);
-        }
-
-        return new int[] { value0, value1 };
-    }
-
-    public static Long byteArrayAsLong(byte[] stats)
-    {
-        if (stats.length != 6) { return 0L; }
-
-        long value = 0;
-        for (int i = stats.length - 1; i >= 0; i--)
-        {
-            value = (value << 8) + (stats[i] & 0xff);
-        }
-        return value;
+        final double dx = location.x - meteor.x;
+        final double dy = location.y - meteor.y;
+        final double dz = location.z - meteor.z;
+        return dx * dx + dy * dy + dz * dz;
     }
 
     public static PokecubeSerializer getInstance()
     {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        World world = PokecubeCore.proxy.getWorld();
-        String serverId = PokecubeCore.proxy.getFolderName();
-        if (world == null
-                || world.isRemote) { return instance == null ? instance = new PokecubeSerializer(server) : instance; }
+        final World world = PokecubeCore.proxy.getWorld();
+        if (world == null || world.isRemote) return PokecubeSerializer.instance == null
+                ? PokecubeSerializer.instance = new PokecubeSerializer(world.getServer()) : PokecubeSerializer.instance;
 
-        if (instance == null || instance.serverId == null || !instance.serverId.equals(serverId))
+        if (PokecubeSerializer.instance == null || PokecubeSerializer.instance.myWorld == world)
         {
             boolean toNew = false;
-
-            toNew = (instance == null || instance.saveHandler == null);
-
+            toNew = PokecubeSerializer.instance == null || PokecubeSerializer.instance.saveHandler == null;
             if (!toNew)
             {
-                File file = instance.saveHandler.getMapFileFromName(POKECUBE);
-
-                if ((file == null))
-                {
-                    instance = new PokecubeSerializer(server);
-                }
+                PokecubeSerializer.instance.myWorld = (ServerWorld) PokecubeCore.proxy.getWorld();
+                if (PokecubeSerializer.instance.myWorld != null)
+                    PokecubeSerializer.instance.saveHandler = PokecubeSerializer.instance.myWorld.getSaveHandler();
             }
-
-            if (!toNew)
-            {
-                instance.myWorld = PokecubeCore.proxy.getWorld();
-                serverId = PokecubeCore.proxy.getFolderName();
-                if (instance.myWorld != null) instance.saveHandler = instance.myWorld.getSaveHandler();
-            }
-            if (toNew)
-            {
-                instance = new PokecubeSerializer(server);
-            }
+            if (toNew) PokecubeSerializer.instance = new PokecubeSerializer(world.getServer());
         }
-
-        return instance;
+        return PokecubeSerializer.instance;
     }
 
-    ISaveHandler                                       saveHandler;
-    public ArrayList<Vector4>                          meteors;
+    SaveHandler saveHandler;
 
-    public HashMap<Integer, HashMap<BlockPos, Ticket>> chunks;
-    private int                                        lastId = 1;
+    public ArrayList<Vector4> meteors;
 
-    public World                                       myWorld;
+    private int lastId = 1;
 
-    private String                                     serverId;
+    public ServerWorld myWorld;
 
-    private PokecubeSerializer(MinecraftServer server)
+    private PokecubeSerializer(final MinecraftServer server)
     {
         /** This data is saved to surface world's folder. */
-        myWorld = PokecubeCore.proxy.getWorld();
-        serverId = PokecubeCore.proxy.getFolderName();
-        if (myWorld != null) saveHandler = myWorld.getSaveHandler();
-        lastId = 0;
-        meteors = new ArrayList<Vector4>();
-        chunks = new HashMap<>();
-        loadData();
+        this.myWorld = (ServerWorld) PokecubeCore.proxy.getWorld();
+        if (this.myWorld != null) this.saveHandler = this.myWorld.getSaveHandler();
+        this.lastId = 0;
+        this.meteors = new ArrayList<>();
+        this.loadData();
     }
 
-    public void addChunks(World world, BlockPos location, LivingEntity placer)
+    public void addMeteorLocation(final Vector4 v)
     {
-        if (!PokecubeMod.core.getConfig().chunkLoadPokecenters) return;
-
-        Integer dimension = world.dimension.getDimension();
-
-        HashMap<BlockPos, Ticket> tickets = chunks.get(dimension);
-        if (tickets == null)
-        {
-            chunks.put(dimension, tickets = new HashMap<>());
-        }
-        boolean found = tickets.containsKey(location);
-        try
-        {
-            if (!found)
-            {
-                Ticket ticket;
-                if (placer instanceof PlayerEntity)
-                {
-                    ticket = ForgeChunkManager.requestPlayerTicket(PokecubeCore.instance,
-                            placer.getCachedUniqueIdString(), world, ForgeChunkManager.Type.NORMAL);
-                    CompoundNBT pos = new CompoundNBT();
-                    pos.putInt("x", location.getX());
-                    pos.putInt("y", location.getY());
-                    pos.putInt("z", location.getZ());
-                    ticket.getModData().put("pos", pos);
-                    ChunkPos chunk = world.getChunk(location).getPos();
-                    PokecubeMod.log("Forcing Chunk at " + location);
-                    ForgeChunkManager.forceChunk(ticket, chunk);
-                    tickets.put(location, ticket);
-                }
-            }
-        }
-        catch (Throwable e)
-        {
-            PokecubeMod.log(Level.WARNING, "Error adding chunks to load.", new Exception(e));
-        }
+        this.meteors.add(v);
+        this.save();
     }
 
-    public void addMeteorLocation(Vector4 v)
+    public boolean canMeteorLand(final Vector4 location)
     {
-        meteors.add(v);
-        save();
-    }
-
-    public boolean canMeteorLand(Vector4 location)
-    {
-        for (Vector4 v : meteors)
-        {
-            if (tooClose(location, v)) return false;
-        }
+        for (final Vector4 v : this.meteors)
+            if (this.tooClose(location, v)) return false;
         return true;
-    }
-
-    public static double distSq(Vector4 location, Vector4 meteor)
-    {
-        double dx = location.x - meteor.x;
-        double dy = location.y - meteor.y;
-        double dz = location.z - meteor.z;
-        return dx * dx + dy * dy + dz * dz;
-    }
-
-    private boolean tooClose(Vector4 location, Vector4 meteor)
-    {
-        if (location.w != meteor.w) return false;
-        return distSq(location, meteor) < MeteorDistance;
     }
 
     public void clearInstance()
     {
-        if (instance == null) return;
-        instance.save();
-        PokecubeItems.times = new Vector<Long>();
-        instance = null;
+        if (PokecubeSerializer.instance == null) return;
+        PokecubeSerializer.instance.save();
+        PokecubeItems.times = new Vector<>();
+        PokecubeSerializer.instance = null;
     }
 
     public int getNextID()
     {
-        return lastId++;
+        return this.lastId++;
     }
 
-    public boolean hasStarter(PlayerEntity player)
+    public boolean hasStarter(final PlayerEntity player)
     {
+        if (player != null) return false;
         return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class).hasStarter();
     }
 
     public void loadData()
     {
-        if (saveHandler != null)
+        if (this.saveHandler != null) try
         {
-            try
+            final File worlddir = this.saveHandler.getWorldDirectory();
+            File file = new File(worlddir, PokecubeSerializer.POKECUBE);
+            file.mkdirs();
+            file = new File(file, "global.dat");
+            if (file != null && file.exists())
             {
-                File file = saveHandler.getMapFileFromName(POKECUBE);
-
-                if (file != null && file.exists())
-                {
-                    FileInputStream fileinputstream = new FileInputStream(file);
-                    CompoundNBT CompoundNBT = CompressedStreamTools.readCompressed(fileinputstream);
-                    fileinputstream.close();
-                    readFromNBT(CompoundNBT.getCompound(DATA));
-                }
-            }
-            catch (Exception exception)
-            {
-                exception.printStackTrace();
+                final FileInputStream fileinputstream = new FileInputStream(file);
+                final CompoundNBT CompoundNBT = CompressedStreamTools.readCompressed(fileinputstream);
+                fileinputstream.close();
+                this.readFromNBT(CompoundNBT.getCompound(PokecubeSerializer.DATA));
             }
         }
-    }
-
-    public void readFromNBT(CompoundNBT CompoundNBT)
-    {
-        lastId = CompoundNBT.getInt(LASTUID);
-        INBT temp;
-        temp = CompoundNBT.getTag(METEORS);
-        if (temp instanceof ListNBT)
-        {
-            ListNBT tagListMeteors = (ListNBT) temp;
-            if (tagListMeteors.size() > 0)
-            {
-                meteors:
-                for (int i = 0; i < tagListMeteors.size(); i++)
-                {
-                    CompoundNBT pokemobData = tagListMeteors.getCompound(i);
-
-                    if (pokemobData != null)
-                    {
-                        Vector4 location;
-                        // TODO remove this in a few versions.
-                        if (pokemobData.hasKey(METEORS + "x"))
-                        {
-                            int posX = pokemobData.getInt(METEORS + "x");
-                            int posY = pokemobData.getInt(METEORS + "y");
-                            int posZ = pokemobData.getInt(METEORS + "z");
-                            int w = pokemobData.getInt(METEORS + "w");
-                            location = new Vector4(posX, posY, posZ, w);
-                        }
-                        else location = new Vector4(pokemobData);
-                        if (location != null && !location.isEmpty())
-                        {
-                            for (Vector4 v : meteors)
-                            {
-                                if (distSq(location, v) < 4) continue meteors;
-                            }
-                            meteors.add(location);
-                        }
-                    }
-                }
-            }
-        }
-        temp = CompoundNBT.getTag("tmtags");
-        if (temp instanceof CompoundNBT)
-        {
-            PokecubeItems.loadTime((CompoundNBT) temp);
-        }
-    }
-
-    public void removeChunks(World world, BlockPos location)
-    {
-        Integer dimension = world.dimension.getDimension();
-        HashMap<BlockPos, Ticket> tickets = chunks.get(dimension);
-        if (tickets != null)
-        {
-            Ticket ticket = tickets.remove(location);
-            if (ticket != null)
-            {
-                ForgeChunkManager.releaseTicket(ticket);
-            }
-        }
-    }
-
-    public void save()
-    {
-        saveData();
-    }
-
-    private void saveData()
-    {
-        if (saveHandler == null || FMLCommonHandler.instance().getEffectiveSide() == Dist.CLIENT) { return; }
-
-        try
-        {
-            File file = saveHandler.getMapFileFromName(POKECUBE);
-            if (file != null)
-            {
-                CompoundNBT CompoundNBT = new CompoundNBT();
-                writeToNBT(CompoundNBT);
-                CompoundNBT CompoundNBT1 = new CompoundNBT();
-                CompoundNBT1.put(DATA, CompoundNBT);
-                FileOutputStream fileoutputstream = new FileOutputStream(file);
-                CompressedStreamTools.writeCompressed(CompoundNBT1, fileoutputstream);
-                fileoutputstream.close();
-            }
-        }
-        catch (Exception exception)
+        catch (final Exception exception)
         {
             exception.printStackTrace();
         }
     }
 
-    public void setHasStarter(PlayerEntity player)
+    public void readFromNBT(final CompoundNBT CompoundNBT)
     {
-        setHasStarter(player, true);
+        this.lastId = CompoundNBT.getInt(PokecubeSerializer.LASTUID);
+        INBT temp;
+        temp = CompoundNBT.get(PokecubeSerializer.METEORS);
+        if (temp instanceof ListNBT)
+        {
+            final ListNBT tagListMeteors = (ListNBT) temp;
+            if (tagListMeteors.size() > 0) meteors:
+            for (int i = 0; i < tagListMeteors.size(); i++)
+            {
+                final CompoundNBT pokemobData = tagListMeteors.getCompound(i);
+
+                if (pokemobData != null)
+                {
+                    Vector4 location;
+                    // TODO remove this in a few versions.
+                    if (pokemobData.contains(PokecubeSerializer.METEORS + "x"))
+                    {
+                        final int posX = pokemobData.getInt(PokecubeSerializer.METEORS + "x");
+                        final int posY = pokemobData.getInt(PokecubeSerializer.METEORS + "y");
+                        final int posZ = pokemobData.getInt(PokecubeSerializer.METEORS + "z");
+                        final int w = pokemobData.getInt(PokecubeSerializer.METEORS + "w");
+                        location = new Vector4(posX, posY, posZ, w);
+                    }
+                    else location = new Vector4(pokemobData);
+                    if (location != null && !location.isEmpty())
+                    {
+                        for (final Vector4 v : this.meteors)
+                            if (PokecubeSerializer.distSq(location, v) < 4) continue meteors;
+                        this.meteors.add(location);
+                    }
+                }
+            }
+        }
+        temp = CompoundNBT.get("tmtags");
+        if (temp instanceof CompoundNBT) PokecubeItems.loadTime((CompoundNBT) temp);
     }
 
-    public void setHasStarter(PlayerEntity player, boolean value)
+    public void save()
+    {
+        this.saveData();
+    }
+
+    private void saveData()
+    {
+        if (this.saveHandler == null || ThutCore.proxy.isClientSide()) return;
+
+        try
+        {
+            final File worlddir = this.saveHandler.getWorldDirectory();
+            File file = new File(worlddir, PokecubeSerializer.POKECUBE);
+            file.mkdirs();
+            file = new File(file, "global.dat");
+            if (file != null)
+            {
+                final CompoundNBT CompoundNBT = new CompoundNBT();
+                this.writeToNBT(CompoundNBT);
+                final CompoundNBT CompoundNBT1 = new CompoundNBT();
+                CompoundNBT1.put(PokecubeSerializer.DATA, CompoundNBT);
+                final FileOutputStream fileoutputstream = new FileOutputStream(file);
+                CompressedStreamTools.writeCompressed(CompoundNBT1, fileoutputstream);
+                fileoutputstream.close();
+            }
+        }
+        catch (final Exception exception)
+        {
+            exception.printStackTrace();
+        }
+    }
+
+    public void setHasStarter(final PlayerEntity player)
+    {
+        this.setHasStarter(player, true);
+    }
+
+    public void setHasStarter(final PlayerEntity player, final boolean value)
     {
         try
         {
-            PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class)
-                    .setHasStarter(value);
+            PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class).setHasStarter(
+                    value);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            PokecubeMod.log(Level.WARNING, "Error setting has starter state for " + player, e);
+            PokecubeCore.LOGGER.error("Error setting has starter state for " + player, e);
         }
-        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
-            PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
+        if (ThutCore.proxy.isServerSide()) PlayerDataHandler.getInstance().save(player.getCachedUniqueIdString());
     }
 
-    public ItemStack starter(PokedexEntry entry, PlayerEntity owner)
+    public ItemStack starter(final PokedexEntry entry, final PlayerEntity owner)
     {
-        World worldObj = owner.getEntityWorld();
-        IPokemob entity = CapabilityPokemob.getPokemobFor(PokecubeMod.core.createPokemob(entry, worldObj));
+        final World worldObj = owner.getEntityWorld();
+        final IPokemob entity = CapabilityPokemob.getPokemobFor(PokecubeCore.createPokemob(entry, worldObj));
 
         if (entity != null)
         {
             entity.setForSpawn(Tools.levelToXp(entity.getExperienceMode(), 5));
             entity.setHealth(entity.getMaxHealth());
-            entity.setPokemonOwner(owner);
-            Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
-            if (contrib != null)
-            {
-                entity.setPokecube(contrib.getStarterCube());
-            }
+            entity.setOwner(owner.getUniqueID());
+            final Contributor contrib = ContributorManager.instance().getContributor(owner.getGameProfile());
+            if (contrib != null) entity.setPokecube(contrib.getStarterCube());
             else entity.setPokecube(new ItemStack(PokecubeItems.getFilledCube(PokecubeBehavior.DEFAULTCUBE)));
-            ItemStack item = PokecubeManager.pokemobToItem(entity);
+            final ItemStack item = PokecubeManager.pokemobToItem(entity);
             PokecubeManager.heal(item);
-            entity.getEntity().isDead = true;
+            entity.getEntity().remove();
             return item;
         }
         return ItemStack.EMPTY;
     }
 
-    public void writeToNBT(CompoundNBT CompoundNBT)
+    private boolean tooClose(final Vector4 location, final Vector4 meteor)
     {
-        CompoundNBT.putInt(LASTUID, lastId);
-        ListNBT tagListMeteors = new ListNBT();
-        for (Vector4 v : meteors)
-        {
+        if (location.w != meteor.w) return false;
+        return PokecubeSerializer.distSq(location, meteor) < PokecubeSerializer.MeteorDistance;
+    }
+
+    public void writeToNBT(final CompoundNBT CompoundNBT)
+    {
+        CompoundNBT.putInt(PokecubeSerializer.LASTUID, this.lastId);
+        final ListNBT tagListMeteors = new ListNBT();
+        for (final Vector4 v : this.meteors)
             if (v != null && !v.isEmpty())
             {
-                CompoundNBT nbt = new CompoundNBT();
+                final CompoundNBT nbt = new CompoundNBT();
                 v.writeToNBT(nbt);
-                tagListMeteors.appendTag(nbt);
+                tagListMeteors.add(nbt);
             }
-        }
-        CompoundNBT.put(METEORS, tagListMeteors);
-        CompoundNBT tms = new CompoundNBT();
+        CompoundNBT.put(PokecubeSerializer.METEORS, tagListMeteors);
+        final CompoundNBT tms = new CompoundNBT();
         PokecubeItems.saveTime(tms);
         CompoundNBT.put("tmtags", tms);
     }

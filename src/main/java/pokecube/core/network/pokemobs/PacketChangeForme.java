@@ -1,48 +1,39 @@
 package pokecube.core.network.pokemobs;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
 import pokecube.core.database.Database;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ICanEvolve;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.items.megastuff.MegaCapability;
 import thut.core.common.commands.CommandTools;
+import thut.core.common.network.Packet;
 
-public class PacketChangeForme implements IMessage, IMessageHandler<PacketChangeForme, IMessage>
+public class PacketChangeForme extends Packet
 {
     public static void sendPacketToServer(Entity mob, PokedexEntry forme)
     {
-        PacketChangeForme packet = new PacketChangeForme();
+        final PacketChangeForme packet = new PacketChangeForme();
         packet.entityId = mob.getEntityId();
         packet.forme = forme;
-        PokecubeMod.packetPipeline.sendToServer(packet);
+        PokecubeCore.packets.sendToServer(packet);
     }
 
     public static void sendPacketToTracking(Entity mob, PokedexEntry forme)
     {
-        PacketChangeForme packet = new PacketChangeForme();
+        final PacketChangeForme packet = new PacketChangeForme();
         packet.entityId = mob.getEntityId();
         packet.forme = forme;
-        ServerWorld server = (ServerWorld) mob.getEntityWorld();
-        for (PlayerEntity player : server.getEntityTracker().getTrackingPlayers(mob))
-            PokecubeMod.packetPipeline.sendTo(packet, (ServerPlayerEntity) player);
+        PokecubeCore.packets.sendToTracking(packet, mob);
     }
 
     int          entityId;
@@ -52,111 +43,82 @@ public class PacketChangeForme implements IMessage, IMessageHandler<PacketChange
     {
     }
 
-    @Override
-    public IMessage onMessage(final PacketChangeForme message, final MessageContext ctx)
+    public PacketChangeForme(PacketBuffer buffer)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
+        this.entityId = buffer.readInt();
+        this.forme = Database.getEntry(buffer.readString(20));
     }
 
     @Override
-    public void fromBytes(ByteBuf buf)
+    public void handleClient()
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        entityId = buf.readInt();
-        forme = Database.getEntry(buffer.readString(20));
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeInt(entityId);
-        if (forme != null) buffer.writeString(forme.getName());
-        else buffer.writeString("");
-    }
-
-    void processMessage(MessageContext ctx, PacketChangeForme message)
-    {
-        PlayerEntity player;
-        if (ctx.side == Dist.CLIENT)
-        {
-            player = PokecubeCore.getPlayer(null);
-        }
-        else
-        {
-            player = ctx.getServerHandler().player;
-        }
-        Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), message.entityId, true);
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final Entity mob = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), this.entityId, true);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
         if (pokemob == null) return;
+        pokemob.setPokedexEntry(this.forme);
+    }
 
-        if (ctx.side == Dist.CLIENT)
+    @Override
+    public void handleServer(ServerPlayerEntity player)
+    {
+        final Entity mob = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), this.entityId, true);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
+        if (pokemob == null) return;
+        if (pokemob.getGeneralState(GeneralStates.EVOLVING)) return;
+        final boolean hasRing = MegaCapability.canMegaEvolve(player, pokemob);
+        if (!hasRing)
         {
-            pokemob.setPokedexEntry(message.forme);
+            player.sendMessage(new TranslationTextComponent("pokecube.mega.noring", pokemob.getDisplayName()));
+            return;
         }
-        else
+        PokedexEntry newEntry = pokemob.getPokedexEntry().getEvo(pokemob);
+        if (newEntry != null && newEntry.getPokedexNb() == pokemob.getPokedexEntry().getPokedexNb())
         {
-            if (pokemob.getGeneralState(GeneralStates.EVOLVING)) return;
-            boolean hasRing = MegaCapability.canMegaEvolve(player, pokemob);
-            if (!hasRing)
+            final String old = pokemob.getDisplayName().getFormattedText();
+            if (pokemob.getPokedexEntry() == newEntry)
             {
-                player.sendMessage(
-                        new TranslationTextComponent("pokecube.mega.noring", pokemob.getPokemonDisplayName()));
-                return;
-            }
-            PokedexEntry newEntry = pokemob.getPokedexEntry().getEvo(pokemob);
-            if (newEntry != null && newEntry.getPokedexNb() == pokemob.getPokedexEntry().getPokedexNb())
-            {
-                String old = pokemob.getPokemonDisplayName().getFormattedText();
-                if (pokemob.getPokedexEntry() == newEntry)
-                {
-                    ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.revert",
-                            "green", old);
-                    pokemob.displayMessageToOwner(mess);
-                    pokemob.setCombatState(CombatStates.MEGAFORME, false);
-                    mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.revert", "green", old,
-                            newEntry.getUnlocalizedName());
-                    ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
-                }
-                else
-                {
-                    ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.evolve",
-                            "green", old);
-                    pokemob.displayMessageToOwner(mess);
-                    mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.success", "green", old,
-                            newEntry.getUnlocalizedName());
-                    pokemob.setCombatState(CombatStates.MEGAFORME, true);
-                    ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
-                }
+                ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.revert", "green",
+                        old);
+                pokemob.displayMessageToOwner(mess);
+                pokemob.setCombatState(CombatStates.MEGAFORME, false);
+                mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.revert", "green", old, newEntry
+                        .getUnlocalizedName());
+                ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
             }
             else
             {
-                if (pokemob.getCombatState(CombatStates.MEGAFORME))
-                {
-                    String old = pokemob.getPokemonDisplayName().getFormattedText();
-                    ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.revert",
-                            "green", old);
-                    pokemob.displayMessageToOwner(mess);
-                    newEntry = pokemob.getPokedexEntry().getBaseForme();
-                    pokemob.setCombatState(CombatStates.MEGAFORME, false);
-                    mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.revert", "green", old,
-                            newEntry.getUnlocalizedName());
-                    ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
-                }
-                else
-                {
-                    player.sendMessage(CommandTools.makeTranslatedMessage("pokemob.megaevolve.failed", "red",
-                            pokemob.getPokemonDisplayName()));
-                }
+                ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.evolve", "green",
+                        old);
+                pokemob.displayMessageToOwner(mess);
+                mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.success", "green", old, newEntry
+                        .getUnlocalizedName());
+                pokemob.setCombatState(CombatStates.MEGAFORME, true);
+                ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
             }
         }
+        else if (pokemob.getCombatState(CombatStates.MEGAFORME))
+        {
+            final String old = pokemob.getDisplayName().getFormattedText();
+            ITextComponent mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.command.revert", "green", old);
+            pokemob.displayMessageToOwner(mess);
+            newEntry = pokemob.getPokedexEntry().getBaseForme();
+            pokemob.setCombatState(CombatStates.MEGAFORME, false);
+            mess = CommandTools.makeTranslatedMessage("pokemob.megaevolve.revert", "green", old, newEntry
+                    .getUnlocalizedName());
+            ICanEvolve.setDelayedMegaEvolve(pokemob, newEntry, mess);
+        }
+        else player.sendMessage(CommandTools.makeTranslatedMessage("pokemob.megaevolve.failed", "red", pokemob
+                .getDisplayName()));
     }
+
+    @Override
+    public void write(PacketBuffer buf)
+    {
+        final PacketBuffer buffer = new PacketBuffer(buf);
+        buffer.writeInt(this.entityId);
+        if (this.forme != null) buffer.writeString(this.forme.getName());
+        else buffer.writeString("");
+    }
+
 }

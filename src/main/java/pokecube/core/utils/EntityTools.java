@@ -6,6 +6,18 @@ import pokecube.core.interfaces.IPokemob;
 
 public class EntityTools
 {
+    public static void copyPokemobData(IPokemob from, IPokemob to)
+    {
+        to.read(from.write());
+    }
+
+    public static void copyEntityData(LivingEntity to, LivingEntity from)
+    {
+        final CompoundNBT tag = new CompoundNBT();
+        from.writeAdditional(tag);
+        to.readAdditional(tag);
+    }
+
     public static void copyEntityTransforms(LivingEntity to, LivingEntity from)
     {
         to.setEntityId(from.getEntityId());
@@ -16,9 +28,7 @@ public class EntityTools
         to.lastTickPosY = from.lastTickPosY;
         to.lastTickPosZ = from.lastTickPosZ;
 
-        to.motionX = from.motionX;
-        to.motionY = from.motionY;
-        to.motionZ = from.motionZ;
+        to.setMotion(from.getMotion());
 
         to.rotationPitch = from.rotationPitch;
         to.ticksExisted = from.ticksExisted;
@@ -37,17 +47,5 @@ public class EntityTools
         to.prevLimbSwingAmount = from.prevLimbSwingAmount;
         to.limbSwing = from.limbSwing;
         to.limbSwingAmount = from.limbSwingAmount;
-    }
-
-    public static void copyEntityData(LivingEntity to, LivingEntity from)
-    {
-        CompoundNBT tag = new CompoundNBT();
-        from.writeEntityToNBT(tag);
-        to.readEntityFromNBT(tag);
-    }
-
-    public static void copy(IPokemob from, IPokemob to)
-    {
-        to.readPokemobData(from.writePokemobData());
     }
 }

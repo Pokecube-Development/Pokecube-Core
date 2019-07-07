@@ -5,7 +5,11 @@ import java.util.Vector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
 import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.EggEvent;
@@ -18,6 +22,7 @@ import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
 import pokecube.core.utils.Tools;
 import thut.api.entity.IBreedingMob;
 import thut.api.maths.Vector3;
+import thut.core.common.ThutCore;
 
 public abstract class PokemobSexed extends PokemobStats
 {
@@ -25,11 +30,11 @@ public abstract class PokemobSexed extends PokemobStats
     @Override
     public boolean canMate(AnimalEntity AnimalEntity)
     {
-        if (!isRoutineEnabled(AIRoutine.MATE)) return false;
-        IPokemob otherMob = CapabilityPokemob.getPokemobFor(AnimalEntity);
+        if (!this.isRoutineEnabled(AIRoutine.MATE)) return false;
+        final IPokemob otherMob = CapabilityPokemob.getPokemobFor(AnimalEntity);
         if (otherMob != null)
         {
-            PokedexEntry thisEntry = getPokedexEntry();
+            PokedexEntry thisEntry = this.getPokedexEntry();
             PokedexEntry thatEntry = otherMob.getPokedexEntry();
 
             if (thisEntry.isMega) thisEntry = thisEntry.getBaseForme();
@@ -37,22 +42,17 @@ public abstract class PokemobSexed extends PokemobStats
 
             // Check if pokedex entries state they can breed, and then if so,
             // ensure sexe is different.
-            boolean neutral = this.getSexe() == IPokemob.NOSEXE || otherMob.getSexe() == IPokemob.NOSEXE;
-            if (thisEntry.areRelated(thatEntry)
-                    || thatEntry.areRelated(thisEntry) && (neutral || otherMob.getSexe() != this.getSexe()))
-                return true;
+            final boolean neutral = this.getSexe() == IPokemob.NOSEXE || otherMob.getSexe() == IPokemob.NOSEXE;
+            if (thisEntry.areRelated(thatEntry) || thatEntry.areRelated(thisEntry) && (neutral || otherMob
+                    .getSexe() != this.getSexe())) return true;
 
             // Otherwise check for transform.
             boolean transforms = false;
             boolean otherTransforms = false;
-            for (String s : getMoves())
-            {
+            for (final String s : this.getMoves())
                 if (s != null && s.equalsIgnoreCase(IMoveNames.MOVE_TRANSFORM)) transforms = true;
-            }
-            for (String s : otherMob.getMoves())
-            {
+            for (final String s : otherMob.getMoves())
                 if (s != null && s.equalsIgnoreCase(IMoveNames.MOVE_TRANSFORM)) otherTransforms = true;
-            }
 
             // can't breed two transformers
             if (transforms && otherTransforms) return false;
@@ -64,63 +64,69 @@ public abstract class PokemobSexed extends PokemobStats
         return false;
     }
 
+    private int getBreedingDelay(IPokemob mate)
+    {
+        return PokecubeCore.getConfig().breedingDelay;
+    }
+
     @Override
     public Object getChild(IBreedingMob male)
     {
         if (!IPokemob.class.isInstance(male)) return null;
         boolean transforms = false;
         boolean otherTransforms = ((IPokemob) male).getTransformedTo() != null;
-        String[] moves = getMoves();
-        for (String s : moves)
-        {
+        final String[] moves = this.getMoves();
+        for (final String s : moves)
             if (s != null && s.equalsIgnoreCase(IMoveNames.MOVE_TRANSFORM)) transforms = true;
-        }
-        if (!otherTransforms) for (String s : ((IPokemob) male).getMoves())
-        {
+        if (!otherTransforms) for (final String s : ((IPokemob) male).getMoves())
             if (s != null && s.equalsIgnoreCase(IMoveNames.MOVE_TRANSFORM)) otherTransforms = true;
-        }
-        if (transforms && !otherTransforms
-                && ((IPokemob) male).getTransformedTo() != getEntity()) { return male.getChild(this); }
-        return getPokedexEntry().getChild(((IPokemob) male).getPokedexEntry());
+        if (transforms && !otherTransforms && ((IPokemob) male).getTransformedTo() != this.getEntity()) return male
+                .getChild(this);
+        return this.getPokedexEntry().getChild(((IPokemob) male).getPokedexEntry());
     }
 
     @Override
-    /** Which entity is this pokemob trying to breed with
-     * 
-     * @return */
+    /**
+     * Which entity is this pokemob trying to breed with
+     *
+     * @return
+     */
     public Entity getLover()
     {
-        return lover;
+        return this.lover;
     }
 
     @Override
     public int getLoveTimer()
     {
-        return loveTimer;
+        return this.loveTimer;
     }
 
     @Override
     public Vector<IBreedingMob> getMalesForBreeding()
     {
-        return males;
+        return this.males;
     }
 
     public void lay(IPokemob male)
     {
-        here.set(getEntity());
-        if (PokecubeMod.debug) PokecubeMod.log(this + " lay()");
-        if (getEntity().getEntityWorld().isRemote) { return; }
-        int num = Tools.countPokemon(getEntity().getEntityWorld(), here, PokecubeMod.core.getConfig().maxSpawnRadius);
-        if (!(getOwner() instanceof PlayerEntity) && num > PokecubeMod.core.getConfig().mobSpawnNumber * 1.25) return;
-        Vector3 pos = here.set(getEntity()).addTo(0, Math.max(getPokedexEntry().height * getSize() / 4, 0.5f), 0);
-        if (pos.isClearOfBlocks(getEntity().getEntityWorld()))
+        this.here.set(this.getEntity());
+        if (PokecubeMod.debug) PokecubeCore.LOGGER.info(this + " lay()");
+        if (this.getEntity().getEntityWorld().isRemote) return;
+        final int num = Tools.countPokemon(this.getEntity().getEntityWorld(), this.here, PokecubeCore
+                .getConfig().maxSpawnRadius);
+        if (!(this.getOwner() instanceof PlayerEntity) && num > PokecubeCore.getConfig().mobSpawnNumber * 1.25) return;
+        final Vector3 pos = this.here.set(this.getEntity()).addTo(0, Math.max(this.getPokedexEntry().height * this
+                .getSize() / 4, 0.5f), 0);
+        if (pos.isClearOfBlocks(this.getEntity().getEntityWorld()))
         {
             Entity eggItem = null;
             try
             {
-                eggItem = new EntityPokemobEgg(getEntity().getEntityWorld(), here.x, here.y, here.z, getEntity(), male);
+                eggItem = new EntityPokemobEgg(EntityPokemobEgg.TYPE, this.getEntity().getEntityWorld()).setPos(
+                        this.here).setStackByParents(this.getEntity(), male);
             }
-            catch (Exception e1)
+            catch (final Exception e1)
             {
                 e1.printStackTrace();
             }
@@ -131,11 +137,11 @@ public abstract class PokemobSexed extends PokemobStats
                 MinecraftForge.EVENT_BUS.post(event);
                 if (!event.isCanceled())
                 {
-                    egg = eggItem;
-                    getEntity().getEntityWorld().spawnEntity(egg);
+                    this.egg = eggItem;
+                    this.getEntity().getEntityWorld().addEntity(this.egg);
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 e.printStackTrace();
             }
@@ -145,66 +151,58 @@ public abstract class PokemobSexed extends PokemobStats
 
     protected void mate(IBreedingMob male)
     {
-        IPokemob mate = (IPokemob) male;
-        if (male == null || mate.getEntity().isDead) return;
-        if (this.getSexe() == MALE || (male.getSexe() == FEMALE && male != this)) { return; }
-        int hungerValue = PokecubeMod.core.getConfig().pokemobLifeSpan / 2;
+        final IPokemob mate = (IPokemob) male;
+        if (male == null || !mate.getEntity().isAlive()) return;
+        if (this.getSexe() == IPokemob.MALE || male.getSexe() == IPokemob.FEMALE && male != this) return;
+        final int hungerValue = PokecubeCore.getConfig().pokemobLifeSpan / 2;
         mate.setHungerTime(mate.getHungerTime() + hungerValue);
-        setHungerTime(getHungerTime() + hungerValue);
+        this.setHungerTime(this.getHungerTime() + hungerValue);
         mate.setLover(null);
         mate.resetLoveStatus();
-        getEntity().setAttackTarget(null);
+        this.getEntity().setAttackTarget(null);
         mate.getEntity().setAttackTarget(null);
-        lay(mate);
-        resetLoveStatus();
-        lover = null;
+        this.lay(mate);
+        this.resetLoveStatus();
+        this.lover = null;
     }
 
     @Override
     public void mateWith(final IBreedingMob male)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                mate(male);
-            }
-        });
+        if (ThutCore.proxy.isClientSide()) return;
+        final MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        server.enqueue(new TickDelayedTask(0, () -> this.mate(male)));
     }
 
     @Override
     public void resetLoveStatus()
     {
-        setLoveTimer(rand.nextInt(600) - getBreedingDelay(null));
-        setLover(null);
-        setGeneralState(GeneralStates.MATING, false);
-        if (males != null) males.clear();
+        this.setLoveTimer(this.rand.nextInt(600) - this.getBreedingDelay(null));
+        this.setLover(null);
+        this.setGeneralState(GeneralStates.MATING, false);
+        if (this.males != null) this.males.clear();
     }
 
     @Override
-    /** Sets the entity to try to breed with
-     * 
-     * @param lover */
+    /**
+     * Sets the entity to try to breed with
+     *
+     * @param lover
+     */
     public void setLover(final Entity newLover)
     {
         this.lover = newLover;
     }
 
-    private int getBreedingDelay(IPokemob mate)
-    {
-        return PokecubeMod.core.getConfig().breedingDelay;
-    }
-
     @Override
     public void setLoveTimer(final int value)
     {
-        loveTimer = value;
+        this.loveTimer = value;
     }
 
     @Override
     public boolean tryToBreed()
     {
-        return loveTimer > 0 || lover != null;
+        return this.loveTimer > 0 || this.lover != null;
     }
 }

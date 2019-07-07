@@ -1,88 +1,79 @@
 package pokecube.core.network.pokemobs;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import thut.api.entity.genetics.Alleles;
+import thut.api.entity.genetics.GeneRegistry;
 import thut.api.entity.genetics.IMobGenetics;
+import thut.core.common.network.Packet;
 
-public class PacketSyncGene implements IMessage, IMessageHandler<PacketSyncGene, IMessage>
+public class PacketSyncGene extends Packet
 {
-    public static void syncGene(Entity mob, Alleles gene)
+    public static void syncGene(Entity mob, Alleles gene, ServerPlayerEntity entityPlayer)
     {
         if (mob.getEntityWorld() == null || mob.getEntityWorld().isRemote || gene == null) return;
-        PacketSyncGene packet = new PacketSyncGene();
+        final PacketSyncGene packet = new PacketSyncGene();
         packet.genes = gene;
         packet.entityId = mob.getEntityId();
-        PokecubeMod.packetPipeline.sendToDimension(packet, mob.dimension);
+        PokecubeCore.packets.sendTo(packet, entityPlayer);
     }
 
-    public PacketSyncGene()
+    public static void syncGeneToTracking(Entity mob, Alleles gene)
     {
+        if (mob.getEntityWorld() == null || mob.getEntityWorld().isRemote || gene == null) return;
+        final PacketSyncGene packet = new PacketSyncGene();
+        packet.genes = gene;
+        packet.entityId = mob.getEntityId();
+        PokecubeCore.packets.sendToTracking(packet, mob);
     }
 
     Alleles genes = new Alleles();
-    int     entityId;
 
-    @Override
-    public IMessage onMessage(PacketSyncGene message, MessageContext ctx)
+    int entityId;
+
+    public PacketSyncGene()
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-
-            void processMessage(MessageContext ctx, PacketSyncGene message)
-            {
-                PlayerEntity player = PokecubeCore.getPlayer(null);
-                int id = message.entityId;
-                Alleles alleles = message.genes;
-                Entity mob = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
-                if (mob == null) return;
-                IMobGenetics genes = mob.getCapability(IMobGenetics.GENETICS_CAP, null);
-                IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
-                if (genes != null && alleles != null && alleles.getExpressed() != null)
-                {
-                    genes.getAlleles().put(alleles.getExpressed().getKey(), alleles);
-                }
-                if (pokemob != null) pokemob.onGenesChanged();
-            }
-        });
-        return null;
+        super(null);
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf)
+    public PacketSyncGene(PacketBuffer buffer)
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        entityId = buffer.readInt();
+        super(buffer);
+        this.entityId = buffer.readInt();
         try
         {
-            genes.load(buffer.readCompoundTag());
+            this.genes.load(buffer.readCompoundTag());
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void handleClient()
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeInt(entityId);
-        buffer.writeCompoundTag(genes.save());
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final int id = this.entityId;
+        final Alleles alleles = this.genes;
+        final Entity mob = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
+        if (mob == null) return;
+        final IMobGenetics genes = mob.getCapability(GeneRegistry.GENETICS_CAP, null).orElse(null);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(mob);
+        if (genes != null && alleles != null && alleles.getExpressed() != null) genes.getAlleles().put(alleles
+                .getExpressed().getKey(), alleles);
+        if (pokemob != null) pokemob.onGenesChanged();
+    }
+
+    @Override
+    public void write(PacketBuffer buffer)
+    {
+        buffer.writeInt(this.entityId);
+        buffer.writeCompoundTag(this.genes.save());
     }
 }

@@ -3,7 +3,6 @@ package pokecube.core.database.recipes;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
 import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -16,87 +15,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntryLoader.Drop;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.utils.Tools;
-import thut.lib.CompatWrapper;
 
 public class XMLRecipeHandler
 {
-    public static Set<String>                recipeFiles   = Sets.newHashSet();
-    public static Map<String, IRecipeParser> recipeParsers = Maps.newHashMap();
-
-    private static final QName               OREDICT       = new QName("oreDict");
-
-    public static class DefaultParser implements IRecipeParser
-    {
-        @Override
-        public void manageRecipe(XMLRecipe recipe) throws NullPointerException
-        {
-            if (!PokecubeMod.debug) return;
-            if (PokecubeMod.debug) return;
-            ItemStack output = getStack(recipe.output);
-            List<Object> inputs = Lists.newArrayList();
-            if (recipe.shapeless) for (XMLRecipeInput xml : recipe.inputs)
-            {
-                if (xml.values.containsKey(OREDICT)) inputs.add(xml.values.get(OREDICT));
-                else inputs.add(getStack(xml));
-            }
-            else
-            {
-                String[] map = recipe.map.split(",");
-                for (String s : map)
-                    inputs.add(s);
-                for (XMLRecipeInput xml : recipe.inputs)
-                {
-                    Character ch = xml.key.charAt(0);
-                    inputs.add(ch);
-                    if (xml.values.containsKey(OREDICT)) inputs.add(xml.values.get(OREDICT));
-                    else inputs.add(getStack(xml));
-                }
-            }
-            boolean failed = !CompatWrapper.isValid(output);
-            for (Object o : inputs)
-                failed = failed || o == null;
-            if (failed) { throw new NullPointerException("output: " + output + " inputs: " + inputs); }
-            String group = PokecubeMod.ID;
-            if (recipe.shapeless) try
-            {
-                RecipeJsonHelper.addShapelessRecipe(group, output, inputs.toArray());
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                System.err.println("Error with Recipe for " + output);
-                if (output != null && output.hasTag()) System.err.println(output.getTag());
-            }
-            else RecipeJsonHelper.addShapedRecipe(group, output, inputs.toArray());
-            RecipeJsonHelper.generateConstants();
-
-        }
-
-        @Override
-        public String serialize(XMLRecipe recipe)
-        {
-
-            return IRecipeParser.super.serialize(recipe);
-        }
-
-    }
-
-    static
-    {
-        recipeParsers.put("default", new DefaultParser());
-        recipeParsers.put("move_effect", new PokemobMoveRecipeParser());
-    }
-
-    @XmlRootElement(name = "Recipes")
-    public static class XMLRecipes
-    {
-        @XmlElement(name = "Recipe")
-        public List<XMLRecipe> recipes = Lists.newArrayList();
-    }
-
     @XmlRootElement(name = "Recipe")
     public static class XMLRecipe
     {
@@ -116,17 +42,8 @@ public class XMLRecipeHandler
         @Override
         public String toString()
         {
-            return "output: " + output + " inputs: " + inputs + " shapeless: " + shapeless + " map: " + map;
-        }
-    }
-
-    @XmlRootElement(name = "Output")
-    public static class XMLRecipeOutput extends Drop
-    {
-        @Override
-        public String toString()
-        {
-            return "values: " + values + " tag: " + tag;
+            return "output: " + this.output + " inputs: " + this.inputs + " shapeless: " + this.shapeless + " map: "
+                    + this.map;
         }
     }
 
@@ -139,36 +56,60 @@ public class XMLRecipeHandler
         @Override
         public String toString()
         {
-            return "values: " + values + " tag: " + tag + " key: " + key;
+            return "values: " + this.values + " tag: " + this.tag + " key: " + this.key;
         }
     }
 
-    public static ItemStack getStack(Drop drop)
+    @XmlRootElement(name = "Output")
+    public static class XMLRecipeOutput extends Drop
     {
-        Map<QName, String> values = drop.values;
-        if (drop.tag != null)
+        @Override
+        public String toString()
         {
-            QName name = new QName("tag");
-            values.put(name, drop.tag);
+            return "values: " + this.values + " tag: " + this.tag;
         }
-        return Tools.getStack(drop.values);
     }
 
-    public static void addRecipe(XMLRecipe recipe)
+    @XmlRootElement(name = "Recipes")
+    public static class XMLRecipes
     {
-        IRecipeParser parser = recipeParsers.get(recipe.handler);
+        @XmlElement(name = "Recipe")
+        public List<XMLRecipe> recipes = Lists.newArrayList();
+    }
+
+    public static Set<ResourceLocation> recipeFiles = Sets.newHashSet();
+
+    public static Map<String, IRecipeParser> recipeParsers = Maps.newHashMap();
+
+    static
+    {
+        // TODO re-implement the PokemobMoveRecipeParser...
+        // recipeParsers.put("move_effect", new PokemobMoveRecipeParser());
+    }
+
+    public static void addRecipe(final XMLRecipe recipe)
+    {
+        final IRecipeParser parser = XMLRecipeHandler.recipeParsers.get(recipe.handler);
         try
         {
-            if (PokecubeMod.debug)
-            {
-                PokecubeMod.log("Recipe Handler: " + recipe.handler + " Parser: " + parser);
-            }
+            if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Recipe Handler: " + recipe.handler + " Parser: " + parser);
             parser.manageRecipe(recipe);
 
         }
-        catch (NullPointerException e)
+        catch (final NullPointerException e)
         {
-            PokecubeMod.log(Level.WARNING, "Error with a recipe, Error for: " + recipe, e);
+            PokecubeCore.LOGGER.error("Error with a recipe, Error for: " + recipe, e);
         }
+    }
+
+    public static ItemStack getStack(final Drop drop)
+    {
+        final Map<QName, String> values = drop.values;
+        if (drop.tag != null)
+        {
+            final QName name = new QName("tag");
+            values.put(name, drop.tag);
+        }
+        return Tools.getStack(drop.values);
     }
 }

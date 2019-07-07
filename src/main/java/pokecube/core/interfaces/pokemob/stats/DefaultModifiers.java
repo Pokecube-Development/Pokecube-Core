@@ -4,22 +4,22 @@ import pokecube.core.interfaces.IPokemob.Stats;
 
 public class DefaultModifiers implements IStatsModifiers
 {
+    public float[] values = new float[Stats.values().length];
+
     public DefaultModifiers()
     {
     }
 
-    public float[] values = new float[Stats.values().length];
-
     @Override
-    public boolean persistant()
+    public float getModifier(Stats stat)
     {
-        return false;
+        return this.modifierToRatio((byte) this.values[stat.ordinal()], stat.ordinal() > 5);
     }
 
     @Override
-    public boolean isFlat()
+    public float getModifierRaw(Stats stat)
     {
-        return false;
+        return this.values[stat.ordinal()];
     }
 
     @Override
@@ -29,21 +29,9 @@ public class DefaultModifiers implements IStatsModifiers
     }
 
     @Override
-    public float getModifier(Stats stat)
+    public boolean isFlat()
     {
-        return modifierToRatio((byte) values[stat.ordinal()], stat.ordinal() > 5);
-    }
-
-    @Override
-    public void setModifier(Stats stat, float value)
-    {
-        values[stat.ordinal()] = value;
-    }
-
-    @Override
-    public float getModifierRaw(Stats stat)
-    {
-        return values[stat.ordinal()];
+        return false;
     }
 
     public float modifierToRatio(byte mod, boolean accuracy)
@@ -63,6 +51,18 @@ public class DefaultModifiers implements IStatsModifiers
         else if (mod == -5) modifier = !accuracy ? 2 / 7f : 3 / 8f;
         else if (mod == -6) modifier = !accuracy ? 1 / 4f : 3 / 9f;
         return modifier;
+    }
+
+    @Override
+    public boolean persistant()
+    {
+        return false;
+    }
+
+    @Override
+    public void setModifier(Stats stat, float value)
+    {
+        this.values[stat.ordinal()] = value;
     }
 
 }

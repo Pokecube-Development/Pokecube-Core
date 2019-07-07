@@ -23,31 +23,21 @@ public class Contributor
     {
         ResourceLocation id = PokecubeBehavior.DEFAULTCUBE;
         override:
-        if (!cubeOverride.isEmpty())
+        if (!this.cubeOverride.isEmpty())
         {
-            id = new ResourceLocation(cubeOverride);
-            for (ResourceLocation h : IPokecube.BEHAVIORS.getKeys())
-            {
-                if (h.equals(id))
-                {
-                    break override;
-                }
-            }
+            id = new ResourceLocation(this.cubeOverride);
+            for (final ResourceLocation h : IPokecube.BEHAVIORS.getKeys())
+                if (h.equals(id)) break override;
             id = PokecubeBehavior.DEFAULTCUBE;
         }
         else
         {
             id = new ResourceLocation("pokecube:park");
-            for (ResourceLocation h : IPokecube.BEHAVIORS.getKeys())
-            {
-                if (h.equals(id))
-                {
-                    break override;
-                }
-            }
+            for (final ResourceLocation h : IPokecube.BEHAVIORS.getKeys())
+                if (h.equals(id)) break override;
             id = PokecubeBehavior.DEFAULTCUBE;
         }
-        ItemStack stack = new ItemStack(PokecubeItems.getFilledCube(id));
+        final ItemStack stack = new ItemStack(PokecubeItems.getFilledCube(id));
         return stack;
     }
 

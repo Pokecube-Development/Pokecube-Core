@@ -1,238 +1,158 @@
 package pokecube.core.client.gui.pokemob;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
-import com.mcf.davidee.nbteditpqb.gui.GuiTextField;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiListExtended;
-import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
-import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.ExtendedList.AbstractListEntry;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import pokecube.core.client.Resources;
-import pokecube.core.client.gui.GuiPokemob;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.entity.pokemobs.ContainerPokemob;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.network.pokemobs.PacketAIRoutine;
 import pokecube.core.network.pokemobs.PacketPokemobGui;
+import pokecube.nbtedit.gui.TextFieldWidget2;
 
-public class GuiPokemobAI extends GuiContainer
+public class GuiPokemobAI extends ContainerScreen<ContainerPokemob>
 {
-    final IInventory playerInventory;
-    final IInventory pokeInventory;
-    final IPokemob   pokemob;
-    final Entity     entity;
-    GuiListExtended  list;
-    private float    yRenderAngle = 10;
-    private float    xRenderAngle = 0;
-
-    public GuiPokemobAI(IInventory playerInv, IPokemob pokemob)
+    private static class Entry extends AbstractListEntry<Entry>
     {
-        super(new ContainerPokemob(playerInv, pokemob.getPokemobInventory(), pokemob, false));
-        this.pokemob = pokemob;
-        this.playerInventory = playerInv;
-        this.pokeInventory = pokemob.getPokemobInventory();
-        this.entity = pokemob.getEntity();
+        final IPokemob pokemob;
+        final Button   wrapped;
+        int            top;
+
+        public Entry(final Button wrapped, final IPokemob pokemob)
+        {
+            this.wrapped = wrapped;
+            this.pokemob = pokemob;
+            this.wrapped.visible = false;
+            this.wrapped.active = false;
+            this.top = wrapped.y;
+        }
+
+        @Override
+        public void render(final int slotIndex, final int y, final int x, final int listWidth, final int slotHeight,
+                final int mouseX, final int mouseY, final boolean isSelected, final float partialTicks)
+        {
+            this.wrapped.visible = false;
+            this.wrapped.active = false;
+            if (y > this.top && y < this.top + 50)
+            {
+                final AIRoutine routine = AIRoutine.values()[slotIndex];
+                final boolean state = this.pokemob.isRoutineEnabled(routine);
+                AbstractGui.fill(x + 41, y + 1, x + 80, y + 10, state ? 0xFF00FF00 : 0xFFFF0000);
+                AbstractGui.fill(x, y + 10, x + 40, y + 11, 0xFF000000);
+                this.wrapped.x = x;
+                this.wrapped.y = y;
+                this.wrapped.visible = true;
+                this.wrapped.active = true;
+            }
+            else
+            {
+                this.wrapped.visible = false;
+                this.wrapped.active = false;
+            }
+        }
+
     }
 
-    final List<GuiTextField> textInputs = Lists.newArrayList();
+    final PlayerInventory playerInventory;
+    final IInventory      pokeInventory;
+    final IPokemob        pokemob;
+    final Entity          entity;
+    ScrollGui<Entry>      list;
+    private float         yRenderAngle = 10;
 
-    @Override
-    /** Draws the background (i is always 0 as of 1.2.2) */
-    public void drawBackground(int tint)
+    private float xRenderAngle = 0;
+
+    final List<TextFieldWidget2> textInputs = Lists.newArrayList();
+
+    public GuiPokemobAI(final ContainerPokemob container, final PlayerInventory inventory)
     {
-        super.drawBackground(tint);
+        super(container, inventory, container.pokemob.getDisplayName());
+        this.pokemob = container.pokemob;
+        this.playerInventory = inventory;
+        this.pokeInventory = this.pokemob.getInventory();
+        this.entity = this.pokemob.getEntity();
     }
 
     @Override
-    public void drawWorldBackground(int tint)
+    protected void drawGuiContainerBackgroundLayer(final float partialTicks, final int mouseX, final int mouseY)
     {
-        super.drawWorldBackground(tint);
+        super.renderBackground();
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindTexture(Resources.GUI_POKEMOB);
+        final int k = (this.width - this.xSize) / 2;
+        final int l = (this.height - this.ySize) / 2;
+        this.blit(k, l, 0, 0, this.xSize, this.ySize);
+        this.yRenderAngle = -this.entity.rotationYaw + 45;
+        this.xRenderAngle = 0;
+        GuiPokemob.renderMob(this.pokemob.getEntity(), k, l, this.xSize, this.ySize, this.xRenderAngle,
+                this.yRenderAngle, 0, 1);
+    }
+
+    /**
+     * Draw the foreground layer for the ContainerScreen (everything in front of
+     * the items)
+     */
+    @Override
+    protected void drawGuiContainerForegroundLayer(final int mouseX, final int mouseY)
+    {
+        this.font.drawString(this.getTitle().getFormattedText(), 8, 6, 4210752);
+        this.font.drawString(this.playerInventory.getName().getFormattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
     @Override
-    public void handleMouseInput() throws IOException
+    public void init()
     {
-        super.handleMouseInput();
-        this.list.handleMouseInput();
-    }
-
-    @Override
-    public void initGui()
-    {
-        super.initGui();
-        buttonList.clear();
-        int xOffset = width / 2 - 10;
-        int yOffset = height / 2 - 77;
-        buttonList.add(new GuiButton(0, xOffset + 60, yOffset, 30, 10, I18n.format("pokemob.gui.inventory")));
-        buttonList.add(new GuiButton(1, xOffset + 30, yOffset, 30, 10, I18n.format("pokemob.gui.storage")));
-        buttonList.add(new GuiButton(2, xOffset + 00, yOffset, 30, 10, I18n.format("pokemob.gui.routes")));
-        yOffset += 13;
+        super.init();
+        int xOffset = this.width / 2 - 10;
+        int yOffset = this.height / 2 - 77;
+        this.addButton(new Button(xOffset + 60, yOffset, 30, 10, I18n.format("pokemob.gui.inventory"),
+                b -> PacketPokemobGui.sendPagePacket(PacketPokemobGui.MAIN, this.entity.getEntityId())));
+        this.addButton(new Button(xOffset + 30, yOffset, 30, 10, I18n.format("pokemob.gui.storage"),
+                b -> PacketPokemobGui.sendPagePacket(PacketPokemobGui.STORAGE, this.entity.getEntityId())));
+        this.addButton(new Button(xOffset + 00, yOffset, 30, 10, I18n.format("pokemob.gui.routes"),
+                b -> PacketPokemobGui.sendPagePacket(PacketPokemobGui.ROUTES, this.entity.getEntityId())));
+        yOffset += 9;
         xOffset += 2;
-        final List<IGuiListEntry> entries = Lists.newArrayList();
+        this.list = new ScrollGui<>(this, this.minecraft, 90, 50, 10, xOffset, yOffset);
+        this.list.smoothScroll = false;
         for (int i = 0; i < AIRoutine.values().length; i++)
         {
             String name = AIRoutine.values()[i].toString();
             if (name.length() > 6) name = name.substring(0, 6);
-            entries.add(new Entry(new GuiButton(i, xOffset, yOffset + i * 10, 40, 10, name), yOffset, mc, pokemob));
-        }
-        list = new ScrollGui(mc, 88, 50, 10, xOffset, yOffset, entries);
-    }
-
-    @Override
-    protected void keyTyped(char par1, int par2) throws IOException
-    {
-        super.keyTyped(par1, par2);
-    }
-
-    /** Called when the mouse is clicked. */
-    @Override
-    protected void mouseClicked(int x, int y, int mouseButton)
-    {
-        try
-        {
-            super.mouseClicked(x, y, mouseButton);
-            this.list.mouseClicked(x, y, mouseButton);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    /** Called when a mouse button is released. */
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state)
-    {
-        super.mouseReleased(mouseX, mouseY, state);
-        this.list.mouseReleased(mouseX, mouseY, state);
-    }
-
-    /** Draw the foreground layer for the GuiContainer (everything in front of
-     * the items) */
-    @Override
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
-    {
-        this.fontRenderer.drawString(this.pokeInventory.hasCustomName() ? this.pokeInventory.getName()
-                : I18n.format(this.pokeInventory.getName(), new Object[0]), 8, 6, 4210752);
-        this.fontRenderer.drawString(this.playerInventory.hasCustomName() ? this.playerInventory.getName()
-                : I18n.format(this.playerInventory.getName(), new Object[0]), 8, this.ySize - 96 + 2, 4210752);
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton guibutton)
-    {
-        if (guibutton.id == 0)
-        {
-            PacketPokemobGui.sendPagePacket(PacketPokemobGui.MAIN, entity.getEntityId());
-        }
-        else if (guibutton.id == 1)
-        {
-            PacketPokemobGui.sendPagePacket(PacketPokemobGui.STORAGE, entity.getEntityId());
-        }
-        else if (guibutton.id == 2)
-        {
-            PacketPokemobGui.sendPagePacket(PacketPokemobGui.ROUTES, entity.getEntityId());
-        }
-        else
-        {
-            this.list.actionPerformed(guibutton);
-        }
-    }
-
-    @Override
-    public void drawScreen(int i, int j, float f)
-    {
-        super.drawScreen(i, j, f);
-        this.list.drawScreen(i, j, f);
-        this.renderHoveredToolTip(i, j);
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
-    {
-        super.drawDefaultBackground();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(Resources.GUI_POKEMOB);
-        int k = (this.width - this.xSize) / 2;
-        int l = (this.height - this.ySize) / 2;
-        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
-        yRenderAngle = -entity.rotationYaw + 45;
-        xRenderAngle = 0;
-        GuiPokemob.renderMob(pokemob, k, l, xSize, ySize, xRenderAngle, yRenderAngle, 0, 1);
-    }
-
-    private static class Entry implements IGuiListEntry
-    {
-        final GuiButton wrapped;
-        final int       offsetY;
-        final Minecraft mc;
-        final IPokemob  pokemob;
-
-        public Entry(GuiButton guiButton, int offsetY, Minecraft mc, IPokemob pokemob)
-        {
-            this.wrapped = guiButton;
-            this.offsetY = offsetY;
-            this.mc = mc;
-            this.pokemob = pokemob;
-        }
-
-        @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY,
-                boolean isSelected, float partialTicks)
-        {
-            boolean fits = true;
-            wrapped.x = x - 2;
-            wrapped.y = y - 4;
-            fits = wrapped.y >= offsetY;
-            fits = fits && wrapped.y + 10 <= offsetY + 50;
-            if (fits)
+            final int index = i;
+            final Button button = new Button(xOffset, yOffset, 40, 10, name, b ->
             {
-                wrapped.drawButton(mc, mouseX, mouseY, partialTicks);
-                AIRoutine routine = AIRoutine.values()[slotIndex];
-                boolean state = pokemob.isRoutineEnabled(routine);
-                Gui.drawRect(wrapped.x + 41, wrapped.y + 1, wrapped.x + 80, wrapped.y + 10,
-                        state ? 0xFF00FF00 : 0xFFFF0000);
-                Gui.drawRect(wrapped.x, wrapped.y + 10, wrapped.x + 40, wrapped.y + 11, 0xFF000000);
-            }
+                final AIRoutine routine = AIRoutine.values()[index];
+                final boolean state = !this.pokemob.isRoutineEnabled(routine);
+                this.pokemob.setRoutineState(routine, state);
+                PacketAIRoutine.sentCommand(this.pokemob, routine, state);
+            });
+            this.addButton(button);
+            this.list.addEntry(new Entry(button, this.pokemob));
         }
+        this.children.add(this.list);
+    }
 
-        @Override
-        public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY)
-        {
-            boolean fits = true;
-            fits = wrapped.y >= offsetY;
-            fits = fits && wrapped.y + 10 <= offsetY + 52;
-            if (fits)
-            {
-                AIRoutine routine = AIRoutine.values()[slotIndex];
-                boolean state = !pokemob.isRoutineEnabled(routine);
-                pokemob.setRoutineState(routine, state);
-                PacketAIRoutine.sentCommand(pokemob, routine, state);
-            }
-            return fits;
-        }
-
-        @Override
-        public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY)
-        {
-        }
-
-        @Override
-        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
-        {
-
-        }
-
+    @Override
+    public void render(final int x, final int y, final float f)
+    {
+        super.render(x, y, f);
+        for (int i = 3; i < this.buttons.size(); i++)
+            this.buttons.get(i).visible = false;
+        this.list.render(x, y, f);
+        this.renderHoveredToolTip(x, y);
     }
 }

@@ -3,8 +3,6 @@ package pokecube.core.moves.templates;
 import java.util.Random;
 
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.moves.PokemobTerrainEffects;
 import pokecube.core.network.packets.PacketSyncTerrain;
@@ -18,44 +16,45 @@ public class Move_Terrain extends Move_Basic
     public final int effect;
     public int       duration = 300;
 
-    /** See TerrainSegment for the types of effects.
-     * 
+    /**
+     * See TerrainSegment for the types of effects.
+     *
      * @param name
-     * @param effect */
+     * @param effect
+     */
     public Move_Terrain(String name)
     {
         super(name);
-        this.effect = move.baseEntry.extraInfo;
+        this.effect = this.move.baseEntry.extraInfo;
     }
 
     @Override
-    /** Called after the attack for special post attack treatment.
-     * 
+    /**
+     * Called after the attack for special post attack treatment.
+     *
      * @param attacker
      * @param attacked
      * @param f
      * @param finalAttackStrength
-     *            the number of HPs the attack takes from target */
+     *            the number of HPs the attack takes from target
+     */
     public void doWorldAction(IPokemob attacker, Vector3 location)
     {
-        if (attacker.getMoveStats().SPECIALCOUNTER > 0) { return; }
+        if (attacker.getMoveStats().SPECIALCOUNTER > 0) return;
         attacker.getMoveStats().SPECIALCOUNTER = 20;
 
-        duration = 300 + new Random().nextInt(600);
-        World world = attacker.getEntity().getEntityWorld();
-        TerrainSegment segment = TerrainManager.getInstance().getTerrian(world, location);
+        this.duration = 300 + new Random().nextInt(600);
+        final World world = attacker.getEntity().getEntityWorld();
+        final TerrainSegment segment = TerrainManager.getInstance().getTerrian(world, location);
 
-        PokemobTerrainEffects teffect = (PokemobTerrainEffects) segment.geTerrainEffect("pokemobEffects");
+        final PokemobTerrainEffects teffect = (PokemobTerrainEffects) segment.geTerrainEffect("pokemobEffects");
         // TODO check if effect already exists, and send message if so.
         // Otherwise send the it starts to effect message
 
-        teffect.setEffect(effect, duration + world.getGameTime());
+        teffect.setEffect(this.effect, this.duration + world.getGameTime());
 
-        if (FMLCommonHandler.instance().getEffectiveSide() == Dist.DEDICATED_SERVER)
-        {
-            PacketSyncTerrain.sendTerrainEffects(attacker.getEntity(), segment.chunkX, segment.chunkY, segment.chunkZ,
-                    teffect);
-        }
+        if (attacker.getEntity().isServerWorld()) PacketSyncTerrain.sendTerrainEffects(attacker.getEntity(),
+                segment.chunkX, segment.chunkY, segment.chunkZ, teffect);
 
     }
 

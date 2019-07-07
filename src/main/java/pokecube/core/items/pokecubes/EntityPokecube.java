@@ -2,18 +2,12 @@ package pokecube.core.items.pokecubes;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.UUID;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -21,41 +15,27 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraft.world.ServerWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraft.world.storage.loot.LootTable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
-import pokecube.core.PokecubeItems;
-import pokecube.core.events.CaptureEvent;
-import pokecube.core.events.CaptureEvent.Pre;
-import pokecube.core.interfaces.IPokecube;
-import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.capabilities.CapabilityPokemob;
-import pokecube.core.interfaces.pokemob.ai.CombatStates;
-import pokecube.core.interfaces.pokemob.ai.GeneralStates;
-import pokecube.core.interfaces.pokemob.ai.LogicStates;
+import pokecube.core.PokecubeCore;
+import pokecube.core.events.pokemob.CaptureEvent;
 import pokecube.core.network.packets.PacketPokecube;
-import pokecube.core.utils.TagNames;
 import pokecube.core.utils.Tools;
 import thut.api.maths.Vector3;
-import thut.lib.CompatWrapper;
 
 public class EntityPokecube extends EntityPokecubeBase
 {
+
     public static class CollectEntry
     {
         static CollectEntry createFromNBT(CompoundNBT nbt)
         {
-            String player = nbt.getString("player");
-            long time = nbt.getLong("time");
+            final String player = nbt.getString("player");
+            final long time = nbt.getLong("time");
             return new CollectEntry(player, time);
         }
 
@@ -70,21 +50,22 @@ public class EntityPokecube extends EntityPokecubeBase
 
         void writeToNBT(CompoundNBT nbt)
         {
-            nbt.putString("player", player);
-            nbt.putLong("time", time);
+            nbt.putString("player", this.player);
+            nbt.putLong("time", this.time);
         }
     }
 
     public static class LootEntry
     {
-        final ItemStack loot;
-        final int       rolls;
-
         static LootEntry createFromNBT(CompoundNBT nbt)
         {
-            ItemStack loot = new ItemStack(nbt.getCompound("loot"));
+            final ItemStack loot = ItemStack.read(nbt.getCompound("loot"));
             return new LootEntry(loot, nbt.getInt("rolls"));
         }
+
+        final ItemStack loot;
+
+        final int rolls;
 
         public LootEntry(ItemStack loot, int rolls)
         {
@@ -94,12 +75,21 @@ public class EntityPokecube extends EntityPokecubeBase
 
         void writeToNBT(CompoundNBT nbt)
         {
-            CompoundNBT loot = new CompoundNBT();
-            this.loot.writeToNBT(loot);
+            final CompoundNBT loot = new CompoundNBT();
+            this.loot.write(loot);
             nbt.put("loot", loot);
-            nbt.putInt("rolls", rolls);
+            nbt.putInt("rolls", this.rolls);
         }
 
+    }
+
+    public static final EntityType<EntityPokecube> TYPE;
+
+    static
+    {
+        TYPE = EntityType.Builder.create(EntityPokecube::new, EntityClassification.MISC)
+                .setShouldReceiveVelocityUpdates(true).setTrackingRange(32).setUpdateInterval(1).disableSummoning()
+                .immuneToFire().size(0.25f, 0.25f).build("pokecube");
     }
 
     public long                    reset      = 0;
@@ -108,619 +98,218 @@ public class EntityPokecube extends EntityPokecubeBase
     public ArrayList<LootEntry>    loot       = Lists.newArrayList();
     public ArrayList<ItemStack>    lootStacks = Lists.newArrayList();
 
-    public EntityPokecube(World world)
+    public EntityPokecube(EntityType<? extends EntityPokecubeBase> type, World worldIn)
     {
-        super(world);
-        resetTime = 10000;
+        super(type, worldIn);
     }
 
-    public EntityPokecube(World world, LivingEntity shootingEntity, ItemStack ItemEntity)
+    public void addLoot(LootEntry entry)
     {
-        this(world);
-        if (shootingEntity != null)
-        {
-            Vector3 start = Vector3.getNewVector().set(shootingEntity, false);
-            Vector3 dir = Vector3.getNewVector().set(shootingEntity.getLookVec());
-            start.addTo(dir).moveEntity(this);
-            setVelocity(speed, dir);
-            shooter = shootingEntity.getPersistentID();
-        }
-        this.setItem(ItemEntity);
-        this.shootingEntity = shootingEntity;
-        if (PokecubeManager.hasMob(ItemEntity)) tilt = -2;
+        this.loot.add(entry);
+        for (int i = 0; i < entry.rolls; i++)
+            this.lootStacks.add(entry.loot);
     }
 
-    /** Applies a velocity to each of the entities pushing them away from each
-     * other. Args: entity */
-    @Override
-    public void applyEntityCollision(Entity e)
+    public boolean cannotCollect(Entity e)
     {
-        if (e == shootingEntity || isReleasing() || getEntityWorld().isRemote || e instanceof EntityPokecube
-                || e.isDead)
-        {
-            if (CapabilityPokemob.getPokemobFor(e) == null) super.applyEntityCollision(e);
-            return;
-        }
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
-        if (shootingEntity != null && pokemob != null && pokemob.getPokemonOwner() == shootingEntity) { return; }
-        if (e instanceof MobEntity && pokemob != null && ((MobEntity) e).getHealth() > 0 && tilt == -1)
-        {
-            captureAttempt(e);
-        }
-        else if (PokecubeManager.isFilled(getItem()))
-        {
-            IPokemob entity1 = CapabilityPokemob.getPokemobFor(sendOut());
-            if (entity1 != null && shootingEntity != null)
+        if (e == null) return false;
+        final String name = e.getCachedUniqueIdString();
+        for (final CollectEntry s : this.players)
+            if (s.player.equals(name))
             {
-                if (e instanceof LivingEntity)
+                if (this.resetTime > 0)
                 {
-                    LivingEntity entityHit = (LivingEntity) e;
-                    if (pokemob != null && entity1.getPokemonOwnerID() != null
-                            && entity1.getPokemonOwnerID().equals(pokemob.getPokemonOwnerID()))
+                    final long diff = this.getEntityWorld().getGameTime() - s.time;
+                    if (diff > this.resetTime)
                     {
-                        // do not attack a mob of the same team.
-                    }
-                    else
-                    {
-                        entity1.getEntity().setAttackTarget(entityHit);
-                        entity1.setCombatState(CombatStates.ANGRY, true);
-                        entity1.setLogicState(LogicStates.SITTING, false);
-                        if (entityHit instanceof EntityCreature)
-                        {
-                            ((EntityCreature) entityHit).setAttackTarget(entity1.getEntity());
-                        }
-                        if (pokemob != null)
-                        {
-                            pokemob.setCombatState(CombatStates.ANGRY, true);
-                        }
+                        this.players.remove(s);
+                        return false;
                     }
                 }
+                return true;
             }
-        }
-        else if (tilt == -1 && e instanceof MobEntity && getItem().getItem() instanceof IPokecube)
-        {
-            IPokecube cube = (IPokecube) getItem().getItem();
-            if (cube.canCapture((MobEntity) e, getItem()))
-            {
-                captureAttempt(e);
-            }
-        }
-        else
-        {
-            if (e instanceof PlayerEntity)
-            {
-                this.processInteract((PlayerEntity) e, Hand.MAIN_HAND);
-            }
-        }
+        return false;
     }
 
-    public Entity getOwner()
+    public EntityPokecube copy()
     {
-        if (PokecubeManager.isFilled(getItem()))
-        {
-            String name = PokecubeManager.getOwner(getItem());
-            if (!name.isEmpty())
-            {
-                UUID id = UUID.fromString(name);
-                PlayerEntity player = getEntityWorld().getPlayerEntityByUUID(id);
-                return player;
-            }
-        }
-        return null;
-    }
-
-    public Entity copy()
-    {
-        EntityPokecube copy = new EntityPokecube(getEntityWorld(), shootingEntity, getItem());
-        copy.posX = this.posX;
-        copy.posY = this.posY;
-        copy.posZ = this.posZ;
-        copy.motionX = this.motionX;
-        copy.motionY = this.motionY;
-        copy.motionZ = this.motionZ;
-        copy.setItem(getItem());
-        copy.tilt = this.tilt;
-        copy.time = this.time;
+        final EntityPokecube copy = new EntityPokecube(EntityPokecube.TYPE, this.getEntityWorld());
+        copy.copyLocationAndAnglesFrom(this);
+        copy.copyDataFromOld(this);
         return copy;
     }
 
     @Override
-    public void onCollideWithPlayer(PlayerEntity PlayerEntity)
+    public boolean processInitialInteract(PlayerEntity player, Hand hand)
     {
-        if (isLoot)
+        final ItemStack stack = player.getHeldItem(hand);
+        if (!player.getEntityWorld().isRemote)
         {
-            processInteract(PlayerEntity, Hand.MAIN_HAND);
-        }
-    }
-
-    /** Called to update the entity's position/logic. */
-    @Override
-    public void onUpdate()
-    {
-        this.portalCounter = 0;
-        if (isLoot) motionX = motionZ = 0;
-        super.onUpdate();
-        if (isLoot) return;
-        this.renderYawOffset = 0;
-        boolean releasing = isReleasing();
-
-        if (shooter != null && shootingEntity == null)
-        {
-            shootingEntity = getEntityWorld().getPlayerEntityByUUID(shooter);
-        }
-
-        if (releasing)
-        {
-            Entity mob = getReleased();
-            if (mob != null)
-            {
-                Vector3 diff = Vector3.getNewVector().set(mob).subtractFrom(v0.set(this));
-
-                if (diff.magSq() < 4)
+            if (player.isSneaking() && PokecubeManager.isFilled(this.getItem()) && player.abilities.isCreativeMode)
+                if (!stack.isEmpty())
                 {
-                    diff.norm().reverse().scalarMultBy(0.25 * diff.magSq() / 4d);
-                    motionX = diff.x;
-                    motionY = diff.y;
-                    motionZ = diff.z;
+                this.isLoot = true;
+                this.addLoot(new LootEntry(stack, 1));
+                return true;
                 }
-                else
-                {
-                    motionX = motionY = motionZ = 0;
-                }
-
-                IPokemob released = CapabilityPokemob.getPokemobFor(mob);
-                diff.set(mob);
-                this.getLookHelper().setLookPosition(diff.x, diff.y, diff.z, 360, 0);
-                this.getLookHelper().onUpdateLook();
-                this.rotationYaw = -this.rotationYawHead;
-                if (released == null || mob.isDead || !released.getGeneralState(GeneralStates.EXITINGCUBE))
-                    this.setDead();
-            }
-            else this.setDead();
-            return;
-        }
-
-        this.getLookHelper().setLookPosition(posX + motionX, posY + motionY, posZ + motionZ, 360, 0);
-        this.getLookHelper().onUpdateLook();
-        this.rotationYaw = -this.rotationYawHead;
-
-        if (PokecubeManager.isFilled(getItem())
-                || (getItem().hasTag() && getItem().getTag().hasKey(TagNames.MOBID)))
-            time--;
-
-        if (time == 0 && tilt >= 4) // Captured the pokemon
-        {
-            if (captureSucceed())
+            if (!this.isReleasing()) if (PokecubeManager.isFilled(this.getItem()))
             {
-                if (PokecubeManager.isFilled(getItem()))
+                if (player.isSneaking())
                 {
-                    CaptureEvent.Post event = new CaptureEvent.Post(this);
-                    MinecraftForge.EVENT_BUS.post(event);
+                    Tools.giveItem(player, this.getItem());
+                    this.remove();
                 }
-                else if (shootingEntity instanceof ServerPlayerEntity && !(shootingEntity instanceof FakePlayer))
-                {
-                    Tools.giveItem((PlayerEntity) shootingEntity, getItem());
-                }
-                else
-                {
-                    entityDropItem(getItem(), 0.5f);
-                }
-            }
-            setDead();
-            return;
-        }
-        else if (time < 0 && tilt >= 4)
-        {
-            if (shootingEntity != null)
-            {
-                Vector3 here = Vector3.getNewVector().set(this);
-                Vector3 dir = Vector3.getNewVector().set(shootingEntity);
-                double dist = dir.distanceTo(here);
-                dir.subtractFrom(here);
-                dir.scalarMultBy(1 / (dist));
-                dir.setVelocities(this);
-            }
-        }
-        else if (time <= 0 && tilt >= 0) // Missed the pokemon
-        {
-            captureFailed();
-            setDead();
-            return;
-        }
-
-        if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
-        {
-            float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-            this.prevRotationYaw = this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D
-                    / Math.PI);
-            this.prevRotationPitch = this.rotationPitch = (float) (Math.atan2(this.motionY, f) * 180.0D / Math.PI);
-        }
-
-        BlockPos pos = tilePos == null ? getPosition() : tilePos;
-        BlockState state = getEntityWorld().getBlockState(pos);
-
-        Block block = state.getBlock();
-        if (state.getMaterial() != Material.AIR)
-        {
-            AxisAlignedBB axisalignedbb = state.getBoundingBox(getEntityWorld(), pos);
-
-            if (axisalignedbb != null && axisalignedbb.contains(new Vec3d(this.posX, this.posY, this.posZ)))
-            {// contains in 1.12
-                this.inGround = true;
-                tilePos = pos;
-            }
-            if (state.getMaterial().isLiquid())
-            {
-                motionY += 0.1;
-            }
-        }
-        if (motionX == motionZ && motionZ == 0)
-        {
-            this.inGround = true;
-        }
-
-        if (this.inGround || tilt >= 0)
-        {
-            int j = block.getMetaFromState(state);
-
-            if (block == this.tile && j == this.inData)
-            {
-                ++this.ticksInGround;
+                else this.sendOut();
             }
             else
             {
-                this.inGround = false;
-                this.ticksInGround = 0;
-            }
-            if (tilt < 0 && !(targetEntity == null && targetLocation.isEmpty()))
-            {
-                if (PokecubeManager.hasMob(getItem()))
+                if (this.isLoot)
                 {
-                    sendOut();
-                }
-                else
-                {
-
-                }
-                return;
-            }
-        }
-        if (tilt > 0 || (targetEntity != null && targetEntity.isDead))
-        {
-            targetEntity = null;
-            if (!targetLocation.equals(Vector3.secondAxisNeg)) targetLocation.clear();
-        }
-
-        Vector3 target = Vector3.getNewVector();
-        if (targetEntity != null)
-        {
-            target.set(targetEntity);
-            if (targetEntity.getDistanceSq(this) < 4)
-            {
-                this.applyEntityCollision(targetEntity);
-            }
-        }
-        else
-        {
-            target.set(targetLocation);
-        }
-        if (!target.isEmpty() && target.y >= 0 && SEEKING)
-        {
-            Vector3 here = Vector3.getNewVector().set(this);
-            Vector3 dir = Vector3.getNewVector().set(target);
-            if (targetEntity != null)
-            {
-                dir.x += targetEntity.motionX;
-                dir.y += targetEntity.motionY;
-                dir.z += targetEntity.motionZ;
-            }
-            double dist = dir.distanceTo(here) / 2;
-            if (dist > 1) dist = 1;
-            dir.subtractFrom(here);
-            dir.scalarMultBy(dist);
-            dir.setVelocities(this);
-        }
-    }
-
-    @Override
-    public boolean processInteract(PlayerEntity player, Hand hand)
-    {
-        ItemStack stack = player.getHeldItem(hand);
-        if (!player.getEntityWorld().isRemote)
-        {
-            if (player.isSneaking() && PokecubeManager.isFilled(getItem()) && player.capabilities.isCreativeMode)
-            {
-                if (!stack.isEmpty())
-                {
-                    isLoot = true;
-                    addLoot(new LootEntry(stack, 1));
+                    if (this.cannotCollect(player)) return false;
+                    this.players.add(new CollectEntry(player.getCachedUniqueIdString(), this.getEntityWorld()
+                            .getGameTime()));
+                    ItemStack loot = ItemStack.EMPTY;
+                    if (!this.lootStacks.isEmpty())
+                    {
+                        loot = this.lootStacks.get(new Random().nextInt(this.lootStacks.size()));
+                        if (!loot.isEmpty())
+                        {
+                            PacketPokecube.sendMessage(player, this.getEntityId(), this.getEntityWorld().getGameTime()
+                                    + this.resetTime);
+                            Tools.giveItem(player, loot.copy());
+                        }
+                    }
+                    else if (this.lootTable != null)
+                    {
+                        final LootTable loottable = this.getEntityWorld().getServer().getLootTableManager()
+                                .getLootTableFromLocation(this.lootTable);
+                        final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) this
+                                .getEntityWorld()).withParameter(LootParameters.THIS_ENTITY, this);
+                        for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable
+                                .func_216122_a())))
+                            if (!itemstack.isEmpty()) Tools.giveItem(player, itemstack.copy());
+                        PacketPokecube.sendMessage(player, this.getEntityId(), this.getEntityWorld().getGameTime()
+                                + this.resetTime);
+                    }
                     return true;
                 }
-            }
-            if (!isReleasing())
-            {
-                if (PokecubeManager.isFilled(getItem())
-                        || (getItem().hasTag() && (getItem().getTag()).hasKey(TagNames.MOBID)))
-                {
-                    if (player.isSneaking())
-                    {
-                        Tools.giveItem(player, getItem());
-                        this.setDead();
-                    }
-                    else sendOut();
-                }
-                else
-                {
-                    if (isLoot)
-                    {
-                        if (cannotCollect(player)) return false;
-                        players.add(new CollectEntry(player.getCachedUniqueIdString(),
-                                getEntityWorld().getGameTime()));
-                        ItemStack loot = ItemStack.EMPTY;
-
-                        if (!lootStacks.isEmpty())
-                        {
-                            loot = lootStacks.get(new Random().nextInt(lootStacks.size()));
-                            if (CompatWrapper.isValid(loot))
-                            {
-                                PacketPokecube.sendMessage(player, getEntityId(),
-                                        getEntityWorld().getGameTime() + resetTime);
-                                Tools.giveItem(player, loot.copy());
-                            }
-                        }
-                        else if (lootTable != null)
-                        {
-                            LootTable loottable = getEntityWorld().getLootTableManager()
-                                    .getLootTableFromLocation(lootTable);
-                            LootContext.Builder lootcontext$builder = (new LootContext.Builder(
-                                    (ServerWorld) getEntityWorld())).withLootedEntity(this);
-                            for (ItemStack itemstack : loottable.generateLootForPools(getRNG(),
-                                    lootcontext$builder.build()))
-                            {
-                                if (CompatWrapper.isValid(itemstack))
-                                {
-                                    Tools.giveItem(player, itemstack.copy());
-                                }
-                            }
-                            PacketPokecube.sendMessage(player, getEntityId(),
-                                    getEntityWorld().getGameTime() + resetTime);
-                        }
-                        return true;
-                    }
-                    Tools.giveItem(player, getItem());
-                    this.setDead();
-                }
+                Tools.giveItem(player, this.getItem());
+                this.remove();
             }
         }
         return true;
     }
 
     @Override
-    public void readEntityFromNBT(CompoundNBT nbt)
+    public void readAdditional(CompoundNBT nbt)
     {
-        super.readEntityFromNBT(nbt);
-        isLoot = nbt.getBoolean("isLoot");
-        setReleasing(nbt.getBoolean("releasing"));
-        if (nbt.hasKey("resetTime")) resetTime = nbt.getLong("resetTime");
-        players.clear();
-        loot.clear();
-        lootStacks.clear();
-        if (nbt.hasKey("players", 9))
+        super.readAdditional(nbt);
+        this.isLoot = nbt.getBoolean("isLoot");
+        this.setReleasing(nbt.getBoolean("releasing"));
+        if (nbt.contains("resetTime")) this.resetTime = nbt.getLong("resetTime");
+        this.players.clear();
+        this.loot.clear();
+        this.lootStacks.clear();
+        if (nbt.contains("players", 9))
         {
-            ListNBT ListNBT = nbt.getTagList("players", 10);
+            final ListNBT ListNBT = nbt.getList("players", 10);
             for (int i = 0; i < ListNBT.size(); i++)
-                players.add(CollectEntry.createFromNBT(ListNBT.getCompound(i)));
+                this.players.add(CollectEntry.createFromNBT(ListNBT.getCompound(i)));
         }
-        if (nbt.hasKey("loot", 9))
+        if (nbt.contains("loot", 9))
         {
-            ListNBT ListNBT = nbt.getTagList("loot", 10);
+            final ListNBT ListNBT = nbt.getList("loot", 10);
             for (int i = 0; i < ListNBT.size(); i++)
-                addLoot(LootEntry.createFromNBT(ListNBT.getCompound(i)));
+                this.addLoot(LootEntry.createFromNBT(ListNBT.getCompound(i)));
         }
-        String lootTable = nbt.getString("lootTable");
-        if (!lootTable.isEmpty())
-        {
-            this.lootTable = new ResourceLocation(lootTable);
-        }
-    }
-
-    /** Sets the position and rotation. Only difference from the other one is no
-     * bounding on the rotation. Args: posX, posY, posZ, yaw, pitch */
-    @OnlyIn(Dist.CLIENT)
-    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_,
-            float p_70056_8_, int p_70056_9_)
-    {
-        this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-        this.setRotation(p_70056_7_, p_70056_8_);
-    }
-
-    public void setVelocity(double speed, Vector3 dir)
-    {
-        dir = dir.scalarMult(speed);
-        dir.setVelocities(this);
-    }
-
-    public void addLoot(LootEntry entry)
-    {
-        loot.add(entry);
-        for (int i = 0; i < entry.rolls; i++)
-            lootStacks.add(entry.loot);
+        final String lootTable = nbt.getString("lootTable");
+        if (!lootTable.isEmpty()) this.lootTable = new ResourceLocation(lootTable);
     }
 
     @Override
-    public void writeEntityToNBT(CompoundNBT nbt)
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy)
     {
-        super.writeEntityToNBT(nbt);
-        nbt.putLong("resetTime", resetTime);
-        nbt.putBoolean("isLoot", isLoot);
-        if (isReleasing())
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void tick()
+    {
+        final boolean filled = PokecubeManager.isFilled(this.getItem());
+        if (filled || this.isReleasing()) this.setTime(this.getTime() - 1);
+        if (this.isReleasing())
         {
-            nbt.putBoolean("releasing", true);
+            if (this.getTime() < 0 || this.getReleased() == null || !this.getReleased().isAlive()) this.remove();
+            return;
         }
+        if (this.getTime() <= 0 && this.tilt >= 4) // Captured the pokemon
+        {
+            if (this.captureSucceed())
+            {
+                boolean gave = false;
+                if (filled)
+                {
+                    final CaptureEvent.Post event = new CaptureEvent.Post(this);
+                    gave = PokecubeCore.POKEMOB_BUS.post(event);
+                }
+                else if (this.shootingEntity instanceof ServerPlayerEntity
+                        && !(this.shootingEntity instanceof FakePlayer))
+                {
+                    Tools.giveItem((PlayerEntity) this.shootingEntity, this.getItem());
+                    gave = true;
+                }
+                if (!gave) this.entityDropItem(this.getItem(), 0.5f);
+            }
+            this.remove();
+            return;
+        }
+        else if (this.getTime() < 0 && this.tilt >= 4)
+        {
+            if (this.shootingEntity != null)
+            {
+                final Vector3 here = Vector3.getNewVector().set(this);
+                final Vector3 dir = Vector3.getNewVector().set(this.shootingEntity);
+                final double dist = dir.distanceTo(here);
+                dir.subtractFrom(here);
+                dir.scalarMultBy(1 / dist);
+                dir.setVelocities(this);
+            }
+        }
+        else if (this.getTime() <= 0 && this.tilt >= 0) // Missed the pokemon
+        {
+            this.captureFailed();
+            this.remove();
+            return;
+        }
+        super.tick();
+    }
+
+    @Override
+    public void writeAdditional(CompoundNBT nbt)
+    {
+        super.writeAdditional(nbt);
+        nbt.putLong("resetTime", this.resetTime);
+        nbt.putBoolean("isLoot", this.isLoot);
+        if (this.isReleasing()) nbt.putBoolean("releasing", true);
         ListNBT ListNBT = new ListNBT();
-        for (CollectEntry entry : players)
+        for (final CollectEntry entry : this.players)
         {
-            CompoundNBT CompoundNBT = new CompoundNBT();
+            final CompoundNBT CompoundNBT = new CompoundNBT();
             entry.writeToNBT(CompoundNBT);
-            ListNBT.appendTag(CompoundNBT);
+            ListNBT.add(CompoundNBT);
         }
-        if (!players.isEmpty()) nbt.put("players", ListNBT);
+        if (!this.players.isEmpty()) nbt.put("players", ListNBT);
         ListNBT = new ListNBT();
-        for (LootEntry entry : loot)
+        for (final LootEntry entry : this.loot)
         {
-            CompoundNBT CompoundNBT = new CompoundNBT();
+            final CompoundNBT CompoundNBT = new CompoundNBT();
             entry.writeToNBT(CompoundNBT);
-            ListNBT.appendTag(CompoundNBT);
+            ListNBT.add(CompoundNBT);
         }
-        if (!loot.isEmpty()) nbt.put("loot", ListNBT);
-        if (lootTable != null) nbt.putString("lootTable", lootTable.toString());
+        if (!this.loot.isEmpty()) nbt.put("loot", ListNBT);
+        if (this.lootTable != null) nbt.putString("lootTable", this.lootTable.toString());
         else nbt.putString("lootTable", "");
     }
 
-    protected void captureAttempt(Entity e)
-    {
-        IPokemob hitten = CapabilityPokemob.getPokemobFor(e);
-        if (hitten != null)
-        {
-            if (hitten.getPokemonOwner() == shootingEntity) { return; }
-
-            int tiltBak = tilt;
-            CaptureEvent.Pre capturePre = new Pre(hitten, this);
-            MinecraftForge.EVENT_BUS.post(capturePre);
-            if (capturePre.isCanceled() || capturePre.getResult() == Result.DENY)
-            {
-                if (tilt != tiltBak)
-                {
-                    if (tilt == 5)
-                    {
-                        time = 10;
-                    }
-                    else
-                    {
-                        time = 20 * tilt;
-                    }
-                    hitten.setPokecube(getItem());
-                    setItem(PokecubeManager.pokemobToItem(hitten));
-                    PokecubeManager.setTilt(getItem(), tilt);
-                    hitten.getEntity().setDead();
-                    Vector3 v = Vector3.getNewVector();
-                    v.set(this).addTo(0, hitten.getPokedexEntry().height / 2, 0).moveEntity(this);
-                    motionX = 0;
-                    motionY = 0.1;
-                    motionZ = 0;
-                }
-            }
-            else
-            {
-                int n = Tools.computeCatchRate(hitten, PokecubeItems.getCubeId(getItem()));
-                tilt = n;
-
-                if (n == 5)
-                {
-                    time = 10;
-                }
-                else
-                {
-                    time = 20 * n;
-                }
-
-                hitten.setPokecube(getItem());
-                setItem(PokecubeManager.pokemobToItem(hitten));
-                PokecubeManager.setTilt(getItem(), n);
-                hitten.getEntity().setDead();
-                Vector3 v = Vector3.getNewVector();
-                v.set(this).addTo(0, hitten.getPokedexEntry().height / 2, 0).moveEntity(this);
-                motionX = 0;
-                motionY = 0.1;
-                motionZ = 0;
-            }
-        }
-        else if (e instanceof MobEntity && getItem().getItem() instanceof IPokecube)
-        {
-            IPokecube cube = (IPokecube) getItem().getItem();
-            MobEntity mob = (MobEntity) e;
-            int n = 0;
-            rate:
-            {
-                int catchRate = 250;// TODO configs for this?
-                double cubeBonus = cube.getCaptureModifier(mob, PokecubeItems.getCubeId(getItem()));
-                double statusbonus = 1;// TODO statuses for mobs?
-                double a = Tools.getCatchRate(mob.getMaxHealth(), mob.getHealth(), catchRate, cubeBonus, statusbonus);
-                if (a > 255)
-                {
-                    n = 5;
-                    break rate;
-                }
-                double b = 1048560 / Math.sqrt(Math.sqrt(16711680 / a));
-
-                if (rand.nextInt(65535) <= b)
-                {
-                    n++;
-                }
-
-                if (rand.nextInt(65535) <= b)
-                {
-                    n++;
-                }
-
-                if (rand.nextInt(65535) <= b)
-                {
-                    n++;
-                }
-
-                if (rand.nextInt(65535) <= b)
-                {
-                    n++;
-                }
-            }
-            tilt = n;
-
-            if (n == 5)
-            {
-                time = 10;
-            }
-            else
-            {
-                time = 20 * n;
-            }
-            ItemStack mobStack = getItem().copy();
-            if (!mobStack.hasTag()) mobStack.put(new CompoundNBT());
-            String id = EntityList.getKey(mob).toString();
-            mobStack.getTag().putString(TagNames.MOBID, id);
-            CompoundNBT mobTag = new CompoundNBT();
-            mob.writeToNBT(mobTag);
-            mobStack.getTag().put(TagNames.OTHERMOB, mobTag);
-            setItem(mobStack);
-            PokecubeManager.setTilt(getItem(), n);
-            mob.setDead();
-            Vector3 v = Vector3.getNewVector();
-            v.set(this).addTo(0, mob.height / 2, 0).moveEntity(this);
-            motionX = 0;
-            motionY = 0.1;
-            motionZ = 0;
-        }
-    }
-
-    public boolean cannotCollect(Entity e)
-    {
-        if (e == null) return false;
-        String name = e.getCachedUniqueIdString();
-        for (CollectEntry s : players)
-        {
-            if (s.player.equals(name))
-            {
-                if (resetTime > 0)
-                {
-                    long diff = getEntityWorld().getGameTime() - s.time;
-                    if (diff > resetTime)
-                    {
-                        players.remove(s);
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
 }

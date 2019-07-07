@@ -1,13 +1,7 @@
 package pokecube.core.handlers;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -16,793 +10,843 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.LoaderState;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.registries.ForgeRegistries;
+import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
-import pokecube.core.ai.thread.aiRunnables.combat.AIFindTarget;
-import pokecube.core.ai.thread.aiRunnables.idle.AIHungry;
-import pokecube.core.ai.thread.aiRunnables.idle.AIIdle;
-import pokecube.core.contributors.Contributor;
-import pokecube.core.contributors.ContributorManager;
-import pokecube.core.database.Database;
 import pokecube.core.database.Database.EnumDatabase;
 import pokecube.core.database.recipes.XMLRecipeHandler;
 import pokecube.core.database.rewards.XMLRewardsHandler;
 import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
-import pokecube.core.events.handlers.EventsHandler;
-import pokecube.core.events.handlers.SpawnHandler;
-import pokecube.core.events.handlers.SpawnHandler.FunctionVariance;
+import pokecube.core.events.pokemob.SpawnEvent.FunctionVariance;
+import pokecube.core.handlers.events.EventsHandler;
+import pokecube.core.handlers.events.SpawnHandler;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
-import pokecube.core.network.PokecubePacketHandler.StarterInfo;
 import pokecube.core.utils.PokecubeSerializer;
-import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
 import pokecube.core.world.terrain.PokecubeTerrainChecker;
-import thut.core.common.config.ConfigBase;
+import thut.core.common.config.Config.ConfigData;
 import thut.core.common.config.Configure;
 
-public class Config extends ConfigBase
+public class Config extends ConfigData
 {
-    public static final int              VERSION                      = 1;
+    public static final int VERSION = 1;
 
-    public static final String           spawning                     = "spawning";
-    public static final String           database                     = "database";
-    public static final String           world                        = "generation";
-    public static final String           mobAI                        = "ai";
-    public static final String           moves                        = "moves";
-    public static final String           misc                         = "misc";
-    public static final String           perms                        = "permissions";
-    public static final String           client                       = "client";
-    public static final String           advanced                     = "advanced";
-    public static final String           healthbars                   = "healthbars";
-    public static final String           genetics                     = "genetics";
-    public static final String           items                        = "items";
+    public static final String spawning = "spawning";
 
-    public static int                    GUICHOOSEFIRSTPOKEMOB_ID;
-    public static int                    GUIDISPLAYPOKECUBEINFO_ID;
-    public static int                    GUIDISPLAYTELEPORTINFO_ID;
-    public static int                    GUIPOKECENTER_ID;
-    public static int                    GUIPOKEDEX_ID;
-    public static int                    GUIPOKEWATCH_ID;
-    public static int                    GUIPOKEMOBSPAWNER_ID;
-    public static int                    GUIPC_ID;
-    public static int                    GUIPOKEMOB_ID;
-    public static int                    GUIPOKEMOBAI_ID;
-    public static int                    GUIPOKEMOBSTORE_ID;
-    public static int                    GUIPOKEMOBROUTE_ID;
-    public static int                    GUITRADINGTABLE_ID;
-    public static int                    GUITMTABLE_ID;
+    public static final String database   = "database";
+    public static final String world      = "generation";
+    public static final String mobAI      = "ai";
+    public static final String moves      = "moves";
+    public static final String misc       = "misc";
+    public static final String perms      = "permissions";
+    public static final String client     = "client";
+    public static final String advanced   = "advanced";
+    public static final String healthbars = "healthbars";
+    public static final String genetics   = "genetics";
+    public static final String items      = "items";
+    public static int          GUICHOOSEFIRSTPOKEMOB_ID;
 
-    public static Config                 instance;
+    public static int    GUIDISPLAYPOKECUBEINFO_ID;
+    public static int    GUIDISPLAYTELEPORTINFO_ID;
+    public static int    GUIPOKECENTER_ID;
+    public static int    GUIPOKEDEX_ID;
+    public static int    GUIPOKEWATCH_ID;
+    public static int    GUIPOKEMOBSPAWNER_ID;
+    public static int    GUIPC_ID;
+    public static int    GUIPOKEMOB_ID;
+    public static int    GUIPOKEMOBAI_ID;
+    public static int    GUIPOKEMOBSTORE_ID;
+    public static int    GUIPOKEMOBROUTE_ID;
+    public static int    GUITRADINGTABLE_ID;
+    public static int    GUITMTABLE_ID;
+    public static Config instance;
 
-    private static Config                defaults                     = new Config();
+    private static Config defaults = new Config();
+
+    private static SoundEvent getRegisteredSoundEvent(final String id)
+    {
+
+        final SoundEvent soundevent = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(id));
+        if (soundevent == null) throw new IllegalStateException("Invalid Sound requested: " + id);
+        else return soundevent;
+    }
+
     // Misc Settings
-    @Configure(category = misc, needsMcRestart = true)
-    public boolean                       default_contributors         = true;
-    @Configure(category = misc, needsMcRestart = true)
-    public String                        extra_contributors           = "";
-    @Configure(category = misc, needsMcRestart = true)
-    public boolean                       loginmessage                 = true;
-    @Configure(category = misc)
+    @Configure(category = Config.misc)
+    public boolean      default_contributors = true;
+    @Configure(category = Config.misc)
+    public String       extra_contributors   = "";
+    @Configure(category = Config.misc)
+    public boolean      loginmessage         = true;
+    @Configure(category = Config.misc)
     /** is there a choose first gui on login */
-    public boolean                       guiOnLogin                   = true;
-    @Configure(category = misc)
+    public boolean      guiOnLogin           = true;
+    @Configure(category = Config.misc)
     /** does defeating a tame pokemob give exp */
-    public boolean                       pvpExp                       = false;
-    @Configure(category = misc)
+    public boolean      pvpExp               = false;
+    @Configure(category = Config.misc)
     /** does defeating a tame pokemob give exp */
-    public double                        pvpExpMultiplier             = 0.5;
-    @Configure(category = misc)
+    public double       pvpExpMultiplier     = 0.5;
+    @Configure(category = Config.misc)
     /** does defeating a tame pokemob give exp */
-    public boolean                       trainerExp                   = true;
-    @Configure(category = misc)
-    public boolean                       mysterygift                  = true;
-    @Configure(category = misc, needsMcRestart = true)
-    public String                        defaultMobs                  = "";
-    @Configure(category = misc)
+    public boolean      trainerExp           = true;
+    @Configure(category = Config.misc)
+    public boolean      mysterygift          = true;
+    @Configure(category = Config.misc)
+    public String       defaultMobs          = "";
+    @Configure(category = Config.misc)
     @SyncConfig
-    public double                        scalefactor                  = 1;
-    @Configure(category = misc)
-    public boolean                       pcOnDrop                     = true;
-    @Configure(category = misc)
-    public float                         expScaleFactor               = 1;
-    @Configure(category = misc)
-    @SyncConfig
-    public boolean                       pcHoldsOnlyPokecubes         = true;
-    @Configure(category = misc)
-    public String[]                      snagblacklist                = { "net.minecraft.entity.boss.EntityDragon",
-            "net.minecraft.entity.boss.EntityWither" };
-    @Configure(category = misc)
-    public boolean                       defaultInteractions          = true;
-    @Configure(category = misc)
-    public boolean                       berryBreeding                = true;
-    @Configure(category = misc)
-    public String[]                      customSounds                 = {};
+    public double       scalefactor          = 1;
+    @Configure(category = Config.misc)
+    public boolean      pcOnDrop             = true;
+    @Configure(category = Config.misc)
+    public double       expScaleFactor       = 1;
+    @Configure(category = Config.misc, type = Type.SERVER)
+    public boolean      pcHoldsOnlyPokecubes = true;
+    @Configure(category = Config.misc)
+    public List<String> snagblacklist        = Lists.newArrayList(new String[] {
+            "net.minecraft.entity.boss.EntityDragon", "net.minecraft.entity.boss.EntityWither" });
+    @Configure(category = Config.misc)
+    public boolean      defaultInteractions  = true;
+    @Configure(category = Config.misc)
+    public boolean      berryBreeding        = true;
+    @Configure(category = Config.misc)
+    public List<String> customSounds         = Lists.newArrayList();
 
-    @Configure(category = perms)
-    public boolean                       permsCapture                 = false;
-    @Configure(category = perms)
-    public boolean                       permsCaptureSpecific         = false;
-    @Configure(category = perms)
-    public boolean                       permsHatch                   = false;
-    @Configure(category = perms)
-    public boolean                       permsHatchSpecific           = false;
-    @Configure(category = perms)
-    public boolean                       permsSendOut                 = false;
-    @Configure(category = perms)
-    public boolean                       permsSendOutSpecific         = false;
-    @Configure(category = perms)
-    public boolean                       permsRide                    = false;
-    @Configure(category = perms)
-    public boolean                       permsRideSpecific            = false;
-    @Configure(category = perms)
-    public boolean                       permsFly                     = false;
-    @Configure(category = perms)
-    public boolean                       permsFlySpecific             = false;
-    @Configure(category = perms)
-    public boolean                       permsSurf                    = false;
-    @Configure(category = perms)
-    public boolean                       permsSurfSpecific            = false;
-    @Configure(category = perms)
-    public boolean                       permsDive                    = false;
-    @Configure(category = perms)
-    public boolean                       permsDiveSpecific            = false;
-    @Configure(category = perms)
-    public boolean                       permsMoveAction              = false;
+    @Configure(category = Config.perms)
+    public boolean permsCapture         = false;
+    @Configure(category = Config.perms)
+    public boolean permsCaptureSpecific = false;
+    @Configure(category = Config.perms)
+    public boolean permsHatch           = false;
+    @Configure(category = Config.perms)
+    public boolean permsHatchSpecific   = false;
+    @Configure(category = Config.perms)
+    public boolean permsSendOut         = false;
+    @Configure(category = Config.perms)
+    public boolean permsSendOutSpecific = false;
+    @Configure(category = Config.perms)
+    public boolean permsRide            = false;
+    @Configure(category = Config.perms)
+    public boolean permsRideSpecific    = false;
+    @Configure(category = Config.perms)
+    public boolean permsFly             = false;
+    @Configure(category = Config.perms)
+    public boolean permsFlySpecific     = false;
+    @Configure(category = Config.perms)
+    public boolean permsSurf            = false;
+    @Configure(category = Config.perms)
+    public boolean permsSurfSpecific    = false;
+    @Configure(category = Config.perms)
+    public boolean permsDive            = false;
+    @Configure(category = Config.perms)
+    public boolean permsDiveSpecific    = false;
+    @Configure(category = Config.perms)
+    public boolean permsMoveAction      = false;
 
     // Move Use related settings
-    @Configure(category = moves)
-    public double                        contactAttackDistance        = 0;
-    @Configure(category = moves)
-    public double                        rangedAttackDistance         = 16;
-    @Configure(category = moves)
-    public double                        contactAttackDamageScale     = 1;
-    @Configure(category = moves)
-    public double                        rangedAttackDamageScale      = 1;
-    @Configure(category = moves)
+    @Configure(category = Config.moves)
+    public double  contactAttackDistance        = 0;
+    @Configure(category = Config.moves)
+    public double  rangedAttackDistance         = 16;
+    @Configure(category = Config.moves)
+    public double  contactAttackDamageScale     = 1;
+    @Configure(category = Config.moves)
+    public double  rangedAttackDamageScale      = 1;
+    @Configure(category = Config.moves)
     /** Scaling factor for pokemob explosions */
-    public double                        blastStrength                = 100;
-    @Configure(category = moves)
+    public double  blastStrength                = 100;
+    @Configure(category = Config.moves)
     /** Scaling factor for pokemob explosions */
-    public int                           blastRadius                  = 16;
-    @Configure(category = moves)
+    public int     blastRadius                  = 16;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public int                           maxWildPlayerDamage          = 10;
-    @Configure(category = moves)
+    public int     maxWildPlayerDamage          = 10;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public int                           maxOwnedPlayerDamage         = 10;
-    @Configure(category = moves)
+    public int     maxOwnedPlayerDamage         = 10;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public double                        wildPlayerDamageRatio        = 1;
-    @Configure(category = moves)
+    public double  wildPlayerDamageRatio        = 1;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public double                        wildPlayerDamageMagic        = 0.1;
-    @Configure(category = moves)
+    public double  wildPlayerDamageMagic        = 0.1;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public double                        ownedPlayerDamageRatio       = 1;
-    @Configure(category = moves)
+    public double  ownedPlayerDamageRatio       = 1;
+    @Configure(category = Config.moves)
     /** Capped damage to players by pok�mobs */
-    public double                        ownedPlayerDamageMagic       = 0.1;
-    @Configure(category = moves)
+    public double  ownedPlayerDamageMagic       = 0.1;
+    @Configure(category = Config.moves)
     /** Scaling factor for damage against not pokemobs */
-    public double                        pokemobToOtherMobDamageRatio = 1;
-    @Configure(category = moves)
+    public double  pokemobToOtherMobDamageRatio = 1;
+    @Configure(category = Config.moves)
     /** Scaling factor for damage against NPCs */
-    public double                        pokemobToNPCDamageRatio      = 1;
-    @Configure(category = moves)
-    public int                           baseSmeltingHunger           = 100;
-    @Configure(category = moves)
-    public boolean                       onlyPokemobsDamagePokemobs   = false;
-    @Configure(category = moves)
-    public float                         playerToPokemobDamageScale   = 1;
-    @Configure(category = moves)
-    public boolean                       defaultFireActions           = true;
-    @Configure(category = moves)
-    public boolean                       defaultWaterActions          = true;
-    @Configure(category = moves)
-    public boolean                       defaultElectricActions       = true;
-    @Configure(category = moves)
-    public boolean                       defaultIceActions            = true;
+    public double  pokemobToNPCDamageRatio      = 1;
+    @Configure(category = Config.moves)
+    public int     baseSmeltingHunger           = 100;
+    @Configure(category = Config.moves)
+    public boolean onlyPokemobsDamagePokemobs   = false;
+    @Configure(category = Config.moves)
+    public double  playerToPokemobDamageScale   = 1;
+    @Configure(category = Config.moves)
+    public boolean defaultFireActions           = true;
+    @Configure(category = Config.moves)
+    public boolean defaultWaterActions          = true;
+    @Configure(category = Config.moves)
+    public boolean defaultElectricActions       = true;
+    @Configure(category = Config.moves)
+    public boolean defaultIceActions            = true;
 
     // AI Related settings
-    @Configure(category = mobAI)
-    public int                           mateMultiplier               = 1;
-    @Configure(category = mobAI)
-    public float                         mateDensityWild              = 2;
-    @Configure(category = mobAI)
-    public int                           mateAIRate                   = 40;
-    @Configure(category = mobAI)
-    public float                         mateDensityPlayer            = 4;
-    @Configure(category = mobAI)
-    public int                           breedingDelay                = 4000;
-    @Configure(category = mobAI)
-    public int                           eggHatchTime                 = 10000;
-    @Configure(category = mobAI)
+    @Configure(category = Config.mobAI)
+    public int           mateMultiplier        = 1;
+    @Configure(category = Config.mobAI)
+    public double        mateDensityWild       = 2;
+    @Configure(category = Config.mobAI)
+    public int           mateAIRate            = 40;
+    @Configure(category = Config.mobAI)
+    public double        mateDensityPlayer     = 4;
+    @Configure(category = Config.mobAI)
+    public int           breedingDelay         = 4000;
+    @Configure(category = Config.mobAI)
+    public int           eggHatchTime          = 10000;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
     /** do wild pokemobs which leave cullDistance despawn immediately */
-    @SyncConfig
-    public boolean                       cull                         = false;
+    public boolean       cull                  = false;
     /** distance for culling */
-    @Configure(category = mobAI)
-    @SyncConfig
-    public int                           cullDistance                 = 96;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public boolean                       despawn                      = true;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public int           cullDistance          = 96;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public boolean       despawn               = true;
     /** distance for culling */
-    @Configure(category = mobAI)
-    public int                           despawnTimer                 = 2000;
-    @Configure(category = mobAI)
+    @Configure(category = Config.mobAI)
+    public int           despawnTimer          = 2000;
+    @Configure(category = Config.mobAI)
     /** Will lithovores eat gravel */
-    public boolean                       pokemobsEatGravel            = false;
-    @Configure(category = mobAI)
+    public boolean       pokemobsEatGravel     = false;
+    @Configure(category = Config.mobAI)
     /** Will lithovores eat rocks */
-    public boolean                       pokemobsEatRocks             = true;
-    @Configure(category = mobAI)
+    public boolean       pokemobsEatRocks      = true;
+    @Configure(category = Config.mobAI)
     /** Will herbivores eat plants */
-    public boolean                       pokemobsEatPlants            = true;
-    @Configure(category = mobAI)
+    public boolean       pokemobsEatPlants     = true;
+    @Configure(category = Config.mobAI)
     /** Is there a warning before a wild pok�mob attacks the player. */
-    public boolean                       pokemobagresswarning         = true;
-    @Configure(category = mobAI)
-    @SyncConfig
+    public boolean       pokemobagresswarning  = true;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
     /** Distance to player needed to agress the player */
-    public int                           mobAggroRadius               = 3;
-    @Configure(category = mobAI)
-    /** Approximately how many ticks between wild pokemobs running agro
-     * checks. */
-    public int                           mobAgroRate                  = 200;
-    @Configure(category = mobAI)
-    /** Approximate number of ticks before pok�mob starts taking hunger
-     * damage */
-    public int                           pokemobLifeSpan              = 8000;
-    @Configure(category = mobAI)
+    public int           mobAggroRadius        = 3;
+    @Configure(category = Config.mobAI)
+    /**
+     * Approximately how many ticks between wild pokemobs running agro
+     * checks.
+     */
+    public int           mobAgroRate           = 200;
+    @Configure(category = Config.mobAI)
+    /**
+     * Approximate number of ticks before pok�mob starts taking hunger
+     * damage
+     */
+    public int           pokemobLifeSpan       = 8000;
+    @Configure(category = Config.mobAI)
     /** Warning time before a wild pok�mob attacks a player */
-    public int                           pokemobagressticks           = 100;
-    @Configure(category = mobAI)
-    public boolean                       pokemobsDamageOwner          = false;
-    @Configure(category = mobAI)
-    public boolean                       pokemobsDamagePlayers        = true;
-    @Configure(category = mobAI)
-    public boolean                       pokemobsDamageBlocks         = false;
-    @Configure(category = mobAI)
-    public boolean                       pokemobsDropItems            = true;
-    @Configure(category = mobAI)
-    public float                         expFromDeathDropScale        = 1;
-    @Configure(category = mobAI)
+    public int           pokemobagressticks    = 100;
+    @Configure(category = Config.mobAI)
+    public boolean       pokemobsDamageOwner   = false;
+    @Configure(category = Config.mobAI)
+    public boolean       pokemobsDamagePlayers = true;
+    @Configure(category = Config.mobAI)
+    public boolean       pokemobsDamageBlocks  = false;
+    @Configure(category = Config.mobAI)
+    public boolean       pokemobsDropItems     = true;
+    @Configure(category = Config.mobAI)
+    public double        expFromDeathDropScale = 1;
+    @Configure(category = Config.mobAI)
     /** Do explosions occur and cause damage */
-    public boolean                       explosions                   = true;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public int                           attackCooldown               = 20;
-    @Configure(category = mobAI)
-    public int                           chaseDistance                = 32;
-    @Configure(category = mobAI)
-    public int                           combatDistance               = 4;
-    @Configure(category = mobAI)
-    public int                           aiDisableDistance            = 32;
-    @Configure(category = mobAI)
-    public int                           tameGatherDelay              = 20;
-    @Configure(category = mobAI)
-    public int                           wildGatherDelay              = 200;
-    @Configure(category = mobAI)
-    public int                           tameGatherDistance           = 16;
-    @Configure(category = mobAI)
-    public int                           wildGatherDistance           = 8;
-    @Configure(category = mobAI)
-    public boolean                       tameGather                   = true;
-    @Configure(category = mobAI)
-    public boolean                       wildGather                   = false;
-    @Configure(category = mobAI)
-    public boolean                       flyEnabled                   = true;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public int[]                         flyDimBlacklist              = { -1, 1 };
-    @Configure(category = mobAI)
-    public boolean                       surfEnabled                  = true;
-    @Configure(category = mobAI)
-    public boolean                       diveEnabled                  = true;
-    @Configure(category = mobAI)
-    public String[]                      dodgeSounds                  = { "entity.witch.throw" };
-    @Configure(category = mobAI)
-    public String[]                      leapSounds                   = { "entity.witch.throw" };
-    @Configure(category = mobAI)
-    public String[]                      guardBlacklistClass          = { "net.minecraft.entity.IMerchant",
+    public boolean       explosions            = true;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public int           attackCooldown        = 20;
+    @Configure(category = Config.mobAI)
+    public int           chaseDistance         = 32;
+    @Configure(category = Config.mobAI)
+    public int           combatDistance        = 4;
+    @Configure(category = Config.mobAI)
+    public int           aiDisableDistance     = 32;
+    @Configure(category = Config.mobAI)
+    public int           tameGatherDelay       = 20;
+    @Configure(category = Config.mobAI)
+    public int           wildGatherDelay       = 200;
+    @Configure(category = Config.mobAI)
+    public int           tameGatherDistance    = 16;
+    @Configure(category = Config.mobAI)
+    public int           wildGatherDistance    = 8;
+    @Configure(category = Config.mobAI)
+    public boolean       tameGather            = true;
+    @Configure(category = Config.mobAI)
+    public boolean       wildGather            = false;
+    @Configure(category = Config.mobAI)
+    public boolean       flyEnabled            = true;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    // TODO possibly change this to dimensiontypes.
+    public List<Integer> flyDimBlacklist       = Lists.newArrayList(new Integer[] { -1, 1 });
+    @Configure(category = Config.mobAI)
+    public boolean       surfEnabled           = true;
+    @Configure(category = Config.mobAI)
+    public boolean       diveEnabled           = true;
+    @Configure(category = Config.mobAI)
+    public List<String>  dodgeSounds           = Lists.newArrayList(new String[] { "entity.witch.throw" });
+    @Configure(category = Config.mobAI)
+    public List<String>  leapSounds            = Lists.newArrayList(new String[] { "entity.witch.throw" });
+    @Configure(category = Config.mobAI)
+    public List<String>  guardBlacklistClass   = Lists.newArrayList(new String[] { "net.minecraft.entity.IMerchant",
             "net.minecraft.entity.INpc", "pokecube.core.items.pokemobeggs.EntityPokemobEgg",
-            "net.minecraft.entity.IProjectile" };
-    @Configure(category = mobAI)
-    public String[]                      guardBlacklistId             = {};
-    @Configure(category = mobAI)
-    public float                         interactHungerScale          = 1;
-    @Configure(category = mobAI)
-    public float                         interactDelayScale           = 1;
-    @Configure(category = mobAI)
-    public boolean                       pokemobsOnShoulder           = true;
-    @Configure(category = mobAI)
-    public int                           fishHookBaitRange            = 16;
+            "net.minecraft.entity.IProjectile" });
+    @Configure(category = Config.mobAI)
+    public List<String>  guardBlacklistId      = Lists.newArrayList();
+    @Configure(category = Config.mobAI)
+    public double        interactHungerScale   = 1;
+    @Configure(category = Config.mobAI)
+    public double        interactDelayScale    = 1;
+    @Configure(category = Config.mobAI)
+    public boolean       pokemobsOnShoulder    = true;
+    @Configure(category = Config.mobAI)
+    public int           fishHookBaitRange     = 16;
 
     // ridden Speed multipliers
-    @Configure(category = mobAI)
-    @SyncConfig
-    public float                         flySpeedFactor               = 1;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public float                         surfSpeedFactor              = 1;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public float                         groundSpeedFactor            = 1;
-    @Configure(category = mobAI)
-    @SyncConfig
-    public boolean                       guardModeEnabled             = true;
-    @Configure(category = mobAI)
-    public int                           guardSearchDistance          = 16;
-    @Configure(category = mobAI)
-    public int                           guardTickRate                = 20;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public double  flySpeedFactor      = 1;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public double  surfSpeedFactor     = 1;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public double  groundSpeedFactor   = 1;
+    @Configure(category = Config.mobAI, type = Type.SERVER)
+    public boolean guardModeEnabled    = true;
+    @Configure(category = Config.mobAI)
+    public int     guardSearchDistance = 16;
+    @Configure(category = Config.mobAI)
+    public int     guardTickRate       = 20;
 
     // Used by pathfinder's movehelper for scaling speed in air and water.
-    @Configure(category = mobAI)
-    public float                         flyPathingSpeedFactor        = 1.25f;
-    @Configure(category = mobAI)
-    public float                         swimPathingSpeedFactor       = 1.25f;
-    @Configure(category = mobAI)
-    public boolean                       pokemobCollisions            = true;
-    @Configure(category = mobAI)
-    public int                           captureDelayTicks            = 0;
-    @Configure(category = mobAI)
-    public boolean                       captureDelayTillAttack       = true;
-    @Configure(category = mobAI)
-    public int                           idleTickRate                 = 20;
-    @Configure(category = mobAI)
-    public int                           idleMaxPathWild              = 8;
-    @Configure(category = mobAI)
-    public int                           idleMaxPathTame              = 8;
-    @Configure(category = mobAI)
-    public int                           hungerTickRate               = 20;
-    @Configure(category = mobAI)
-    public float                         hordeRateFactor              = 1;
-    @Configure(category = mobAI)
-    public float                         leapSpeedFactor              = 1;
-    @Configure(category = mobAI)
-    public float                         dodgeSpeedFactor             = 1;
+    @Configure(category = Config.mobAI)
+    public double  flyPathingSpeedFactor  = 1.25f;
+    @Configure(category = Config.mobAI)
+    public double  swimPathingSpeedFactor = 1.25f;
+    @Configure(category = Config.mobAI)
+    public boolean pokemobCollisions      = true;
+    @Configure(category = Config.mobAI)
+    public int     captureDelayTicks      = 0;
+    @Configure(category = Config.mobAI)
+    public boolean captureDelayTillAttack = true;
+    @Configure(category = Config.mobAI)
+    public int     idleTickRate           = 20;
+    @Configure(category = Config.mobAI)
+    public int     idleMaxPathWild        = 8;
+    @Configure(category = Config.mobAI)
+    public int     idleMaxPathTame        = 8;
+    @Configure(category = Config.mobAI)
+    public int     hungerTickRate         = 20;
+    @Configure(category = Config.mobAI)
+    public double  hordeRateFactor        = 1;
+    @Configure(category = Config.mobAI)
+    public double  leapSpeedFactor        = 1;
+    @Configure(category = Config.mobAI)
+    public double  dodgeSpeedFactor       = 1;
+    @Configure(category = Config.mobAI)
+    public int     exitCubeDuration       = 40;
 
-    public SoundEvent[]                  dodges                       = {};
-    public SoundEvent[]                  leaps                        = {};
+    public SoundEvent[] dodges = {};
+    public SoundEvent[] leaps  = {};
 
     // World Gen and World effect settings
-    @Configure(category = world)
+    @Configure(category = Config.world)
     /** do meteors fall. */
-    public boolean                       meteors                      = true;
-    @Configure(category = world)
-    public int                           meteorDistance               = 3000;
-    @Configure(category = world)
-    public int                           meteorRadius                 = 64;
-    @Configure(category = world)
-    public boolean                       doSpawnBuilding              = true;
-    @Configure(category = world)
-    public boolean                       basesLoaded                  = true;
-    @Configure(category = world)
-    public boolean                       autoPopulateLists            = true;
-    @Configure(category = world)
-    public boolean                       refreshSubbiomes             = false;
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksStones                 = { "minecraft:stone variant=stone",
+    public boolean      meteors              = true;
+    @Configure(category = Config.world)
+    public int          meteorDistance       = 3000;
+    @Configure(category = Config.world)
+    public int          meteorRadius         = 64;
+    @Configure(category = Config.world)
+    public boolean      doSpawnBuilding      = true;
+    @Configure(category = Config.world)
+    public boolean      basesLoaded          = true;
+    @Configure(category = Config.world)
+    public boolean      autoPopulateLists    = true;
+    @Configure(category = Config.world)
+    public boolean      refreshSubbiomes     = false;
+    @Configure(category = Config.world)
+    public List<String> blocksStones         = Lists.newArrayList(new String[] { "minecraft:stone variant=stone",
             "minecraft:stone variant=granite", "minecraft:stone variant=diorite", "minecraft:stone variant=andesite",
             "minecraft:netherrack", "minecraft:sandstone type=sandstone", "minecraft:red_sandstone type=red_sandstone",
-            "minecraft:cobblestone" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksOre                    = { ".*:.*_ore", ".*:ore*", ".*:ore" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksGround                 = { "minecraft:sand", "minecraft:gravel",
-            "minecraft:stained_hardened_clay", "minecraft:hardened_clay", "minecraft:dirt", "minecraft:grass" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksWood                   = {};
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksLeaves                 = {};
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksPlants                 = { "minecraft:double_plant",
+            "minecraft:cobblestone" });
+    @Configure(category = Config.world)
+    public List<String> blocksOre            = Lists.newArrayList(new String[] { ".*:.*_ore", ".*:ore*", ".*:ore" });
+    @Configure(category = Config.world)
+    public List<String> blocksGround         = Lists.newArrayList(new String[] { "minecraft:sand", "minecraft:gravel",
+            "minecraft:stained_hardened_clay", "minecraft:hardened_clay", "minecraft:dirt", "minecraft:grass" });
+    @Configure(category = Config.world)
+    public List<String> blocksWood           = Lists.newArrayList();
+    @Configure(category = Config.world)
+    public List<String> blocksLeaves         = Lists.newArrayList();
+    @Configure(category = Config.world)
+    public List<String> blocksPlants         = Lists.newArrayList(new String[] { "minecraft:double_plant",
             "minecraft:red_flower", "minecraft:yellow_flower", "minecraft:tallgrass", "minecraft:deadbush",
-            "minecraft:wheat", "minecraft:carrots", "minecraft:potatoes", "pokecube:berryfruit" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksFruits                 = { "minecraft:wheat age=7",
+            "minecraft:wheat", "minecraft:carrots", "minecraft:potatoes", "pokecube:berryfruit" });
+    @Configure(category = Config.world)
+    public List<String> blocksFruits         = Lists.newArrayList(new String[] { "minecraft:wheat age=7",
             "minecraft:nether_wart age=3", "minecraft:carrots age=7", "minecraft:potatoes age=7",
-            "minecraft:melon_block", "minecraft:pumpkin", "pokecube:berryfruit" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksTerrain                = {};
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      blocksIndustrial             = { "minecraft:redstone_block",
+            "minecraft:melon_block", "minecraft:pumpkin", "pokecube:berryfruit" });
+    @Configure(category = Config.world)
+    public List<String> blocksTerrain        = Lists.newArrayList();
+    @Configure(category = Config.world)
+    public List<String> blocksIndustrial     = Lists.newArrayList(new String[] { "minecraft:redstone_block",
             "minecraft:furnace", "minecraft:lit_furnace", "minecraft:piston", "minecraft:sticky_piston",
-            "minecraft:dispenser", "minecraft:dropper", "minecraft:hopper", "minecraft:anvil" };
-    @Configure(category = world)
-    public boolean                       autoAddNullBerries           = false;
-    @Configure(category = world)
-    public int                           cropGrowthTicks              = 2500;
-    @Configure(category = world)
-    public int                           leafBerryTicks               = 7500;
-    @Configure(category = world)
-    public boolean                       autoDetectSubbiomes          = true;
-    @Configure(category = world)
-    public boolean                       generateFossils              = true;
-    @Configure(category = world)
-    public boolean                       villagePokecenters           = true;
-    @Configure(category = world)
-    public boolean                       chunkLoadPokecenters         = true;
+            "minecraft:dispenser", "minecraft:dropper", "minecraft:hopper", "minecraft:anvil" });
+    @Configure(category = Config.world)
+    public boolean      autoAddNullBerries   = false;
+    @Configure(category = Config.world)
+    public int          cropGrowthTicks      = 75;
+    @Configure(category = Config.world)
+    public int          leafBerryTicks       = 75;
+    @Configure(category = Config.world)
+    public boolean      autoDetectSubbiomes  = true;
+    @Configure(category = Config.world)
+    public boolean      generateFossils      = true;
+    @Configure(category = Config.world)
+    public boolean      villagePokecenters   = true;
+    @Configure(category = Config.world)
+    public boolean      chunkLoadPokecenters = true;
 
-    @Configure(category = world)
-    public String                        baseSizeFunction             = "8 + c/10 + h/10 + k/20";
-    @Configure(category = world)
-    public int                           baseMaxSize                  = 1;
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      structureSubiomes            = { "Stronghold:ruin", "Mineshaft:ruin",
-            "Temple:ruin", "EndCity:ruin", "Fortress:ruin", "Mansion:ruin", "Monument:monument", "Village:village" };
-    @Configure(category = world, needsMcRestart = true)
-    public String[]                      extraWorldgenDatabases       = {};
-    @Configure(category = world)
-    public int                           spawnDimension               = 0;
+    @Configure(category = Config.world)
+    public String       baseSizeFunction       = "8 + c/10 + h/10 + k/20";
+    @Configure(category = Config.world)
+    public int          baseMaxSize            = 1;
+    @Configure(category = Config.world)
+    public List<String> structureSubiomes      = Lists.newArrayList(new String[] { "Stronghold:ruin", "Mineshaft:ruin",
+            "Temple:ruin", "EndCity:ruin", "Fortress:ruin", "Mansion:ruin", "Monument:monument", "Village:village" });
+    @Configure(category = Config.world)
+    public List<String> extraWorldgenDatabases = Lists.newArrayList();
+    @Configure(category = Config.world)
+    public int          spawnDimension         = 0;
     // Mob Spawning settings
-    @Configure(category = spawning, needsMcRestart = true)
+    @Configure(category = Config.spawning)
     /** Do monsters not spawn. */
-    public boolean                       deactivateMonsters           = false;
-    @Configure(category = spawning)
+    public boolean       deactivateMonsters     = false;
+    @Configure(category = Config.spawning)
     /** do monster spawns get swapped with shadow pokemobs */
-    public boolean                       disableVanillaMonsters       = false;
-    @Configure(category = spawning)
-    public boolean                       disableVanillaAnimals        = false;
-    @Configure(category = spawning, needsMcRestart = true)
+    public boolean       disableVanillaMonsters = false;
+    @Configure(category = Config.spawning)
+    public boolean       disableVanillaAnimals  = false;
+    @Configure(category = Config.spawning)
     /** do animals not spawn */
-    public boolean                       deactivateAnimals            = true;
-    @Configure(category = spawning, needsMcRestart = true)
+    public boolean       deactivateAnimals      = true;
+    @Configure(category = Config.spawning)
     /** do Pokemobs spawn */
-    public boolean                       pokemonSpawn                 = true;
-    @Configure(category = spawning)
-    @SyncConfig
-    /** This is also the radius which mobs spawn in. Is only despawn radius if
-     * cull is true */
-    public int                           maxSpawnRadius               = 32;
-    @Configure(category = spawning)
-    @SyncConfig
+    public boolean       pokemonSpawn           = true;
+    @Configure(category = Config.spawning, type = Type.SERVER)
+    /**
+     * This is also the radius which mobs spawn in. Is only despawn radius if
+     * cull is true
+     */
+    public int           maxSpawnRadius         = 32;
+    @Configure(category = Config.spawning, type = Type.SERVER)
     /** closest distance to a player the pokemob can spawn. */
-    public int                           minSpawnRadius               = 16;
-    @Configure(category = spawning)
+    public int           minSpawnRadius         = 16;
+    @Configure(category = Config.spawning)
     /** Minimum level legendaries can spawn at. */
-    public int                           minLegendLevel               = 1;
-    @Configure(category = spawning)
+    public int           minLegendLevel         = 1;
+    @Configure(category = Config.spawning)
     /** Will nests spawn */
-    public boolean                       nests                        = false;
-    @Configure(category = spawning)
+    public boolean       nests                  = false;
+    @Configure(category = Config.spawning)
     /** number of nests per chunk */
-    public int                           nestsPerChunk                = 1;
-    @Configure(category = spawning)
+    public int           nestsPerChunk          = 1;
+    @Configure(category = Config.spawning)
     /** To be used for nest retrogen. */
-    public boolean                       refreshNests                 = false;
-    @Configure(category = spawning)
-    public int                           mobSpawnNumber               = 10;
-    @Configure(category = spawning)
-    public double                        mobDensityMultiplier         = 1;
-    @Configure(category = spawning)
-    @SyncConfig
-    public int                           levelCap                     = 50;
-    @Configure(category = spawning)
-    public boolean                       shouldCap                    = true;
-    @Configure(category = spawning)
-    @SyncConfig
+    public boolean       refreshNests           = false;
+    @Configure(category = Config.spawning)
+    public int           mobSpawnNumber         = 10;
+    @Configure(category = Config.spawning)
+    public double        mobDensityMultiplier   = 1;
+    @Configure(category = Config.spawning, type = Type.SERVER)
+    public int           levelCap               = 50;
+    @Configure(category = Config.spawning)
+    public boolean       shouldCap              = true;
+    @Configure(category = Config.spawning, type = Type.SERVER)
     @Versioned
-    String[]                             spawnLevelFunctions          = { //@formatter:off
+    public List<String>  spawnLevelFunctions    = Lists.newArrayList(new String[] { //@formatter:off
             "-1:abs((25)*(sin(x*8*10^-3)^3 + sin(y*8*10^-3)^3)):false:false",
             "0:abs((25)*(sin(x*10^-3)^3 + sin(y*10^-3)^3)):false:false",
             "1:1+r/200:true:true"
-            };//@formatter:on
-    @Configure(category = spawning)
-    @SyncConfig
-    public boolean                       expFunction                  = false;
-    @Configure(category = spawning)
-    @SyncConfig
-    public String                        spawnLevelVariance           = "x + ceil(5*rand())";
-    @Configure(category = spawning)
-    public int[]                         dimensionBlacklist           = {};
-    @Configure(category = spawning)
-    public int[]                         dimensionWhitelist           = {};
-    @Configure(category = spawning)
-    public boolean                       whiteListEnabled             = false;
-    @Configure(category = spawning)
+            });//@formatter:on
+    @Configure(category = Config.spawning, type = Type.SERVER)
+    public boolean       expFunction            = false;
+    @Configure(category = Config.spawning, type = Type.SERVER)
+    public String        spawnLevelVariance     = "x + ceil(5*rand())";
+    @Configure(category = Config.spawning)
+    public List<Integer> dimensionBlacklist     = Lists.newArrayList();
+    @Configure(category = Config.spawning)
+    public List<Integer> dimensionWhitelist     = Lists.newArrayList();
+    @Configure(category = Config.spawning)
+    public boolean       whiteListEnabled       = false;
+    @Configure(category = Config.spawning)
     /** Spawns run once every this many ticks.. */
-    public int                           spawnRate                    = 20;
-    @Configure(category = spawning)
+    public int           spawnRate              = 20;
+    @Configure(category = Config.spawning)
     /** Default radius for repel blocks */
-    public int                           repelRadius                  = 10;
+    public int           repelRadius            = 16;
 
     // Gui/client settings
-    @Configure(category = client)
-    public String                        guiRef                       = "top_left";
-    @Configure(category = client)
-    public String                        messageRef                   = "right_middle";
-    @Configure(category = client)
-    public String                        targetRef                    = "top_right";
-    @Configure(category = client)
-    public String                        teleRef                      = "top_right";
-    @Configure(category = client)
-    public int[]                         guiPos                       = { 0, 0 };
-    @Configure(category = client)
-    public float                         guiSize                      = 1;
-    @Configure(category = client)
-    public int[]                         telePos                      = { 89, 17 };
-    @Configure(category = client)
-    public float                         teleSize                     = 1;
-    @Configure(category = client)
-    public int[]                         targetPos                    = { 147, -42 };
-    @Configure(category = client)
-    public float                         targetSize                   = 1;
-    @Configure(category = client)
-    public int[]                         messagePos                   = { -150, -100 };
-    @Configure(category = client)
-    public int                           messageWidth                 = 150;;
-    @Configure(category = client)
-    public int[]                         messagePadding               = { 0, 0 };
-    @Configure(category = client)
-    public float                         messageSize                  = 1;
-    @Configure(category = client)
-    public boolean                       guiDown                      = true;
-    @Configure(category = client)
-    public boolean                       guiAutoScale                 = false;
-    @Configure(category = client)
-    public boolean                       autoSelectMoves              = false;
-    @Configure(category = client)
-    public boolean                       autoRecallPokemobs           = false;
-    @Configure(category = client)
-    public int                           autoRecallDistance           = 32;
-    @Configure(category = client)
-    public boolean                       riddenMobsTurnWithLook       = true;
-    @Configure(category = client)
-    public boolean                       extraberries                 = false;
-    @Configure(category = client)
-    public boolean                       battleLogInChat              = false;
+    @Configure(category = Config.client)
+    public String        guiRef                 = "top_left";
+    @Configure(category = Config.client)
+    public String        messageRef             = "right_middle";
+    @Configure(category = Config.client)
+    public String        targetRef              = "top_right";
+    @Configure(category = Config.client)
+    public String        teleRef                = "top_right";
+    @Configure(category = Config.client)
+    public List<Integer> guiPos                 = Lists.newArrayList(new Integer[] { 0, 0 });
+    @Configure(category = Config.client)
+    public double        guiSize                = 1;
+    @Configure(category = Config.client)
+    public List<Integer> telePos                = Lists.newArrayList(new Integer[] { 89, 17 });
+    @Configure(category = Config.client)
+    public double        teleSize               = 1;
+    @Configure(category = Config.client)
+    public List<Integer> targetPos              = Lists.newArrayList(new Integer[] { 147, -42 });
+    @Configure(category = Config.client)
+    public double        targetSize             = 1;
+    @Configure(category = Config.client)
+    public List<Integer> messagePos             = Lists.newArrayList(new Integer[] { -150, -100 });
+    @Configure(category = Config.client)
+    public int           messageWidth           = 150;;
+    @Configure(category = Config.client)
+    public List<Integer> messagePadding         = Lists.newArrayList(new Integer[] { 0, 0 });
+    @Configure(category = Config.client)
+    public double        messageSize            = 1;
+    @Configure(category = Config.client)
+    public boolean       guiDown                = true;
+    @Configure(category = Config.client)
+    public boolean       guiAutoScale           = false;
+    @Configure(category = Config.client)
+    public boolean       autoSelectMoves        = false;
+    @Configure(category = Config.client)
+    public boolean       autoRecallPokemobs     = false;
+    @Configure(category = Config.client)
+    public int           autoRecallDistance     = 32;
+    @Configure(category = Config.client)
+    public boolean       riddenMobsTurnWithLook = true;
+    @Configure(category = Config.client)
+    public boolean       extraberries           = false;
+    @Configure(category = Config.client)
+    public boolean       battleLogInChat        = false;
 
-    @Configure(category = advanced)
-    String[]                             mystLocs                     = {};
-    @Configure(category = advanced)
-    boolean                              reputs                    = false;
-    @Configure(category = advanced)
+    @Configure(category = Config.advanced)
+    public List<String>  mystLocs               = Lists.newArrayList();
+    @Configure(category = Config.advanced)
+    boolean              reputs                 = false;
+    @Configure(category = Config.advanced)
     // TODO find more internal variables to add to this.
-    String[]                             extraVars                    = { "jc:" + EventsHandler.juiceChance,
-            "rc:" + EventsHandler.candyChance, "eggDpl:" + ItemPokemobEgg.PLAYERDIST,
-            "eggDpm:" + ItemPokemobEgg.MOBDIST };
-    @Configure(category = advanced)
-    public boolean                       debug                        = false;
-    @Configure(category = advanced)
-    public String[]                      damageBlocksWhitelist        = { "flash", "teleport", "dig", "cut",
-            "rocksmash", "secretpower" };
-    @Configure(category = advanced)
-    public String[]                      damageBlocksBlacklist        = {};
-    @Configure(category = advanced)
+    public List<String>  extraVars              = Lists.newArrayList(new String[] { "jc:" + EventsHandler.juiceChance,
+            "rc:" + EventsHandler.candyChance, "eggDpl:" + ItemPokemobEgg.PLAYERDIST, "eggDpm:"
+                    + ItemPokemobEgg.MOBDIST });
+    @Configure(category = Config.advanced)
+    public boolean       debug                  = false;
+    @Configure(category = Config.advanced)
+    public List<String>  damageBlocksWhitelist  = Lists.newArrayList(new String[] { "flash", "teleport", "dig", "cut",
+            "rocksmash", "secretpower" });
+    @Configure(category = Config.advanced)
+    public List<String>  damageBlocksBlacklist  = Lists.newArrayList();
+    @Configure(category = Config.advanced)
     @SyncConfig
-    public int                           evolutionTicks               = 50;
-    @Configure(category = advanced)
+    public int           evolutionTicks         = 50;
+    @Configure(category = Config.advanced)
     @SyncConfig
-    public int                           baseRadarRange               = 64;
-    @Configure(category = advanced)
-    public String                        nonPokemobExpFunction        = "h*(a+1)";
-    @Configure(category = advanced)
-    public boolean                       nonPokemobExp                = false;
-    @Configure(category = advanced)
-    public int[]                         teleDimBlackList             = {};
-    @Configure(category = advanced)
+    public int           baseRadarRange         = 64;
+    @Configure(category = Config.advanced)
+    public String        nonPokemobExpFunction  = "h*(a+1)";
+    @Configure(category = Config.advanced)
+    public boolean       nonPokemobExp          = false;
+    @Configure(category = Config.advanced)
+    public List<Integer> teleDimBlackList       = Lists.newArrayList();
+    @Configure(category = Config.advanced)
     @SyncConfig
-    public int                           telePearlsCostSameDim        = 0;
-    @Configure(category = advanced)
+    public int           telePearlsCostSameDim  = 0;
+    @Configure(category = Config.advanced)
     @SyncConfig
-    public int                           telePearlsCostOtherDim       = 16;
-    @Configure(category = advanced)
-    /** This is the version to match in configs, this is set after loading the
+    public int           telePearlsCostOtherDim = 16;
+    @Configure(category = Config.advanced)
+    /**
+     * This is the version to match in configs, this is set after loading the
      * configs to VERSION, and uses -1 as a "default" to ensure this has
-     * changed. */
-    public int                           version                      = -1;
-    @Configure(category = advanced)
-    public boolean                       pokemobsAreAllFrozen         = false;
+     * changed.
+     */
+    public int           version                = -1;
+    @Configure(category = Config.advanced)
+    public boolean       pokemobsAreAllFrozen   = false;
 
-    @Configure(category = genetics)
-    public String                        epigeneticEVFunction         = GeneticsManager.epigeneticFunction;
-    @Configure(category = genetics)
-    String[]                             mutationRates                = GeneticsManager.getMutationConfig();
+    @Configure(category = Config.genetics)
+    public String       epigeneticEVFunction = GeneticsManager.epigeneticFunction;
+    @Configure(category = Config.genetics)
+    public List<String> mutationRates        = GeneticsManager.getMutationConfig();
 
-    @Configure(category = database, needsMcRestart = true)
-    boolean                              forceDatabase                = true;
-    @Configure(category = database, needsMcRestart = true)
-    boolean                              forceRecipes                 = true;
-    @Configure(category = database, needsMcRestart = true)
-    boolean                              forceRewards                 = true;
-    @Configure(category = database, needsMcRestart = true)
-    public boolean                       forceBerries                 = true;
-    @Configure(category = database, needsMcRestart = true)
-    public boolean                       useCache                     = true;
+    @Configure(category = Config.database)
+    public boolean forceBerries = true;
+    @Configure(category = Config.database)
+    public boolean useCache     = true;
 
-    @Configure(category = database, needsMcRestart = true)
-    public String[]                      configDatabases              = { "", "", "" };
+    @Configure(category = Config.database)
+    public List<String> configDatabases = Lists.newArrayList(new String[] { "", "", "" });
 
-    @Configure(category = database, needsMcRestart = true)
-    String[]                             recipeDatabases              = { "recipes" };
-    @Configure(category = database, needsMcRestart = true)
-    String[]                             rewardDatabases              = { "rewards" };
+    @Configure(category = Config.database)
+    public List<String> recipeDatabases = Lists.newArrayList(new String[] { "recipes" });
+    @Configure(category = Config.database)
+    public List<String> rewardDatabases = Lists.newArrayList(new String[] { "rewards" });
 
-    @Configure(category = healthbars)
-    public boolean                       doHealthBars                 = true;
-    @Configure(category = healthbars)
-    public int                           maxDistance                  = 24;
-    @Configure(category = healthbars)
-    public boolean                       renderInF1                   = false;
-    @Configure(category = healthbars)
-    public double                        heightAbove                  = 0.6;
-    @Configure(category = healthbars)
-    public boolean                       drawBackground               = true;
-    @Configure(category = healthbars)
-    public int                           backgroundPadding            = 2;
-    @Configure(category = healthbars)
-    public int                           backgroundHeight             = 6;
-    @Configure(category = healthbars)
-    public int                           barHeight                    = 4;
-    @Configure(category = healthbars)
-    public int                           plateSize                    = 25;
-    @Configure(category = healthbars)
-    public boolean                       showHeldItem                 = true;
-    @Configure(category = healthbars)
-    public boolean                       showArmor                    = true;
-    @Configure(category = healthbars)
-    public boolean                       groupArmor                   = true;
-    @Configure(category = healthbars)
-    public int                           hpTextHeight                 = 14;
-    @Configure(category = healthbars)
-    public boolean                       showOnlyFocused              = false;
-    @Configure(category = healthbars)
-    public boolean                       enableDebugInfo              = true;
-    @Configure(category = healthbars)
-    public int                           ownedNameColour              = 0x55FF55;
-    @Configure(category = healthbars)
-    public int                           otherOwnedNameColour         = 0xFF5555;
-    @Configure(category = healthbars)
-    public int                           caughtNamedColour            = 0x5555FF;
-    @Configure(category = healthbars)
-    public int                           scannedNameColour            = 0x88FFFF;
-    @Configure(category = healthbars)
-    public int                           unknownNameColour            = 0x888888;
+    @Configure(category = Config.healthbars)
+    public boolean doHealthBars         = true;
+    @Configure(category = Config.healthbars)
+    public int     maxDistance          = 24;
+    @Configure(category = Config.healthbars)
+    public boolean renderInF1           = false;
+    @Configure(category = Config.healthbars)
+    public double  heightAbove          = 0.6;
+    @Configure(category = Config.healthbars)
+    public boolean drawBackground       = true;
+    @Configure(category = Config.healthbars)
+    public int     backgroundPadding    = 2;
+    @Configure(category = Config.healthbars)
+    public int     backgroundHeight     = 6;
+    @Configure(category = Config.healthbars)
+    public int     barHeight            = 4;
+    @Configure(category = Config.healthbars)
+    public int     plateSize            = 25;
+    @Configure(category = Config.healthbars)
+    public boolean showHeldItem         = true;
+    @Configure(category = Config.healthbars)
+    public boolean showArmor            = true;
+    @Configure(category = Config.healthbars)
+    public boolean groupArmor           = true;
+    @Configure(category = Config.healthbars)
+    public int     hpTextHeight         = 14;
+    @Configure(category = Config.healthbars)
+    public boolean showOnlyFocused      = false;
+    @Configure(category = Config.healthbars)
+    public boolean enableDebugInfo      = true;
+    @Configure(category = Config.healthbars)
+    public int     ownedNameColour      = 0x55FF55;
+    @Configure(category = Config.healthbars)
+    public int     otherOwnedNameColour = 0xFF5555;
+    @Configure(category = Config.healthbars)
+    public int     caughtNamedColour    = 0x5555FF;
+    @Configure(category = Config.healthbars)
+    public int     scannedNameColour    = 0x88FFFF;
+    @Configure(category = Config.healthbars)
+    public int     unknownNameColour    = 0x888888;
 
-    @Configure(category = items, needsMcRestart = true)
-    public String[]                      customHeldItems              = {};
-    @Configure(category = items, needsMcRestart = true)
-    public String[]                      customFossils                = {};
+    @Configure(category = Config.items)
+    public List<String> customHeldItems = Lists.newArrayList();
+    @Configure(category = Config.items)
+    public List<String> customFossils   = Lists.newArrayList();
 
     /** List of blocks to be considered for the floor of a cave. */
-    private List<Predicate<BlockState>> caveBlocks                   = Lists.newArrayList();
+    private final List<Predicate<BlockState>> caveBlocks    = Lists.newArrayList();
     /** List of blocks to be considered for the surface. */
-    private List<Predicate<BlockState>> surfaceBlocks                = Lists.newArrayList();
-    /** List of blocks to be considered to be rocks for the purpose of rocksmash
-     * and lithovore eating */
-    private List<Predicate<BlockState>> rocks                        = Lists.newArrayList();
-    /** List of blocks to be considered to be generic terrain, for dig to reduce
-     * drop rates for */
-    private List<Predicate<BlockState>> terrain                      = Lists.newArrayList();
-    private List<Predicate<BlockState>> woodTypes                    = Lists.newArrayList();
-    private List<Predicate<BlockState>> plantTypes                   = Lists.newArrayList();
-    private List<Predicate<BlockState>> fruitTypes                   = Lists.newArrayList();
-    private List<Predicate<BlockState>> dirtTypes                    = Lists.newArrayList();
-    private List<Predicate<BlockState>> industrial                   = Lists.newArrayList();
+    private final List<Predicate<BlockState>> surfaceBlocks = Lists.newArrayList();
+    /**
+     * List of blocks to be considered to be rocks for the purpose of rocksmash
+     * and lithovore eating
+     */
+    private final List<Predicate<BlockState>> rocks         = Lists.newArrayList();
+    /**
+     * List of blocks to be considered to be generic terrain, for dig to reduce
+     * drop rates for
+     */
+    private final List<Predicate<BlockState>> terrain       = Lists.newArrayList();
+    private final List<Predicate<BlockState>> woodTypes     = Lists.newArrayList();
+    private final List<Predicate<BlockState>> plantTypes    = Lists.newArrayList();
+    private final List<Predicate<BlockState>> fruitTypes    = Lists.newArrayList();
+    private final List<Predicate<BlockState>> dirtTypes     = Lists.newArrayList();
+    private final List<Predicate<BlockState>> industrial    = Lists.newArrayList();
 
-    private Config()
+    public Config()
     {
-        super(null);
+        super(PokecubeCore.MODID);
     }
 
-    public Config(File path)
+    public List<Predicate<BlockState>> getCaveBlocks()
     {
-        super(path, defaults);
-        populateSettings();
-        applySettings();
-        save();
-        if (path.getName().endsWith(".dummy")) return;
-        if (instance != null) MinecraftForge.EVENT_BUS.unregister(instance);
-        MinecraftForge.EVENT_BUS.register(instance = this);
+        return this.caveBlocks;
+    }
+
+    public List<Predicate<BlockState>> getDirtTypes()
+    {
+        return this.dirtTypes;
+    }
+
+    public List<Predicate<BlockState>> getFruitTypes()
+    {
+        return this.fruitTypes;
+    }
+
+    public List<Predicate<BlockState>> getIndustrial()
+    {
+        return this.industrial;
+    }
+
+    public List<Predicate<BlockState>> getPlantTypes()
+    {
+        return this.plantTypes;
+    }
+
+    public List<Predicate<BlockState>> getRocks()
+    {
+        return this.rocks;
+    }
+
+    public List<Predicate<BlockState>> getSurfaceBlocks()
+    {
+        return this.surfaceBlocks;
+    }
+
+    public List<Predicate<BlockState>> getTerrain()
+    {
+        return this.terrain;
+    }
+
+    public List<Predicate<BlockState>> getWoodTypes()
+    {
+        return this.woodTypes;
+    }
+
+    public void initDefaultStarts()
+    {
+        // TODO process starter info.
+        // FMLCommonHandler.callFuture(new FutureTask<Object>(new
+        // Callable<Object>()
+        // {
+        // @Override
+        // public Object call() throws Exception
+        // {
+        // try
+        // {
+        // ContributorManager.instance().loadContributors();
+        // List<String> args = Lists.newArrayList();
+        // for (Contributor c :
+        // ContributorManager.instance().contributors.contributors)
+        // {
+        // if (!c.legacy.isEmpty())
+        // {
+        // args.add(c.name + ";" + c.legacy);
+        // }
+        // }
+        // StarterInfo.infos = args.toArray(new String[0]);
+        // if
+        // (Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION))
+        // StarterInfo.processStarterInfo();
+        // }
+        // catch (Exception e)
+        // {
+        // if (e instanceof UnknownHostException)
+        // {
+        // PokecubeCore.LOGGER.error("Error loading contributors, unknown
+        // host");
+        // }
+        // else PokecubeCore.LOGGER.error("Error loading contributors", e);
+        // }
+        // return null;
+        // }
+        // }));
     }
 
     @Override
-    public void applySettings()
+    public void onUpdated()
     {
-        if (PokecubeMod.core.getConfig() == this) initDefaultStarts();
+        if (PokecubeCore.getConfig() == this) this.initDefaultStarts();
 
-        boolean toSave = false;
         // Check version stuff.
-        if (version != VERSION)
+        if (this.version != Config.VERSION)
         {
-            toSave = true;
-            version = VERSION;
-            for (Field f : Config.class.getDeclaredFields())
+            this.version = Config.VERSION;
+            for (final Field f : Config.class.getDeclaredFields())
             {
-                Versioned conf = f.getAnnotation(Versioned.class);
-                if (conf != null)
+                final Versioned conf = f.getAnnotation(Versioned.class);
+                if (conf != null) try
                 {
-                    try
-                    {
-                        f.setAccessible(true);
-                        f.set(this, f.get(defaults));
-                    }
-                    catch (IllegalArgumentException | IllegalAccessException e)
-                    {
-                        PokecubeMod.log(Level.WARNING, "Error updating " + f.getName(), e);
-                    }
+                    f.setAccessible(true);
+                    f.set(this, f.get(Config.defaults));
+                }
+                catch (IllegalArgumentException | IllegalAccessException e)
+                {
+                    PokecubeCore.LOGGER.error("Error updating " + f.getName(), e);
                 }
             }
         }
 
         // Ensure these values are in bounds.
-        if (attackCooldown <= 0) attackCooldown = 1;
-        if (spawnRate <= 0) spawnRate = 1;
-        if (idleTickRate == 0) idleTickRate = 1;
-        if (hungerTickRate == 0) hungerTickRate = 1;
+        if (this.attackCooldown <= 0) this.attackCooldown = 1;
+        if (this.spawnRate <= 0) this.spawnRate = 1;
+        if (this.idleTickRate == 0) this.idleTickRate = 1;
+        if (this.hungerTickRate == 0) this.hungerTickRate = 1;
 
-        // Update idle tick rate.
-        AIIdle.IDLETIMER = idleTickRate;
-        AIHungry.TICKRATE = hungerTickRate;
-
-        // Init secret bases.
-        DimensionSecretBase.init(baseSizeFunction);
-        for (String s : structureSubiomes)
+        // TODO Init secret bases.
+        // DimensionSecretBase.init(baseSizeFunction);
+        for (final String s : this.structureSubiomes)
         {
-            String[] args = s.split(":");
+            final String[] args = s.split(":");
             PokecubeTerrainChecker.structureSubbiomeMap.put(args[0], args[1]);
         }
 
-        SpawnHandler.MAX_DENSITY = mobDensityMultiplier;
-        SpawnHandler.MAXNUM = mobSpawnNumber;
-        if (breedingDelay < 600) breedingDelay = 1000;
+        SpawnHandler.MAX_DENSITY = this.mobDensityMultiplier;
+        SpawnHandler.MAXNUM = this.mobSpawnNumber;
+        if (this.breedingDelay < 600) this.breedingDelay = 1000;
 
-        SpawnHandler.doSpawns = pokemonSpawn;
-        SpawnHandler.lvlCap = shouldCap;
-        SpawnHandler.capLevel = levelCap;
-        SpawnHandler.expFunction = expFunction;
-        SpawnHandler.loadFunctionsFromStrings(spawnLevelFunctions);
-        SpawnHandler.refreshSubbiomes = refreshSubbiomes;
-        SpawnHandler.DEFAULT_VARIANCE = new FunctionVariance(spawnLevelVariance);
+        SpawnHandler.doSpawns = this.pokemonSpawn;
+        SpawnHandler.lvlCap = this.shouldCap;
+        SpawnHandler.capLevel = this.levelCap;
+        SpawnHandler.expFunction = this.expFunction;
+        SpawnHandler.loadFunctionsFromStrings(this.spawnLevelFunctions);
+        SpawnHandler.refreshSubbiomes = this.refreshSubbiomes;
+        SpawnHandler.DEFAULT_VARIANCE = new FunctionVariance(this.spawnLevelVariance);
 
-        PokecubeSerializer.MeteorDistance = meteorDistance * meteorDistance;
-        PokecubeMod.debug = debug;
-        for (String loc : mystLocs)
-        {
+        PokecubeSerializer.MeteorDistance = this.meteorDistance * this.meteorDistance;
+        PokecubeMod.debug = this.debug;
+        for (final String loc : this.mystLocs)
             PokecubeMod.giftLocations.add(loc);
-        }
-        if (Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION))
+        for (final String s : this.recipeDatabases)
+            XMLRecipeHandler.recipeFiles.add(PokecubeItems.toPokecubeResource(s));
+        for (final String s : this.rewardDatabases)
+            XMLRewardsHandler.recipeFiles.add(PokecubeItems.toPokecubeResource(s));
+        if (this.extraVars.size() != Config.defaults.extraVars.size())
         {
-            AIFindTarget.initIDs();
-        }
-        for (String s : recipeDatabases)
-            XMLRecipeHandler.recipeFiles.add(s);
-        for (String s : rewardDatabases)
-            XMLRewardsHandler.recipeFiles.add(s);
-        if (extraVars.length != defaults.extraVars.length)
-        {
-            String[] old = extraVars.clone();
-            extraVars = defaults.extraVars.clone();
-            for (int i = 0; i < extraVars.length; i++)
+            final List<String> old = Lists.newArrayList(this.extraVars);
+            this.extraVars = Lists.newArrayList(Config.defaults.extraVars);
+            for (int i = 0; i < this.extraVars.size(); i++)
             {
-                String[] args1 = extraVars[i].split(":");
-                String key1 = args1[0];
-                for (String s : old)
+                final String[] args1 = this.extraVars.get(i).split(":");
+                final String key1 = args1[0];
+                for (final String s : old)
                 {
-                    String[] args2 = s.split(":");
-                    String key2 = args2[0];
+                    final String[] args2 = s.split(":");
+                    final String key2 = args2[0];
                     if (key1.equals(key2))
                     {
-                        extraVars[i] = s;
+                        this.extraVars.set(i, s);
                         break;
                     }
                 }
             }
-            toSave = true;
         }
         // TODO more internal variables
-        for (String s : extraVars)
+        for (final String s : this.extraVars)
         {
-            String[] args = s.split(":");
-            String key = args[0];
-            String value = args[1];
+            final String[] args = s.split(":");
+            final String key = args[0];
+            final String value = args[1];
             if (key.equals("jc"))
             {
                 EventsHandler.juiceChance = Double.parseDouble(value);
@@ -825,295 +869,108 @@ public class Config extends ConfigBase
             }
         }
 
-        if (mutationRates.length != defaults.mutationRates.length)
+        if (this.mutationRates.size() != Config.defaults.mutationRates.size())
         {
-            String[] old = mutationRates.clone();
-            mutationRates = defaults.mutationRates.clone();
-            for (int i = 0; i < mutationRates.length; i++)
+            final List<String> old = Lists.newArrayList(this.mutationRates);
+            this.mutationRates = Lists.newArrayList(Config.defaults.mutationRates);
+            for (int i = 0; i < this.mutationRates.size(); i++)
             {
-                String[] args1 = mutationRates[i].split(" ");
-                String key1 = args1[0];
-                for (String s : old)
+                final String[] args1 = this.mutationRates.get(i).split(" ");
+                final String key1 = args1[0];
+                for (final String s : old)
                 {
-                    String[] args2 = s.split(" ");
-                    String key2 = args2[0];
+                    final String[] args2 = s.split(" ");
+                    final String key2 = args2[0];
                     if (key1.equals(key2))
                     {
-                        mutationRates[i] = s;
+                        this.mutationRates.set(i, s);
                         break;
                     }
                 }
             }
-            toSave = true;
         }
 
-        for (String s : mutationRates)
+        for (final String s : this.mutationRates)
         {
-            String[] args = s.split(" ");
-            String key = args[0];
+            final String[] args = s.split(" ");
+            final String key = args[0];
             try
             {
-                Float value = Float.parseFloat(args[1]);
-                ResourceLocation loc = new ResourceLocation(key);
+                final Float value = Float.parseFloat(args[1]);
+                final ResourceLocation loc = new ResourceLocation(key);
                 GeneticsManager.mutationRates.put(loc, value);
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
-                PokecubeMod.log(Level.WARNING, "Error with mutation rate for " + s, e);
+                PokecubeCore.LOGGER.error("Error with mutation rate for " + s, e);
             }
         }
 
-        PokecubeItems.resetTimeTags = reputs;
-        if (reputs) get(advanced, "reputs", false).set(false);
+        PokecubeItems.resetTimeTags = this.reputs;
 
-        Database.FORCECOPY = forceDatabase;
-        Database.FORCECOPYRECIPES = forceRecipes;
-        Database.FORCECOPYREWARDS = forceRewards;
+        if (this.configDatabases.size() != EnumDatabase.values().length) this.configDatabases = Lists.newArrayList(
+                new String[] { "", "", "" });
 
-        if (configDatabases.length != EnumDatabase.values().length)
-        {
-            configDatabases = new String[] { "", "", "" };
-            toSave = true;
-        }
+        // TODO see if these are the correct things to be using.
         SpawnHandler.dimensionBlacklist.clear();
-        for (int i : dimensionBlacklist)
+        for (final int i : this.dimensionBlacklist)
         {
-            SpawnHandler.dimensionBlacklist.add(i);
+            final DimensionType type = Registry.DIMENSION_TYPE.getByValue(i);
+            SpawnHandler.dimensionBlacklist.add(type);
         }
         SpawnHandler.dimensionWhitelist.clear();
-        for (int i : dimensionWhitelist)
+        for (final int i : this.dimensionWhitelist)
         {
-            SpawnHandler.dimensionWhitelist.add(i);
+            final DimensionType type = Registry.DIMENSION_TYPE.getByValue(i);
+            SpawnHandler.dimensionWhitelist.add(type);
         }
+
         boolean failed = false;
-        if (dodgeSounds.length == 0) failed = true;
+        if (this.dodgeSounds.size() == 0) failed = true;
         else
         {
-            dodges = new SoundEvent[dodgeSounds.length];
-            for (int i = 0; i < dodgeSounds.length; i++)
+            this.dodges = new SoundEvent[this.dodgeSounds.size()];
+            for (int i = 0; i < this.dodgeSounds.size(); i++)
             {
-                String s = dodgeSounds[i];
+                final String s = this.dodgeSounds.get(i);
                 try
                 {
-                    SoundEvent e = getRegisteredSoundEvent(s);
-                    dodges[i] = e;
+                    final SoundEvent e = Config.getRegisteredSoundEvent(s);
+                    this.dodges[i] = e;
                 }
-                catch (Exception e)
+                catch (final Exception e)
                 {
-                    PokecubeMod.log(Level.WARNING, "No Sound for " + s, e);
+                    PokecubeCore.LOGGER.error("No Sound for " + s, e);
                     failed = true;
                     break;
                 }
             }
         }
 
-        if (failed)
-        {
-            dodges = new SoundEvent[] { SoundEvents.ENTITY_GENERIC_SMALL_FALL };
-        }
+        if (failed) this.dodges = new SoundEvent[] { SoundEvents.ENTITY_GENERIC_SMALL_FALL };
 
         failed = false;
-        if (leapSounds.length == 0) failed = true;
+        if (this.leapSounds.size() == 0) failed = true;
         else
         {
-            leaps = new SoundEvent[leapSounds.length];
-            for (int i = 0; i < leapSounds.length; i++)
+            this.leaps = new SoundEvent[this.leapSounds.size()];
+            for (int i = 0; i < this.leapSounds.size(); i++)
             {
-                String s = leapSounds[i];
+                final String s = this.leapSounds.get(i);
                 try
                 {
-                    SoundEvent e = getRegisteredSoundEvent(s);
-                    leaps[i] = e;
+                    final SoundEvent e = Config.getRegisteredSoundEvent(s);
+                    this.leaps[i] = e;
                 }
-                catch (Exception e)
+                catch (final Exception e)
                 {
-                    PokecubeMod.log("No Sound for " + s);
+                    PokecubeCore.LOGGER.info("No Sound for " + s);
                     failed = true;
                     break;
                 }
             }
         }
 
-        if (failed)
-        {
-            leaps = new SoundEvent[] { SoundEvents.ENTITY_GENERIC_SMALL_FALL };
-        }
-
-        if (PokecubeDimensionManager.SECRET_BASE_TYPE != null)
-        {
-            PokecubeDimensionManager.SECRET_BASE_TYPE.setLoadSpawn(basesLoaded);
-        }
-
-        if (toSave)
-        {
-            this.save();
-        }
-    }
-
-    @Override
-    public Property get(String category, String key, String defaultValue, String comment, Property.Type type)
-    {
-        Property prop = super.get(category, key, defaultValue, comment, type);
-        requiresRestart(prop);
-        return prop;
-    }
-
-    public List<Predicate<BlockState>> getCaveBlocks()
-    {
-        return caveBlocks;
-    }
-
-    public List<Predicate<BlockState>> getRocks()
-    {
-        return rocks;
-    }
-
-    public List<Predicate<BlockState>> getSurfaceBlocks()
-    {
-        return surfaceBlocks;
-    }
-
-    public List<Predicate<BlockState>> getTerrain()
-    {
-        return terrain;
-    }
-
-    public List<Predicate<BlockState>> getWoodTypes()
-    {
-        return woodTypes;
-    }
-
-    public List<Predicate<BlockState>> getPlantTypes()
-    {
-        return plantTypes;
-    }
-
-    public List<Predicate<BlockState>> getFruitTypes()
-    {
-        return fruitTypes;
-    }
-
-    public List<Predicate<BlockState>> getDirtTypes()
-    {
-        return dirtTypes;
-    }
-
-    public List<Predicate<BlockState>> getIndustrial()
-    {
-        return industrial;
-    }
-
-    public void initDefaultStarts()
-    {
-        FMLCommonHandler.callFuture(new FutureTask<Object>(new Callable<Object>()
-        {
-            @Override
-            public Object call() throws Exception
-            {
-                try
-                {
-                    ContributorManager.instance().loadContributors();
-                    List<String> args = Lists.newArrayList();
-                    for (Contributor c : ContributorManager.instance().contributors.contributors)
-                    {
-                        if (!c.legacy.isEmpty())
-                        {
-                            args.add(c.name + ";" + c.legacy);
-                        }
-                    }
-                    StarterInfo.infos = args.toArray(new String[0]);
-                    if (Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION))
-                        StarterInfo.processStarterInfo();
-                }
-                catch (Exception e)
-                {
-                    if (e instanceof UnknownHostException)
-                    {
-                        PokecubeMod.log(Level.WARNING, "Error loading contributors, unknown host");
-                    }
-                    else PokecubeMod.log(Level.WARNING, "Error loading contributors", e);
-                }
-                return null;
-            }
-        }));
-    }
-
-    @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs)
-    {
-        if (eventArgs.getModID().equals(PokecubeMod.ID))
-        {
-            populateSettings();
-            applySettings();
-            save();
-        }
-    }
-
-    public void requiresRestart(Property property)
-    {
-        Class<?> me = getClass();
-        Configure c;
-        for (Field f : me.getDeclaredFields())
-        {
-            if (f.getName().equals(property.getName()))
-            {
-                c = f.getAnnotation(Configure.class);
-                if (c != null)
-                {
-                    boolean needsMcRestart = c.needsMcRestart();
-                    property.setRequiresMcRestart(needsMcRestart);
-                }
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void save()
-    {
-        List<Integer> dims = Lists.newArrayList(SpawnHandler.dimensionBlacklist);
-        Collections.sort(dims);
-        dimensionBlacklist = new int[dims.size()];
-        for (int i = 0; i < dims.size(); i++)
-        {
-            dimensionBlacklist[i] = dims.get(i);
-        }
-        dims = Lists.newArrayList(SpawnHandler.dimensionWhitelist);
-        Collections.sort(dims);
-        dimensionWhitelist = new int[dims.size()];
-        for (int i = 0; i < dims.size(); i++)
-        {
-            dimensionWhitelist[i] = dims.get(i);
-        }
-        super.save();
-    }
-
-    public void seenMessage()
-    {
-        load();
-        get(misc, "loginmessage", false).set(false);
-        get(misc, "version", PokecubeMod.VERSION).set(PokecubeMod.VERSION);
-        save();
-    }
-
-    public void setSettings()
-    {
-        load();
-        populateSettings(true);
-        applySettings();
-        save();
-    }
-
-    private static SoundEvent getRegisteredSoundEvent(String id)
-    {
-        SoundEvent soundevent = SoundEvent.REGISTRY.getObject(new ResourceLocation(id));
-        if (soundevent == null)
-        {
-            throw new IllegalStateException("Invalid Sound requested: " + id);
-        }
-        else
-        {
-            return soundevent;
-        }
+        if (failed) this.leaps = new SoundEvent[] { SoundEvents.ENTITY_GENERIC_SMALL_FALL };
     }
 }

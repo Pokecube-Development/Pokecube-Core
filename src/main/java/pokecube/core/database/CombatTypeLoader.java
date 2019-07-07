@@ -1,28 +1,45 @@
 package pokecube.core.database;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
-import net.minecraftforge.common.util.EnumHelper;
-import pokecube.core.interfaces.PokecubeMod;
+import net.minecraft.util.ResourceLocation;
+import pokecube.core.PokecubeCore;
 import pokecube.core.utils.PokeType;
 
 public class CombatTypeLoader
 {
-    private static Gson gson = new Gson();
-
-    public static class TypeEffect
+    public static class CombatTypes
     {
-        public String type;
-        public float  amount;
+        public JsonType[] types;
+
+        public void init()
+        {
+            PokeType.typeTable = new float[this.types.length][this.types.length];
+
+            // First add them all in as enums.
+            for (final JsonType type2 : this.types)
+            {
+                final JsonType type = type2;
+                type.init();
+                if (PokeType.getType(type.name) == PokeType.unknown && !type.name.equals("???")) PokeType.create(
+                        type.name, type.colour, type.name);
+            }
+
+            for (int i = 0; i < this.types.length; i++)
+            {
+                final float[] arr = new float[this.types.length];
+                PokeType.typeTable[i] = arr;
+                final JsonType current = this.types[i];
+                for (int j = 0; j < this.types.length; j++)
+                    arr[j] = current.effect(this.types[j].name);
+            }
+        }
     }
 
     public static class JsonType
@@ -32,68 +49,43 @@ public class CombatTypeLoader
         public TypeEffect[] outgoing;
         Map<String, Float>  effects = Maps.newHashMap();
 
+        float effect(final String type)
+        {
+            if (!this.effects.containsKey(type)) return 1;
+            return this.effects.get(type);
+        }
+
         void init()
         {
-            for (TypeEffect e : outgoing)
-            {
-                effects.put(e.type, e.amount);
-            }
-        }
-
-        float effect(String type)
-        {
-            if (!effects.containsKey(type)) return 1;
-            return effects.get(type);
+            for (final TypeEffect e : this.outgoing)
+                this.effects.put(e.type, e.amount);
         }
     }
 
-    public static class CombatTypes
+    public static class TypeEffect
     {
-        public JsonType[] types;
-
-        public void init()
-        {
-            PokeType.typeTable = new float[types.length][types.length];
-
-            // First add them all in as enums.
-            for (int i = 0; i < types.length; i++)
-            {
-                JsonType type = types[i];
-                type.init();
-                if (PokeType.getType(type.name) == PokeType.unknown && !type.name.equals("???"))
-                {
-                    EnumHelper.addEnum(PokeType.class, type.name, new Class<?>[] { int.class, String.class },
-                            type.colour, type.name);
-                }
-            }
-
-            for (int i = 0; i < types.length; i++)
-            {
-                float[] arr = new float[types.length];
-                PokeType.typeTable[i] = arr;
-                JsonType current = types[i];
-                for (int j = 0; j < types.length; j++)
-                {
-                    arr[j] = current.effect(types[j].name);
-                }
-            }
-        }
+        public String type;
+        public float  amount;
     }
+
+    public static ResourceLocation TYPES = new ResourceLocation(PokecubeCore.MODID, "database/types.json");
+
+    private static Gson gson = new Gson();
 
     public static void loadTypes()
     {
-        Database.copyDatabaseFile("types.json");
-        File file = new File(Database.CONFIGLOC + "types.json");
         try
         {
-            FileReader reader = new FileReader(file);
-            CombatTypes types = gson.fromJson(reader, CombatTypes.class);
+            final InputStream res = Database.resourceManager.getResource(CombatTypeLoader.TYPES).getInputStream();
+            final Reader reader = new InputStreamReader(res);
+            final CombatTypes types = CombatTypeLoader.gson.fromJson(reader, CombatTypes.class);
             types.init();
             reader.close();
         }
-        catch (JsonSyntaxException | JsonIOException | IOException e)
+        catch (final Exception e)
         {
-            PokecubeMod.log(Level.SEVERE, "Error loading types.json", e);
+            PokecubeCore.LOGGER.error("Error loading types.json", e);
+            throw new RuntimeException(e);
         }
     }
 }

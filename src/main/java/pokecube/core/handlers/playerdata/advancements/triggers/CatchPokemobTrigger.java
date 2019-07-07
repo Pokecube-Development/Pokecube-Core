@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.advancements.critereon.AbstractCriterionInstance;
+import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
@@ -23,9 +23,7 @@ import pokecube.core.interfaces.PokecubeMod;
 
 public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigger.Instance>
 {
-    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "catch");
-
-    public static class Instance extends AbstractCriterionInstance
+    public static class Instance extends CriterionInstance
     {
         final PokedexEntry entry;
         boolean            lenient = false;
@@ -34,7 +32,7 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
 
         public Instance(PokedexEntry entry, boolean lenient, int number, int sign)
         {
-            super(ID);
+            super(CatchPokemobTrigger.ID);
             this.entry = entry != null ? entry : Database.missingno;
             this.lenient = lenient;
             this.number = number;
@@ -46,27 +44,21 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
             PokedexEntry entry = this.entry;
             PokedexEntry testEntry = pokemob.getPokedexEntry();
             boolean numCheck = true;
-            if (lenient)
+            if (this.lenient)
             {
                 entry = entry.base ? entry : entry.getBaseForme();
                 testEntry = testEntry.base ? testEntry : testEntry.getBaseForme();
             }
-            if (number != -1)
+            if (this.number != -1)
             {
                 int num = -1;
-                if (entry == Database.missingno)
-                {
-                    num = CaptureStats.getNumberUniqueCaughtBy(player.getUniqueID());
-                }
-                else
-                {
-                    num = CaptureStats.getTotalNumberOfPokemobCaughtBy(player.getUniqueID(), entry);
-                }
+                if (entry == Database.missingno) num = CaptureStats.getNumberUniqueCaughtBy(player.getUniqueID());
+                else num = CaptureStats.getTotalNumberOfPokemobCaughtBy(player.getUniqueID(), entry);
                 if (num == -1) return false;
-                numCheck = num * sign > number;
+                numCheck = num * this.sign > this.number;
             }
-            return numCheck && (entry == Database.missingno || testEntry == entry)
-                    && pokemob.getPokemonOwner() == player;
+            return numCheck && (entry == Database.missingno || testEntry == entry) && pokemob
+                    .getOwner() == player;
         }
 
     }
@@ -81,14 +73,14 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
             this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean isEmpty()
-        {
-            return this.listeners.isEmpty();
-        }
-
         public void add(ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener)
         {
             this.listeners.add(listener);
+        }
+
+        public boolean isEmpty()
+        {
+            return this.listeners.isEmpty();
         }
 
         public void remove(ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener)
@@ -100,38 +92,25 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
         {
             List<ICriterionTrigger.Listener<CatchPokemobTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener : this.listeners)
-            {
+            for (final ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener : this.listeners)
                 if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
-                    {
                         list = Lists.<ICriterionTrigger.Listener<CatchPokemobTrigger.Instance>> newArrayList();
-                    }
 
                     list.add(listener);
                 }
-            }
-            if (list != null)
-            {
-                for (ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener1 : list)
-                {
-                    listener1.grantCriterion(this.playerAdvancements);
-                }
-            }
+            if (list != null) for (final ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener1 : list)
+                listener1.grantCriterion(this.playerAdvancements);
         }
     }
+
+    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "catch");
 
     private final Map<PlayerAdvancements, CatchPokemobTrigger.Listeners> listeners = Maps.<PlayerAdvancements, CatchPokemobTrigger.Listeners> newHashMap();
 
     public CatchPokemobTrigger()
     {
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
     }
 
     @Override
@@ -149,21 +128,24 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
         bredanimalstrigger$listeners.add(listener);
     }
 
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the
+     * JSON.
+     */
     @Override
-    public void removeListener(PlayerAdvancements playerAdvancementsIn,
-            ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener)
+    public CatchPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        CatchPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        final String name = json.has("entry") ? json.get("entry").getAsString() : "";
+        final int number = json.has("number") ? json.get("number").getAsInt() : -1;
+        final int sign = json.has("sign") ? json.get("sign").getAsInt() : 0;
+        final boolean lenient = json.has("lenient") ? json.get("lenient").getAsBoolean() : false;
+        return new CatchPokemobTrigger.Instance(Database.getEntry(name), lenient, number, sign);
+    }
 
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.remove(listener);
-
-            if (bredanimalstrigger$listeners.isEmpty())
-            {
-                this.listeners.remove(playerAdvancementsIn);
-            }
-        }
+    @Override
+    public ResourceLocation getId()
+    {
+        return CatchPokemobTrigger.ID;
     }
 
     @Override
@@ -172,24 +154,23 @@ public class CatchPokemobTrigger implements ICriterionTrigger<CatchPokemobTrigge
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    /** Deserialize a ICriterionInstance of this trigger from the data in the
-     * JSON. */
     @Override
-    public CatchPokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn,
+            ICriterionTrigger.Listener<CatchPokemobTrigger.Instance> listener)
     {
-        String name = json.has("entry") ? json.get("entry").getAsString() : "";
-        int number = json.has("number") ? json.get("number").getAsInt() : -1;
-        int sign = json.has("sign") ? json.get("sign").getAsInt() : 0;
-        boolean lenient = json.has("lenient") ? json.get("lenient").getAsBoolean() : false;
-        return new CatchPokemobTrigger.Instance(Database.getEntry(name), lenient, number, sign);
+        final CatchPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+
+        if (bredanimalstrigger$listeners != null)
+        {
+            bredanimalstrigger$listeners.remove(listener);
+
+            if (bredanimalstrigger$listeners.isEmpty()) this.listeners.remove(playerAdvancementsIn);
+        }
     }
 
     public void trigger(ServerPlayerEntity player, IPokemob pokemob)
     {
-        CatchPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.trigger(player, pokemob);
-        }
+        final CatchPokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
+        if (bredanimalstrigger$listeners != null) bredanimalstrigger$listeners.trigger(player, pokemob);
     }
 }

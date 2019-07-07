@@ -2,8 +2,7 @@ package pokecube.core.moves.animations;
 
 import java.util.Random;
 
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemDye;
+import net.minecraft.item.DyeColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.interfaces.IMoveAnimation;
@@ -23,120 +22,107 @@ public abstract class MoveAnimationBase implements IMoveAnimation
     protected boolean flat            = false;
     protected boolean reverse         = false;
 
-    protected String  rgbaVal         = null;
+    protected String rgbaVal = null;
 
-    public int getColourFromMove(Move_Base move, int alpha)
+    @Override
+    public int getApplicationTick()
     {
-        alpha = Math.min(255, alpha);
-        int colour = move.getType(null).colour + 0x01000000 * alpha;
-        return colour;
+        return this.duration;
     }
 
-    public IMoveAnimation init(String preset)
+    public int getColourFromMove(final Move_Base move, int alpha)
     {
-        return this;
+        alpha = Math.min(255, alpha);
+        final int colour = move.getType(null).colour + 0x01000000 * alpha;
+        return colour;
     }
 
     @Override
     public int getDuration()
     {
-        return duration;
+        return this.duration;
     }
 
-    @Override
-    public int getApplicationTick()
+    public IMoveAnimation init(final String preset)
     {
-        return duration;
+        return this;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void initColour(long time, float partialTicks, Move_Base move)
+    public void initColour(final long time, final float partialTicks, final Move_Base move)
     {
-        reallyInitRGBA();
-        if (customColour) return;
-        if (particle == null)
+        this.reallyInitRGBA();
+        if (this.customColour) return;
+        if (this.particle == null)
         {
-            rgba = getColourFromMove(move, 255);
+            this.rgba = this.getColourFromMove(move, 255);
             return;
         }
-        if (particle.equals("airbubble"))
+        if (this.particle.equals("airbubble")) this.rgba = 0x78000000 + DyeColor.CYAN.func_218388_g();
+        else if (this.particle.equals("aurora"))
         {
-            rgba = 0x78000000 + EnumDyeColor.CYAN.getColorValue();
+            final DyeColor colour = DyeColor.values()[new Random(time / 10).nextInt(DyeColor.values().length)];
+            final int rand = colour.func_218388_g();
+            this.rgba = 0x61000000 + rand;
         }
-        else if (particle.equals("aurora"))
-        {
-            int rand = ItemDye.DYE_COLORS[new Random(time / 10).nextInt(ItemDye.DYE_COLORS.length)];
-            rgba = 0x61000000 + rand;
-        }
-        else if (particle.equals("iceshard"))
-        {
-            rgba = 0x78000000 + EnumDyeColor.CYAN.getColorValue();
-        }
-        else if (particle.equals("spark"))
-        {
-            rgba = 0x78000000 + EnumDyeColor.YELLOW.getColorValue();
-        }
-        else
-        {
-            rgba = getColourFromMove(move, 255);
-        }
+        else if (this.particle.equals("iceshard")) this.rgba = 0x78000000 + DyeColor.CYAN.func_218388_g();
+        else if (this.particle.equals("spark")) this.rgba = 0x78000000 + DyeColor.YELLOW.func_218388_g();
+        else this.rgba = this.getColourFromMove(move, 255);
     }
 
-    @Override
-    public void setDuration(int duration)
+    protected void initRGBA(final String val)
     {
-        this.duration = duration;
+        this.rgbaVal = val;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public void reallyInitRGBA()
     {
-        if (rgbaVal == null) return;
-        String val = rgbaVal;
-        rgbaVal = null;
-        int alpha = 255;
-        EnumDyeColor colour = null;
+        if (this.rgbaVal == null) return;
+        final String val = this.rgbaVal;
+        this.rgbaVal = null;
+        final int alpha = 255;
+        DyeColor colour = null;
         try
         {
-            colour = EnumDyeColor.byDyeDamage(Integer.parseInt(val));
+            colour = DyeColor.byId(Integer.parseInt(val));
         }
-        catch (NumberFormatException e)
+        catch (final NumberFormatException e)
         {
             try
             {
-                colour = EnumDyeColor.valueOf(val);
+                colour = DyeColor.valueOf(val);
             }
-            catch (Exception e1)
+            catch (final Exception e1)
             {
-                for (EnumDyeColor col : EnumDyeColor.values())
-                {
+                for (final DyeColor col : DyeColor.values())
                     if (col.getName().equals(val))
                     {
                         colour = col;
                         break;
                     }
-                }
             }
         }
         if (colour == null)
         {
             try
             {
-                rgba = Integer.parseInt(val);
+                this.rgba = Integer.parseInt(val);
             }
-            catch (NumberFormatException e)
+            catch (final NumberFormatException e)
             {
 
             }
             return;
         }
-        rgba = colour.getColorValue() + 0x01000000 * alpha;
-        customColour = true;
+        this.rgba = colour.func_218388_g() + 0x01000000 * alpha;
+        this.customColour = true;
     }
 
-    protected void initRGBA(String val)
+    @Override
+    public void setDuration(final int duration)
     {
-        this.rgbaVal = val;
+        this.duration = duration;
     }
 }

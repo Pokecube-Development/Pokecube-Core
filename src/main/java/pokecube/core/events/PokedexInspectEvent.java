@@ -12,6 +12,6 @@ public class PokedexInspectEvent extends EntityEvent
     public PokedexInspectEvent(Entity entity, boolean reward)
     {
         super(entity);
-        shouldReward = reward;
+        this.shouldReward = reward;
     }
 }

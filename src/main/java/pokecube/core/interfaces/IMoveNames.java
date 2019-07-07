@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package pokecube.core.interfaces;
 

@@ -1,64 +1,82 @@
 package pokecube.core.client.gui.watch;
 
-import java.io.IOException;
+import java.util.List;
 
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.resources.I18n;
+import com.google.common.collect.Lists;
+
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.TranslationTextComponent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.watch.progress.GlobalProgress;
 import pokecube.core.client.gui.watch.progress.PerMobProgress;
 import pokecube.core.client.gui.watch.progress.PerTypeProgress;
-import pokecube.core.client.gui.watch.util.PageButton;
+import pokecube.core.client.gui.watch.progress.Progress;
 import pokecube.core.client.gui.watch.util.PageWithSubPages;
-import pokecube.core.client.gui.watch.util.WatchPage;
 
-public class ProgressPage extends PageWithSubPages
+public class ProgressPage extends PageWithSubPages<Progress>
 {
+    public static List<Class<? extends Progress>> PAGELIST = Lists.newArrayList();
 
-    public ProgressPage(GuiPokeWatch watch)
+    static
     {
-        super(watch);
-        setTitle(I18n.format("pokewatch.progress.main.title"));
+        ProgressPage.PAGELIST.add(GlobalProgress.class);
+        ProgressPage.PAGELIST.add(PerTypeProgress.class);
+        ProgressPage.PAGELIST.add(PerMobProgress.class);
+    }
+
+    private static Progress makePage(final Class<? extends Progress> clazz, final GuiPokeWatch parent)
+    {
+        try
+        {
+            return clazz.getConstructor(GuiPokeWatch.class).newInstance(parent);
+        }
+        catch (final Exception e)
+        {
+            PokecubeCore.LOGGER.error("Error with making a page for watch", e);
+            return null;
+        }
+    }
+
+    public ProgressPage(final GuiPokeWatch watch)
+    {
+        super(new TranslationTextComponent("pokewatch.progress.main.title"), watch);
+    }
+
+    @Override
+    protected Progress createPage(final int index)
+    {
+        return ProgressPage.makePage(ProgressPage.PAGELIST.get(index), this.watch);
+    }
+
+    @Override
+    protected int pageCount()
+    {
+        return ProgressPage.PAGELIST.size();
+    }
+
+    @Override
+    public void prePageDraw(final int mouseX, final int mouseY, final float partialTicks)
+    {
+        final int x = (this.watch.width - 160) / 2 + 80;
+        final int y = (this.watch.height - 160) / 2 + 8;
+        this.drawCenteredString(this.font, this.getTitle().getFormattedText(), x, y, 0xFF78C850);
+        this.drawCenteredString(this.font, this.current_page.getTitle().getFormattedText(), x, y + 10, 0xFF78C850);
     }
 
     @Override
     public void preSubOpened()
     {
-        int x = watch.width / 2;
-        int y = watch.height / 2 - 5;
-        String next = ">";
-        String prev = "<";
-        this.watch.getButtons().add(new PageButton(watch.getButtons().size(), x + 64, y - 70, 12, 12, next, this));
-        this.watch.getButtons().add(new PageButton(watch.getButtons().size(), x - 76, y - 70, 12, 12, prev, this));
-        pages.clear();
-        this.pages.add(new GlobalProgress(watch));
-        this.pages.add(new PerTypeProgress(watch));
-        this.pages.add(new PerMobProgress(watch));
-        for (WatchPage page : pages)
+        final int x = this.watch.width / 2;
+        final int y = this.watch.height / 2 - 5;
+        final String next = ">";
+        final String prev = "<";
+        this.addButton(new Button(x + 64, y - 70, 12, 12, next, b ->
         {
-            page.initGui();
-        }
-    }
-
-    @Override
-    public void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.id == 3)// Next
+            this.changePage(this.index + 1);
+        }));
+        this.addButton(new Button(x - 76, y - 70, 12, 12, prev, b ->
         {
-            changePage(index + 1);
-        }
-        else if (button.id == 4)// Previous
-        {
-            changePage(index - 1);
-        }
-        super.actionPerformed(button);
-    }
-
-    @Override
-    public void prePageDraw(int mouseX, int mouseY, float partialTicks)
-    {
-        int x = (watch.width - 160) / 2 + 80;
-        int y = (watch.height - 160) / 2 + 8;
-        drawCenteredString(fontRenderer, getTitle(), x, y, 0xFF78C850);
-        drawCenteredString(fontRenderer, pages.get(index).getTitle(), x, y + 10, 0xFF78C850);
+            this.changePage(this.index - 1);
+        }));
     }
 }

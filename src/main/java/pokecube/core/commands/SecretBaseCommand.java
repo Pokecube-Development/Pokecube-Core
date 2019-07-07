@@ -1,152 +1,52 @@
 package pokecube.core.commands;
 
-import java.util.UUID;
+import java.util.Collection;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.ServerWorld;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
-import pokecube.core.PokecubeItems;
-import pokecube.core.blocks.nests.BlockNest;
-import pokecube.core.blocks.nests.TileEntityBasePortal;
-import pokecube.core.moves.implementations.actions.ActionSecretPower;
-import pokecube.core.world.dimensions.PokecubeDimensionManager;
-import pokecube.core.world.dimensions.secretpower.DimensionSecretBase;
-import thut.api.entity.Transporter;
-import thut.api.maths.Vector3;
-import thut.api.maths.Vector4;
+import pokecube.core.world.dimension.SecretBaseDimension;
 import thut.core.common.commands.CommandTools;
 
-public class SecretBaseCommand extends CommandBase
+public class SecretBaseCommand
 {
-    private static final String ENTERANY = "pokecube.command.pokebase.enterany";
-
-    static
+    public static int execute(final CommandSource source, final ServerPlayerEntity player,
+            final Collection<GameProfile> profiles)
     {
-        PermissionAPI.registerNode(ENTERANY, DefaultPermissionLevel.OP, "Permission to TP to anyone's secret base.");
-    }
+        System.out.println(player);
+        System.out.println(profiles);
+        System.out.println(DimensionManager.getRegistry().keySet());
+        final ServerWorld baseWorld = DimensionManager.getWorld(source.getServer(), SecretBaseDimension.TYPE, true,
+                true);
 
-    public SecretBaseCommand()
-    {
-    }
+        System.out.println(source.getServer().getWorlds());
+        System.out.println(baseWorld);
+        player.setPosition(8, 200, 8);
+        source.getServer().getPlayerList().recreatePlayerEntity(player, SecretBaseDimension.TYPE, true);
 
-    @Override
-    /** Check if the given ICommandSource has permission to execute this
-     * command */
-    public boolean checkPermission(MinecraftServer server, ICommandSource sender)
-    {
-        return true;
-    }
-
-    @Override
-    public String getName()
-    {
-        return "pokebase";
-    }
-
-    @Override
-    public String getUsage(ICommandSource sender)
-    {
-        return "/pokebase";
-    }
-
-    @Override
-    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
-    {
-        PlayerEntity player = getCommandSenderAsPlayer(sender);
-        try
-        {
-            if (args[0].equals("reset"))
-            {
-                int dim = PokecubeDimensionManager.getDimensionForPlayer(player);
-                PokecubeDimensionManager.createNewSecretBaseDimension(dim, true);
-            }
-            else if (args[0].equals("exit"))
-            {
-                if (player.getEntityWorld().provider instanceof DimensionSecretBase)
-                {
-                    String owner = PokecubeDimensionManager.getOwner(player.dimension);
-                    BlockPos exit = PokecubeDimensionManager.getBaseEntrance(owner, 0);
-                    if (exit == null) exit = server.getEntityWorld().getSpawnPoint();
-                    Transporter.teleportEntity(player, Vector3.getNewVector().set(exit).add(0.5, 0, 0.5), 0, false);
-                }
-                else throw new CommandException("You must be in a secret base to do that.");
-            }
-            else if (args[0].equals("tp") && CommandTools.isOp(sender, ENTERANY))
-            {
-                String player2;
-                int dim = 0;
-                try
-                {
-                    player2 = getPlayer(server, sender, args[1]).getCachedUniqueIdString();
-                    dim = PokecubeDimensionManager.getDimensionForPlayer(player2);
-                }
-                catch (Exception e)
-                {
-                    String playerName = args[1];
-                    UUID id = null;
-                    try
-                    {
-                        id = UUID.fromString(playerName);
-                    }
-                    catch (Exception e2)
-                    {
-                    }
-                    GameProfile profile = new GameProfile(id, playerName);
-                    profile = TileEntitySkull.updateGameprofile(profile);
-                    if (profile.getId() == null) { throw new CommandException(
-                            "Error, cannot find profile for " + playerName); }
-                    player2 = profile.getId().toString();
-                    dim = PokecubeDimensionManager.getDimensionForPlayer(player2);
-                }
-                if (dim != 0)
-                {
-                    PokecubeDimensionManager.sendToBase(player2, player);
-                }
-            }
-            else if (args[0].equals("confirm"))
-            {
-                if (ActionSecretPower.pendingBaseLocations.containsKey(player.getUniqueID()))
-                {
-                    Vector4 loc = ActionSecretPower.pendingBaseLocations.remove(player.getUniqueID());
-                    Vector3 pos = Vector3.getNewVector().set(loc.x, loc.y, loc.z);
-                    if (loc.w == player.dimension && pos.distToEntity(player) < 16)
-                    {
-                        BlockNest nest = (BlockNest) PokecubeItems.getBlock("pokemobNest");
-                        pos.setBlock(player.getEntityWorld(), nest.getDefaultState().withProperty(nest.TYPE, 1));
-                        TileEntityBasePortal tile = (TileEntityBasePortal) player.getEntityWorld()
-                                .getTileEntity(pos.getPos());
-                        tile.setPlacer(player);
-                        Vector3 baseExit = Vector3.getNewVector();
-                        baseExit.set(Double.parseDouble(args[1]), Double.parseDouble(args[2]),
-                                Double.parseDouble(args[3]));
-                        PokecubeDimensionManager.setBaseEntrance(player, player.dimension, baseExit.getPos());
-                        TranslationTextComponent message = new TranslationTextComponent("pokemob.createbase.confirmed",
-                                pos);
-                        sender.sendMessage(message);
-                    }
-                }
-            }
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
-            throw new CommandException(
-                    "valid options: /pokebase reset, /pokebase exit, /pokebase tp <playername> (OP only)");
-        }
-    }
-
-    @Override
-    public int getRequiredPermissionLevel()
-    {
         return 0;
     }
 
+    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    {
+        PermissionAPI.registerNode("command.pokebase", DefaultPermissionLevel.OP,
+                "Is the player allowed to use /pokebase");
+
+        final LiteralArgumentBuilder<CommandSource> command = Commands.literal("pokebase").requires(cs -> CommandTools
+                .hasPerm(cs, "command.pokebase")).then(Commands.argument("player", EntityArgument.player()).then(
+                        Commands.argument("owner", GameProfileArgument.gameProfile()).executes(ctx -> SecretBaseCommand
+                                .execute(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), GameProfileArgument
+                                        .getGameProfiles(ctx, "owner")))));
+        commandDispatcher.register(command);
+    }
 }

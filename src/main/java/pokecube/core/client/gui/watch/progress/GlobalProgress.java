@@ -1,99 +1,74 @@
 package pokecube.core.client.gui.watch.progress;
 
-import java.io.IOException;
 import java.util.List;
 
-import com.google.common.base.Predicate;
-
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraft.util.text.TranslationTextComponent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.client.gui.watch.GuiPokeWatch;
-import pokecube.core.client.gui.watch.util.PageButton;
 import pokecube.core.database.stats.CaptureStats;
 import pokecube.core.database.stats.EggStats;
 import pokecube.core.database.stats.KillStats;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.network.packets.PacketPokedex;
 
 public class GlobalProgress extends Progress
 {
-    PageButton button;
+    Button button;
 
-    public GlobalProgress(GuiPokeWatch watch)
+    public GlobalProgress(final GuiPokeWatch watch)
     {
-        super(watch);
-        setTitle(I18n.format("pokewatch.progress.global.title"));
+        super(new TranslationTextComponent("pokewatch.progress.global.title"), watch);
     }
 
     @Override
     public void onPageOpened()
     {
-        lines.clear();
-        caught0 = CaptureStats.getNumberUniqueCaughtBy(watch.player.getUniqueID());
-        caught1 = CaptureStats.getTotalNumberCaughtBy(watch.player.getUniqueID());
+        this.lines.clear();
+        this.caught0 = CaptureStats.getNumberUniqueCaughtBy(this.watch.player.getUniqueID());
+        this.caught1 = CaptureStats.getTotalNumberCaughtBy(this.watch.player.getUniqueID());
 
-        hatched0 = EggStats.getNumberUniqueHatchedBy(watch.player.getUniqueID());
-        hatched1 = EggStats.getTotalNumberHatchedBy(watch.player.getUniqueID());
+        this.hatched0 = EggStats.getNumberUniqueHatchedBy(this.watch.player.getUniqueID());
+        this.hatched1 = EggStats.getTotalNumberHatchedBy(this.watch.player.getUniqueID());
 
-        killed0 = KillStats.getNumberUniqueKilledBy(watch.player.getUniqueID());
-        killed1 = KillStats.getTotalNumberKilledBy(watch.player.getUniqueID());
+        this.killed0 = KillStats.getNumberUniqueKilledBy(this.watch.player.getUniqueID());
+        this.killed1 = KillStats.getTotalNumberKilledBy(this.watch.player.getUniqueID());
 
-        String captureLine = I18n.format("pokewatch.progress.global.caught", caught1, caught0);
-        String killLine = I18n.format("pokewatch.progress.global.killed", killed1, killed0);
-        String hatchLine = I18n.format("pokewatch.progress.global.hatched", hatched1, hatched0);
+        final String captureLine = I18n.format("pokewatch.progress.global.caught", this.caught1, this.caught0);
+        final String killLine = I18n.format("pokewatch.progress.global.killed", this.killed1, this.killed0);
+        final String hatchLine = I18n.format("pokewatch.progress.global.hatched", this.hatched1, this.hatched0);
 
-        AxisAlignedBB centre = watch.player.getBoundingBox();
-        AxisAlignedBB bb = centre.grow(PokecubeMod.core.getConfig().maxSpawnRadius, 5,
-                PokecubeMod.core.getConfig().maxSpawnRadius);
-        List<Entity> otherMobs = watch.player.getEntityWorld().getEntitiesInAABBexcluding(watch.player, bb,
-                new Predicate<Entity>()
-                {
-                    @Override
-                    public boolean apply(Entity input)
-                    {
-                        return input instanceof AnimalEntity && CapabilityPokemob.getPokemobFor(input) != null;
-                    }
-                });
-        String nearbyLine = I18n.format("pokewatch.progress.global.nearby", otherMobs.size());
+        final AxisAlignedBB centre = this.watch.player.getBoundingBox();
+        final AxisAlignedBB bb = centre.grow(PokecubeCore.getConfig().maxSpawnRadius, 5, PokecubeCore
+                .getConfig().maxSpawnRadius);
+        final List<Entity> otherMobs = this.watch.player.getEntityWorld().getEntitiesInAABBexcluding(this.watch.player,
+                bb, input -> input instanceof AnimalEntity && CapabilityPokemob.getPokemobFor(input) != null);
+        final String nearbyLine = I18n.format("pokewatch.progress.global.nearby", otherMobs.size());
 
-        int x = watch.width / 2;
-        int y = watch.height / 2 - 5;
-        this.watch.getButtons().add(button = new PageButton(watch.getButtons().size(), x - 50, y + 57, 100, 12,
-                I18n.format("pokewatch.progress.inspect"), this));
-
-        for (String line : fontRender.listFormattedStringToWidth(captureLine, 120))
+        final int x = this.watch.width / 2;
+        final int y = this.watch.height / 2 - 5;
+        this.addButton(this.button = new Button(x - 50, y + 57, 100, 12, I18n.format("pokewatch.progress.inspect"), b ->
         {
-            lines.add(line);
-        }
-        lines.add("");
-        for (String line : fontRender.listFormattedStringToWidth(killLine, 120))
-        {
-            lines.add(line);
-        }
-        lines.add("");
-        for (String line : fontRender.listFormattedStringToWidth(hatchLine, 120))
-        {
-            lines.add(line);
-        }
-        lines.add("");
-        for (String line : fontRender.listFormattedStringToWidth(nearbyLine, 120))
-        {
-            lines.add(line);
-        }
-    }
+            PacketPokedex.sendInspectPacket(true, Minecraft.getInstance().getLanguageManager().getCurrentLanguage()
+                    .getCode());
+        }));
 
-    @Override
-    public void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.id == this.button.id)
-        {
-            PacketPokedex.sendInspectPacket(true, FMLClientHandler.instance().getCurrentLanguage());
-        }
+        for (final String line : this.font.listFormattedStringToWidth(captureLine, 120))
+            this.lines.add(line);
+        this.lines.add("");
+        for (final String line : this.font.listFormattedStringToWidth(killLine, 120))
+            this.lines.add(line);
+        this.lines.add("");
+        for (final String line : this.font.listFormattedStringToWidth(hatchLine, 120))
+            this.lines.add(line);
+        this.lines.add("");
+        for (final String line : this.font.listFormattedStringToWidth(nearbyLine, 120))
+            this.lines.add(line);
     }
 
 }

@@ -10,51 +10,49 @@ import thut.api.maths.Vector3;
 
 public class TreeRemover
 {
-    World         world;
-    Vector3       centre;
+    World   world;
+    Vector3 centre;
 
-    List<Vector3> blocks  = new LinkedList<Vector3>();
-    List<Vector3> checked = new LinkedList<Vector3>();
+    List<Vector3> blocks  = new LinkedList<>();
+    List<Vector3> checked = new LinkedList<>();
 
     public TreeRemover(World world, Vector3 pos)
     {
         this.world = world;
-        centre = pos;
+        this.centre = pos;
     }
 
     public void clear()
     {
-        blocks.clear();
-        checked.clear();
+        this.blocks.clear();
+        this.checked.clear();
     }
 
     public int cut(boolean count)
     {
-        if (!count && cutTree(true) == 0) cutGrass();
-        return cutTree(count);
+        if (!count && this.cutTree(true) == 0) this.cutGrass();
+        return this.cutTree(count);
     }
 
     public void cutGrass()
     {
-        Vector3 temp = Vector3.getNewVector();
+        final Vector3 temp = Vector3.getNewVector();
         for (int i = -4; i < 5; i++)
             for (int j = -4; j < 5; j++)
                 for (int k = -1; k < 6; k++)
                 {
-                    temp.set(centre).addTo(i, k, j);
-                    if (PokecubeTerrainChecker.isPlant(temp.getBlockState(world)))
-                    {
-                        temp.breakBlock(world, true);
-                    }
+                    temp.set(this.centre).addTo(i, k, j);
+                    if (PokecubeTerrainChecker.isPlant(temp.getBlockState(this.world))) temp.breakBlock(this.world,
+                            true);
                 }
     }
 
     private int cutPoints(boolean count)
     {
         int ret = 0;
-        for (Vector3 v : blocks)
+        for (final Vector3 v : this.blocks)
         {
-            if (!count) v.breakBlock(world, true);
+            if (!count) v.breakBlock(this.world, true);
             ret++;
         }
         return ret;
@@ -62,50 +60,39 @@ public class TreeRemover
 
     public int cutTree(boolean count)
     {
-        if (blocks.size() > 0 && count)
-        {
-            clear();
-        }
-        else if (blocks.size() > 0) { return cutPoints(count); }
-        Vector3 base = findTreeBase();
+        if (this.blocks.size() > 0 && count) this.clear();
+        else if (this.blocks.size() > 0) return this.cutPoints(count);
+        final Vector3 base = this.findTreeBase();
         int ret = 0;
         if (!base.isEmpty())
         {
-            populateList(base);
-            ret = cutPoints(count);
+            this.populateList(base);
+            ret = this.cutPoints(count);
         }
         return ret;
     }
 
     private Vector3 findTreeBase()
     {
-        Vector3 base = Vector3.getNewVector();
+        final Vector3 base = Vector3.getNewVector();
         int k = -1;
-        Vector3 temp = Vector3.getNewVector();
+        final Vector3 temp = Vector3.getNewVector();
 
-        if (PokecubeTerrainChecker.isWood(temp.set(centre).getBlockState(world)))
+        if (PokecubeTerrainChecker.isWood(temp.set(this.centre).getBlockState(this.world)))
         {
             boolean valid = false;
-            while (centre.intY() + k > 0)
+            while (this.centre.intY() + k > 0)
             {
-                if (PokecubeTerrainChecker.isWood(temp.set(centre).addTo(0, k, 0).getBlockState(world)))
+                if (PokecubeTerrainChecker.isWood(temp.set(this.centre).addTo(0, k, 0).getBlockState(this.world)))
                 {
                 }
-                else if (PokecubeTerrainChecker.isDirt(temp.set(centre).addTo(0, k, 0).getBlockState(world)))
-                {
+                else if (PokecubeTerrainChecker.isDirt(temp.set(this.centre).addTo(0, k, 0).getBlockState(this.world)))
                     valid = true;
-                }
-                else
-                {
-                    break;
-                }
+                else break;
                 if (valid) break;
                 k--;
             }
-            if (valid)
-            {
-                base.set(temp).set(centre).addTo(0, k + 1, 0);
-            }
+            if (valid) base.set(temp).set(this.centre).addTo(0, k + 1, 0);
         }
         return base;
     }
@@ -114,39 +101,32 @@ public class TreeRemover
     {
         boolean ret = false;
 
-        Vector3 temp = Vector3.getNewVector();
+        final Vector3 temp = Vector3.getNewVector();
         for (int i = -1; i <= 1; i++)
             for (int j = -1; j <= 1; j++)
                 for (int k = -1; k <= 1; k++)
                 {
                     temp.set(prev).addTo(i, k, j);
-                    if (PokecubeTerrainChecker.isWood(temp.getBlockState(world)))
+                    if (PokecubeTerrainChecker.isWood(temp.getBlockState(this.world)))
                     {
                         tempList.add(temp.copy());
                         ret = true;
                     }
                 }
-        checked.add(prev);
+        this.checked.add(prev);
         return ret;
     }
 
     private void populateList(Vector3 base)
     {
-        blocks.add(base);
-        while (checked.size() < blocks.size())
+        this.blocks.add(base);
+        while (this.checked.size() < this.blocks.size())
         {
-            List<Vector3> toAdd = new ArrayList<Vector3>();
-            for (Vector3 v : blocks)
-            {
-                if (!checked.contains(v))
-                {
-                    nextPoint(v, toAdd);
-                }
-            }
-            for (Vector3 v : toAdd)
-            {
-                if (!blocks.contains(v)) blocks.add(v);
-            }
+            final List<Vector3> toAdd = new ArrayList<>();
+            for (final Vector3 v : this.blocks)
+                if (!this.checked.contains(v)) this.nextPoint(v, toAdd);
+            for (final Vector3 v : toAdd)
+                if (!this.blocks.contains(v)) this.blocks.add(v);
         }
     }
 }

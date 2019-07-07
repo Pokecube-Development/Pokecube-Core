@@ -1,14 +1,12 @@
 package pokecube.core.client.gui.watch.pokemob;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import net.minecraft.client.gui.GuiListExtended.IGuiListEntry;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -22,100 +20,81 @@ import pokecube.core.client.gui.watch.PokemobInfoPage;
 import pokecube.core.client.gui.watch.util.LineEntry;
 import pokecube.core.client.gui.watch.util.LineEntry.IClickListener;
 import pokecube.core.database.PokedexEntry;
-import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
 import pokecube.core.moves.MovesUtils;
 
-public class Moves extends ListPage
+public class Moves extends ListPage<LineEntry>
 {
     private int[][] moveOffsets;
 
-    public Moves(PokemobInfoPage parent, IPokemob pokemob)
+    public Moves(final PokemobInfoPage parent)
     {
-        super(parent, pokemob, "moves");
+        super(parent, "moves");
     }
 
     @Override
-    void initList()
+    void drawInfo(final int mouseX, final int mouseY, final float partialTicks)
     {
-        List<IGuiListEntry> entries = Lists.newArrayList();
-        int offsetX = (watch.width - 160) / 2 + 46;
-        int offsetY = (watch.height - 160) / 2 + 85;
-        int height = fontRenderer.FONT_HEIGHT * 6;
-        int width = 111;
+        final int x = (this.watch.width - 160) / 2 + 80;
+        final int y = (this.watch.height - 160) / 2 + 8;
+        if (this.watch.canEdit(this.parent.pokemob)) this.drawMoves(x, y, mouseX, mouseY);
+    }
 
-        int y0 = offsetY + 4;
-        int y1 = offsetY + height + 4;
-        int colour = 0xFFFFFFFF;
-
-        if (!watch.canEdit(pokemob))
+    private void drawMoves(final int x, final int y, final int mouseX, final int mouseY)
+    {
+        final int dx = -30;
+        final int dy = 20;
+        int held = -1;
+        final int mx = mouseX - (x + dx);
+        final int my = mouseY - (y + dy);
+        for (int i = 0; i < this.moveOffsets.length; i++)
         {
-            width = 111;
-            int dx = 0;
-            int dy = -57;
-            y0 += dy;
-            y1 += dy;
-            offsetY += dy;
-            offsetX += dx;
-        }
-
-        final Moves thisObj = this;
-        IClickListener listener = new IClickListener()
-        {
-            @Override
-            public boolean handleClick(ITextComponent component)
+            final int[] offset = this.moveOffsets[i];
+            if (offset[2] > 0)
             {
-                return thisObj.handleComponentClick(component);
+                held = i;
+                continue;
             }
-
-            @Override
-            public void handleHovor(ITextComponent component, int x, int y)
+            final Move_Base move = MovesUtils.getMoveFromName(this.parent.pokemob.getMove(offset[3]));
+            if (move != null)
             {
-                thisObj.handleComponentHover(component, x, y);
-            }
-        };
-
-        PokedexEntry entry = pokemob.getPokedexEntry();
-        Set<String> added = Sets.newHashSet();
-        for (int i = 0; i < 100; i++)
-        {
-            List<String> moves = entry.getMovesForLevel(i, i - 1);
-            for (String s : moves)
-            {
-                added.add(s);
-                ITextComponent moveName = MovesUtils.getMoveName(s);
-                moveName.setStyle(new Style());
-                moveName.getStyle().setColor(TextFormatting.RED);
-                ITextComponent main = new TranslationTextComponent("pokewatch.moves.lvl", i, moveName);
-                main.setStyle(new Style());
-                main.getStyle().setColor(TextFormatting.GREEN);
-                main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
-                main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
-                entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
+                this.drawString(this.font, MovesUtils.getMoveName(move.getName()).getFormattedText(), x + dx, y + dy
+                        + offset[1] + offset[4], move.getType(this.parent.pokemob).colour);
+                final int length = this.font.getStringWidth(MovesUtils.getMoveName(move.getName()).getFormattedText());
+                if (mx > 0 && mx < length && my > offset[1] && my < offset[1] + this.font.FONT_HEIGHT)
+                {
+                    String text;
+                    final int pwr = move.getPWR(this.parent.pokemob, this.watch.player);
+                    if (pwr > 0) text = pwr + "";
+                    else text = "-";
+                    text = I18n.format("pokewatch.moves.pwr", text);
+                    GlStateManager.disableDepthTest();
+                    final int box = Math.max(10, this.font.getStringWidth(text) + 2);
+                    final int mx1 = 75 - box;
+                    final int my1 = offset[1] + 18;
+                    final int dy1 = this.font.FONT_HEIGHT;
+                    AbstractGui.fill(x + mx1 - 1, y + my1 - 1, x + mx1 + box + 1, y + my1 + dy1 + 1, 0xFF78C850);
+                    AbstractGui.fill(x + mx1, y + my1, x + mx1 + box, y + my1 + dy1, 0xFF000000);
+                    this.font.drawString(text, x + mx1 + 1, y + my1, 0xFFFFFFFF);
+                    GlStateManager.enableDepthTest();
+                }
             }
         }
-        for (String s : entry.getMoves())
+        if (held != -1)
         {
-            added.add(s);
-            ITextComponent moveName = MovesUtils.getMoveName(s);
-            moveName.setStyle(new Style());
-            moveName.getStyle().setColor(TextFormatting.RED);
-            ITextComponent main = new TranslationTextComponent("pokewatch.moves.tm", moveName);
-            main.setStyle(new Style());
-            main.getStyle().setColor(TextFormatting.GREEN);
-            main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
-            main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
-            entries.add(new LineEntry(y0, y1, fontRenderer, main, colour).setClickListner(listener));
+            final int[] offset = this.moveOffsets[held];
+            final Move_Base move = MovesUtils.getMoveFromName(this.parent.pokemob.getMove(offset[3]));
+            if (move != null) this.drawString(this.font, MovesUtils.getMoveName(move.getName()).getFormattedText(), x
+                    + dx, y + dy + offset[1], move.getType(this.parent.pokemob).colour);
         }
-        list = new ScrollGui(mc, width, height, fontRenderer.FONT_HEIGHT, offsetX, offsetY, entries);
     }
 
     @Override
-    public void initGui()
+    public void init()
     {
-        super.initGui();
+        super.init();
         //@formatter:off
-        moveOffsets = new int[][]{
+        this.moveOffsets = new int[][]{
         // i = index, b = selected, dc = cursor offset
         //   dx  dy  b  i  dc
             {00, 00, 0, 0, 0},
@@ -128,159 +107,164 @@ public class Moves extends ListPage
     }
 
     @Override
-    void drawInfo(int mouseX, int mouseY, float partialTicks)
+    public void initList()
     {
-        int x = (watch.width - 160) / 2 + 80;
-        int y = (watch.height - 160) / 2 + 8;
-        if (watch.canEdit(pokemob)) drawMoves(x, y, mouseX, mouseY);
-    }
+        super.initList();
+        int offsetX = (this.watch.width - 160) / 2 + 46;
+        int offsetY = (this.watch.height - 160) / 2 + 82;
+        final int height = this.font.FONT_HEIGHT * 6;
+        int width = 111;
 
-    private void drawMoves(int x, int y, int mouseX, int mouseY)
-    {
+        int y0 = offsetY + 4;
+        int y1 = offsetY + height + 4;
+        final int colour = 0xFFFFFFFF;
 
-        int dx = -30;
-        int dy = 20;
-        int held = -1;
-        int mx = mouseX - (x + dx);
-        int my = mouseY - (y + dy);
-        for (int i = 0; i < moveOffsets.length; i++)
+        if (!this.watch.canEdit(this.parent.pokemob))
         {
-            int[] offset = moveOffsets[i];
-            if (offset[2] > 0)
+            width = 111;
+            final int dx = 0;
+            final int dy = -60;
+            y0 += dy;
+            y1 += dy;
+            offsetY += dy;
+            offsetX += dx;
+        }
+
+        final Moves thisObj = this;
+        final IClickListener listener = new IClickListener()
+        {
+            @Override
+            public boolean handleClick(final ITextComponent component)
             {
-                held = i;
-                continue;
+                return thisObj.handleComponentClicked(component);
             }
-            Move_Base move = MovesUtils.getMoveFromName(pokemob.getMove(offset[3]));
-            if (move != null)
+
+            @Override
+            public void handleHovor(final ITextComponent component, final int x, final int y)
             {
-                drawString(fontRenderer, MovesUtils.getMoveName(move.getName()).getFormattedText(), x + dx,
-                        y + dy + offset[1] + offset[4], move.getType(pokemob).colour);
-                int length = fontRenderer.getStringWidth(MovesUtils.getMoveName(move.getName()).getFormattedText());
-                if (mx > 0 && mx < length && my > offset[1] && my < offset[1] + fontRenderer.FONT_HEIGHT)
-                {
-                    String text;
-                    int pwr = move.getPWR(pokemob, watch.player);
-                    if (pwr > 0) text = pwr + "";
-                    else text = "-";
-                    text = I18n.format("pokewatch.moves.pwr", text);
-                    GlStateManager.disableDepth();
-                    int box = Math.max(10, fontRenderer.getStringWidth(text) + 2);
-                    int mx1 = 75 - box;
-                    int my1 = offset[1] + 18;
-                    int dy1 = fontRenderer.FONT_HEIGHT;
-                    drawRect(x + mx1 - 1, y + my1 - 1, x + mx1 + box + 1, y + my1 + dy1 + 1, 0xFF78C850);
-                    drawRect(x + mx1, y + my1, x + mx1 + box, y + my1 + dy1, 0xFF000000);
-                    fontRenderer.drawString(text, x + mx1 + 1, y + my1, 0xFFFFFFFF, true);
-                    GlStateManager.enableDepth();
-                }
+                thisObj.renderComponentHoverEffect(component, x, y);
+            }
+        };
+
+        this.list = new ScrollGui<>(this, this.minecraft, width, height, this.font.FONT_HEIGHT, offsetX, offsetY);
+        final PokedexEntry entry = this.parent.pokemob.getPokedexEntry();
+        final Set<String> added = Sets.newHashSet();
+        for (int i = 0; i < 100; i++)
+        {
+            final List<String> moves = entry.getMovesForLevel(i, i - 1);
+            for (final String s : moves)
+            {
+                added.add(s);
+                final ITextComponent moveName = MovesUtils.getMoveName(s);
+                moveName.setStyle(new Style());
+                moveName.getStyle().setColor(TextFormatting.RED);
+                final ITextComponent main = new TranslationTextComponent("pokewatch.moves.lvl", i, moveName);
+                main.setStyle(new Style());
+                main.getStyle().setColor(TextFormatting.GREEN);
+                main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
+                main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
+                this.list.addEntry(new LineEntry(this.list, y0, y1, this.font, main, colour).setClickListner(listener));
             }
         }
-        if (held != -1)
+        for (final String s : entry.getMoves())
         {
-            int[] offset = moveOffsets[held];
-            Move_Base move = MovesUtils.getMoveFromName(pokemob.getMove(offset[3]));
-            if (move != null)
-            {
-                drawString(fontRenderer, MovesUtils.getMoveName(move.getName()).getFormattedText(), x + dx,
-                        y + dy + offset[1], move.getType(pokemob).colour);
-            }
+            added.add(s);
+            final ITextComponent moveName = MovesUtils.getMoveName(s);
+            moveName.setStyle(new Style());
+            moveName.getStyle().setColor(TextFormatting.RED);
+            final ITextComponent main = new TranslationTextComponent("pokewatch.moves.tm", moveName);
+            main.setStyle(new Style());
+            main.getStyle().setColor(TextFormatting.GREEN);
+            main.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, s));
+            main.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(s)));
+            this.list.addEntry(new LineEntry(this.list, y0, y1, this.font, main, colour).setClickListner(listener));
         }
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    public boolean mouseClicked(final double mouseX, final double mouseY, final int mouseButton)
     {
-        if (mouseButton == 0 && new Exception().getStackTrace()[3].getClassName()
-                .equals("pokecube.core.client.gui.watch.GuiPokeWatch"))
+        if (mouseButton == 0)
         {
-            for (int i = 0; i < moveOffsets.length; i++)
-            {
-                if (moveOffsets[i][2] != 0) return;
-            }
-            int x = (watch.width - 160) / 2 + 80;
-            int y = (watch.height - 160) / 2 + 8;
-            int dx = -30;
-            int dy = 20;
-            int x1 = mouseX - (x + dx);
-            int y1 = mouseY - (y + dy);
-            boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
+            for (final int[] moveOffset : this.moveOffsets)
+                if (moveOffset[2] != 0) return true;
+            final int x = (this.watch.width - 160) / 2 + 80;
+            final int y = (this.watch.height - 160) / 2 + 8;
+            final int dx = -30;
+            final int dy = 20;
+            final int x1 = (int) (mouseX - (x + dx));
+            final int y1 = (int) (mouseY - (y + dy));
+            final boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
             if (inBox)
             {
                 int index = y1 / 10;
                 index = Math.min(index, 4);
-                moveOffsets[index][2] = 1;
-                moveOffsets[index][4] = (y1 - 10 * index);
+                this.moveOffsets[index][2] = 1;
+                this.moveOffsets[index][4] = y1 - 10 * index;
+                return true;
             }
         }
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    public void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick)
+    public boolean mouseDragged(final double mouseX, final double mouseY, final int mouseButton, final double d2,
+            final double d3)
     {
-        if (mouseButton == 0
-                && new Exception().getStackTrace()[3].getClassName().equals("net.minecraft.client.gui.GuiScreen"))
+        if (mouseButton == 0)
         {
             int heldIndex = -1;
-            for (int i = 0; i < moveOffsets.length; i++)
-            {
-                if (moveOffsets[i][2] != 0)
+            for (int i = 0; i < this.moveOffsets.length; i++)
+                if (this.moveOffsets[i][2] != 0)
                 {
                     heldIndex = i;
                     break;
                 }
-            }
             if (heldIndex != -1)
             {
-                int x = (watch.width - 160) / 2 + 80;
-                int y = (watch.height - 160) / 2 + 8;
-                int dx = -30;
-                int dy = 20;
-                int x1 = mouseX - (x + dx);
-                int y1 = mouseY - (y + dy);
-                boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
-                if (inBox)
-                {
-                    moveOffsets[heldIndex][1] = y1 - moveOffsets[heldIndex][4];
-                }
+                final int x = (this.watch.width - 160) / 2 + 80;
+                final int y = (this.watch.height - 160) / 2 + 8;
+                final int dx = -30;
+                final int dy = 20;
+                final int x1 = (int) (mouseX - (x + dx));
+                final int y1 = (int) (mouseY - (y + dy));
+                final boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
+                if (inBox) this.moveOffsets[heldIndex][1] = y1 - this.moveOffsets[heldIndex][4];
+                if (inBox) return true;
             }
         }
-        super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, mouseButton, d2, d3);
     }
 
     @Override
-    public void mouseReleased(int mouseX, int mouseY, int mouseButton)
+    public boolean mouseReleased(final double mouseX, final double mouseY, final int mouseButton)
     {
-        if (mouseButton == 0
-                && new Exception().getStackTrace()[3].getClassName().equals("net.minecraft.client.gui.GuiScreen"))
+        if (mouseButton == 0)
         {
             int oldIndex = -1;
-            for (int i = 0; i < moveOffsets.length; i++)
-            {
-                if (moveOffsets[i][2] != 0)
+            for (int i = 0; i < this.moveOffsets.length; i++)
+                if (this.moveOffsets[i][2] != 0)
                 {
                     oldIndex = i;
-                    moveOffsets[i][2] = 0;
+                    this.moveOffsets[i][2] = 0;
                 }
-            }
-            if (oldIndex == -1) return;
-            int x = (watch.width - 160) / 2 + 80;
-            int y = (watch.height - 160) / 2 + 8;
-            int dx = -30;
-            int dy = 20;
-            int x1 = mouseX - (x + dx);
-            int y1 = mouseY - (y + dy);
-            boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
+            if (oldIndex == -1) return false;
+            final int x = (this.watch.width - 160) / 2 + 80;
+            final int y = (this.watch.height - 160) / 2 + 8;
+            final int dx = -30;
+            final int dy = 20;
+            final int x1 = (int) (mouseX - (x + dx));
+            final int y1 = (int) (mouseY - (y + dy));
+            final boolean inBox = x1 > 0 && y1 > 0 && x1 < 95 && y1 < 52;
             if (inBox)
             {
                 int index = y1 / 10;
                 index = Math.min(index, 4);
                 index = Math.max(index, 0);
-                pokemob.exchangeMoves(oldIndex, index);
+                this.parent.pokemob.exchangeMoves(oldIndex, index);
             }
             //@formatter:off
-            moveOffsets = new int[][]{
+            this.moveOffsets = new int[][]{
                 {00, 00, 0, 0, 0},
                 {00, 10, 0, 1, 0},
                 {00, 20, 0, 2, 0},
@@ -288,40 +272,35 @@ public class Moves extends ListPage
                 {00, 42, 0, 4, 0}
             };
             //@formatter:on
+            if (inBox) return true;
         }
-        super.mouseReleased(mouseX, mouseY, mouseButton);
+        return super.mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    public boolean handleComponentClick(ITextComponent component)
-    {
-        return super.handleComponentClick(component);
-    }
-
-    @Override
-    protected void handleComponentHover(ITextComponent component, int x, int y)
+    protected void renderComponentHoverEffect(final ITextComponent component, final int x, final int y)
     {
         tooltip:
         if (component.getStyle().getHoverEvent() != null)
         {
-            String text = component.getStyle().getHoverEvent().getValue().getUnformattedText();
-            Move_Base move = MovesUtils.getMoveFromName(text);
+            String text = component.getStyle().getHoverEvent().getValue().getUnformattedComponentText();
+            final Move_Base move = MovesUtils.getMoveFromName(text);
             if (move == null) break tooltip;
-            int pwr = move.getPWR(pokemob, watch.player);
+            final int pwr = move.getPWR(this.parent.pokemob, this.watch.player);
             if (pwr > 0) text = pwr + "";
             else text = "-";
             text = I18n.format("pokewatch.moves.pwr", text);
-            GlStateManager.disableDepth();
-            int box = Math.max(10, fontRenderer.getStringWidth(text) + 2);
-            int mx = 102 - box;
-            int my = -10;
-            int dy = fontRenderer.FONT_HEIGHT;
-            drawRect(x + mx - 1, y + my - 1, x + mx + box + 1, y + my + dy + 1, 0xFF78C850);
-            drawRect(x + mx, y + my, x + mx + box, y + my + dy, 0xFF000000);
-            fontRenderer.drawString(text, x + mx + 1, y + my, 0xFFFFFFFF, true);
-            GlStateManager.enableDepth();
+            GlStateManager.disableDepthTest();
+            final int box = Math.max(10, this.font.getStringWidth(text) + 2);
+            final int mx = 100 - box;
+            final int my = -10;
+            final int dy = this.font.FONT_HEIGHT;
+            AbstractGui.fill(x + mx - 1, y + my - 1, x + mx + box + 1, y + my + dy + 1, 0xFF78C850);
+            AbstractGui.fill(x + mx, y + my, x + mx + box, y + my + dy, 0xFF000000);
+            this.font.drawString(text, x + mx + 1, y + my, 0xFFFFFFFF);
+            GlStateManager.enableDepthTest();
         }
-        super.handleComponentHover(component, x, y);
+        super.renderComponentHoverEffect(component, x, y);
     }
 
 }

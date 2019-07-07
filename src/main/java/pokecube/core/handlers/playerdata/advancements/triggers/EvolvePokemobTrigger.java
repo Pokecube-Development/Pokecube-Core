@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.advancements.critereon.AbstractCriterionInstance;
+import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import pokecube.core.database.Database;
@@ -22,22 +22,20 @@ import pokecube.core.interfaces.PokecubeMod;
 
 public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrigger.Instance>
 {
-    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "evolve");
-
-    public static class Instance extends AbstractCriterionInstance
+    public static class Instance extends CriterionInstance
     {
         final PokedexEntry entry;
 
         public Instance(PokedexEntry entry)
         {
-            super(ID);
+            super(EvolvePokemobTrigger.ID);
             this.entry = entry != null ? entry : Database.missingno;
         }
 
         public boolean test(ServerPlayerEntity player, IPokemob pokemob)
         {
-            return (entry == Database.missingno || pokemob.getPokedexEntry() == entry)
-                    && pokemob.getPokemonOwner() != player;
+            return (this.entry == Database.missingno || pokemob.getPokedexEntry() == this.entry) && pokemob
+                    .getOwner() != player;
         }
 
     }
@@ -52,14 +50,14 @@ public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrig
             this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean isEmpty()
-        {
-            return this.listeners.isEmpty();
-        }
-
         public void add(ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener)
         {
             this.listeners.add(listener);
+        }
+
+        public boolean isEmpty()
+        {
+            return this.listeners.isEmpty();
         }
 
         public void remove(ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener)
@@ -71,38 +69,25 @@ public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrig
         {
             List<ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener : this.listeners)
-            {
+            for (final ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener : this.listeners)
                 if (listener.getCriterionInstance().test(player, pokemob))
                 {
                     if (list == null)
-                    {
                         list = Lists.<ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance>> newArrayList();
-                    }
 
                     list.add(listener);
                 }
-            }
-            if (list != null)
-            {
-                for (ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener1 : list)
-                {
-                    listener1.grantCriterion(this.playerAdvancements);
-                }
-            }
+            if (list != null) for (final ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener1 : list)
+                listener1.grantCriterion(this.playerAdvancements);
         }
     }
+
+    public static ResourceLocation ID = new ResourceLocation(PokecubeMod.ID, "evolve");
 
     private final Map<PlayerAdvancements, EvolvePokemobTrigger.Listeners> listeners = Maps.<PlayerAdvancements, EvolvePokemobTrigger.Listeners> newHashMap();
 
     public EvolvePokemobTrigger()
     {
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
     }
 
     @Override
@@ -120,21 +105,21 @@ public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrig
         bredanimalstrigger$listeners.add(listener);
     }
 
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the
+     * JSON.
+     */
     @Override
-    public void removeListener(PlayerAdvancements playerAdvancementsIn,
-            ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener)
+    public EvolvePokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        EvolvePokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        final String name = json.has("entry") ? json.get("entry").getAsString() : "";
+        return new EvolvePokemobTrigger.Instance(Database.getEntry(name));
+    }
 
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.remove(listener);
-
-            if (bredanimalstrigger$listeners.isEmpty())
-            {
-                this.listeners.remove(playerAdvancementsIn);
-            }
-        }
+    @Override
+    public ResourceLocation getId()
+    {
+        return EvolvePokemobTrigger.ID;
     }
 
     @Override
@@ -143,21 +128,24 @@ public class EvolvePokemobTrigger implements ICriterionTrigger<EvolvePokemobTrig
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    /** Deserialize a ICriterionInstance of this trigger from the data in the
-     * JSON. */
     @Override
-    public EvolvePokemobTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn,
+            ICriterionTrigger.Listener<EvolvePokemobTrigger.Instance> listener)
     {
-        String name = json.has("entry") ? json.get("entry").getAsString() : "";
-        return new EvolvePokemobTrigger.Instance(Database.getEntry(name));
+        final EvolvePokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
+
+        if (bredanimalstrigger$listeners != null)
+        {
+            bredanimalstrigger$listeners.remove(listener);
+
+            if (bredanimalstrigger$listeners.isEmpty()) this.listeners.remove(playerAdvancementsIn);
+        }
     }
 
     public void trigger(ServerPlayerEntity player, IPokemob pokemob)
     {
-        EvolvePokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
-        if (bredanimalstrigger$listeners != null)
-        {
-            bredanimalstrigger$listeners.trigger(player, pokemob);
-        }
+        final EvolvePokemobTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player
+                .getAdvancements());
+        if (bredanimalstrigger$listeners != null) bredanimalstrigger$listeners.trigger(player, pokemob);
     }
 }

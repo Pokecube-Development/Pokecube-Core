@@ -1,5 +1,5 @@
 {
 	"variants": {
-		"normal": { "model": "pokecube:repel" }
+		"": { "model": "pokecube:block/repel" }
 	}
 }

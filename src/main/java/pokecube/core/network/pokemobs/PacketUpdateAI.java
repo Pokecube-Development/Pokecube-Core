@@ -1,116 +1,64 @@
 package pokecube.core.network.pokemobs;
 
-import java.io.IOException;
-
-import javax.annotation.Nullable;
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
-import pokecube.core.interfaces.capabilities.AICapWrapper;
-import thut.api.entity.ai.IAIMob;
+import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import thut.api.entity.ai.IAIRunnable;
-import thut.api.entity.ai.ILogicRunnable;
+import thut.core.common.network.Packet;
 
-public class PacketUpdateAI implements IMessage, IMessageHandler<PacketUpdateAI, IMessage>
+public class PacketUpdateAI extends Packet
 {
-    public int            entityId;
-    public CompoundNBT data = new CompoundNBT();
-
-    public static void sendUpdatePacket(IPokemob pokemob, @Nullable String ai, @Nullable String logic)
+    public static void sendUpdatePacket(final IPokemob pokemob, final IAIRunnable ai)
     {
-        CompoundNBT tag = new CompoundNBT();
-        CompoundNBT savedAI = new CompoundNBT();
-        CompoundNBT savedLogic = new CompoundNBT();
-        if (ai != null) for (IAIRunnable runnable : pokemob.getAI().aiTasks)
-        {
-            if (runnable instanceof INBTSerializable && runnable.getIdentifier().equals(ai))
-            {
-                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedAI.put(runnable.getIdentifier(), base);
-                break;
-            }
-        }
-        if (logic != null) for (ILogicRunnable runnable : pokemob.getAI().aiLogic)
-        {
-            if (runnable instanceof INBTSerializable && runnable.getIdentifier().equals(logic))
-            {
-                INBT base = INBTSerializable.class.cast(runnable).serializeNBT();
-                savedLogic.put(runnable.getIdentifier(), base);
-                break;
-            }
-        }
-        tag.put("ai", savedAI);
-        tag.put("logic", savedLogic);
-        PacketUpdateAI packet = new PacketUpdateAI();
+        final CompoundNBT tag = new CompoundNBT();
+        final INBT base = INBTSerializable.class.cast(ai).serializeNBT();
+        tag.put(ai.getIdentifier(), base);
+        final PacketUpdateAI packet = new PacketUpdateAI();
         packet.data = tag;
         packet.entityId = pokemob.getEntity().getEntityId();
-        PokecubeMod.packetPipeline.sendToServer(packet);
+        PokecubeCore.packets.sendToServer(packet);
     }
+
+    public int entityId;
+
+    public CompoundNBT data = new CompoundNBT();
 
     public PacketUpdateAI()
     {
     }
 
-    @Override
-    public IMessage onMessage(final PacketUpdateAI message, final MessageContext ctx)
+    public PacketUpdateAI(final PacketBuffer buffer)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
+        this.entityId = buffer.readInt();
+        this.data = buffer.readCompoundTag();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void handleServer(final ServerPlayerEntity player)
+    {
+        final int id = this.entityId;
+        final CompoundNBT data = this.data;
+        final Entity e = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
+        if (pokemob != null) for (final IAIRunnable runnable : pokemob.getTasks())
+            if (runnable instanceof INBTSerializable && data.contains(runnable.getIdentifier()))
             {
-                processMessage(ctx, message);
+                INBTSerializable.class.cast(runnable).deserializeNBT(data.get(runnable.getIdentifier()));
+                break;
             }
-        });
-        return null;
     }
 
     @Override
-    public void fromBytes(ByteBuf buf)
+    public void write(final PacketBuffer buffer)
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        entityId = buffer.readInt();
-        try
-        {
-            data = buffer.readCompoundTag();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeInt(entityId);
-        buffer.writeCompoundTag(data);
-    }
-
-    void processMessage(MessageContext ctx, PacketUpdateAI message)
-    {
-        PlayerEntity player = ctx.getServerHandler().player;
-        int id = message.entityId;
-        CompoundNBT data = message.data;
-        Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
-        IAIMob ai = e.getCapability(IAIMob.THUTMOBAI, null);
-        if (ai instanceof AICapWrapper)
-        {
-            AICapWrapper wrapper = (AICapWrapper) ai;
-            wrapper.deserializeNBT(data);
-            wrapper.init();
-        }
+        buffer.writeInt(this.entityId);
+        buffer.writeCompoundTag(this.data);
     }
 }

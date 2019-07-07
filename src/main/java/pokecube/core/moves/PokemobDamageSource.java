@@ -1,13 +1,13 @@
 /**
- * 
+ *
  */
 package pokecube.core.moves;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
@@ -20,80 +20,66 @@ import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
 import pokecube.core.utils.PokeType;
 
-/** This class extends {@link EntityDamageSource} and only modifies the death
+/**
+ * This class extends {@link EntityDamageSource} and only modifies the death
  * message.
- * 
- * @author Manchou */
+ *
+ * @author Manchou
+ */
 public class PokemobDamageSource extends DamageSource
 {
 
-    private LivingEntity damageSourceEntity;
+    private final LivingEntity damageSourceEntity;
     // TODO use this for damage stuff
-    public Move_Base         move;
-    /** This is the type of the used move, can be different from
-     * move.getType() */
-    private PokeType         moveType = null;
-    public IPokemob          user;
+    public Move_Base move;
+    /**
+     * This is the type of the used move, can be different from
+     * move.getType()
+     */
+    private PokeType moveType = null;
+    public IPokemob  user;
 
-    /** @param par1Str
-     * @param par2Entity */
+    /**
+     * @param par1Str
+     * @param par2Entity
+     */
     public PokemobDamageSource(String par1Str, LivingEntity par2Entity, Move_Base type)
     {
         super(par1Str);
-        damageSourceEntity = par2Entity;
-        user = CapabilityPokemob.getPokemobFor(par2Entity);
-        move = type;
-    }
-
-    public PokemobDamageSource setType(PokeType type)
-    {
-        this.moveType = type;
-        return this;
-    }
-
-    public PokeType getType()
-    {
-        return moveType == null ? move.getType(user) : moveType;
+        this.damageSourceEntity = par2Entity;
+        this.user = CapabilityPokemob.getPokemobFor(par2Entity);
+        this.move = type;
     }
 
     @Override
     public ITextComponent getDeathMessage(LivingEntity par1PlayerEntity)
     {
-        ItemStack localObject = (this.damageSourceEntity != null) ? user.getHeldItem() : null;
-        if ((localObject != null) && (localObject.hasDisplayName()))
-            return new TranslationTextComponent("death.attack." + this.damageType,
-                    new Object[] { par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName(),
-                            localObject.getTextComponent() });
-        IPokemob sourceMob = CapabilityPokemob.getPokemobFor(this.damageSourceEntity);
-        if (sourceMob != null && sourceMob.getPokemonOwner() != null)
+        final ItemStack localObject = this.damageSourceEntity != null ? this.user.getHeldItem() : null;
+        if (localObject != null && localObject.hasDisplayName()) return new TranslationTextComponent("death.attack."
+                + this.damageType, new Object[] { par1PlayerEntity.getDisplayName(), this.damageSourceEntity
+                        .getDisplayName(), localObject.getTextComponent() });
+        final IPokemob sourceMob = CapabilityPokemob.getPokemobFor(this.damageSourceEntity);
+        if (sourceMob != null && sourceMob.getOwner() != null)
         {
-            TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.tame",
-                    par1PlayerEntity.getDisplayName(), sourceMob.getPokemonOwner().getDisplayName(),
+            final TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.tame",
+                    par1PlayerEntity.getDisplayName(), sourceMob.getOwner().getDisplayName(),
                     this.damageSourceEntity.getDisplayName());
             return message;
         }
-        else if (sourceMob != null && sourceMob.getPokemonOwner() == null
-                && !sourceMob.getGeneralState(GeneralStates.TAMED))
+        else if (sourceMob != null && sourceMob.getOwner() == null && !sourceMob.getGeneralState(
+                GeneralStates.TAMED))
         {
-            TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.wild",
+            final TranslationTextComponent message = new TranslationTextComponent("pokemob.killed.wild",
                     par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName());
             return message;
         }
-        return new TranslationTextComponent("death.attack." + this.damageType,
-                new Object[] { par1PlayerEntity.getDisplayName(), this.damageSourceEntity.getDisplayName() });
+        return new TranslationTextComponent("death.attack." + this.damageType, new Object[] { par1PlayerEntity
+                .getDisplayName(), this.damageSourceEntity.getDisplayName() });
     }
 
-    @Override
-    public Entity getTrueSource()
+    public float getEffectiveness(IPokemob pokemobCap)
     {
-        IPokemob sourceMob = CapabilityPokemob.getPokemobFor(this.damageSourceEntity);
-        if (sourceMob != null && sourceMob.getOwner() != null) return sourceMob.getOwner();
-        if (this.damageSourceEntity instanceof IEntityOwnable)
-        {
-            Entity owner = ((IEntityOwnable) this.damageSourceEntity).getOwner();
-            return owner != null ? owner : this.damageSourceEntity;
-        }
-        return this.damageSourceEntity;
+        return PokeType.getAttackEfficiency(this.getType(), pokemobCap.getType1(), pokemobCap.getType2());
     }
 
     @Nullable
@@ -104,14 +90,33 @@ public class PokemobDamageSource extends DamageSource
     }
 
     @Override
+    public Entity getTrueSource()
+    {
+        final IPokemob sourceMob = CapabilityPokemob.getPokemobFor(this.damageSourceEntity);
+        if (sourceMob != null && sourceMob.getOwner() != null) return sourceMob.getOwner();
+        if (this.damageSourceEntity instanceof TameableEntity)
+        {
+            final Entity owner = ((TameableEntity) this.damageSourceEntity).getOwner();
+            return owner != null ? owner : this.damageSourceEntity;
+        }
+        return this.damageSourceEntity;
+    }
+
+    public PokeType getType()
+    {
+        return this.moveType == null ? this.move.getType(this.user) : this.moveType;
+    }
+
+    @Override
     /** Returns true if the damage is projectile based. */
     public boolean isProjectile()
     {
-        return (move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) != 0;
+        return (this.move.getAttackCategory() & IMoveConstants.CATEGORY_DISTANCE) != 0;
     }
 
-    public float getEffectiveness(IPokemob pokemobCap)
+    public PokemobDamageSource setType(PokeType type)
     {
-        return PokeType.getAttackEfficiency(getType(), pokemobCap.getType1(), pokemobCap.getType2());
+        this.moveType = type;
+        return this;
     }
 }

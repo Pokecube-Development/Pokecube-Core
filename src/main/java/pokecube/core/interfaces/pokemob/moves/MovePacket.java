@@ -1,10 +1,10 @@
 package pokecube.core.interfaces.pokemob.moves;
 
 import net.minecraft.entity.Entity;
+import pokecube.core.PokecubeCore;
 import pokecube.core.events.pokemob.combat.AttackEvent;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.moves.MovesUtils;
 import pokecube.core.utils.PokeType;
 
@@ -31,18 +31,24 @@ public class MovePacket
     public boolean       didCrit           = false;
     /** False swipe, sturdy ability and focus items would set this true. */
     public boolean       noFaint           = false;
-    /** Used in the protection moves, accounts their accuracy via this
-     * variable */
+    /**
+     * Used in the protection moves, accounts their accuracy via this
+     * variable
+     */
     public boolean       failed            = false;
-    /** Move has failed for some unspecified reason, will not give failure
-     * message, will not process past preAttack */
+    /**
+     * Move has failed for some unspecified reason, will not give failure
+     * message, will not process past preAttack
+     */
     public boolean       denied            = false;
     /** does target get infatuated */
     public boolean       infatuateTarget   = false;
     /** does attacker get infatuated */
     public boolean       infatuateAttacker = false;
-    /** Whether or not to apply ongoing, this can be set to false to use
-     * these during ongoing effects */
+    /**
+     * Whether or not to apply ongoing, this can be set to false to use
+     * these during ongoing effects
+     */
     public boolean       applyOngoing      = true;
     /** Stat modifications for target */
     public int[]         attackedStatModification;
@@ -81,17 +87,17 @@ public class MovePacket
         this.statusChange = statusChange;
         this.changeAddition = changeAddition;
         this.pre = pre;
-        Move_Base move = getMove();
+        final Move_Base move = this.getMove();
         this.attackedStatModification = move.move.attackedStatModification;
         this.attackerStatModification = move.move.attackerStatModification;
         this.attackedStatModProb = move.move.attackedStatModProb;
         this.attackerStatModProb = move.move.attackerStatModProb;
 
-        PokecubeMod.MOVE_BUS.post(new AttackEvent(this));
+        PokecubeCore.MOVE_BUS.post(new AttackEvent(this));
     }
 
     public Move_Base getMove()
     {
-        return MovesUtils.getMoveFromName(attack);
+        return MovesUtils.getMoveFromName(this.attack);
     }
 }

@@ -12,9 +12,9 @@ import thut.api.maths.Vector3;
 @AnimPreset(getPreset = "sphFunc")
 public class SphericalFunction extends MoveAnimationBase
 {
-    JEP     radial;
-    JEP     theta;
-    JEP     phi;
+    JEP radial;
+    JEP theta;
+    JEP phi;
 
     Vector3 v        = Vector3.getNewVector();
     boolean reverse  = false;
@@ -26,103 +26,38 @@ public class SphericalFunction extends MoveAnimationBase
     }
 
     @Override
-    public void spawnClientEntities(MovePacketInfo info)
-    {
-        Vector3 source = reverse ? info.source : info.target;
-        initColour((info.attacker.getEntityWorld().getDayTime()) * 20, 0, info.move);
-        Vector3 temp = Vector3.getNewVector();
-        double scale = this.width;
-        if (!absolute)
-        {
-            if (reverse && info.attacker != null)
-            {
-                scale *= info.attacker.width;
-            }
-            else if (!reverse && info.attacked != null)
-            {
-                scale *= info.attacked.width;
-            }
-        }
-        for (double i = info.currentTick; i < info.currentTick + 1; i += density)
-        {
-            setVector(i, temp);
-            temp.scalarMultBy(scale).addTo(source);
-            PokecubeCore.proxy.spawnParticle(info.attacker.getEntityWorld(), particle, temp, null, rgba, particleLife);
-        }
-    }
-
-    private void setVector(double t, Vector3 temp)
-    {
-        phi.setVarValue("t", t);
-        double dPhi = phi.getValue();
-        radial.setVarValue("t", t);
-        double dR = radial.getValue();
-        theta.setVarValue("t", t);
-        double dTheta = theta.getValue();
-        double sinTheta = MathHelper.sin((float) dTheta);
-        double cosTheta = MathHelper.cos((float) dTheta);
-        double rsinPhi = MathHelper.sin((float) dPhi) * dR;
-        double rcosPhi = MathHelper.cos((float) dPhi) * dR;
-        temp.set(rcosPhi * sinTheta, dR * cosTheta, rsinPhi * sinTheta);
-    }
-
-    @Override
     public IMoveAnimation init(String preset)
     {
-        rgba = 0xFFFFFFFF;
-        density = 0.5f;
-        String[] args = preset.split(":");
+        this.rgba = 0xFFFFFFFF;
+        this.density = 0.5f;
+        final String[] args = preset.split(":");
         this.particle = "misc";
         String fr = "t";
         String fphi = "t*6.3";
         String fthe = "t*3.1-1.5";
         for (int i = 1; i < args.length; i++)
         {
-            String ident = args[i].substring(0, 1);
-            String val = args[i].substring(1);
-            if (ident.equals("d"))
-            {
-                density = Float.parseFloat(val);
-            }
-            else if (ident.equals("w"))
-            {
-                width = Float.parseFloat(val);
-            }
-            else if (ident.equals("r"))
-            {
-                reverse = Boolean.parseBoolean(val);
-            }
-            else if (ident.equals("p"))
-            {
-                this.particle = val;
-            }
-            else if (ident.equals("l"))
-            {
-                particleLife = Integer.parseInt(val);
-            }
-            else if (ident.equals("a"))
-            {
-                absolute = Boolean.parseBoolean(val);
-            }
-            else if (ident.equals("c"))
-            {
-                initRGBA(val);
-            }
+            final String ident = args[i].substring(0, 1);
+            final String val = args[i].substring(1);
+            if (ident.equals("d")) this.density = Float.parseFloat(val);
+            else if (ident.equals("w")) this.width = Float.parseFloat(val);
+            else if (ident.equals("r")) this.reverse = Boolean.parseBoolean(val);
+            else if (ident.equals("p")) this.particle = val;
+            else if (ident.equals("l")) this.particleLife = Integer.parseInt(val);
+            else if (ident.equals("a")) this.absolute = Boolean.parseBoolean(val);
+            else if (ident.equals("c")) this.initRGBA(val);
             else if (ident.equals("f"))
             {
-                String[] funcs = val.split(",");
+                final String[] funcs = val.split(",");
                 fr = funcs[0];
                 fthe = funcs[1];
                 fphi = funcs[2];
             }
-            else if (ident.equals("d"))
-            {
-                density = Float.parseFloat(val);
-            }
+            else if (ident.equals("d")) this.density = Float.parseFloat(val);
         }
-        initJEP(fr, radial = new JEP());
-        initJEP(fthe, theta = new JEP());
-        initJEP(fphi, phi = new JEP());
+        this.initJEP(fr, this.radial = new JEP());
+        this.initJEP(fthe, this.theta = new JEP());
+        this.initJEP(fphi, this.phi = new JEP());
         return this;
     }
 
@@ -136,5 +71,38 @@ public class SphericalFunction extends MoveAnimationBase
         // table
         jep.addVariable("t", 0);
         jep.parseExpression(func);
+    }
+
+    private void setVector(double t, Vector3 temp)
+    {
+        this.phi.setVarValue("t", t);
+        final double dPhi = this.phi.getValue();
+        this.radial.setVarValue("t", t);
+        final double dR = this.radial.getValue();
+        this.theta.setVarValue("t", t);
+        final double dTheta = this.theta.getValue();
+        final double sinTheta = MathHelper.sin((float) dTheta);
+        final double cosTheta = MathHelper.cos((float) dTheta);
+        final double rsinPhi = MathHelper.sin((float) dPhi) * dR;
+        final double rcosPhi = MathHelper.cos((float) dPhi) * dR;
+        temp.set(rcosPhi * sinTheta, dR * cosTheta, rsinPhi * sinTheta);
+    }
+
+    @Override
+    public void spawnClientEntities(MovePacketInfo info)
+    {
+        final Vector3 source = this.reverse ? info.source : info.target;
+        this.initColour(info.attacker.getEntityWorld().getDayTime() * 20, 0, info.move);
+        final Vector3 temp = Vector3.getNewVector();
+        double scale = this.width;
+        if (!this.absolute) if (this.reverse && info.attacker != null) scale *= info.attacker.getWidth();
+        else if (!this.reverse && info.attacked != null) scale *= info.attacked.getWidth();
+        for (double i = info.currentTick; i < info.currentTick + 1; i += this.density)
+        {
+            this.setVector(i, temp);
+            temp.scalarMultBy(scale).addTo(source);
+            PokecubeCore.spawnParticle(info.attacker.getEntityWorld(), this.particle, temp, null, this.rgba,
+                    this.particleLife);
+        }
     }
 }

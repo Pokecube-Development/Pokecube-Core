@@ -1,28 +1,23 @@
 package pokecube.core.network.pokemobs;
 
-import java.io.IOException;
-
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
-import pokecube.core.network.PokecubePacketHandler;
+import thut.core.common.network.Packet;
 
-public class PacketPokemobMessage implements IMessage, IMessageHandler<PacketPokemobMessage, IMessage>
+public class PacketPokemobMessage extends Packet
 {
-    public static void sendMessage(PlayerEntity sendTo, int senderId, ITextComponent message)
+    public static void sendMessage(final PlayerEntity sendTo, final int senderId, final ITextComponent message)
     {
-        PacketPokemobMessage toSend = new PacketPokemobMessage(message, senderId);
-        PokecubePacketHandler.sendToClient(toSend, sendTo);
+        final PacketPokemobMessage toSend = new PacketPokemobMessage(message, senderId);
+        PokecubeCore.packets.sendTo(toSend, (ServerPlayerEntity) sendTo);
     }
 
     ITextComponent message;
@@ -32,64 +27,37 @@ public class PacketPokemobMessage implements IMessage, IMessageHandler<PacketPok
     {
     }
 
-    public PacketPokemobMessage(ITextComponent message, int senderId)
+    public PacketPokemobMessage(final ITextComponent message, final int senderId)
     {
         this.message = message;
         this.senderId = senderId;
     }
 
-    @Override
-    public IMessage onMessage(final PacketPokemobMessage message, final MessageContext ctx)
+    public PacketPokemobMessage(final PacketBuffer buf)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
+        final PacketBuffer buffer = new PacketBuffer(buf);
+        this.senderId = buffer.readInt();
+        this.message = buffer.readTextComponent();
     }
 
     @Override
-    public void fromBytes(ByteBuf buf)
+    @OnlyIn(value = Dist.CLIENT)
+    public void handleClient()
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        senderId = buffer.readInt();
-        try
-        {
-            message = buffer.readTextComponent();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final int id = this.senderId;
+        final ITextComponent component = this.message;
+        final Entity e = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), id, false);
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
+        if (pokemob != null) pokemob.displayMessageToOwner(component);
+        else if (e == player) pokecube.core.client.gui.GuiInfoMessages.addMessage(component);
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void write(final PacketBuffer buf)
     {
-        PacketBuffer buffer = new PacketBuffer(buf);
-        buffer.writeInt(senderId);
-        buffer.writeTextComponent(message);
+        final PacketBuffer buffer = new PacketBuffer(buf);
+        buffer.writeInt(this.senderId);
+        buffer.writeTextComponent(this.message);
     }
-
-    void processMessage(MessageContext ctx, PacketPokemobMessage message)
-    {
-        PlayerEntity player = PokecubeCore.getPlayer(null);
-        int id = message.senderId;
-        ITextComponent component = message.message;
-        Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, false);
-        IPokemob pokemob = CapabilityPokemob.getPokemobFor(e);
-        if (pokemob != null)
-        {
-            pokemob.displayMessageToOwner(component);
-        }
-        else if (e == player)
-        {
-            pokecube.core.client.gui.GuiInfoMessages.addMessage(component);
-        }
-    }
-
 }

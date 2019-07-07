@@ -1,67 +1,59 @@
 package pokecube.core.items.revive;
 
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.items.pokecubes.PokecubeManager;
 import pokecube.core.utils.TagNames;
-import thut.lib.CompatWrapper;
-import thut.lib.IDefaultRecipe;
 
-public class RecipeRevive implements IDefaultRecipe
+public class RecipeRevive extends SpecialRecipe
 {
-    private ItemStack healed = ItemStack.EMPTY;
+    public static final IRecipeSerializer<RecipeRevive> SERIALIZER = IRecipeSerializer.register("pokecube:revive",
+            new SpecialRecipeSerializer<>(RecipeRevive::new));
 
-    @Override
-    public ItemStack getCraftingResult(InventoryCrafting p_77572_1_)
+    public RecipeRevive(ResourceLocation idIn)
     {
-        return healed;
+        super(idIn);
     }
 
     @Override
-    public ItemStack getRecipeOutput()
+    public ItemStack getCraftingResult(CraftingInventory inv)
     {
-        return healed;
-    }
-
-    @Override
-    public boolean matches(InventoryCrafting craftMatrix, World world)
-    {
-        healed = ItemStack.EMPTY;
+        ItemStack healed = ItemStack.EMPTY;
         boolean revive = false;
         boolean pokeseal = false;
         ItemStack other = ItemStack.EMPTY;
         ItemStack seal = ItemStack.EMPTY;
 
-        int n = 0;
-        for (int i = 0; i < craftMatrix.getSizeInventory(); i++)
+        for (int i = 0; i < inv.getSizeInventory(); i++)
         {
-            ItemStack stack = craftMatrix.getStackInSlot(i);
-            if (CompatWrapper.isValid(stack))
+            final ItemStack stack = inv.getStackInSlot(i);
+            if (!stack.isEmpty())
             {
-                n++;
                 if (PokecubeManager.isFilled(stack)) other = stack;
                 if (stack.isItemEqual(PokecubeItems.getStack("Revive"))) revive = true;
                 if (stack.getItem() == PokecubeItems.getEmptyCube(PokecubeBehavior.POKESEAL)) seal = stack;
             }
         }
-        revive = revive && CompatWrapper.isValid(other);
-        pokeseal = CompatWrapper.isValid(seal) && CompatWrapper.isValid(other);
-        if (n != 2) return false;
+        revive = revive && !other.isEmpty();
+        pokeseal = !seal.isEmpty() && !other.isEmpty();
 
         if (pokeseal)
         {
             if (seal.hasTag())
             {
-                IPokemob mob = PokecubeManager.itemToPokemob(other, world);
-                CompoundNBT tag = seal.getTag().getCompound(TagNames.POKESEAL);
-                CompoundNBT mobtag = mob.getEntity().getEntityData();
+                final IPokemob mob = PokecubeManager.itemToPokemob(other, PokecubeCore.proxy.getWorld());
+                final CompoundNBT tag = seal.getTag().getCompound(TagNames.POKESEAL);
+                final CompoundNBT mobtag = mob.getEntity().getEntityData();
                 mobtag.put("sealtag", tag);
                 other = PokecubeManager.pokemobToItem(mob);
                 healed = other;
@@ -69,37 +61,45 @@ public class RecipeRevive implements IDefaultRecipe
         }
         else if (revive)
         {
-            ItemStack stack = other;
+            final ItemStack stack = other;
             if (PokecubeManager.isFilled(stack))
             {
-                if (stack.getItemDamage() != 32767) return false;
                 healed = stack.copy();
-                if (stack.getItemDamage() == 32767) PokecubeManager.heal(healed);
+                PokecubeManager.heal(healed);
             }
-            return CompatWrapper.isValid(healed);
         }
-        return CompatWrapper.isValid(healed);
-    }
-
-    ResourceLocation registryName;
-
-    @Override
-    public IRecipe setRegistryName(ResourceLocation name)
-    {
-        registryName = name;
-        return this;
+        return healed;
     }
 
     @Override
-    public ResourceLocation getRegistryName()
+    public IRecipeSerializer<?> getSerializer()
     {
-        return registryName;
+        return RecipeRevive.SERIALIZER;
     }
 
     @Override
-    public Class<IRecipe> getRegistryType()
+    public boolean matches(CraftingInventory inv, World worldIn)
     {
-        return IRecipe.class;
-    }
+        boolean revive = false;
+        boolean pokeseal = false;
+        ItemStack other = ItemStack.EMPTY;
+        ItemStack seal = ItemStack.EMPTY;
 
+        int n = 0;
+        for (int i = 0; i < inv.getSizeInventory(); i++)
+        {
+            final ItemStack stack = inv.getStackInSlot(i);
+            if (!stack.isEmpty())
+            {
+                n++;
+                if (PokecubeManager.isFilled(stack)) other = stack;
+                if (stack.isItemEqual(PokecubeItems.getStack("Revive"))) revive = true;
+                if (stack.getItem() == PokecubeItems.getEmptyCube(PokecubeBehavior.POKESEAL)) seal = stack;
+            }
+        }
+        revive = revive && !other.isEmpty();
+        pokeseal = !seal.isEmpty() && !other.isEmpty();
+        if (n != 2) return false;
+        return pokeseal || other.getDamage() == 32767;
+    }
 }

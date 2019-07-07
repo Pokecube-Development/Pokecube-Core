@@ -1,7 +1,5 @@
 package pokecube.core.interfaces.pokemob.commandhandlers;
 
-import java.util.logging.Level;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -9,7 +7,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
+import pokecube.core.PokecubeCore;
 import pokecube.core.events.pokemob.combat.CommandAttackEvent;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Move_Base;
@@ -35,55 +33,49 @@ public class AttackEntityHandler extends DefaultHandler
     @Override
     public void handleCommand(IPokemob pokemob)
     {
-        World world = pokemob.getEntity().getEntityWorld();
-        Entity target = PokecubeMod.core.getEntityProvider().getEntity(world, targetId, true);
+        final World world = pokemob.getEntity().getEntityWorld();
+        final Entity target = PokecubeCore.getEntityProvider().getEntity(world, this.targetId, true);
         if (target == null || !(target instanceof LivingEntity))
         {
-            if (PokecubeMod.debug)
-            {
-                if (target == null) PokecubeMod.log(Level.WARNING, "Target Mob cannot be null!",
-                        new IllegalArgumentException(pokemob.getEntity().toString()));
-                else PokecubeMod.log(Level.WARNING, "Invalid Target!",
-                        new IllegalArgumentException(pokemob.getEntity() + " " + target));
-            }
+            if (PokecubeMod.debug) if (target == null) PokecubeCore.LOGGER.error("Target Mob cannot be null!",
+                    new IllegalArgumentException(pokemob.getEntity().toString()));
+            else PokecubeCore.LOGGER.error("Invalid Target!", new IllegalArgumentException(pokemob.getEntity() + " "
+                    + target));
             return;
         }
-        int currentMove = pokemob.getMoveIndex();
-        CommandAttackEvent event = new CommandAttackEvent(pokemob.getEntity(), target);
-        MinecraftForge.EVENT_BUS.post(event);
+        final int currentMove = pokemob.getMoveIndex();
+        final CommandAttackEvent event = new CommandAttackEvent(pokemob.getEntity(), target);
+        PokecubeCore.POKEMOB_BUS.post(event);
         if (!event.isCanceled() && currentMove != 5 && MovesUtils.canUseMove(pokemob))
         {
-            Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
-            if (move.isSelfMove())
-            {
-                pokemob.executeMove(pokemob.getEntity(), null, 0);
-            }
+            final Move_Base move = MovesUtils.getMoveFromName(pokemob.getMoves()[currentMove]);
+            if (move.isSelfMove()) pokemob.executeMove(pokemob.getEntity(), null, 0);
             else
             {
-                ITextComponent mess = new TranslationTextComponent("pokemob.command.attack",
-                        pokemob.getPokemonDisplayName(), target.getDisplayName(),
-                        new TranslationTextComponent(MovesUtils.getUnlocalizedMove(move.getName())));
-                if (fromOwner()) pokemob.displayMessageToOwner(mess);
+                final ITextComponent mess = new TranslationTextComponent("pokemob.command.attack", pokemob
+                        .getDisplayName(), target.getDisplayName(), new TranslationTextComponent(MovesUtils
+                                .getUnlocalizedMove(move.getName())));
+                if (this.fromOwner()) pokemob.displayMessageToOwner(mess);
                 pokemob.getEntity().setAttackTarget((LivingEntity) target);
                 pokemob.setCombatState(CombatStates.ANGRY, true);
                 if (target instanceof MobEntity) ((MobEntity) target).setAttackTarget(pokemob.getEntity());
-                IPokemob targ = CapabilityPokemob.getPokemobFor(target);
+                final IPokemob targ = CapabilityPokemob.getPokemobFor(target);
                 if (targ != null) targ.setCombatState(CombatStates.ANGRY, true);
             }
         }
     }
 
     @Override
-    public void writeToBuf(ByteBuf buf)
-    {
-        super.writeToBuf(buf);
-        buf.writeInt(targetId);
-    }
-
-    @Override
     public void readFromBuf(ByteBuf buf)
     {
         super.readFromBuf(buf);
-        targetId = buf.readInt();
+        this.targetId = buf.readInt();
+    }
+
+    @Override
+    public void writeToBuf(ByteBuf buf)
+    {
+        super.writeToBuf(buf);
+        buf.writeInt(this.targetId);
     }
 }

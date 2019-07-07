@@ -1,13 +1,12 @@
 /**
- * 
+ *
  */
 package pokecube.core.moves;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.IWorldEventListener;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.interfaces.IMoveNames;
@@ -23,8 +22,14 @@ public class Move_Transform extends Move_Basic
     public static class Animation implements IMoveAnimation
     {
         @Override
-        public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
+        public void clientAnimation(MovePacketInfo info, float partialTick)
         {
+        }
+
+        @Override
+        public int getApplicationTick()
+        {
+            return 0;
         }
 
         @Override
@@ -34,9 +39,9 @@ public class Move_Transform extends Move_Basic
         }
 
         @Override
-        public int getApplicationTick()
+        public void reallyInitRGBA()
         {
-            return 0;
+
         }
 
         @Override
@@ -51,24 +56,20 @@ public class Move_Transform extends Move_Basic
 
         }
 
-        @Override
-        public void reallyInitRGBA()
-        {
-
-        }
-
     }
 
-    /** @param name
+    /**
+     * @param name
      * @param type
      * @param PWR
      * @param PRE
      * @param PP
-     * @param attackCategory */
+     * @param attackCategory
+     */
     public Move_Transform(String name)
     {
         super(name);
-        setAnimation(new Animation());
+        this.setAnimation(new Animation());
         this.setSelf();
         this.setNotInterceptable();
 
@@ -81,39 +82,25 @@ public class Move_Transform extends Move_Basic
         {
             if (MovesUtils.contactAttack(attacker, attacked))
             {
-                if (attacked instanceof IPokemob)
-                {
-                    if (attacked instanceof IPokemob)
-                    {
-                        if (!(attacked instanceof IBreedingMob) || attacked != ((IBreedingMob) attacker).getLover())
-                            ((EntityCreature) attacked).setAttackTarget((LivingEntity) attacker);
-                    }
-                }
+                if (attacked instanceof IPokemob) if (attacked instanceof IPokemob)
+                    if (!(attacked instanceof IBreedingMob) || attacked != ((IBreedingMob) attacker).getLover())
+                        ((MobEntity) attacked).setAttackTarget((LivingEntity) attacker);
                 attacker.setTransformedTo(attacked);
             }
         }
-        else
+        else if (attacked instanceof IPokemob)
         {
-            if (attacked instanceof IPokemob)
-            {
-                String move = ((IPokemob) attacked).getMove(0);
-                if (move != null && !IMoveNames.MOVE_TRANSFORM.equals(move))
-                    MovesUtils.doAttack(move, attacker, attacked);
-                else if (MovesUtils.contactAttack(attacker, attacked))
-                {
-                    MovesUtils.displayEfficiencyMessages(attacker, attacked, 0F, 1F);
-                }
-            }
-            else if (attacked instanceof PlayerEntity)
-            {
-                if (MovesUtils.contactAttack(attacker, attacked))
-                {
-                    // TODO see if this needs tweaking.
-                    MovePacket packet = new MovePacket(attacker, attacked, name, getType(attacker), 25, 1,
-                            IMoveConstants.STATUS_NON, IMoveConstants.CHANGE_NONE);
-                    onAttack(packet);
-                }
-            }
+            final String move = ((IPokemob) attacked).getMove(0);
+            if (move != null && !IMoveNames.MOVE_TRANSFORM.equals(move)) MovesUtils.doAttack(move, attacker, attacked);
+            else if (MovesUtils.contactAttack(attacker, attacked)) MovesUtils.displayEfficiencyMessages(attacker,
+                    attacked, 0F, 1F);
+        }
+        else if (attacked instanceof PlayerEntity) if (MovesUtils.contactAttack(attacker, attacked))
+        {
+            // TODO see if this needs tweaking.
+            final MovePacket packet = new MovePacket(attacker, attacked, this.name, this.getType(attacker), 25, 1,
+                    IMoveConstants.STATUS_NON, IMoveConstants.CHANGE_NONE);
+            this.onAttack(packet);
         }
     }
 }

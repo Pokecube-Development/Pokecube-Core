@@ -1,40 +1,22 @@
 package pokecube.core.network.pokemobs;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraft.network.PacketBuffer;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
+import thut.core.common.network.Packet;
 
-public class PacketSyncExp implements IMessage, IMessageHandler<PacketSyncExp, IMessage>
+public class PacketSyncExp extends Packet
 {
-
-    private static void processMessage(MessageContext ctx, PacketSyncExp message)
-    {
-        PlayerEntity player = PokecubeCore.getPlayer(null);
-        int id = message.entityId;
-        int exp = message.exp;
-        Entity e = PokecubeMod.core.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
-        IPokemob mob = CapabilityPokemob.getPokemobFor(e);
-        if (mob != null)
-        {
-            mob.getMoveStats().exp = exp;
-        }
-    }
-
     public static void sendUpdate(IPokemob pokemob)
     {
         if (!pokemob.getEntity().isServerWorld()) return;
-        PacketSyncExp packet = new PacketSyncExp();
+        final PacketSyncExp packet = new PacketSyncExp();
         packet.entityId = pokemob.getEntity().getEntityId();
         packet.exp = pokemob.getExp();
-        PokecubeMod.packetPipeline.sendToDimension(packet, pokemob.getEntity().dimension);
+        PokecubeCore.packets.sendToTracking(packet, pokemob.getEntity());
     }
 
     int entityId;
@@ -44,32 +26,28 @@ public class PacketSyncExp implements IMessage, IMessageHandler<PacketSyncExp, I
     {
     }
 
-    @Override
-    public IMessage onMessage(final PacketSyncExp message, final MessageContext ctx)
+    public PacketSyncExp(PacketBuffer buf)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
+        this.entityId = buf.readInt();
+        this.exp = buf.readInt();
     }
 
     @Override
-    public void fromBytes(ByteBuf buf)
+    public void handleClient()
     {
-        entityId = buf.readInt();
-        exp = buf.readInt();
+        final PlayerEntity player = PokecubeCore.proxy.getPlayer();
+        final int id = this.entityId;
+        final int exp = this.exp;
+        final Entity e = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), id, true);
+        final IPokemob mob = CapabilityPokemob.getPokemobFor(e);
+        if (mob != null) mob.getMoveStats().exp = exp;
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void write(PacketBuffer buf)
     {
-        buf.writeInt(entityId);
-        buf.writeInt(exp);
+        buf.writeInt(this.entityId);
+        buf.writeInt(this.exp);
     }
 
 }

@@ -24,27 +24,29 @@ public enum LogicStates
     final int     mask;
     final boolean persist;
 
-    private LogicStates(int mask, boolean persist)
-    {
-        this.mask = mask;
-        this.persist = persist;
-    }
-
     private LogicStates(int mask)
     {
         this.mask = mask;
         this.persist = true;
     }
 
-    public int getMask()
+    private LogicStates(int mask, boolean persist)
     {
-        return mask;
+        this.mask = mask;
+        this.persist = persist;
     }
 
-    /** if this is false, then the value will be cleared whenever the pokemob is
-     * loaded from nbt. */
+    public int getMask()
+    {
+        return this.mask;
+    }
+
+    /**
+     * if this is false, then the value will be cleared whenever the pokemob is
+     * loaded from nbt.
+     */
     public boolean persists()
     {
-        return persist;
+        return this.persist;
     }
 }

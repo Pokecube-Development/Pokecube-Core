@@ -9,25 +9,25 @@ public class PokecubePlayerDataHandler extends PlayerDataHandler
 {
     public static CompoundNBT getCustomDataTag(PlayerEntity player)
     {
-        PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
-        PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
+        final PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
+        final PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
         return data.tag;
     }
 
     public static CompoundNBT getCustomDataTag(String player)
     {
-        PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
-        PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
+        final PlayerDataManager manager = PlayerDataHandler.getInstance().getPlayerData(player);
+        final PokecubePlayerCustomData data = manager.getData(PokecubePlayerCustomData.class);
         return data.tag;
     }
 
     public static void saveCustomData(PlayerEntity player)
     {
-        saveCustomData(player.getCachedUniqueIdString());
+        PokecubePlayerDataHandler.saveCustomData(player.getCachedUniqueIdString());
     }
 
     public static void saveCustomData(String cachedUniqueIdString)
     {
-        getInstance().save(cachedUniqueIdString, "pokecube-custom");
+        PlayerDataHandler.getInstance().save(cachedUniqueIdString, "pokecube-custom");
     }
 }

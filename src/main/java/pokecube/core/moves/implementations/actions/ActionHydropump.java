@@ -1,16 +1,17 @@
 package pokecube.core.moves.implementations.actions;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import pokecube.core.events.handlers.MoveEventsHandler;
+import pokecube.core.handlers.events.MoveEventsHandler;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.moves.MovesUtils;
-import thut.api.TickHandler;
 import thut.api.maths.Vector3;
 
 public class ActionHydropump implements IMoveAction
@@ -24,25 +25,26 @@ public class ActionHydropump implements IMoveAction
     {
         if (user.getCombatState(CombatStates.ANGRY)) return false;
         if (!MoveEventsHandler.canEffectBlock(user, location)) return false;
-        MoveEventsHandler.doDefaultWater(user, MovesUtils.getMoveFromName(getMoveName()), location);
-        Vector3 source = Vector3.getNewVector().set(user.getEntity());
-        double dist = source.distanceTo(location);
-        Vector3 dir = location.subtract(source).norm();
-        Vector3 temp = Vector3.getNewVector();
+        MoveEventsHandler.doDefaultWater(user, MovesUtils.getMoveFromName(this.getMoveName()), location);
+        final Vector3 source = Vector3.getNewVector().set(user.getEntity());
+        final double dist = source.distanceTo(location);
+        final Vector3 dir = location.subtract(source).norm();
+        final Vector3 temp = Vector3.getNewVector();
         for (int i = 0; i < dist; i++)
         {
-            Entity player = user.getEntity();
+            final Entity player = user.getEntity();
             temp.set(dir).scalarMultBy(i).addTo(source);
-            BlockState state = temp.getBlockState(player.getEntityWorld());
+            final BlockState state = temp.getBlockState(player.getEntityWorld());
             if (!state.getMaterial().isReplaceable()) continue;
-            if (user.getPokemonOwner() instanceof PlayerEntity)
+            if (user.getOwner() instanceof PlayerEntity)
             {
-                BreakEvent evt = new BreakEvent(player.getEntityWorld(), temp.getPos(), state,
-                        (PlayerEntity) user.getPokemonOwner());
+                final BreakEvent evt = new BreakEvent(player.getEntityWorld(), temp.getPos(), state, (PlayerEntity) user
+                        .getOwner());
                 MinecraftForge.EVENT_BUS.post(evt);
                 if (evt.isCanceled()) continue;
             }
-            TickHandler.addBlockChange(temp, player.dimension, Blocks.FLOWING_WATER, 1);
+            temp.setBlock(user.getEntity().getEntityWorld(), Blocks.WATER.getDefaultState().with(
+                    FlowingFluidBlock.LEVEL, 2));
         }
         return true;
     }

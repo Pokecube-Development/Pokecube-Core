@@ -1,25 +1,12 @@
 package pokecube.core.interfaces.capabilities.impl;
 
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.ABILITYGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.COLOURGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.EVSGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.IVSGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.MOVESGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.NATUREGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.SHINYGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.SIZEGENE;
-import static pokecube.core.entity.pokemobs.genetics.GeneticsManager.SPECIESGENE;
-
-import java.util.HashMap;
 import java.util.Random;
-import java.util.logging.Level;
 
-import com.google.common.collect.Maps;
-
-import pokecube.core.database.Database;
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.abilities.Ability;
 import pokecube.core.database.abilities.AbilityManager;
+import pokecube.core.entity.pokemobs.genetics.GeneticsManager;
 import pokecube.core.entity.pokemobs.genetics.epigenes.EVsGene;
 import pokecube.core.entity.pokemobs.genetics.epigenes.MovesGene;
 import pokecube.core.entity.pokemobs.genetics.genes.AbilityGene;
@@ -33,7 +20,6 @@ import pokecube.core.entity.pokemobs.genetics.genes.SpeciesGene;
 import pokecube.core.entity.pokemobs.genetics.genes.SpeciesGene.SpeciesInfo;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.Nature;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.network.pokemobs.PacketChangeForme;
 import pokecube.core.network.pokemobs.PacketSyncGene;
 import pokecube.core.utils.Tools;
@@ -42,71 +28,19 @@ import thut.api.entity.genetics.Alleles;
 
 public abstract class PokemobGenes extends PokemobSided implements IMobColourable
 {
-    private static HashMap<Class<?>, PokedexEntry> classMap = Maps.newHashMap();
-
-    public static boolean isRegistered(Class<?> clazz)
-    {
-        return classMap.containsKey(clazz);
-    }
-
-    public static void registerClass(Class<?> clazz, PokedexEntry entry)
-    {
-        if (classMap.containsValue(entry)) throw new IllegalArgumentException("Cannot register " + entry + " twice!");
-        PokecubeMod.pokedexmap.put(entry, clazz);
-        classMap.put(clazz, entry);
-    }
-
-    private void initAbilityGene()
-    {
-        if (genesAbility == null)
-        {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesAbility = genes.getAlleles().get(ABILITYGENE);
-            if (genesAbility == null)
-            {
-                genesAbility = new Alleles();
-                genes.getAlleles().put(ABILITYGENE, genesAbility);
-            }
-            if (genesAbility.getAlleles()[0] == null)
-            {
-                Random random = new Random(getRNGValue());
-                PokedexEntry entry = getPokedexEntry();
-                int abilityIndex = random.nextInt(100) % 2;
-                if (entry.getAbility(abilityIndex, this) == null)
-                {
-                    if (abilityIndex != 0) abilityIndex = 0;
-                    else abilityIndex = 1;
-                }
-                Ability ability = entry.getAbility(abilityIndex, this);
-                AbilityGene gene = new AbilityGene();
-                AbilityObject obj = gene.getValue();
-                obj.ability = "";
-                obj.abilityObject = ability;
-                obj.abilityIndex = (byte) abilityIndex;
-                genesAbility.getAlleles()[0] = gene;
-                genesAbility.getAlleles()[1] = gene;
-                genesAbility.refreshExpressed();
-            }
-            setAbility(getAbility());
-        }
-    }
-
     @Override
     public Ability getAbility()
     {
-        if (genesAbility == null) initAbilityGene();
-        AbilityObject obj = genesAbility.getExpressed().getValue();
+        if (this.genesAbility == null) this.initAbilityGene();
+        final AbilityObject obj = this.genesAbility.getExpressed().getValue();
         if (obj.abilityObject == null && !obj.searched)
         {
             if (!obj.ability.isEmpty())
             {
-                Ability ability = AbilityManager.getAbility(obj.ability);
+                final Ability ability = AbilityManager.getAbility(obj.ability);
                 obj.abilityObject = ability;
             }
-            else
-            {
-                obj.abilityObject = getPokedexEntry().getAbility(obj.abilityIndex, this);
-            }
+            else obj.abilityObject = this.getPokedexEntry().getAbility(obj.abilityIndex, this);
             obj.searched = true;
         }
         return obj.abilityObject;
@@ -115,407 +49,268 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     @Override
     public int getAbilityIndex()
     {
-        if (genesAbility == null) initAbilityGene();
-        AbilityObject obj = genesAbility.getExpressed().getValue();
+        if (this.genesAbility == null) this.initAbilityGene();
+        final AbilityObject obj = this.genesAbility.getExpressed().getValue();
         return obj.abilityIndex;
-    }
-
-    @Override
-    public void setAbility(Ability ability)
-    {
-        if (genesAbility == null) initAbilityGene();
-        AbilityObject obj = genesAbility.getExpressed().getValue();
-        Ability oldAbility = obj.abilityObject;
-        if (oldAbility != null && oldAbility != ability) oldAbility.destroy();
-        Ability defalt = getPokedexEntry().getAbility(getAbilityIndex(), this);
-        obj.abilityObject = ability;
-        obj.ability = ability != null
-                ? defalt != null && defalt.getName().equals(ability.getName()) ? "" : ability.toString() : "";
-        if (ability != null) ability.init(this);
-    }
-
-    @Override
-    public void setAbilityIndex(int ability)
-    {
-        if (genesAbility == null) initAbilityGene();
-        if (ability > 2 || ability < 0) ability = 0;
-        AbilityObject obj = genesAbility.getExpressed().getValue();
-        obj.abilityIndex = (byte) ability;
-    }
-
-    @Override
-    public float getSize()
-    {
-        if (genesSize == null)
-        {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesSize = genes.getAlleles().get(SIZEGENE);
-            if (genesSize == null)
-            {
-                genesSize = new Alleles();
-                genes.getAlleles().put(SIZEGENE, genesSize);
-            }
-            if (genesSize.getAlleles()[0] == null || genesSize.getAlleles()[1] == null)
-            {
-                SizeGene gene = new SizeGene();
-                genesSize.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesSize.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesSize.refreshExpressed();
-                setSize(genesSize.getExpressed().getValue());
-            }
-        }
-        Float size = genesSize.getExpressed().getValue();
-        return (float) (size * PokecubeMod.core.getConfig().scalefactor);
-    }
-
-    @Override
-    public void setIVs(byte[] ivs)
-    {
-        if (genesIVs == null) getIVs();
-        if (genesIVs != null) genesIVs.getExpressed().setValue(ivs);
-    }
-
-    @Override
-    public void setEVs(byte[] evs)
-    {
-        if (genesEVs == null) getEVs();
-        if (genesEVs != null) genesEVs.getExpressed().setValue(evs);
-        PacketSyncGene.syncGene(getEntity(), genesEVs);
     }
 
     @Override
     public byte[] getEVs()
     {
-        if (genesEVs == null)
+        if (this.genesEVs == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesEVs = genes.getAlleles().get(EVSGENE);
-            if (genesEVs == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesEVs = this.genes.getAlleles().get(GeneticsManager.EVSGENE);
+            if (this.genesEVs == null)
             {
-                genesEVs = new Alleles();
-                genes.getAlleles().put(EVSGENE, genesEVs);
+                this.genesEVs = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.EVSGENE, this.genesEVs);
             }
-            if (genesEVs.getAlleles()[0] == null || genesEVs.getAlleles()[1] == null)
+            if (this.genesEVs.getAlleles()[0] == null || this.genesEVs.getAlleles()[1] == null)
             {
-                EVsGene ivs = new EVsGene();
-                genesEVs.getAlleles()[0] = ivs.getMutationRate() > rand.nextFloat() ? ivs.mutate() : ivs;
-                genesEVs.getAlleles()[1] = ivs.getMutationRate() > rand.nextFloat() ? ivs.mutate() : ivs;
-                genesEVs.refreshExpressed();
-                genesEVs.getExpressed().setValue(new EVsGene().getValue());
+                final EVsGene ivs = new EVsGene();
+                this.genesEVs.getAlleles()[0] = ivs.getMutationRate() > this.rand.nextFloat() ? ivs.mutate() : ivs;
+                this.genesEVs.getAlleles()[1] = ivs.getMutationRate() > this.rand.nextFloat() ? ivs.mutate() : ivs;
+                this.genesEVs.refreshExpressed();
+                this.genesEVs.getExpressed().setValue(new EVsGene().getValue());
             }
         }
-        return genesEVs.getExpressed().getValue();
+        return this.genesEVs.getExpressed().getValue();
     }
 
     @Override
     public byte[] getIVs()
     {
-        if (genesIVs == null)
+        if (this.genesIVs == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesIVs = genes.getAlleles().get(IVSGENE);
-            if (genesIVs == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesIVs = this.genes.getAlleles().get(GeneticsManager.IVSGENE);
+            if (this.genesIVs == null)
             {
-                genesIVs = new Alleles();
-                genes.getAlleles().put(IVSGENE, genesIVs);
+                this.genesIVs = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.IVSGENE, this.genesIVs);
             }
-            if (genesIVs.getAlleles()[0] == null || genesIVs.getAlleles()[1] == null)
+            if (this.genesIVs.getAlleles()[0] == null || this.genesIVs.getAlleles()[1] == null)
             {
-                IVsGene gene = new IVsGene();
-                genesIVs.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesIVs.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesIVs.refreshExpressed();
+                final IVsGene gene = new IVsGene();
+                this.genesIVs.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesIVs.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesIVs.refreshExpressed();
             }
         }
-        return genesIVs.getExpressed().getValue();
+        return this.genesIVs.getExpressed().getValue();
     }
 
     @Override
     public String[] getMoves()
     {
-        String[] moves = getMoveStats().moves;
-        if (genesMoves == null)
+        final String[] moves = this.getMoveStats().moves;
+        if (this.genesMoves == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesMoves = genes.getAlleles().get(MOVESGENE);
-            if (genesMoves == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesMoves = this.genes.getAlleles().get(GeneticsManager.MOVESGENE);
+            if (this.genesMoves == null)
             {
-                genesMoves = new Alleles();
-                genes.getAlleles().put(MOVESGENE, genesMoves);
+                this.genesMoves = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.MOVESGENE, this.genesMoves);
             }
-            if (genesMoves.getAlleles()[0] == null || genesMoves.getAlleles()[1] == null)
+            if (this.genesMoves.getAlleles()[0] == null || this.genesMoves.getAlleles()[1] == null)
             {
-                MovesGene gene = new MovesGene();
+                final MovesGene gene = new MovesGene();
                 gene.setValue(moves);
-                genesMoves.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesMoves.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesMoves.refreshExpressed();
+                this.genesMoves.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesMoves.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesMoves.refreshExpressed();
             }
         }
-        return getMoveStats().moves = genesMoves.getExpressed().getValue();
-    }
-
-    @Override
-    public void setMove(int i, String moveName)
-    {
-        // do not blanket set moves on client, or when transformed.
-        if (!getEntity().isServerWorld() || getTransformedTo() != null) return;
-
-        String[] moves = getMoves();
-        moves[i] = moveName;
-        setMoves(moves);
-    }
-
-    @Override
-    public void setNature(Nature nature)
-    {
-        if (genesNature == null) getNature();
-        if (genesNature != null) genesNature.getExpressed().setValue(nature);
+        return this.getMoveStats().moves = this.genesMoves.getExpressed().getValue();
     }
 
     @Override
     public Nature getNature()
     {
-        if (genesNature == null)
+        if (this.genesNature == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesNature = genes.getAlleles().get(NATUREGENE);
-            if (genesNature == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesNature = this.genes.getAlleles().get(GeneticsManager.NATUREGENE);
+            if (this.genesNature == null)
             {
-                genesNature = new Alleles();
-                genes.getAlleles().put(NATUREGENE, genesNature);
+                this.genesNature = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.NATUREGENE, this.genesNature);
             }
-            if (genesNature.getAlleles()[0] == null || genesNature.getAlleles()[1] == null)
+            if (this.genesNature.getAlleles()[0] == null || this.genesNature.getAlleles()[1] == null)
             {
-                NatureGene gene = new NatureGene();
-                genesNature.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesNature.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesNature.refreshExpressed();
+                final NatureGene gene = new NatureGene();
+                this.genesNature.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesNature.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesNature.refreshExpressed();
             }
         }
-        return genesNature.getExpressed().getValue();
+        return this.genesNature.getExpressed().getValue();
     }
 
     @Override
-    public void setMoves(String[] moves)
+    public PokedexEntry getPokedexEntry()
     {
-        // do not blanket set moves on client, or when transformed.
-        if (getEntity().getEntityWorld().isRemote || getTransformedTo() != null) return;
-        if (moves != null && moves.length == 4)
+        if (this.genesSpecies == null)
         {
-            if (genesMoves == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesSpecies = this.genes.getAlleles().get(GeneticsManager.SPECIESGENE);
+            if (this.genesSpecies == null)
             {
-                getMoves();
+                this.genesSpecies = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.SPECIESGENE, this.genesSpecies);
             }
-            if (genesMoves == null || genesMoves.getExpressed() == null || getMoveStats() == null)
+            SpeciesGene gene;
+            SpeciesInfo info;
+            if (this.genesSpecies.getAlleles()[0] == null || (info = (gene = this.genesSpecies.getExpressed())
+                    .getValue()).entry == null)
             {
-                PokecubeMod.log(Level.WARNING, "Error in setMoves " + getEntity(), new NullPointerException());
-                PokecubeMod.log(Level.WARNING, "AllGenes: " + genes);
-                PokecubeMod.log(Level.WARNING, "Genes: " + genesMoves);
-                if (genesMoves != null) PokecubeMod.log(Level.WARNING, "Gene: " + genesMoves.getExpressed());
-                else PokecubeMod.log(Level.WARNING, "Gene: " + genesMoves);
-                PokecubeMod.log(Level.WARNING, "stats: " + getMoveStats());
-                return;
+                gene = new SpeciesGene();
+                info = gene.getValue();
+                info.entry = PokecubeCore.getEntryFor(this.getEntity().getType());
+                info.value = Tools.getSexe(info.entry.getSexeRatio(), new Random());
+                info.entry = info.entry.getForGender(info.value);
+                info = info.clone();
+                // Generate the basic genes
+                this.genesSpecies.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesSpecies.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesSpecies.refreshExpressed();
+                // Set the expressed gene to the info made above, this is to
+                // override the gene from merging parents which results in the
+                // child state.
+                this.genesSpecies.getExpressed().setValue(info);
             }
-            genesMoves.getExpressed().setValue(getMoveStats().moves = moves);
+            info = this.genesSpecies.getExpressed().getValue();
+            info.entry = this.entry = info.entry.getForGender(info.value);
         }
-        PacketSyncGene.syncGene(getEntity(), genesMoves);
-    }
-
-    @Override
-    public void setSize(float size)
-    {
-        if (genesSize == null) getSize();
-        float a = 1, b = 1, c = 1;
-        PokedexEntry entry = getPokedexEntry();
-        if (entry != null)
-        {
-            a = entry.width * size;
-            b = entry.height * size;
-            c = entry.length * size;
-            // Do not allow them to be smaller than 1/100 of a block.
-            if (a < 0.01 || b < 0.01 || c < 0.01)
-            {
-                float min = 0.01f / Math.min(a, Math.min(c, b));
-                size *= min / PokecubeMod.core.getConfig().scalefactor;
-            }
-            // Do not allow them to be larger than 20 blocks.
-            if (a > 20 || b > 20 || c > 20)
-            {
-                float max = 20 / Math.max(a, Math.max(c, b));
-                size *= max / PokecubeMod.core.getConfig().scalefactor;
-            }
-        }
-        genesSize.getExpressed().setValue(size);
+        if (this.entry != null) return this.entry;
+        final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
+        assert info.entry != null;
+        return this.entry = info.entry;
     }
 
     @Override
     public int[] getRGBA()
     {
-        if (genesColour == null)
+        if (this.genesColour == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesColour = genes.getAlleles().get(COLOURGENE);
-            if (genesColour == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesColour = this.genes.getAlleles().get(GeneticsManager.COLOURGENE);
+            if (this.genesColour == null)
             {
-                genesColour = new Alleles();
-                genes.getAlleles().put(COLOURGENE, genesColour);
+                this.genesColour = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.COLOURGENE, this.genesColour);
             }
-            if (genesColour.getAlleles()[0] == null)
+            if (this.genesColour.getAlleles()[0] == null)
             {
-                ColourGene gene = new ColourGene();
-                genesColour.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesColour.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesColour.refreshExpressed();
+                final ColourGene gene = new ColourGene();
+                this.genesColour.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesColour.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate()
+                        : gene;
+                this.genesColour.refreshExpressed();
             }
         }
-        return genesColour.getExpressed().getValue();
+        return this.genesColour.getExpressed().getValue();
     }
 
     @Override
-    public void setRGBA(int... colours)
+    public byte getSexe()
     {
-        int[] rgba = getRGBA();
-        for (int i = 0; i < colours.length && i < rgba.length; i++)
+        if (this.genesSpecies == null) this.getPokedexEntry();
+        final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
+        return info.value;
+    }
+
+    @Override
+    public float getSize()
+    {
+        if (this.genesSize == null)
         {
-            rgba[i] = colours[i];
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesSize = this.genes.getAlleles().get(GeneticsManager.SIZEGENE);
+            if (this.genesSize == null)
+            {
+                this.genesSize = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.SIZEGENE, this.genesSize);
+            }
+            if (this.genesSize.getAlleles()[0] == null || this.genesSize.getAlleles()[1] == null)
+            {
+                final SizeGene gene = new SizeGene();
+                this.genesSize.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesSize.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesSize.refreshExpressed();
+                this.setSize(this.genesSize.getExpressed().getValue());
+            }
+        }
+        final Float size = this.genesSize.getExpressed().getValue();
+        return (float) (size * PokecubeCore.getConfig().scalefactor);
+    }
+
+    private void initAbilityGene()
+    {
+        if (this.genesAbility == null)
+        {
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesAbility = this.genes.getAlleles().get(GeneticsManager.ABILITYGENE);
+            if (this.genesAbility == null)
+            {
+                this.genesAbility = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.ABILITYGENE, this.genesAbility);
+            }
+            if (this.genesAbility.getAlleles()[0] == null)
+            {
+                final Random random = new Random(this.getRNGValue());
+                final PokedexEntry entry = this.getPokedexEntry();
+                int abilityIndex = random.nextInt(100) % 2;
+                if (entry.getAbility(abilityIndex, this) == null) if (abilityIndex != 0) abilityIndex = 0;
+                else abilityIndex = 1;
+                final Ability ability = entry.getAbility(abilityIndex, this);
+                final AbilityGene gene = new AbilityGene();
+                final AbilityObject obj = gene.getValue();
+                obj.ability = "";
+                obj.abilityObject = ability;
+                obj.abilityIndex = (byte) abilityIndex;
+                this.genesAbility.getAlleles()[0] = gene;
+                this.genesAbility.getAlleles()[1] = gene;
+                this.genesAbility.refreshExpressed();
+            }
+            this.setAbility(this.getAbility());
         }
     }
 
     @Override
     public boolean isShiny()
     {
-        if (genesShiny == null)
+        if (this.genesShiny == null)
         {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesShiny = genes.getAlleles().get(SHINYGENE);
-            if (genesShiny == null)
+            if (this.genes == null) throw new RuntimeException("This should not be called here");
+            this.genesShiny = this.genes.getAlleles().get(GeneticsManager.SHINYGENE);
+            if (this.genesShiny == null)
             {
-                genesShiny = new Alleles();
-                genes.getAlleles().put(SHINYGENE, genesShiny);
+                this.genesShiny = new Alleles();
+                this.genes.getAlleles().put(GeneticsManager.SHINYGENE, this.genesShiny);
             }
-            if (genesShiny.getAlleles()[0] == null || genesShiny.getAlleles()[1] == null)
+            if (this.genesShiny.getAlleles()[0] == null || this.genesShiny.getAlleles()[1] == null)
             {
-                ShinyGene gene = new ShinyGene();
-                genesShiny.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesShiny.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesShiny.refreshExpressed();
+                final ShinyGene gene = new ShinyGene();
+                this.genesShiny.getAlleles()[0] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesShiny.getAlleles()[1] = gene.getMutationRate() > this.rand.nextFloat() ? gene.mutate() : gene;
+                this.genesShiny.refreshExpressed();
             }
         }
-        boolean shiny = genesShiny.getExpressed().getValue();
-        if (shiny && !getPokedexEntry().hasShiny)
+        boolean shiny = this.genesShiny.getExpressed().getValue();
+        if (shiny && !this.getPokedexEntry().hasShiny)
         {
             shiny = false;
-            genesShiny.getExpressed().setValue(false);
+            this.genesShiny.getExpressed().setValue(false);
         }
         return shiny;
-    }
-
-    @Override
-    public void setShiny(boolean shiny)
-    {
-        if (genesShiny == null) isShiny();
-        genesShiny.getExpressed().setValue(shiny);
-        PacketSyncGene.syncGene(getEntity(), genesShiny);
-    }
-
-    @Override
-    public PokedexEntry getPokedexEntry()
-    {
-        if (genesSpecies == null)
-        {
-            if (genes == null) throw new RuntimeException("This should not be called here");
-            genesSpecies = genes.getAlleles().get(SPECIESGENE);
-            if (genesSpecies == null)
-            {
-                genesSpecies = new Alleles();
-                genes.getAlleles().put(SPECIESGENE, genesSpecies);
-            }
-            SpeciesGene gene;
-            SpeciesInfo info;
-            if (genesSpecies.getAlleles()[0] == null
-                    || (info = (gene = genesSpecies.getExpressed()).getValue()).entry == null)
-            {
-                gene = new SpeciesGene();
-                info = gene.getValue();
-                info.entry = classMap.get(getEntity().getClass());
-                if (info.entry == null)
-                {
-                    if (getEntity().getClass().getSimpleName().startsWith("GenericPokemob_"))
-                    {
-                        String name = getEntity().getClass().getSimpleName().replace("GenericPokemob_", "").trim();
-                        info.entry = Database.getEntry(name);
-                    }
-                    else
-                    {
-                        System.out.println(this.getEntity().getClass());
-                        Thread.dumpStack();
-                        info.entry = Database.missingno;
-                        throw new RuntimeException("Error with Species!");
-                    }
-                }
-                info.value = Tools.getSexe(info.entry.getSexeRatio(), new Random());
-                info.entry = info.entry.getForGender(info.value);
-                info = info.clone();
-                // Generate the basic genes
-                genesSpecies.getAlleles()[0] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesSpecies.getAlleles()[1] = gene.getMutationRate() > rand.nextFloat() ? gene.mutate() : gene;
-                genesSpecies.refreshExpressed();
-                // Set the expressed gene to the info made above, this is to
-                // override the gene from merging parents which results in the
-                // child state.
-                genesSpecies.getExpressed().setValue(info);
-            }
-            info = genesSpecies.getExpressed().getValue();
-            info.entry = entry = info.entry.getForGender(info.value);
-        }
-        if (entry != null) return entry;
-        SpeciesInfo info = genesSpecies.getExpressed().getValue();
-        assert info.entry != null;
-        return entry = info.entry;
-    }
-
-    @Override
-    public IPokemob setPokedexEntry(PokedexEntry newEntry)
-    {
-        PokedexEntry entry = getPokedexEntry();
-        SpeciesInfo info = genesSpecies.getExpressed().getValue();
-        if (newEntry == null || newEntry == entry) return this;
-        this.entry = newEntry;
-        IPokemob ret = this;
-        info.entry = newEntry;
-        ret = megaEvolve(newEntry);
-        if (getEntity().getEntityWorld() != null)
-            ret.setSize((float) (ret.getSize() / PokecubeMod.core.getConfig().scalefactor));
-        if (getEntity().getEntityWorld() != null && getEntity().isServerWorld())
-        {
-            PacketChangeForme.sendPacketToTracking(ret.getEntity(), newEntry);
-        }
-        return ret;
-    }
-
-    @Override
-    public byte getSexe()
-    {
-        if (genesSpecies == null) getPokedexEntry();
-        SpeciesInfo info = genesSpecies.getExpressed().getValue();
-        return info.value;
-    }
-
-    @Override
-    public void setSexe(byte sexe)
-    {
-        if (genesSpecies == null) getPokedexEntry();
-        SpeciesInfo info = genesSpecies.getExpressed().getValue();
-        if (sexe == NOSEXE || sexe == FEMALE || sexe == MALE || sexe == SEXLEGENDARY)
-        {
-            info.value = sexe;
-        }
-        else
-        {
-            System.err.println("Illegal argument. Sexe cannot be " + sexe);
-            new Exception().printStackTrace();
-        }
     }
 
     @Override
@@ -524,30 +319,183 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
         // Reset this incase gender or shininess changed..
         this.textures = null;
 
-        genesSpecies = null;
-        getPokedexEntry();
-        genesSize = null;
-        getSize();
-        genesIVs = null;
-        getIVs();
-        genesEVs = null;
-        getEVs();
-        genesMoves = null;
-        getMoves();
-        genesNature = null;
-        getNature();
-        genesAbility = null;
-        getAbility();
-        genesShiny = null;
-        isShiny();
-        genesColour = null;
-        getRGBA();
+        this.genesSpecies = null;
+        this.getPokedexEntry();
+        this.genesSize = null;
+        this.getSize();
+        this.genesIVs = null;
+        this.getIVs();
+        this.genesEVs = null;
+        this.getEVs();
+        this.genesMoves = null;
+        this.getMoves();
+        this.genesNature = null;
+        this.getNature();
+        this.genesAbility = null;
+        this.getAbility();
+        this.genesShiny = null;
+        this.isShiny();
+        this.genesColour = null;
+        this.getRGBA();
 
         // Refresh the datamanager for moves.
-        setMoves(getMoves());
+        this.setMoves(this.getMoves());
         // Refresh the datamanager for evs
-        setEVs(getEVs());
+        this.setEVs(this.getEVs());
 
-        setSize((float) (getSize() / PokecubeMod.core.getConfig().scalefactor));
+        this.setSize((float) (this.getSize() / PokecubeCore.getConfig().scalefactor));
+    }
+
+    @Override
+    public void setAbility(Ability ability)
+    {
+        if (this.genesAbility == null) this.initAbilityGene();
+        final AbilityObject obj = this.genesAbility.getExpressed().getValue();
+        final Ability oldAbility = obj.abilityObject;
+        if (oldAbility != null && oldAbility != ability) oldAbility.destroy();
+        final Ability defalt = this.getPokedexEntry().getAbility(this.getAbilityIndex(), this);
+        obj.abilityObject = ability;
+        obj.ability = ability != null ? defalt != null && defalt.getName().equals(ability.getName()) ? ""
+                : ability.toString() : "";
+        if (ability != null) ability.init(this);
+    }
+
+    @Override
+    public void setAbilityIndex(int ability)
+    {
+        if (this.genesAbility == null) this.initAbilityGene();
+        if (ability > 2 || ability < 0) ability = 0;
+        final AbilityObject obj = this.genesAbility.getExpressed().getValue();
+        obj.abilityIndex = (byte) ability;
+    }
+
+    @Override
+    public void setEVs(byte[] evs)
+    {
+        if (this.genesEVs == null) this.getEVs();
+        if (this.genesEVs != null) this.genesEVs.getExpressed().setValue(evs);
+        PacketSyncGene.syncGeneToTracking(this.getEntity(), this.genesEVs);
+    }
+
+    @Override
+    public void setIVs(byte[] ivs)
+    {
+        if (this.genesIVs == null) this.getIVs();
+        if (this.genesIVs != null) this.genesIVs.getExpressed().setValue(ivs);
+    }
+
+    @Override
+    public void setMove(int i, String moveName)
+    {
+        // do not blanket set moves on client, or when transformed.
+        if (!this.getEntity().isServerWorld() || this.getTransformedTo() != null) return;
+
+        final String[] moves = this.getMoves();
+        moves[i] = moveName;
+        this.setMoves(moves);
+    }
+
+    @Override
+    public void setMoves(String[] moves)
+    {
+        // do not blanket set moves on client, or when transformed.
+        if (this.getEntity().getEntityWorld().isRemote || this.getTransformedTo() != null) return;
+        if (moves != null && moves.length == 4)
+        {
+            if (this.genesMoves == null) this.getMoves();
+            if (this.genesMoves == null || this.genesMoves.getExpressed() == null || this.getMoveStats() == null)
+            {
+                PokecubeCore.LOGGER.error("Error in setMoves " + this.getEntity(), new NullPointerException());
+                PokecubeCore.LOGGER.error("AllGenes: " + this.genes);
+                PokecubeCore.LOGGER.error("Genes: " + this.genesMoves);
+                if (this.genesMoves != null) PokecubeCore.LOGGER.error("Gene: " + this.genesMoves.getExpressed());
+                else PokecubeCore.LOGGER.error("Gene: " + this.genesMoves);
+                PokecubeCore.LOGGER.error("stats: " + this.getMoveStats());
+                return;
+            }
+            this.genesMoves.getExpressed().setValue(this.getMoveStats().moves = moves);
+        }
+        PacketSyncGene.syncGeneToTracking(this.getEntity(), this.genesMoves);
+    }
+
+    @Override
+    public void setNature(Nature nature)
+    {
+        if (this.genesNature == null) this.getNature();
+        if (this.genesNature != null) this.genesNature.getExpressed().setValue(nature);
+    }
+
+    @Override
+    public IPokemob setPokedexEntry(PokedexEntry newEntry)
+    {
+        final PokedexEntry entry = this.getPokedexEntry();
+        final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
+        if (newEntry == null || newEntry == entry) return this;
+        this.entry = newEntry;
+        IPokemob ret = this;
+        info.entry = newEntry;
+        ret = this.megaEvolve(newEntry);
+        if (this.getEntity().getEntityWorld() != null) ret.setSize((float) (ret.getSize() / PokecubeCore
+                .getConfig().scalefactor));
+        if (this.getEntity().getEntityWorld() != null && this.getEntity().isServerWorld()) PacketChangeForme
+                .sendPacketToTracking(ret.getEntity(), newEntry);
+        return ret;
+    }
+
+    @Override
+    public void setRGBA(int... colours)
+    {
+        final int[] rgba = this.getRGBA();
+        for (int i = 0; i < colours.length && i < rgba.length; i++)
+            rgba[i] = colours[i];
+    }
+
+    @Override
+    public void setSexe(byte sexe)
+    {
+        if (this.genesSpecies == null) this.getPokedexEntry();
+        final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
+        if (sexe == IPokemob.NOSEXE || sexe == IPokemob.FEMALE || sexe == IPokemob.MALE
+                || sexe == IPokemob.SEXLEGENDARY) info.value = sexe;
+        else
+        {
+            System.err.println("Illegal argument. Sexe cannot be " + sexe);
+            new Exception().printStackTrace();
+        }
+    }
+
+    @Override
+    public void setShiny(boolean shiny)
+    {
+        if (this.genesShiny == null) this.isShiny();
+        this.genesShiny.getExpressed().setValue(shiny);
+        PacketSyncGene.syncGeneToTracking(this.getEntity(), this.genesShiny);
+    }
+
+    @Override
+    public void setSize(float size)
+    {
+        if (this.genesSize == null) this.getSize();
+        float a = 1, b = 1, c = 1;
+        final PokedexEntry entry = this.getPokedexEntry();
+        if (entry != null)
+        {
+            a = entry.width * size;
+            b = entry.height * size;
+            c = entry.length * size;
+            // Do not allow them to be smaller than 1/100 of a block.
+            if (a < 0.01 || b < 0.01 || c < 0.01)
+            {
+                final float min = 0.01f / Math.min(a, Math.min(c, b));
+                size *= min / PokecubeCore.getConfig().scalefactor;
+            }
+            // Do not allow them to be larger than 20 blocks.
+            if (a > 20 || b > 20 || c > 20)
+            {
+                final float max = 20 / Math.max(a, Math.max(c, b));
+                size *= max / PokecubeCore.getConfig().scalefactor;
+            }
+        }
+        this.genesSize.getExpressed().setValue(size);
     }
 }

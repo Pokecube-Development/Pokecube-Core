@@ -6,15 +6,19 @@ public enum CombatStates
     ANGRY(1 << 0),
     /** A Guarding pokemon will attack any strangers nearby */
     GUARDING(1 << 1),
-    /** A Hunting pokemon will look for food to eat)), Either prey or
-     * berries. */
+    /**
+     * A Hunting pokemon will look for food to eat)), Either prey or
+     * berries.
+     */
     HUNTING(1 << 2),
     /** has the pokemob used a zmove this "battle" */
     USEDZMOVE(1 << 3, false),
     /** is the pokemon leaping)), used for the leap AI */
     LEAPING(1 << 4, false),
-    /** in the process of dodging)), used to determine if to use the old attack
-     * location)), or new */
+    /**
+     * in the process of dodging)), used to determine if to use the old attack
+     * location)), or new
+     */
     DODGING(1 << 5, false),
     /** Pokemon is fighting over mate)), should stop when hp hits 50%. */
     MATEFIGHT(1 << 6, false),
@@ -32,27 +36,29 @@ public enum CombatStates
     final int     mask;
     final boolean persist;
 
-    private CombatStates(int mask, boolean persist)
-    {
-        this.mask = mask;
-        this.persist = persist;
-    }
-
     private CombatStates(int mask)
     {
         this.mask = mask;
         this.persist = true;
     }
 
-    public int getMask()
+    private CombatStates(int mask, boolean persist)
     {
-        return mask;
+        this.mask = mask;
+        this.persist = persist;
     }
 
-    /** if this is false, then the value will be cleared whenever the pokemob is
-     * loaded from nbt. */
+    public int getMask()
+    {
+        return this.mask;
+    }
+
+    /**
+     * if this is false, then the value will be cleared whenever the pokemob is
+     * loaded from nbt.
+     */
     public boolean persists()
     {
-        return persist;
+        return this.persist;
     }
 }

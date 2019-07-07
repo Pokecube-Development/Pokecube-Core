@@ -8,42 +8,43 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import pokecube.core.PokecubeItems;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class ItemMegawearable extends Item
 {
     private static Map<String, String> wearables = Maps.newHashMap();
 
-    public static void registerWearable(String name, String slot)
+    static
     {
-        wearables.put(name, slot);
+        ItemMegawearable.registerWearable("ring", "FINGER");
+        ItemMegawearable.registerWearable("belt", "WAIST");
+        ItemMegawearable.registerWearable("hat", "HAT");
     }
 
     public static String getSlot(String name)
     {
-        return wearables.get(name);
+        return ItemMegawearable.wearables.get(name);
     }
 
     public static Collection<String> getWearables()
     {
-        return wearables.keySet();
+        return ItemMegawearable.wearables.keySet();
     }
 
-    static
+    public static void registerWearable(String name, String slot)
     {
-        registerWearable("ring", "FINGER");
-        registerWearable("belt", "WAIST");
-        registerWearable("hat", "HAT");
+        ItemMegawearable.wearables.put(name, slot);
     }
 
     public final String name;
@@ -51,47 +52,35 @@ public class ItemMegawearable extends Item
 
     public ItemMegawearable(String name, String slot)
     {
-        super();
-        this.setMaxStackSize(1);
-        this.setMaxDamage(0);
+        super(new Properties().group(PokecubeItems.POKECUBEITEMS).maxStackSize(1));
         this.name = name;
         this.slot = slot;
         this.setRegistryName(PokecubeMod.ID, "mega_" + name);
-        this.setCreativeTab(PokecubeMod.creativeTabPokecube);
-        this.setUnlocalizedName(this.getRegistryName().getResourcePath());
 
     }
 
-    /** allows items to add custom lines of information to the mouseover
-     * description */
+    /**
+     * allows items to add custom lines of information to the mouseover
+     * description
+     */
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<ITextComponent> tooltip,
+            ITooltipFlag advanced)
     {
-        if (stack.hasTag() && stack.getTag().hasKey("dyeColour"))
+        if (stack.hasTag() && stack.getTag().contains("dyeColour"))
         {
-            int damage = stack.getTag().getInt("dyeColour");
-            EnumDyeColor colour = EnumDyeColor.byDyeDamage(damage);
-            String s = I18n.format(colour.getUnlocalizedName());
-            tooltip.add(s);
+            final int damage = stack.getTag().getInt("dyeColour");
+            final DyeColor colour = DyeColor.byId(damage);
+            tooltip.add(new TranslationTextComponent(colour.getTranslationKey()));
         }
     }
 
-    /** Determines if the specific ItemStack can be placed in the specified
-     * armor slot.
-     *
-     * @param stack
-     *            The ItemStack
-     * @param armorType
-     *            Armor slot ID: 0: Helmet, 1: Chest, 2: Legs, 3: Boots
-     * @param entity
-     *            The entity trying to equip the armor
-     * @return True if the given ItemStack can be inserted in the slot */
     @Override
-    public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity)
+    public EquipmentSlotType getEquipmentSlot(ItemStack stack)
     {
-        String name = getUnlocalizedName(stack).replace("item.", "");
-        if (name.equals("megahat")) return armorType == EntityEquipmentSlot.HEAD;
-        return false;
+        final String name = this.getRegistryName().getPath().replace("mega_", "");
+        if (name.equals("megahat")) return EquipmentSlotType.HEAD;
+        return super.getEquipmentSlot(stack);
     }
 }

@@ -6,7 +6,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 import com.google.gson.ExclusionStrategy;
@@ -15,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.PokecubeMod;
 
 public class ContributorManager
@@ -26,52 +26,52 @@ public class ContributorManager
         {
 
             @Override
-            public boolean shouldSkipField(FieldAttributes f)
-            {
-                return f.getName().equals("byUUID") || f.getName().equals("byName") || f.getName().equals("cubeStack");
-            }
-
-            @Override
             public boolean shouldSkipClass(Class<?> clazz)
             {
                 return false;
             }
+
+            @Override
+            public boolean shouldSkipField(FieldAttributes f)
+            {
+                return f.getName().equals("byUUID") || f.getName().equals("byName") || f.getName().equals("cubeStack");
+            }
         };
     }
 
-    private static final Gson               GSON     = new GsonBuilder()
-            .addDeserializationExclusionStrategy(EXCLUDEMAPS).create();
+    private static final Gson GSON = new GsonBuilder().addDeserializationExclusionStrategy(
+            ContributorManager.EXCLUDEMAPS).create();
 
-    private static final String             DEFAULTS = PokecubeMod.GIST + "contribs.json";
+    private static final String DEFAULTS = PokecubeMod.GIST + "contribs.json";
 
     private static final ContributorManager INSTANCE = new ContributorManager();
 
     public static ContributorManager instance()
     {
-        return INSTANCE;
+        return ContributorManager.INSTANCE;
     }
 
     public Contributors contributors = new Contributors();
 
-    public Contributor getContributor(GameProfile profile)
-    {
-        return contributors.getContributor(profile);
-    }
-
     public List<ContributorType> getContributionTypes(GameProfile profile)
     {
         Contributor contrib;
-        if ((contrib = contributors.getContributor(profile)) != null) return contrib.types;
+        if ((contrib = this.contributors.getContributor(profile)) != null) return contrib.types;
         return Lists.newArrayList();
+    }
+
+    public Contributor getContributor(GameProfile profile)
+    {
+        return this.contributors.getContributor(profile);
     }
 
     public void loadContributors()
     {
-        contributors.contributors.clear();
-        if (PokecubeMod.core.getConfig().default_contributors) loadContributors(DEFAULTS);
-        if (!PokecubeMod.core.getConfig().extra_contributors.isEmpty())
-            loadContributors(PokecubeMod.core.getConfig().extra_contributors);
-        contributors.init();
+        this.contributors.contributors.clear();
+        if (PokecubeCore.getConfig().default_contributors) this.loadContributors(ContributorManager.DEFAULTS);
+        if (!PokecubeCore.getConfig().extra_contributors.isEmpty()) this.loadContributors(PokecubeCore
+                .getConfig().extra_contributors);
+        this.contributors.init();
     }
 
     private void loadContributors(String location)
@@ -84,22 +84,17 @@ public class ContributorManager
             con = url.openConnection();
             con.setConnectTimeout(1000);
             con.setReadTimeout(1000);
-            InputStream in = con.getInputStream();
-            InputStreamReader reader = new InputStreamReader(in);
-            Contributors newContribs = GSON.fromJson(reader, Contributors.class);
-            if (PokecubeMod.debug) PokecubeMod.log(newContribs + "");
-            if (newContribs != null)
-            {
-                contributors.contributors.addAll(newContribs.contributors);
-            }
+            final InputStream in = con.getInputStream();
+            final InputStreamReader reader = new InputStreamReader(in);
+            final Contributors newContribs = ContributorManager.GSON.fromJson(reader, Contributors.class);
+            PokecubeCore.LOGGER.debug(newContribs + "");
+            if (newContribs != null) this.contributors.contributors.addAll(newContribs.contributors);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            if (e instanceof UnknownHostException)
-            {
-                PokecubeMod.log(Level.WARNING, "Error loading contributors, unknown host " + location);
-            }
-            else PokecubeMod.log(Level.WARNING, "Error loading Contributors from " + location, e);
+            if (e instanceof UnknownHostException) PokecubeCore.LOGGER.error("Error loading contributors, unknown host "
+                    + location);
+            else PokecubeCore.LOGGER.error("Error loading Contributors from " + location, e);
         }
     }
 }

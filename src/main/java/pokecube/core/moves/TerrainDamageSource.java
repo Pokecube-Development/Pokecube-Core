@@ -24,7 +24,7 @@ public class TerrainDamageSource extends DamageSource
     /** Gets the death message that is displayed when the player dies */
     public ITextComponent getDeathMessage(LivingEntity LivingEntityIn)
     {
-        String s = "death.attack." + this.damageType;
+        final String s = "death.attack." + this.damageType;
         return new TranslationTextComponent(s, LivingEntityIn.getDisplayName());
     }
 }

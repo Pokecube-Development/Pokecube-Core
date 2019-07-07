@@ -1,7 +1,6 @@
 package pokecube.core.interfaces;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import thut.api.maths.Vector3;
@@ -27,44 +26,54 @@ public interface IMoveAnimation
         }
     }
 
-    /** Actually plays the animation in the world, this is called every render
+    /**
+     * Actually plays the animation in the world, this is called every render
      * tick for the number of world ticks specificed in getDuration(); This is
      * used for direct GL call rendering
-     * 
+     *
      * @param info
      * @param world
-     * @param partialTick */
+     * @param partialTick
+     */
     @OnlyIn(Dist.CLIENT)
-    default public void clientAnimation(MovePacketInfo info, IWorldEventListener world, float partialTick)
+    default public void clientAnimation(MovePacketInfo info, float partialTick)
     {
     }
 
-    /** Used if you need to spawn in something like thunder effects.
-     * 
-     * @param info */
-    @OnlyIn(Dist.CLIENT)
-    default public void spawnClientEntities(MovePacketInfo info)
-    {
-    }
-
-    /** How long this animation plays for in world ticks.
-     * 
-     * @return */
-    public int getDuration();
-
-    /** How far into the duration should the move actually be applied.
-     * 
-     * @return */
+    /**
+     * How far into the duration should the move actually be applied.
+     *
+     * @return
+     */
     public int getApplicationTick();
 
-    /** Sets the duration.
-     * 
-     * @param duration */
-    public void setDuration(int duration);
+    /**
+     * How long this animation plays for in world ticks.
+     *
+     * @return
+     */
+    public int getDuration();
 
     @OnlyIn(Dist.CLIENT)
     /** Initialise colours for the move. */
     default void reallyInitRGBA()
+    {
+    }
+
+    /**
+     * Sets the duration.
+     *
+     * @param duration
+     */
+    public void setDuration(int duration);
+
+    /**
+     * Used if you need to spawn in something like thunder effects.
+     *
+     * @param info
+     */
+    @OnlyIn(Dist.CLIENT)
+    default public void spawnClientEntities(MovePacketInfo info)
     {
     }
 }

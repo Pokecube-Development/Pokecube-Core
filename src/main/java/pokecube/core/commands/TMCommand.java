@@ -1,145 +1,123 @@
 package pokecube.core.commands;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.command.arguments.EntitySelector;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ServerWorld;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
+import net.minecraftforge.server.permission.PermissionAPI;
 import pokecube.core.items.ItemTM;
 import pokecube.core.moves.MovesUtils;
 import thut.core.common.commands.CommandTools;
 
-public class TMCommand extends CommandBase
+public class TMCommand
 {
-    private List<String> aliases;
+    private static SuggestionProvider<CommandSource> SUGGEST_TMS = (ctx,
+            sb) -> net.minecraft.command.ISuggestionProvider.suggest(MovesUtils.moves.keySet(), sb);
 
-    public TMCommand()
+    public static int execute(final CommandSource source, final ServerPlayerEntity serverplayerentity, final String tm)
     {
-        this.aliases = new ArrayList<String>();
-        this.aliases.add("poketm");
-    }
-
-    @Override
-    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
-    {
-        ServerPlayerEntity[] targets = null;
-        for (int i = 1; i < args.length; i++)
+        final ItemStack itemstack = ItemTM.getTM(tm);
+        final boolean flag = serverplayerentity.inventory.addItemStackToInventory(itemstack);
+        if (flag && itemstack.isEmpty())
         {
-            String s = args[i];
-            if (s.contains("@"))
+            itemstack.setCount(1);
+            final ItemEntity itementity1 = serverplayerentity.dropItem(itemstack, false);
+            if (itementity1 != null) itementity1.makeFakeItem();
+            serverplayerentity.world.playSound((PlayerEntity) null, serverplayerentity.posX, serverplayerentity.posY,
+                    serverplayerentity.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F,
+                    ((serverplayerentity.getRNG().nextFloat() - serverplayerentity.getRNG().nextFloat()) * 0.7F + 1.0F)
+                            * 2.0F);
+            serverplayerentity.container.detectAndSendChanges();
+        }
+        else
+        {
+            final ItemEntity itementity = serverplayerentity.dropItem(itemstack, false);
+            if (itementity != null)
             {
-                ArrayList<PlayerEntity> targs = new ArrayList<PlayerEntity>(
-                        EntitySelector.matchEntities(sender, s, PlayerEntity.class));
-                targets = targs.toArray(new ServerPlayerEntity[0]);
+                itementity.setNoPickupDelay();
+                itementity.setOwnerId(serverplayerentity.getUniqueID());
             }
         }
-        if (args.length == 0)
-        {
-            CommandTools.sendBadArgumentsMissingArg(sender);
-            return;
-        }
-        if (args.length >= 1)
-        {
-            String temp = args[0];
-
-            boolean isMove = false;
-            isMove = MovesUtils.isMoveImplemented(temp);
-
-            if (isMove)
-            {
-                int index = 0;
-                String name = null;
-                PlayerEntity player = null;
-
-                ServerWorld world = (ServerWorld) sender.getEntityWorld();
-                if (args.length == 2)
-                {
-                    name = args[1];
-                    player = world.getPlayerEntityByName(name);
-                }
-
-                ItemStack tm = ItemTM.getTM(temp);
-
-                if (targets != null)
-                {
-                    player = targets[index];
-                }
-
-                if (player == null) player = world.getPlayerEntityByName(sender.getName());
-
-                if (player != null)
-                {
-                    player.inventory.addItemStackToInventory(tm);
-                }
-                return;
-            }
-            CommandTools.sendBadArgumentsTryTab(sender);
-            return;
-        }
+        return 0;
     }
 
-    @Override
-    public List<String> getAliases()
+    public static int execute(final CommandSource source, final String tm) throws CommandSyntaxException
     {
-        return this.aliases;
+        // final boolean var = tm.isEmpty();
+        // if (!var)
+        // {
+        // for (final ItemBerry berry : BerryManager.berryItems.values())
+        // {
+        // // final Gson gson = new
+        // // GsonBuilder().setPrettyPrinting().create();
+        // final String filename = "fruit_" + berry.type.name;
+        // final File dir = new File("./generated/");
+        // if (!dir.exists()) dir.mkdirs();
+        // final File file = new File(dir, filename + ".json");
+        //
+//            //@formatter:off
+//            final String json =
+//                "{\n"+
+//                "  \"type\": \"minecraft:block\",\n"+
+//                "  \"pools\": [\n"+
+//                "    {\n"+
+//                "      \"name\": \""+berry.getRegistryName()+"\",\n"+
+//                "      \"rolls\": 1,\n"+
+//                "      \"entries\": [\n"+
+//                "        {\n"+
+//                "          \"type\": \"minecraft:item\",\n"+
+//                "          \"name\": \""+berry.getRegistryName()+"\"\n"+
+//                "        }\n"+
+//                "      ],\n"+
+//                "      \"conditions\": [\n"+
+//                "        {\n"+
+//                "          \"condition\": \"minecraft:survives_explosion\"\n"+
+//                "        }\n"+
+//                "      ]\n"+
+//                "    }\n"+
+//                "  ]\n"+
+//                "}";//@formatter:on
+        // try
+        // {
+        // final FileWriter write = new FileWriter(file);
+        // write.write(json);
+        // write.close();
+        // }
+        // catch (final IOException e)
+        // {
+        // e.printStackTrace();
+        // }
+        // }
+        // return 0;
+        // }
+        final ServerPlayerEntity player = source.asPlayer();
+        return TMCommand.execute(source, player, tm);
     }
 
-    @Override
-    public String getName()
+    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
     {
-        return aliases.get(0);
+        PermissionAPI.registerNode("command.poketm", DefaultPermissionLevel.OP, "Is the player allowed to use /poketm");
+
+        final LiteralArgumentBuilder<CommandSource> command = Commands.literal("poketm").requires(cs -> CommandTools
+                .hasPerm(cs, "command.poketm")).then(Commands.argument("tm", StringArgumentType.string()).suggests(
+                        TMCommand.SUGGEST_TMS).executes(ctx -> TMCommand.execute(ctx.getSource(), StringArgumentType
+                                .getString(ctx, "tm")))).then(Commands.argument("tm", StringArgumentType.string())
+                                        .suggests(TMCommand.SUGGEST_TMS).then(Commands.argument("player", EntityArgument
+                                                .player()).executes(ctx -> TMCommand.execute(ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "player"), StringArgumentType
+                                                                .getString(ctx, "tm")))));
+        commandDispatcher.register(command);
     }
-
-    @Override
-    public String getUsage(ICommandSource sender)
-    {
-        return "/" + aliases.get(0) + "<move name>";
-    }
-
-    @Override
-    /** Return the required permission level for this command. */
-    public int getRequiredPermissionLevel()
-    {
-        return 2;
-    }
-
-    @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, BlockPos pos)
-    {
-        Collection<String> moves = MovesUtils.moves.keySet();
-        List<String> ret = new ArrayList<String>();
-        if (args.length == 1)
-        {
-            String text = args[0];
-            for (String name : moves)
-            {
-                if (name.startsWith(text.toLowerCase(java.util.Locale.ENGLISH)))
-                {
-                    ret.add(name);
-                }
-            }
-            Collections.sort(ret, new Comparator<String>()
-            {
-                @Override
-                public int compare(String o1, String o2)
-                {
-
-                    return o1.compareToIgnoreCase(o2);
-                }
-            });
-        }
-        return ret;
-    }
-
 }

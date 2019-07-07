@@ -1,125 +1,108 @@
 package pokecube.core.moves;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.world.IWorld;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
+import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.Stats;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.moves.animations.EntityMoveUse;
 
 public class MoveQueue
 {
+    @Mod.EventBusSubscriber
     public static class MoveQueuer
     {
-        Map<World, MoveQueue> queues = Maps.newHashMap();
+        private static final Map<IWorld, MoveQueue> queues = Maps.newHashMap();
 
-        public MoveQueuer()
+        @SubscribeEvent
+        public static void load(WorldEvent.Load evt)
         {
-            MinecraftForge.EVENT_BUS.register(this);
+            MoveQueuer.queues.put(evt.getWorld(), new MoveQueue(evt.getWorld()));
         }
 
-        public void queueMove(EntityMoveUse move)
+        public static void queueMove(EntityMoveUse move)
         {
-            MoveQueue queue = queues.get(move.getEntityWorld());
+            final MoveQueue queue = MoveQueuer.queues.get(move.getEntityWorld());
             if (queue == null) throw new NullPointerException("why is world queue null?");
             if (move.getUser() != null) queue.moves.add(move);
         }
 
         @SubscribeEvent
-        public void load(WorldEvent.Load evt)
+        public static void tick(WorldTickEvent evt)
         {
-            queues.put(evt.getWorld(), new MoveQueue(evt.getWorld()));
-        }
-
-        @SubscribeEvent
-        public void unload(WorldEvent.Unload evt)
-        {
-            queues.remove(evt.getWorld());
-        }
-
-        @SubscribeEvent
-        public void tick(WorldTickEvent evt)
-        {
-            if (evt.phase == Phase.END && evt.side == Dist.DEDICATED_SERVER)
+            if (evt.phase == Phase.END && evt.side == LogicalSide.SERVER)
             {
-                MoveQueue queue = queues.get(evt.world);
+                final MoveQueue queue = MoveQueuer.queues.get(evt.world);
                 if (queue == null)
                 {
-                    if (PokecubeMod.debug) PokecubeMod.log(Level.SEVERE,
-                            "Critical Error with world for dimension " + evt.world.dimension.getDimension()
-                                    + " It is somehow ticking when not loaded, this should not happen.",
+                    PokecubeCore.LOGGER.error("Critical Error with world for dimension " + evt.world.dimension
+                            .getDimension() + " It is somehow ticking when not loaded, this should not happen.",
                             new Exception());
                     return;
                 }
-                long time = System.nanoTime();
+                final long time = System.nanoTime();
                 queue.executeMoves();
-                double dt = (System.nanoTime() - time) / 1000d;
-                if (PokecubeMod.debug && dt > 100)
-                {
-                    PokecubeMod.log(Level.INFO, "move queue took " + dt);
-                }
+                final double dt = (System.nanoTime() - time) / 1000d;
+                if (dt > 100) PokecubeCore.LOGGER.debug("move queue took " + dt + " for world " + evt.world);
             }
+        }
+
+        @SubscribeEvent
+        public static void unload(WorldEvent.Unload evt)
+        {
+            MoveQueuer.queues.remove(evt.getWorld());
         }
     }
 
     public List<EntityMoveUse> moves = Lists.newArrayList();
-    final World                world;
+    final IWorld               world;
 
-    public MoveQueue(World world)
+    public MoveQueue(IWorld iWorld)
     {
-        this.world = world;
+        this.world = iWorld;
     }
 
     public void executeMoves()
     {
-        synchronized (moves)
+        synchronized (this.moves)
         {
-            Collections.sort(moves, new Comparator<EntityMoveUse>()
+            Collections.sort(this.moves, (o1, o2) ->
             {
-                @Override
-                public int compare(EntityMoveUse o1, EntityMoveUse o2)
-                {
-                    IPokemob user1 = CapabilityPokemob.getPokemobFor(o1.getUser());
-                    IPokemob user2 = CapabilityPokemob.getPokemobFor(o2.getUser());
-                    int speed1 = user1 == null ? 0 : user1.getStat(Stats.VIT, true);
-                    int speed2 = user2 == null ? 0 : user2.getStat(Stats.VIT, true);
-                    // TODO also factor in move priority here.
-                    return speed1 - speed2;
-                }
+                final IPokemob user1 = CapabilityPokemob.getPokemobFor(o1.getUser());
+                final IPokemob user2 = CapabilityPokemob.getPokemobFor(o2.getUser());
+                final int speed1 = user1 == null ? 0 : user1.getStat(Stats.VIT, true);
+                final int speed2 = user2 == null ? 0 : user2.getStat(Stats.VIT, true);
+                // TODO also factor in move priority here.
+                return speed1 - speed2;
             });
-            for (EntityMoveUse move : moves)
+            for (final EntityMoveUse move : this.moves)
             {
-                if (move.getUser() == null || move.getUser().isDead) continue;
+                if (move.getUser() == null || !move.getUser().isAlive()) continue;
                 boolean toUse = true;
-                if (move.getUser() instanceof LivingEntity)
-                {
-                    toUse = ((LivingEntity) move.getUser()).getHealth() >= 1;
-                }
+                if (move.getUser() instanceof LivingEntity) toUse = ((LivingEntity) move.getUser()).getHealth() >= 1;
                 if (toUse)
                 {
-                    IPokemob mob = CapabilityPokemob.getPokemobFor(move.getUser());
-                    world.spawnEntity(move);
+                    final IPokemob mob = CapabilityPokemob.getPokemobFor(move.getUser());
+                    this.world.addEntity(move);
                     move.getMove().applyHungerCost(mob);
                     MovesUtils.displayMoveMessages(mob, move.getTarget(), move.getMove().name);
                 }
             }
-            moves.clear();
+            this.moves.clear();
         }
     }
 

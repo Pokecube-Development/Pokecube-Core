@@ -1,145 +1,79 @@
 /**
- * 
+ *
  */
 package pokecube.core.items.berries;
 
-import java.util.Collection;
+import java.util.Map;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.IProperty;
-import net.minecraftforge.oredict.OreDictionary;
-import pokecube.core.PokecubeItems;
+import pokecube.core.blocks.berries.BerryGenManager;
 import pokecube.core.blocks.berries.BerryGenManager.GenericGrower;
-import pokecube.core.blocks.berries.TileEntityBerries;
 import pokecube.core.handlers.ItemGenerator;
-import pokecube.core.interfaces.IMoveConstants;
 import pokecube.core.items.UsableItemEffects;
-import pokecube.core.items.UsableItemEffects.BerryUsable.BerryEffect;
+import pokecube.core.items.berries.ItemBerry.BerryType;
 
-/** @author Oracion
- * @author Manchou */
+/**
+ * @author Oracion
+ * @author Manchou
+ */
 public class BerryManager
 {
-    public static final IProperty<String>    type          = new IProperty<String>()
-                                                           {
-                                                               @Override
-                                                               public Collection<String> getAllowedValues()
-                                                               {
-                                                                   return BerryManager.berryNames.values();
-                                                               }
-
-                                                               @Override
-                                                               public String getName()
-                                                               {
-                                                                   return "type";
-                                                               }
-
-                                                               @Override
-                                                               public String getName(String value)
-                                                               {
-                                                                   return value;
-                                                               }
-
-                                                               @Override
-                                                               public Class<String> getValueClass()
-                                                               {
-                                                                   return String.class;
-                                                               }
-
-                                                               @Override
-                                                               public Optional<String> parseValue(String value)
-                                                               {
-                                                                   return Optional.<String> fromNullable(value);
-                                                               }
-                                                           };
-
-    public static Block                      berryFruit;
-    public static Block                      berryCrop;
-    public static Block                      berryLeaf;
     /** Map of berry id -> block of crop */
-    public static Int2ObjectArrayMap<Block>  berryCrops    = new Int2ObjectArrayMap<>();
+    public static Int2ObjectArrayMap<Block>     berryCrops  = new Int2ObjectArrayMap<>();
     /** Map of berry id -> block of fruit */
-    public static Int2ObjectArrayMap<Block>  berryFruits   = new Int2ObjectArrayMap<>();
+    public static Int2ObjectArrayMap<Block>     berryFruits = new Int2ObjectArrayMap<>();
     /** Map of berry id -> block of fruit */
-    public static Int2ObjectArrayMap<Item>   berryItems    = new Int2ObjectArrayMap<>();
+    public static Int2ObjectArrayMap<ItemBerry> berryItems  = new Int2ObjectArrayMap<>();
     /** Map of berry id -> name of berry */
-    public static Int2ObjectArrayMap<String> berryNames    = new Int2ObjectArrayMap<>();
-    /** Map of berry id -> flavours of berry, see {@link IMoveConstants.SPICY}
-     * for the indecies of the array */
-    public static Int2ObjectArrayMap<int[]>  berryFlavours = new Int2ObjectArrayMap<>();
+    public static Int2ObjectArrayMap<String>    berryNames  = new Int2ObjectArrayMap<>();
+    /** Map of berry id -> name of berry */
+    public static Map<String, ItemBerry>        byName      = Maps.newHashMap();
 
-    public static void addBerry(String name, int id, int spicy, int dry, int sweet, int bitter, int sour,
-            BerryEffect effect)
+    public static void addBerry(ItemBerry berry)
     {
-        berryNames.put(id, name);
-        berryFlavours.put(id, new int[] { spicy, dry, sweet, bitter, sour });
-        if (effect != null)
-        {
-            UsableItemEffects.BerryUsable.effects.put(id, effect);
-        }
+        final BerryType type = berry.type;
+
+        BerryManager.berryNames.put(type.index, type.name);
+        BerryManager.berryItems.put(type.index, berry);
+        BerryManager.byName.put(type.name, berry);
+        if (type.effect != null) UsableItemEffects.BerryUsable.effects.put(type.index, type.effect);
     }
 
-    public static void addBerry(String name, int id, int spicy, int dry, int sweet, int bitter, int sour)
+    public static Item getBerryItem(String name)
     {
-        addBerry(name, id, spicy, dry, sweet, bitter, sour, null);
+        return BerryManager.byName.get(name);
     }
 
-    public static Block getBerryCrop(String name)
+    public static Block getCrop(ItemBerry berry)
     {
-        for (Block berryCrop : berryCrops.values())
-        {
-            if (berryCrop.getUnlocalizedName().toLowerCase(java.util.Locale.ENGLISH)
-                    .contains(name.toLowerCase(java.util.Locale.ENGLISH)))
-                return berryCrop;
-        }
-        return null;
+        return BerryManager.berryCrops.get(berry.type.index);
     }
 
-    public static void initBerries()
+    public static Block getFruit(ItemBerry berry)
     {
-        OreDictionary.registerOre("berry", new ItemStack(PokecubeItems.nullberry, 1, OreDictionary.WILDCARD_VALUE));
-        for (int id : berryNames.keySet())
-        {
-            String name = berryNames.get(id);
-            ItemStack stack = getBerryItem(id);
-            PokecubeItems.addSpecificItemStack(name + "berry", stack);
-            OreDictionary.registerOre(name + "Berry", stack);
-            PokecubeItems.addSpecificItemStack(name, stack);
-            PokecubeItems.addToHoldables(name);
-        }
-    }
-
-    public static ItemStack getBerryItem(int id)
-    {
-        if (!berryItems.containsKey(id)) return new ItemStack(PokecubeItems.nullberry);
-        return new ItemStack(berryItems.get(id));
-    }
-
-    public static ItemStack getBerryItem(String name)
-    {
-        return PokecubeItems.getStack(name);
+        return BerryManager.berryFruits.get(berry.type.index);
     }
 
     public static void registerTrees()
     {
-        TileEntityBerries.trees.put(3, new GenericGrower(ItemGenerator.logs.get("pecha").getDefaultState()));
-        TileEntityBerries.trees.put(6, new GenericGrower(ItemGenerator.logs.get("leppa").getDefaultState()));
-        TileEntityBerries.trees.put(7, new GenericGrower(ItemGenerator.logs.get("oran").getDefaultState()));
-        TileEntityBerries.trees.put(10, new GenericGrower(ItemGenerator.logs.get("sitrus").getDefaultState()));
-        TileEntityBerries.trees.put(60, new GenericGrower(ItemGenerator.logs.get("enigma").getDefaultState()));
-        TileEntityBerries.trees.put(18, new GenericGrower(ItemGenerator.logs.get("nanab").getDefaultState()));
-
-        // EV Berries
-        TileEntityBerries.trees.put(21, new GenericGrower(Blocks.LOG.getDefaultState()));
-        TileEntityBerries.trees.put(22, new GenericGrower(Blocks.LOG.getDefaultState()));
-        TileEntityBerries.trees.put(23, new GenericGrower(Blocks.LOG.getDefaultState()));
-        TileEntityBerries.trees.put(24, new GenericGrower(Blocks.LOG.getDefaultState()));
-        TileEntityBerries.trees.put(25, new GenericGrower(Blocks.LOG.getDefaultState()));
-        TileEntityBerries.trees.put(26, new GenericGrower(Blocks.LOG.getDefaultState()));
+        BerryGenManager.trees.put(3, new GenericGrower(ItemGenerator.logs.get("pecha").getDefaultState()));
+        BerryGenManager.trees.put(6, new GenericGrower(ItemGenerator.logs.get("leppa").getDefaultState()));
+        BerryGenManager.trees.put(7, new GenericGrower(ItemGenerator.logs.get("oran").getDefaultState()));
+        BerryGenManager.trees.put(10, new GenericGrower(ItemGenerator.logs.get("sitrus").getDefaultState()));
+        BerryGenManager.trees.put(60, new GenericGrower(ItemGenerator.logs.get("enigma").getDefaultState()));
+        BerryGenManager.trees.put(18, new GenericGrower(ItemGenerator.logs.get("nanab").getDefaultState()));
+        //
+        // // EV Berries
+        BerryGenManager.trees.put(21, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
+        BerryGenManager.trees.put(22, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
+        BerryGenManager.trees.put(23, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
+        BerryGenManager.trees.put(24, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
+        BerryGenManager.trees.put(25, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
+        BerryGenManager.trees.put(26, new GenericGrower(Blocks.OAK_LOG.getDefaultState()));
     }
 }

@@ -31,60 +31,124 @@ public class PokecubePlayerStats extends PlayerData
         super();
     }
 
-    public void initMaps()
-    {
-        captures = Maps.newHashMap();
-        hatches = Maps.newHashMap();
-        kills = Maps.newHashMap();
-        inspected = Sets.newHashSet();
-    }
-
-    public boolean hasInspected(PokedexEntry entry)
-    {
-        if (inspected == null) initMaps();
-        return inspected.contains(entry);
-    }
-
-    public boolean inspect(PlayerEntity player, IPokemob pokemob)
-    {
-        if (inspected == null) initMaps();
-        if (player instanceof ServerPlayerEntity) Triggers.INSPECTPOKEMOB.trigger((ServerPlayerEntity) player, pokemob);
-        return inspected.add(pokemob.getPokedexEntry());
-    }
-
     public void addCapture(PokedexEntry entry)
     {
-        int num = getCaptures().get(entry) == null ? 0 : getCaptures().get(entry);
-        getCaptures().put(entry, num + 1);
-    }
-
-    public void addKill(PokedexEntry entry)
-    {
-        int num = getKills().get(entry) == null ? 0 : getKills().get(entry);
-        getKills().put(entry, num + 1);
+        final int num = this.getCaptures().get(entry) == null ? 0 : this.getCaptures().get(entry);
+        this.getCaptures().put(entry, num + 1);
     }
 
     public void addHatch(PokedexEntry entry)
     {
-        int num = getHatches().get(entry) == null ? 0 : getHatches().get(entry);
-        getHatches().put(entry, num + 1);
+        final int num = this.getHatches().get(entry) == null ? 0 : this.getHatches().get(entry);
+        this.getHatches().put(entry, num + 1);
     }
 
-    public void setHasFirst(PlayerEntity player)
+    public void addKill(PokedexEntry entry)
     {
-        hasFirst = true;
-        Triggers.FIRSTPOKEMOB.trigger((ServerPlayerEntity) player);
+        final int num = this.getKills().get(entry) == null ? 0 : this.getKills().get(entry);
+        this.getKills().put(entry, num + 1);
     }
 
-    public boolean hasFirst()
+    @Override
+    public String dataFileName()
     {
-        return hasFirst;
+        return "pokecubeStats";
+    }
+
+    public Map<PokedexEntry, Integer> getCaptures()
+    {
+        if (this.captures == null) this.initMaps();
+        return this.captures;
+    }
+
+    public Map<PokedexEntry, Integer> getHatches()
+    {
+        if (this.hatches == null) this.initMaps();
+        return this.hatches;
     }
 
     @Override
     public String getIdentifier()
     {
         return "pokecube-stats";
+    }
+
+    public Map<PokedexEntry, Integer> getKills()
+    {
+        if (this.kills == null) this.initMaps();
+        return this.kills;
+    }
+
+    public boolean hasFirst()
+    {
+        return this.hasFirst;
+    }
+
+    public boolean hasInspected(PokedexEntry entry)
+    {
+        if (this.inspected == null) this.initMaps();
+        return this.inspected.contains(entry);
+    }
+
+    public void initMaps()
+    {
+        this.captures = Maps.newHashMap();
+        this.hatches = Maps.newHashMap();
+        this.kills = Maps.newHashMap();
+        this.inspected = Sets.newHashSet();
+    }
+
+    public boolean inspect(PlayerEntity player, IPokemob pokemob)
+    {
+        if (this.inspected == null) this.initMaps();
+        if (player instanceof ServerPlayerEntity) Triggers.INSPECTPOKEMOB.trigger((ServerPlayerEntity) player, pokemob);
+        return this.inspected.add(pokemob.getPokedexEntry());
+    }
+
+    @Override
+    public void readFromNBT(CompoundNBT tag)
+    {
+        CompoundNBT temp = tag.getCompound("kills");
+        PokedexEntry entry;
+        this.initMaps();
+        this.hasFirst = tag.getBoolean("F");
+        for (final String s : temp.keySet())
+        {
+            final int num = temp.getInt(s);
+            if (num > 0 && (entry = Database.getEntry(s)) != null) for (int i = 0; i < num; i++)
+                this.addKill(entry);
+        }
+        temp = tag.getCompound("captures");
+        for (final String s : temp.keySet())
+        {
+            final int num = temp.getInt(s);
+            if (num > 0 && (entry = Database.getEntry(s)) != null) for (int i = 0; i < num; i++)
+                this.addCapture(entry);
+        }
+        temp = tag.getCompound("hatches");
+        for (final String s : temp.keySet())
+        {
+            final int num = temp.getInt(s);
+            if (num > 0 && (entry = Database.getEntry(s)) != null) for (int i = 0; i < num; i++)
+                this.addHatch(entry);
+        }
+        if (tag.contains("inspected"))
+        {
+            final ListNBT list = (ListNBT) tag.get("inspected");
+            if (this.inspected == null) this.initMaps();
+            for (int i = 0; i < list.size(); i++)
+            {
+                final String s = list.getString(i);
+                entry = Database.getEntry(s);
+                if (entry != null) this.inspected.add(entry);
+            }
+        }
+    }
+
+    public void setHasFirst(PlayerEntity player)
+    {
+        this.hasFirst = true;
+        Triggers.FIRSTPOKEMOB.trigger((ServerPlayerEntity) player);
     }
 
     @Override
@@ -97,102 +161,21 @@ public class PokecubePlayerStats extends PlayerData
     public void writeToNBT(CompoundNBT tag_)
     {
         CompoundNBT tag = new CompoundNBT();
-        for (PokedexEntry e : getKills().keySet())
-        {
-            tag.putInt(e.getName(), getKills().get(e));
-        }
+        for (final PokedexEntry e : this.getKills().keySet())
+            tag.putInt(e.getName(), this.getKills().get(e));
         tag_.put("kills", tag);
         tag = new CompoundNBT();
-        for (PokedexEntry e : getCaptures().keySet())
-        {
-            tag.putInt(e.getName(), getCaptures().get(e));
-        }
+        for (final PokedexEntry e : this.getCaptures().keySet())
+            tag.putInt(e.getName(), this.getCaptures().get(e));
         tag_.put("captures", tag);
         tag = new CompoundNBT();
-        for (PokedexEntry e : getHatches().keySet())
-        {
-            tag.putInt(e.getName(), getHatches().get(e));
-        }
+        for (final PokedexEntry e : this.getHatches().keySet())
+            tag.putInt(e.getName(), this.getHatches().get(e));
         tag_.put("hatches", tag);
-        ListNBT list = new ListNBT();
-        for (PokedexEntry e : inspected)
-        {
-            list.appendTag(new StringNBT(e.getName()));
-        }
+        final ListNBT list = new ListNBT();
+        for (final PokedexEntry e : this.inspected)
+            list.add(new StringNBT(e.getName()));
         tag_.put("inspected", list);
-        tag_.putBoolean("F", hasFirst);
-    }
-
-    @Override
-    public void readFromNBT(CompoundNBT tag)
-    {
-        CompoundNBT temp = tag.getCompound("kills");
-        PokedexEntry entry;
-        initMaps();
-        hasFirst = tag.getBoolean("F");
-        for (String s : temp.getKeySet())
-        {
-            int num = temp.getInt(s);
-            if (num > 0 && (entry = Database.getEntry(s)) != null)
-            {
-                for (int i = 0; i < num; i++)
-                    addKill(entry);
-            }
-        }
-        temp = tag.getCompound("captures");
-        for (String s : temp.getKeySet())
-        {
-            int num = temp.getInt(s);
-            if (num > 0 && (entry = Database.getEntry(s)) != null)
-            {
-                for (int i = 0; i < num; i++)
-                    addCapture(entry);
-            }
-        }
-        temp = tag.getCompound("hatches");
-        for (String s : temp.getKeySet())
-        {
-            int num = temp.getInt(s);
-            if (num > 0 && (entry = Database.getEntry(s)) != null)
-            {
-                for (int i = 0; i < num; i++)
-                    addHatch(entry);
-            }
-        }
-        if (tag.hasKey("inspected"))
-        {
-            ListNBT list = (ListNBT) tag.getTag("inspected");
-            if (inspected == null) initMaps();
-            for (int i = 0; i < list.size(); i++)
-            {
-                String s = list.getStringTagAt(i);
-                entry = Database.getEntry(s);
-                if (entry != null) inspected.add(entry);
-            }
-        }
-    }
-
-    @Override
-    public String dataFileName()
-    {
-        return "pokecubeStats";
-    }
-
-    public Map<PokedexEntry, Integer> getCaptures()
-    {
-        if (captures == null) initMaps();
-        return captures;
-    }
-
-    public Map<PokedexEntry, Integer> getKills()
-    {
-        if (kills == null) initMaps();
-        return kills;
-    }
-
-    public Map<PokedexEntry, Integer> getHatches()
-    {
-        if (hatches == null) initMaps();
-        return hatches;
+        tag_.putBoolean("F", this.hasFirst);
     }
 }

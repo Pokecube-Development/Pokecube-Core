@@ -4,13 +4,13 @@ import net.minecraft.item.Item;
 
 public class ItemRevive extends Item
 {
-    public ItemRevive()
+    public ItemRevive(Properties props)
     {
-        super();
+        super(props);
     }
 
     @Override
-    public boolean getShareTag()
+    public boolean shouldSyncTag()
     {
         return true;
     }

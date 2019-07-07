@@ -2,31 +2,10 @@ package pokecube.core.client;
 
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 public class GuiEvent extends Event
 {
-
-    public GuiEvent()
-    {
-    }
-
-    @Cancelable
-    public static class RenderTargetInfo extends GuiEvent
-    {
-
-    }
-
-    @Cancelable
-    public static class RenderSelectedInfo extends GuiEvent
-    {
-
-    }
-
-    @Cancelable
-    public static class RenderTeleports extends GuiEvent
-    {
-
-    }
 
     @Cancelable
     public static class RenderMoveMessages extends GuiEvent
@@ -40,9 +19,31 @@ public class GuiEvent extends Event
 
         public ElementType getType()
         {
-            return type;
+            return this.type;
         }
 
+    }
+
+    @Cancelable
+    public static class RenderSelectedInfo extends GuiEvent
+    {
+
+    }
+
+    @Cancelable
+    public static class RenderTargetInfo extends GuiEvent
+    {
+
+    }
+
+    @Cancelable
+    public static class RenderTeleports extends GuiEvent
+    {
+
+    }
+
+    public GuiEvent()
+    {
     }
 
 }

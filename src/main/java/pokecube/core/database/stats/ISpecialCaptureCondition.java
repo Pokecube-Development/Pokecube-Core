@@ -8,7 +8,7 @@ import pokecube.core.interfaces.IPokemob;
 
 public interface ISpecialCaptureCondition
 {
-    public static final HashMap<PokedexEntry, ISpecialCaptureCondition> captureMap = new HashMap<PokedexEntry, ISpecialCaptureCondition>();
+    public static final HashMap<PokedexEntry, ISpecialCaptureCondition> captureMap = new HashMap<>();
 
     boolean canCapture(Entity trainer);
 

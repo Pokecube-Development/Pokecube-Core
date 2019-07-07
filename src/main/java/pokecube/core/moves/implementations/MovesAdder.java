@@ -1,18 +1,15 @@
 package pokecube.core.moves.implementations;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 
+import pokecube.core.PokecubeCore;
 import pokecube.core.database.Database;
-import pokecube.core.database.Database.EnumDatabase;
 import pokecube.core.database.moves.MoveEntry;
-import pokecube.core.database.moves.json.JsonMoves;
-import pokecube.core.events.handlers.MoveEventsHandler;
+import pokecube.core.handlers.events.MoveEventsHandler;
 import pokecube.core.interfaces.IMoveAction;
 import pokecube.core.interfaces.IMoveAnimation;
 import pokecube.core.interfaces.IMoveConstants;
@@ -36,60 +33,35 @@ public class MovesAdder implements IMoveConstants
 
     static
     {
-        presetMap.put("ongoing", Move_Ongoing.class);
-        presetMap.put("explode", Move_Explode.class);
-        presetMap.put("terrain", Move_Terrain.class);
-        presetMap.put("aoe", Move_AOE.class);
-        presetMap.put("multihit", Move_MultiHit.class);
-        presetMap.put("doublehit", Move_Doublehit.class);
+        MovesAdder.presetMap.put("ongoing", Move_Ongoing.class);
+        MovesAdder.presetMap.put("explode", Move_Explode.class);
+        MovesAdder.presetMap.put("terrain", Move_Terrain.class);
+        MovesAdder.presetMap.put("aoe", Move_AOE.class);
+        MovesAdder.presetMap.put("multihit", Move_MultiHit.class);
+        MovesAdder.presetMap.put("doublehit", Move_Doublehit.class);
     }
 
     public static void postInitMoves()
     {
-        for (Move_Base move : MovesUtils.moves.values())
+        for (final Move_Base move : MovesUtils.moves.values())
         {
-            if (move.move.baseEntry != null && move.move.baseEntry.animations != null
-                    && !move.move.baseEntry.animations.isEmpty())
+            if (move.move.baseEntry != null && move.move.baseEntry.animations != null && !move.move.baseEntry.animations
+                    .isEmpty())
             {
-                if (PokecubeMod.debug)
-                    PokecubeMod.log(move.move.name + ": animations: " + move.move.baseEntry.animations);
+                if (PokecubeMod.debug) PokecubeCore.LOGGER.info(move.move.name + ": animations: "
+                        + move.move.baseEntry.animations);
                 move.setAnimation(new AnimationMultiAnimations(move.move));
                 continue;
             }
             String anim = move.move.animDefault;
             if (anim == null || anim.equals("none")) continue;
-            if (!move.move.animDefault.endsWith(":~" + move.name))
-                move.move.animDefault = move.move.animDefault + ":~" + move.name;
+            if (!move.move.animDefault.endsWith(":~" + move.name)) move.move.animDefault = move.move.animDefault + ":~"
+                    + move.name;
             anim = move.move.animDefault;
-            if (PokecubeMod.debug) PokecubeMod.log(move.move.name + ": preset animation: " + move.move.animDefault);
-            IMoveAnimation animation = MoveAnimationHelper.getAnimationPreset(anim);
+            if (PokecubeMod.debug) PokecubeCore.LOGGER.info(move.move.name + ": preset animation: "
+                    + move.move.animDefault);
+            final IMoveAnimation animation = MoveAnimationHelper.getAnimationPreset(anim);
             if (animation != null) move.setAnimation(animation);
-        }
-    }
-
-    private static void registerMove(Move_Base move_Base)
-    {
-        MovesUtils.registerMove(move_Base);
-    }
-
-    public static void registerMoves()
-    {
-        registerAutodetect();
-        registerRemainder();
-        // Reload the moves databases to apply the animations to the newly added
-        // moves.
-        for (String s : Database.configDatabases.get(EnumDatabase.MOVES.ordinal()))
-        {
-            try
-            {
-                File moves = new File(Database.CONFIGLOC + s);
-                File anims = new File(Database.CONFIGLOC + "animations.json");
-                JsonMoves.merge(anims, moves);
-            }
-            catch (Exception e1)
-            {
-                PokecubeMod.log(Level.SEVERE, "Error with " + Database.CONFIGLOC + s, e1);
-            }
         }
     }
 
@@ -98,29 +70,27 @@ public class MovesAdder implements IMoveConstants
     {
         List<Class<?>> foundClasses;
         // Register moves.
-        if (PokecubeMod.debug) PokecubeMod.log("Autodecting Moves...");
+        if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Autodecting Moves...");
         try
         {
             foundClasses = ClassFinder.find(MovesAdder.class.getPackage().getName());
             int num = 0;
-            for (Class<?> candidateClass : foundClasses)
-            {
+            for (final Class<?> candidateClass : foundClasses)
                 if (Move_Basic.class.isAssignableFrom(candidateClass) && candidateClass.getEnclosingClass() == null)
                 {
-                    Move_Basic move = (Move_Basic) candidateClass.getConstructor().newInstance();
+                    final Move_Basic move = (Move_Basic) candidateClass.getConstructor().newInstance();
                     if (MovesUtils.isMoveImplemented(move.name))
                     {
-                        PokecubeMod.log(
-                                "Error, Double registration of " + move.name + " Replacing old entry with new one.");
+                        PokecubeCore.LOGGER.info("Error, Double registration of " + move.name
+                                + " Replacing old entry with new one.");
                         num--;
                     }
                     num++;
-                    registerMove(move);
+                    MovesAdder.registerMove(move);
                 }
-            }
-            if (PokecubeMod.debug) PokecubeMod.log("Registered " + num + " Custom Moves");
+            if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Registered " + num + " Custom Moves");
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             e.printStackTrace();
         }
@@ -128,28 +98,41 @@ public class MovesAdder implements IMoveConstants
         try
         {
             foundClasses = ClassFinder.find(MovesAdder.class.getPackage().getName());
-            for (Class<?> candidateClass : foundClasses)
-            {
+            for (final Class<?> candidateClass : foundClasses)
                 if (IMoveAction.class.isAssignableFrom(candidateClass) && candidateClass.getEnclosingClass() == null)
                 {
-                    IMoveAction move = (IMoveAction) candidateClass.getConstructor().newInstance();
+                    final IMoveAction move = (IMoveAction) candidateClass.getConstructor().newInstance();
                     MoveEventsHandler.register(move);
                 }
-            }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             e.printStackTrace();
         }
     }
 
-    /** Only registers contact and self, as distances moves usually should have
-     * some effect. */
+    private static void registerMove(final Move_Base move_Base)
+    {
+        MovesUtils.registerMove(move_Base);
+    }
+
+    public static void registerMoves()
+    {
+        MovesAdder.registerAutodetect();
+        MovesAdder.registerRemainder();
+        // Reload the moves databases to apply the animations to the newly added
+        // moves.
+        Database.preInitMoves();
+    }
+
+    /**
+     * Only registers contact and self, as distances moves usually should have
+     * some effect.
+     */
     public static void registerRemainder()
     {
         int num = 0;
-        for (MoveEntry e : MoveEntry.values())
-        {
+        for (final MoveEntry e : MoveEntry.values())
             if (!MovesUtils.isMoveImplemented(e.name))
             {
 
@@ -170,15 +153,15 @@ public class MovesAdder implements IMoveConstants
 
                 if (doesSomething)
                 {
-                    Class<? extends Move_Base> moveClass = e.baseEntry.preset != null
-                            ? presetMap.get(e.baseEntry.preset) : Move_Basic.class;
+                    Class<? extends Move_Base> moveClass = e.baseEntry.preset != null ? MovesAdder.presetMap.get(
+                            e.baseEntry.preset) : Move_Basic.class;
                     if (moveClass == null) moveClass = Move_Basic.class;
 
                     Move_Base toAdd;
                     try
                     {
                         toAdd = moveClass.getConstructor(String.class).newInstance(e.name);
-                        registerMove(toAdd);
+                        MovesAdder.registerMove(toAdd);
                         num++;
                     }
                     catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -188,7 +171,6 @@ public class MovesAdder implements IMoveConstants
                     }
                 }
             }
-        }
-        if (PokecubeMod.debug) PokecubeMod.log("Registered " + num + " Database Moves");
+        if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Registered " + num + " Database Moves");
     }
 }

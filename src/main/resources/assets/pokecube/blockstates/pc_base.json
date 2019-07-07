@@ -1,20 +1,8 @@
 {
-    "forge_marker": 1,
-    "defaults": {
-        "textures": {
-            "#pc_base": "pokecube:blocks/pc_base"
-        },
-        "model": "pokecube:pc_base.obj"
-     },
     "variants": {
-        "inventory": [{
-            "transform": "forge:default-block"
-        }],
-        "facing":{
-            "east":  { "y":0 },
-            "west":  { "y":180 },
-            "north": { "y":270 },
-            "south": {  "y":90 }
-        }
+        "facing=east":  { "model": "pokecube:block/pc_base", "y":270 },
+        "facing=west":  { "model": "pokecube:block/pc_base", "y":90 },
+        "facing=north": { "model": "pokecube:block/pc_base", "y":180},
+        "facing=south": { "model": "pokecube:block/pc_base", "y":0 }
     }
 }

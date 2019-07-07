@@ -9,86 +9,77 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import net.java.games.input.Mouse;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.GuiEvent.RenderMoveMessages;
-import pokecube.core.interfaces.PokecubeMod;
 
+@Mod.EventBusSubscriber
 public class GuiInfoMessages
 {
-    public static GuiInfoMessages instance;
+    private static final LinkedList<String> messages = Lists.newLinkedList();
+    private static final LinkedList<String> recent   = Lists.newLinkedList();
 
-    public static void addMessage(ITextComponent message)
+    static long       time   = 0;
+    static public int offset = 0;
+
+    public static void addMessage(final ITextComponent message)
     {
-        if (PokecubeMod.core.getConfig().battleLogInChat)
+        if (message == null)
         {
-            if (PokecubeCore.getPlayer(null) != null) PokecubeCore.getPlayer(null).sendMessage(message);
+            PokecubeCore.LOGGER.warn("Null message was sent!", new NullPointerException());
             return;
         }
-        instance.messages.push(message.getFormattedText());
-        instance.time = Minecraft.getInstance().player.ticksExisted;
-        instance.recent.addFirst(message.getFormattedText());
-        if (instance.messages.size() > 100)
+        PokecubeCore.LOGGER.debug("Recieved Message: " + message.getFormattedText());
+        if (PokecubeCore.getConfig().battleLogInChat)
         {
-            instance.messages.remove(0);
+            if (PokecubeCore.proxy.getPlayer() != null) PokecubeCore.proxy.getPlayer().sendMessage(message);
+            return;
         }
+        GuiInfoMessages.messages.push(message.getFormattedText());
+        GuiInfoMessages.time = Minecraft.getInstance().player.ticksExisted;
+        GuiInfoMessages.recent.addFirst(message.getFormattedText());
+        if (GuiInfoMessages.messages.size() > 100) GuiInfoMessages.messages.remove(0);
     }
 
     public static void clear()
+
     {
-        if (instance != null)
-        {
-            instance.messages.clear();
-            instance.recent.clear();
-        }
-    }
-
-    private LinkedList<String> messages = Lists.newLinkedList();
-    private LinkedList<String> recent   = Lists.newLinkedList();
-    long                       time     = 0;
-
-    int                        offset   = 0;
-
-    public GuiInfoMessages()
-    {
-        MinecraftForge.EVENT_BUS.register(this);
-        instance = this;
+        GuiInfoMessages.messages.clear();
+        GuiInfoMessages.recent.clear();
     }
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public void draw(RenderMoveMessages event)
+    public static void draw(final RenderMoveMessages event)
     {
-        if (PokecubeMod.core.getConfig().battleLogInChat) { return; }
-        Minecraft minecraft = Minecraft.getInstance();
-        if (event.getType() == ElementType.CHAT && !(minecraft.currentScreen instanceof GuiChat)) return;
-        if (event.getType() != ElementType.CHAT && (minecraft.currentScreen instanceof GuiChat)) return;
+        if (PokecubeCore.getConfig().battleLogInChat) return;
+        final Minecraft minecraft = Minecraft.getInstance();
+        // TODO see about this?
+        if (event.getType() == ElementType.CHAT && minecraft.currentScreen == null) return;
+        if (event.getType() != ElementType.CHAT && minecraft.currentScreen != null) return;
 
-        int texH = minecraft.fontRenderer.FONT_HEIGHT;
-        int trim = PokecubeMod.core.getConfig().messageWidth;
-        int paddingXPos = PokecubeMod.core.getConfig().messagePadding[0];
-        int paddingXNeg = PokecubeMod.core.getConfig().messagePadding[1];
+        final int texH = minecraft.fontRenderer.FONT_HEIGHT;
+        final int trim = PokecubeCore.getConfig().messageWidth;
+        final int paddingXPos = PokecubeCore.getConfig().messagePadding.get(0);
+        final int paddingXNeg = PokecubeCore.getConfig().messagePadding.get(1);
         GL11.glPushMatrix();
 
-        minecraft.entityRenderer.setupOverlayRendering();
-        int[] mess = GuiDisplayPokecubeInfo.applyTransform(PokecubeMod.core.getConfig().messageRef,
-                PokecubeMod.core.getConfig().messagePos,
-                new int[] { PokecubeMod.core.getConfig().messageWidth, 7 * minecraft.fontRenderer.FONT_HEIGHT },
-                PokecubeMod.core.getConfig().messageSize);
+        // TODO possbly fix lighitng here?
+        final int[] mess = GuiDisplayPokecubeInfo.applyTransform(PokecubeCore.getConfig().messageRef, PokecubeCore
+                .getConfig().messagePos, new int[] { PokecubeCore.getConfig().messageWidth, 7
+                        * minecraft.fontRenderer.FONT_HEIGHT }, (float) PokecubeCore.getConfig().messageSize);
         int x = 0, y = 0;
-        float s = PokecubeMod.core.getConfig().messageSize;
+        final float s = (float) PokecubeCore.getConfig().messageSize;
         x = x - 150;
-        Rectangle messRect = new Rectangle(x, y - 7 * texH, 150, 8 * texH);
+        final Rectangle messRect = new Rectangle(x, y - 7 * texH, 150, 8 * texH);
         x += mess[2];
         y += mess[3];
         messRect.setBounds((int) (x * s), (int) ((y - 7 * texH) * s), (int) (150 * s), (int) (8 * texH * s));
@@ -96,71 +87,67 @@ public class GuiInfoMessages
         int i1 = -10;
         int j1 = -10;
 
+        double mx, my;
+        mx = minecraft.mouseHelper.getMouseX();
+        my = minecraft.mouseHelper.getMouseY();
+
         if (minecraft.currentScreen != null)
         {
-            i1 = ((Mouse.getX() * minecraft.currentScreen.width / minecraft.displayWidth));
-            j1 = ((minecraft.currentScreen.height
-                    - Mouse.getY() * minecraft.currentScreen.height / minecraft.displayHeight)) - 1;
+            i1 = (int) (mx * minecraft.currentScreen.width / minecraft.mainWindow.getScaledWidth());
+            j1 = (int) (minecraft.currentScreen.height - my * minecraft.currentScreen.height / minecraft.mainWindow
+                    .getScaledHeight() - 1);
         }
         i1 = i1 - mess[0];
         j1 = j1 - mess[1];
 
-        int i = Mouse.getDWheel();
-        if (!messRect.contains(i1, j1))
-        {
-            i = 0;
-        }
         int w = 0;
         int h = 0;
         x = w;
         y = h;
         GL11.glNormal3f(0.0F, -1.0F, 0.0F);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.translate(0, -texH * 7, 0);
-        GlStateManager.translate(0, 0, 0);
+        GlStateManager.translatef(0, -texH * 7, 0);
+        GlStateManager.translatef(0, 0, 0);
         int num = -1;
         if (event.getType() == ElementType.CHAT)
         {
             num = 7;
-            offset += (int) (i != 0 ? Math.signum(i) : 0);
-            if (offset < 0) offset = 0;
-            if (offset > messages.size() - 7) offset = messages.size() - 7;
+            if (GuiInfoMessages.offset < 0) GuiInfoMessages.offset = 0;
+            if (GuiInfoMessages.offset > GuiInfoMessages.messages.size() - 7)
+                GuiInfoMessages.offset = GuiInfoMessages.messages.size() - 7;
         }
-        else if (time > minecraft.player.ticksExisted - 30)
+        else if (GuiInfoMessages.time > minecraft.player.ticksExisted - 30)
         {
             num = 6;
-            offset = 0;
+            GuiInfoMessages.offset = 0;
         }
         else
         {
-            offset = 0;
+            GuiInfoMessages.offset = 0;
             num = 6;
-            time = minecraft.player.ticksExisted;
-            if (!recent.isEmpty())
-            {
-                recent.removeLast();
-            }
+            GuiInfoMessages.time = minecraft.player.ticksExisted;
+            if (!GuiInfoMessages.recent.isEmpty()) GuiInfoMessages.recent.removeLast();
         }
-        while (recent.size() > 8)
-            recent.removeLast();
-        List<String> toUse = num == 7 ? messages : recent;
-        int size = toUse.size() - 1;
+        while (GuiInfoMessages.recent.size() > 8)
+            GuiInfoMessages.recent.removeLast();
+        final List<String> toUse = num == 7 ? GuiInfoMessages.messages : GuiInfoMessages.recent;
+        final int size = toUse.size() - 1;
         num = Math.min(num, size + 1);
         int shift = 0;
         for (int l = 0; l < num && shift < num; l++)
         {
-            int index = (l + offset);
+            int index = l + GuiInfoMessages.offset;
             if (index < 0) index = 0;
             if (index > size) break;
-            String mess2 = toUse.get(index);
-            List<String> mess1 = minecraft.fontRenderer.listFormattedStringToWidth(mess2, trim);
+            final String mess2 = toUse.get(index);
+            final List<String> mess1 = minecraft.fontRenderer.listFormattedStringToWidth(mess2, trim);
             for (int j = mess1.size() - 1; j >= 0; j--)
             {
-                h = y + texH * (shift);
+                h = y + texH * shift;
                 w = x - trim;
-                int ph = 6 * texH - h;
-                Gui.drawRect(w - paddingXNeg, ph, w + trim + paddingXPos, ph + texH, 0x66000000);
-                minecraft.fontRenderer.drawString(mess1.get(j), x - trim, ph, 0xffffff, true);
+                final int ph = 6 * texH - h;
+                AbstractGui.fill(w - paddingXNeg, ph, w + trim + paddingXPos, ph + texH, 0x66000000);
+                minecraft.fontRenderer.drawString(mess1.get(j), x - trim, ph, 0xffffff);
                 if (j != 0) shift++;
             }
             shift++;

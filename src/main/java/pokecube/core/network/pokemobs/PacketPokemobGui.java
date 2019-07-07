@@ -1,93 +1,114 @@
 package pokecube.core.network.pokemobs;
 
-import javax.xml.ws.handler.MessageContext;
-
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkHooks;
 import pokecube.core.PokecubeCore;
-import pokecube.core.handlers.Config;
-import pokecube.core.interfaces.PokecubeMod;
-import pokecube.core.network.PokecubePacketHandler;
+import pokecube.core.ai.tasks.utility.AIStoreStuff;
+import pokecube.core.entity.pokemobs.ContainerPokemob;
+import pokecube.core.interfaces.IPokemob;
+import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.network.packets.PacketSyncRoutes;
+import thut.api.entity.ai.IAIRunnable;
+import thut.core.common.network.Packet;
 
-public class PacketPokemobGui implements IMessage, IMessageHandler<PacketPokemobGui, IMessage>
+public class PacketPokemobGui extends Packet
 {
     public static final byte MAIN    = 0;
     public static final byte AI      = 1;
     public static final byte STORAGE = 2;
     public static final byte ROUTES  = 3;
 
-    byte                     message;
-    int                      id;
-
-    public static void sendPagePacket(byte page, int id)
+    public static void sendOpenPacket(final Entity target, final ServerPlayerEntity player)
     {
-        PacketPokemobGui packet = new PacketPokemobGui(page, id);
-        PokecubePacketHandler.sendToServer(packet);
+        final PacketBuffer buffer = new PacketBuffer(Unpooled.buffer(0));
+        buffer.writeInt(target.getEntityId());
+        buffer.writeByte(PacketPokemobGui.MAIN);
+        final SimpleNamedContainerProvider provider = new SimpleNamedContainerProvider((i, p,
+                e) -> new ContainerPokemob(i, p, buffer), target.getDisplayName());
+        NetworkHooks.openGui(player, provider, buf ->
+        {
+            buf.writeInt(target.getEntityId());
+            buf.writeByte(PacketPokemobGui.MAIN);
+        });
     }
+
+    @OnlyIn(value = Dist.CLIENT)
+    public static void sendPagePacket(final byte page, final int id)
+    {
+        PokecubeCore.packets.sendToServer(new PacketPokemobGui(page, id));
+    }
+
+    byte message;
+
+    int id;
 
     public PacketPokemobGui()
     {
     }
 
-    public PacketPokemobGui(byte message, int id)
+    public PacketPokemobGui(final byte message, final int id)
     {
         this.message = message;
         this.id = id;
     }
 
-    @Override
-    public IMessage onMessage(final PacketPokemobGui message, final MessageContext ctx)
+    public PacketPokemobGui(final PacketBuffer buf)
     {
-        PokecubeCore.proxy.getMainThreadListener().addScheduledTask(new Runnable()
+        this.message = buf.readByte();
+        this.id = buf.readInt();
+    }
+
+    @Override
+    public void handleServer(final ServerPlayerEntity player)
+    {
+        final Entity entity = PokecubeCore.getEntityProvider().getEntity(player.getEntityWorld(), this.id, true);
+        final PacketBuffer buffer = new PacketBuffer(Unpooled.buffer(0));
+        buffer.writeInt(entity.getEntityId());
+        buffer.writeByte(this.message);
+        final byte mode = this.message;
+        SimpleNamedContainerProvider provider;
+        final IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
+
+        switch (this.message)
         {
-            @Override
-            public void run()
-            {
-                processMessage(ctx, message);
-            }
-        });
-        return null;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf)
-    {
-        message = buf.readByte();
-        id = buf.readInt();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf)
-    {
-        buf.writeByte(message);
-        buf.writeInt(id);
-    }
-
-    void processMessage(MessageContext ctx, PacketPokemobGui message)
-    {
-        Entity entity = PokecubeMod.core.getEntityProvider().getEntity(ctx.getServerHandler().player.getEntityWorld(),
-                message.id, true);
-
-        int id = -1;
-        switch (message.message)
-        {
-        case AI:
-            id = Config.GUIPOKEMOBAI_ID;
-            break;
-        case MAIN:
-            id = Config.GUIPOKEMOB_ID;
-            break;
-        case STORAGE:
-            id = Config.GUIPOKEMOBSTORE_ID;
-            break;
         case ROUTES:
-            PacketSyncRoutes.sendUpdateClientPacket(entity, ctx.getServerHandler().player, true);
+            PacketSyncRoutes.sendUpdateClientPacket(entity, player, true);
+            return;
+        case STORAGE:
+            AIStoreStuff ai = null;
+            for (final IAIRunnable run : pokemob.getTasks())
+                if (run instanceof AIStoreStuff) ai = (AIStoreStuff) run;
+            final AIStoreStuff toSend = ai;
+            buffer.writeCompoundTag(toSend.serializeNBT());
+            provider = new SimpleNamedContainerProvider((i, p, e) -> new ContainerPokemob(i, p, buffer), entity
+                    .getDisplayName());
+            NetworkHooks.openGui(player, provider, buf ->
+            {
+                buf.writeInt(entity.getEntityId());
+                buf.writeByte(mode);
+                buf.writeCompoundTag(toSend.serializeNBT());
+            });
             return;
         }
-        if (id > 0) ctx.getServerHandler().player.openGui(PokecubeMod.core, id, entity.getEntityWorld(),
-                entity.getEntityId(), 0, 0);
+        provider = new SimpleNamedContainerProvider((i, p, e) -> new ContainerPokemob(i, p, buffer), entity
+                .getDisplayName());
+        NetworkHooks.openGui(player, provider, buf ->
+        {
+            buf.writeInt(entity.getEntityId());
+            buf.writeByte(mode);
+        });
+    }
+
+    @Override
+    public void write(final PacketBuffer buf)
+    {
+        buf.writeByte(this.message);
+        buf.writeInt(this.id);
     }
 }
