@@ -296,7 +296,6 @@ public class Tools
             if (optional.isPresent())
             {
                 final double d1 = vec3.squareDistanceTo(optional.get());
-                System.out.println(pointedEntity + " " + d1 + " " + entity1 + " " + d0);
                 if (d1 < d0)
                 {
                     pointedEntity = entity1;

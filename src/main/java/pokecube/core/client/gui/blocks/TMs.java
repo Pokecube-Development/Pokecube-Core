@@ -95,7 +95,6 @@ public class TMs<T extends TMContainer> extends ContainerScreen<T>
             this.drawString(this.font, "" + move.getPWR(), xOffset + 102, yOffset + 99, 0xffffff);
         }
         this.renderHoveredToolTip(mouseX, mouseY);
-
     }
 
 }

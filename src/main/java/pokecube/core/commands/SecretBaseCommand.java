@@ -25,7 +25,6 @@ public class SecretBaseCommand
     {
         System.out.println(player);
         System.out.println(profiles);
-        System.out.println(DimensionManager.getRegistry().keySet());
         final ServerWorld baseWorld = DimensionManager.getWorld(source.getServer(), SecretBaseDimension.TYPE, true,
                 true);
 

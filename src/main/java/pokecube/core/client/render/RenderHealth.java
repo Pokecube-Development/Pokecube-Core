@@ -30,6 +30,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import pokecube.core.PokecubeCore;
@@ -343,7 +344,7 @@ public class RenderHealth
             final IBakedModel iBakedModel = Minecraft.getInstance().getItemRenderer().getItemModelMesher().getItemModel(
                     stack);
             final TextureAtlasSprite textureAtlasSprite = Minecraft.getInstance().getTextureMap().getSprite(iBakedModel
-                    .getParticleTexture().getName());
+                    .getParticleTexture(EmptyModelData.INSTANCE).getName());
             Minecraft.getInstance().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
             final Tessellator tessellator = Tessellator.getInstance();
             final BufferBuilder buffer = tessellator.getBuffer();

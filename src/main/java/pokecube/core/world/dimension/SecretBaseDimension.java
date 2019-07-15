@@ -199,6 +199,7 @@ public class SecretBaseDimension extends ModDimension
     public static DimensionType             TYPE;
     public static final Biome               BIOME     = new SecretBiome();
 
+    @SuppressWarnings("deprecation")
     @SubscribeEvent
     public static void register(final RegisterDimensionsEvent event)
     {

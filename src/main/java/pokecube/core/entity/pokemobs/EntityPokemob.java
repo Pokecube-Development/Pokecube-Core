@@ -12,13 +12,16 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.SitGoal;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.capabilities.DefaultPokemob;
 import pokecube.core.interfaces.pokemob.ai.LogicStates;
+import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
 
 public class EntityPokemob extends TameableEntity
 {
@@ -75,6 +78,12 @@ public class EntityPokemob extends TameableEntity
         if (this.getEntityData().getBoolean("cloned")) return null;
         if (PokecubeCore.getConfig().pokemobsDropItems) return this.pokemobCap.getPokedexEntry().lootTable;
         else return null;
+    }
+
+    @Override
+    public ItemStack getPickedResult(final RayTraceResult target)
+    {
+        return ItemPokemobEgg.getEggStack(this.pokemobCap);
     }
 
     @Override

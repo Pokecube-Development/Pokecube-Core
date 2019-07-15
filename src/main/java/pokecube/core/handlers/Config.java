@@ -915,12 +915,14 @@ public class Config extends ConfigData
         SpawnHandler.dimensionBlacklist.clear();
         for (final int i : this.dimensionBlacklist)
         {
+            @SuppressWarnings("deprecation")
             final DimensionType type = Registry.DIMENSION_TYPE.getByValue(i);
             SpawnHandler.dimensionBlacklist.add(type);
         }
         SpawnHandler.dimensionWhitelist.clear();
         for (final int i : this.dimensionWhitelist)
         {
+            @SuppressWarnings("deprecation")
             final DimensionType type = Registry.DIMENSION_TYPE.getByValue(i);
             SpawnHandler.dimensionWhitelist.add(type);
         }

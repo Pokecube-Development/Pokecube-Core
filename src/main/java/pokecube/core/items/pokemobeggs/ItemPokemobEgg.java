@@ -304,8 +304,8 @@ public class ItemPokemobEgg extends Item
             final List<ITextComponent> tooltip, final ITooltipFlag advanced)
     {
         final PokedexEntry entry = ItemPokemobEgg.getEntry(stack);
-        if (entry != null) tooltip.add(1, new TranslationTextComponent("item.pokemobegg.named.name", I18n.format(entry
-                .getUnlocalizedName())));
+        if (entry != null) tooltip.add(1, new TranslationTextComponent("item.pokecube.pokemobegg.named", I18n.format(
+                entry.getUnlocalizedName())));
     }
 
     /**
