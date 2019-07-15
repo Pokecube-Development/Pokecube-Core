@@ -33,7 +33,6 @@ import net.minecraft.world.biome.BiomeColors;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -200,7 +199,6 @@ public class ClientProxy extends CommonProxy
     public void setupClient(final FMLClientSetupEvent event)
     {
         PokecubeCore.LOGGER.debug("Pokecube Client Setup");
-        if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
 
         // Register keybinds
         PokecubeCore.LOGGER.debug("Init Keybinds");

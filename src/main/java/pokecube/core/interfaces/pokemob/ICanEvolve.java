@@ -30,7 +30,6 @@ import pokecube.core.events.pokemob.EvolveEvent;
 import pokecube.core.handlers.playerdata.advancements.triggers.Triggers;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.HappinessType;
-import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
 import pokecube.core.interfaces.pokemob.ai.GeneralStates;
@@ -256,8 +255,6 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 // Send post evolve event.
                 evt = new EvolveEvent.Post(evo);
                 PokecubeCore.POKEMOB_BUS.post(evt);
-                // Kill old entity.
-                if (evo != this) this.getEntity().remove();
                 return evo;
             }
             return null;
@@ -319,9 +316,6 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                     for (final String s : evo.getPokedexEntry().getEvolutionMoves())
                         evo.learn(s);
                     evo.setAbility(evo.getPokedexEntry().getAbility(thisMob.getAbilityIndex(), evo));
-
-                    // Kill old entity.
-                    if (evo != this) thisEntity.remove();
                 }
                 return evo;
             }
@@ -428,18 +422,22 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             evolution = PokecubeCore.createPokemob(newEntry, thisEntity.getEntityWorld());
             if (evolution == null)
             {
-                System.err.println("No Entry for " + newEntry);
+                PokecubeCore.LOGGER.warn("No Entry for " + newEntry);
                 return thisMob;
             }
-            EntityTools.copyEntityTransforms(evolution, thisEntity);
+            final int id = evolution.getEntityId();
+            final UUID uuid = evolution.getUniqueID();
             evoMob = CapabilityPokemob.getPokemobFor(evolution);
             // Reset nickname if needed.
             if (this.getPokemonNickname().equals(oldEntry.getName())) this.setPokemonNickname("");
 
-            // Copy nbt tag over
-            final CompoundNBT tag = new CompoundNBT();
-            thisEntity.writeAdditional(tag);
-            evoMob.getEntity().readAdditional(tag);
+            // Copy NBT data over
+            evolution.read(thisEntity.writeWithoutTypeId(new CompoundNBT()));
+
+            // Copy transforms over.
+            EntityTools.copyEntityTransforms(evolution, thisEntity);
+            evolution.setEntityId(id);
+            evolution.setUniqueId(uuid);
 
             // Flag the mob as evolving.
             evoMob.setGeneralState(GeneralStates.EVOLVING, true);
@@ -457,7 +455,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 if (thisMob.getAbility() != null) evolution.getEntityData().putString("Ability", thisMob.getAbility()
                         .toString());
                 final Ability ability = newEntry.getAbility(0, evoMob);
-                if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Mega Evolving, changing ability to " + ability);
+                PokecubeCore.LOGGER.debug("Mega Evolving, changing ability to " + ability);
                 if (ability != null) evoMob.setAbility(ability);
             }
             else if (thisEntity.getEntityData().contains("Ability"))
@@ -465,8 +463,7 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
                 final String ability = thisEntity.getEntityData().getString("Ability");
                 evolution.getEntityData().remove("Ability");
                 if (!ability.isEmpty()) evoMob.setAbility(AbilityManager.getAbility(ability));
-                if (PokecubeMod.debug) PokecubeCore.LOGGER.info("Un Mega Evolving, changing ability back to "
-                        + ability);
+                PokecubeCore.LOGGER.debug("Un Mega Evolving, changing ability back to " + ability);
             }
 
             // Set this mob wild, then kill it.
@@ -474,12 +471,13 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
 
             final EvolveEvent evt = new EvolveEvent.Post(evoMob);
             PokecubeCore.POKEMOB_BUS.post(evt);
-
             // Schedule adding to world.
             if (!evt.isCanceled() && thisEntity.addedToChunk)
             {
+                // Remove old mob
                 thisEntity.remove();
 
+                // Add new mob
                 evolution.getEntityWorld().addEntity(evolution);
 
                 // Remount riders on the new mob.
@@ -517,31 +515,4 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
     {
 
     }
-
-    // // Start by syncing all of the capabilities, we will override some
-    // // later. TODO delete this if needed
-    // CapabilityDispatcher caps_old =
-    // ReflectionHelper.getPrivateValue(Entity.class, thisEntity,
-    // "capabilities");
-    // CapabilityDispatcher caps_new =
-    // ReflectionHelper.getPrivateValue(Entity.class, evolution,
-    // "capabilities");
-    // caps_new.deserializeNBT(caps_old.serializeNBT());
-    //
-    // // Sync tags besides the ones that define species and form.
-    // CompoundNBT tag = thisMob.writePokemobData();
-    // tag.getCompound(TagNames.OWNERSHIPTAG).remove(TagNames.POKEDEXNB);
-    // tag.getCompound(TagNames.VISUALSTAG).remove(TagNames.FORME);
-    // evoMob.readPokemobData(tag);
-    //
-    // // Sync held item
-    // evoMob.setHeldItem(thisMob.getHeldItem());
-    //
-    // // Sync genes
-    // IMobGenetics oldGenes =
-    // thisEntity.getCapability(GeneRegistry.GENETICS_CAP, null).orElse(null);
-    // IMobGenetics newGenes =
-    // evolution.getCapability(GeneRegistry.GENETICS_CAP, null).orElse(null);
-    // newGenes.getAlleles().putAll(oldGenes.getAlleles());
-    //
 }

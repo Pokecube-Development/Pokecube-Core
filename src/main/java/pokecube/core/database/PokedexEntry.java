@@ -236,12 +236,10 @@ public class PokedexEntry
             try
             {
                 if (this.data != null) this.parse(this.data);
-                System.out.println(this.data + " " + this.item + " " + this.preset);
             }
             catch (final Exception e)
             {
-                System.out.println(this);
-                e.printStackTrace();
+                PokecubeCore.LOGGER.error("Error parsing " + this, e);
             }
         }
 
@@ -511,7 +509,7 @@ public class PokedexEntry
                 final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) pokemob
                         .getEntity().getEntityWorld()).withParameter(LootParameters.THIS_ENTITY, pokemob.getEntity());
                 for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable
-                        .func_216122_a())))
+                        .getParameterSet())))
                     if (!itemstack.isEmpty())
                     {
                         result = itemstack;
@@ -1437,7 +1435,7 @@ public class PokedexEntry
             {
             final LootTable loottable = mob.getEntityWorld().getServer().getLootTableManager().getLootTableFromLocation(this.heldTable);
             final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) mob.getEntityWorld()).withRandom(mob.getRNG()).withParameter(LootParameters.THIS_ENTITY, mob).withParameter(LootParameters.POSITION, new BlockPos(mob));
-            for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable.func_216122_a())))
+            for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable.getParameterSet())))
             if (!itemstack.isEmpty()) return itemstack;
             }
             catch (final Exception e)

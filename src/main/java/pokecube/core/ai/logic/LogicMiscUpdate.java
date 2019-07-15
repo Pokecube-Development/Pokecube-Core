@@ -158,8 +158,8 @@ public class LogicMiscUpdate extends LogicBase
         for (int i = 0; i < this.pokemob.getInventory().getSizeInventory(); i++)
         {
             ItemStack stack;
-            if (!(stack = this.pokemob.getInventory().getStackInSlot(i)).isEmpty()) stack.getItem()
-                    .inventoryTick(stack, world, this.entity, i, false);
+            if (!(stack = this.pokemob.getInventory().getStackInSlot(i)).isEmpty()) stack.getItem().inventoryTick(stack,
+                    world, this.entity, i, false);
         }
     }
 
@@ -179,7 +179,7 @@ public class LogicMiscUpdate extends LogicBase
             // Check and tick inventory
             this.checkInventory(world);
 
-            // Ensure the cache position is kept updated
+            // // Ensure the cache position is kept updated
             if (this.entity.ticksExisted % 100 == 0) PlayerPokemobCache.UpdateCache(this.pokemob);
 
             // Randomly increase happiness for being outside of pokecube.

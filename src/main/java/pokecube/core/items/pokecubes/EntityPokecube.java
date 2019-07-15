@@ -32,7 +32,7 @@ public class EntityPokecube extends EntityPokecubeBase
 
     public static class CollectEntry
     {
-        static CollectEntry createFromNBT(CompoundNBT nbt)
+        static CollectEntry createFromNBT(final CompoundNBT nbt)
         {
             final String player = nbt.getString("player");
             final long time = nbt.getLong("time");
@@ -42,13 +42,13 @@ public class EntityPokecube extends EntityPokecubeBase
         final String player;
         final long   time;
 
-        public CollectEntry(String player, long time)
+        public CollectEntry(final String player, final long time)
         {
             this.player = player;
             this.time = time;
         }
 
-        void writeToNBT(CompoundNBT nbt)
+        void writeToNBT(final CompoundNBT nbt)
         {
             nbt.putString("player", this.player);
             nbt.putLong("time", this.time);
@@ -57,7 +57,7 @@ public class EntityPokecube extends EntityPokecubeBase
 
     public static class LootEntry
     {
-        static LootEntry createFromNBT(CompoundNBT nbt)
+        static LootEntry createFromNBT(final CompoundNBT nbt)
         {
             final ItemStack loot = ItemStack.read(nbt.getCompound("loot"));
             return new LootEntry(loot, nbt.getInt("rolls"));
@@ -67,13 +67,13 @@ public class EntityPokecube extends EntityPokecubeBase
 
         final int rolls;
 
-        public LootEntry(ItemStack loot, int rolls)
+        public LootEntry(final ItemStack loot, final int rolls)
         {
             this.loot = loot;
             this.rolls = rolls;
         }
 
-        void writeToNBT(CompoundNBT nbt)
+        void writeToNBT(final CompoundNBT nbt)
         {
             final CompoundNBT loot = new CompoundNBT();
             this.loot.write(loot);
@@ -98,19 +98,19 @@ public class EntityPokecube extends EntityPokecubeBase
     public ArrayList<LootEntry>    loot       = Lists.newArrayList();
     public ArrayList<ItemStack>    lootStacks = Lists.newArrayList();
 
-    public EntityPokecube(EntityType<? extends EntityPokecubeBase> type, World worldIn)
+    public EntityPokecube(final EntityType<? extends EntityPokecubeBase> type, final World worldIn)
     {
         super(type, worldIn);
     }
 
-    public void addLoot(LootEntry entry)
+    public void addLoot(final LootEntry entry)
     {
         this.loot.add(entry);
         for (int i = 0; i < entry.rolls; i++)
             this.lootStacks.add(entry.loot);
     }
 
-    public boolean cannotCollect(Entity e)
+    public boolean cannotCollect(final Entity e)
     {
         if (e == null) return false;
         final String name = e.getCachedUniqueIdString();
@@ -140,7 +140,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public boolean processInitialInteract(PlayerEntity player, Hand hand)
+    public boolean processInitialInteract(final PlayerEntity player, final Hand hand)
     {
         final ItemStack stack = player.getHeldItem(hand);
         if (!player.getEntityWorld().isRemote)
@@ -186,7 +186,7 @@ public class EntityPokecube extends EntityPokecubeBase
                         final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) this
                                 .getEntityWorld()).withParameter(LootParameters.THIS_ENTITY, this);
                         for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable
-                                .func_216122_a())))
+                                .getParameterSet())))
                             if (!itemstack.isEmpty()) Tools.giveItem(player, itemstack.copy());
                         PacketPokecube.sendMessage(player, this.getEntityId(), this.getEntityWorld().getGameTime()
                                 + this.resetTime);
@@ -201,7 +201,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void readAdditional(CompoundNBT nbt)
+    public void readAdditional(final CompoundNBT nbt)
     {
         super.readAdditional(nbt);
         this.isLoot = nbt.getBoolean("isLoot");
@@ -227,7 +227,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void shoot(double x, double y, double z, float velocity, float inaccuracy)
+    public void shoot(final double x, final double y, final double z, final float velocity, final float inaccuracy)
     {
         // TODO Auto-generated method stub
 
@@ -286,7 +286,7 @@ public class EntityPokecube extends EntityPokecubeBase
     }
 
     @Override
-    public void writeAdditional(CompoundNBT nbt)
+    public void writeAdditional(final CompoundNBT nbt)
     {
         super.writeAdditional(nbt);
         nbt.putLong("resetTime", this.resetTime);

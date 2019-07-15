@@ -28,7 +28,6 @@ public class TMs<T extends TMContainer> extends ContainerScreen<T>
     public TMs(final T container, final PlayerInventory playerInventory, final ITextComponent name)
     {
         super(container, playerInventory, name);
-        System.out.println(container);
     }
 
     @Override

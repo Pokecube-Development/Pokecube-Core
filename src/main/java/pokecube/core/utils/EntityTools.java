@@ -6,19 +6,14 @@ import pokecube.core.interfaces.IPokemob;
 
 public class EntityTools
 {
-    public static void copyPokemobData(IPokemob from, IPokemob to)
-    {
-        to.read(from.write());
-    }
-
-    public static void copyEntityData(LivingEntity to, LivingEntity from)
+    public static void copyEntityData(final LivingEntity to, final LivingEntity from)
     {
         final CompoundNBT tag = new CompoundNBT();
         from.writeAdditional(tag);
         to.readAdditional(tag);
     }
 
-    public static void copyEntityTransforms(LivingEntity to, LivingEntity from)
+    public static void copyEntityTransforms(final LivingEntity to, final LivingEntity from)
     {
         to.setEntityId(from.getEntityId());
         to.posX = from.posX;
@@ -40,12 +35,18 @@ public class EntityTools
         to.prevRenderYawOffset = from.prevRenderYawOffset;
         to.renderYawOffset = from.renderYawOffset;
 
-        to.dimension = from.dimension;
+        // Setting this seems to break evolution.
+        // to.dimension = from.dimension;
 
         to.onGround = from.onGround;
 
         to.prevLimbSwingAmount = from.prevLimbSwingAmount;
         to.limbSwing = from.limbSwing;
         to.limbSwingAmount = from.limbSwingAmount;
+    }
+
+    public static void copyPokemobData(final IPokemob from, final IPokemob to)
+    {
+        to.read(from.write());
     }
 }

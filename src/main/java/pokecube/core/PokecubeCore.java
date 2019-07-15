@@ -33,7 +33,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
@@ -84,20 +83,18 @@ public class PokecubeCore
     // You can use EventBusSubscriber to automatically subscribe events on the
     // contained class (this is subscribing to the MOD
     // Event bus for receiving Registry Events)
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = PokecubeCore.MODID)
     public static class RegistryEvents
     {
         @SubscribeEvent
         public static void registerBiomes(final RegistryEvent.Register<Biome> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
 
         }
 
         @SubscribeEvent
         public static void registerBlocks(final RegistryEvent.Register<Block> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             // Register these before items and blocks, as some items might need
             // them
             final InitDatabase.Pre pre = new InitDatabase.Pre();
@@ -113,8 +110,7 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerContainers(final RegistryEvent.Register<ContainerType<?>> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
-            // register a new TE here
+            // register a new container here
             PokecubeCore.LOGGER.info("Registering Pokecube Containers");
 
             event.getRegistry().register(ContainerPokemob.TYPE.setRegistryName(PokecubeCore.MODID, "pokemob"));
@@ -127,7 +123,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerDimensions(final RegistryEvent.Register<ModDimension> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             event.getRegistry().register(SecretBaseDimension.DIMENSION.setRegistryName(PokecubeCore.MODID,
                     "secret_bases"));
         }
@@ -135,7 +130,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerEntities(final RegistryEvent.Register<EntityType<?>> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             // register a new mob here
             PokecubeCore.LOGGER.info("Registering Pokecube Mobs");
 
@@ -177,8 +171,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerItems(final RegistryEvent.Register<Item> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
-
             // register a new item here
             PokecubeCore.LOGGER.info("Registering Pokecube Items");
             ItemHandler.registerItems(event.getRegistry());
@@ -187,7 +179,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerRecipes(final RegistryEvent.Register<IRecipeSerializer<?>> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             // register a new mob here
             PokecubeCore.LOGGER.info("Registering Pokecube Sounds");
             RecipeHandler.initRecipes(event);
@@ -196,7 +187,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerSounds(final RegistryEvent.Register<SoundEvent> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             // register a new mob here
             PokecubeCore.LOGGER.info("Registering Pokecube Sounds");
             Database.initSounds(event.getRegistry());
@@ -213,7 +203,6 @@ public class PokecubeCore
         @SubscribeEvent
         public static void registerTileEntities(final RegistryEvent.Register<TileEntityType<?>> event)
         {
-            if (!ModLoadingContext.get().getActiveContainer().getModId().equals(PokecubeCore.MODID)) return;
             // register a new TE here
             PokecubeCore.LOGGER.info("Registering Pokecube TEs");
             ItemHandler.registerTiles(event.getRegistry());
