@@ -20,7 +20,7 @@ import pokecube.core.PokecubeCore;
 import pokecube.core.PokecubeItems;
 import pokecube.core.client.EventsHandlerClient;
 import pokecube.core.client.Resources;
-import pokecube.core.client.render.RenderHealth;
+import pokecube.core.client.render.mobs.RenderMobOverlays;
 import pokecube.core.database.Database;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.PokedexEntry;
@@ -73,7 +73,7 @@ public class GuiChooseFirstPokemob extends Screen
     }
 
     @Override
-    public boolean charTyped(char par1, int par2)
+    public boolean charTyped(final char par1, final int par2)
     {
         if (par2 == 1)
         {
@@ -164,7 +164,7 @@ public class GuiChooseFirstPokemob extends Screen
     }
 
     @Override
-    public void render(int i, int j, float f)
+    public void render(final int i, final int j, final float f)
     {
         try
         {
@@ -255,7 +255,7 @@ public class GuiChooseFirstPokemob extends Screen
         GL11.glPopMatrix();
     }
 
-    public void renderItem(double x, double y, double z)
+    public void renderItem(final double x, final double y, final double z)
     {
         final ItemStack item = PokecubeItems.POKECUBE_CUBES;
         if (item.getItem() instanceof IPokecube)
@@ -331,10 +331,10 @@ public class GuiChooseFirstPokemob extends Screen
             entity.limbSwingAmount = 0;
             final PokeType flying = PokeType.getType("flying");
             entity.onGround = !pokemob.isType(flying);
-            RenderHealth.enabled = false;
+            RenderMobOverlays.enabled = false;
             Minecraft.getInstance().getRenderManager().renderEntity(entity, 0, 0, 0, 0,
                     GuiChooseFirstPokemob.POKEDEX_RENDER, false);
-            RenderHealth.enabled = true;
+            RenderMobOverlays.enabled = true;
             RenderHelper.disableStandardItemLighting();
             GL11.glDisable(GL11.GL_COLOR_MATERIAL);
             GlStateManager.disableLighting();
@@ -347,7 +347,7 @@ public class GuiChooseFirstPokemob extends Screen
         }
     }
 
-    private void sendMessage(PokedexEntry entry)
+    private void sendMessage(final PokedexEntry entry)
     {
         final PacketChoose packet = new PacketChoose(PacketChoose.CHOOSE);
         packet.data.putBoolean("S", this.gotSpecial);

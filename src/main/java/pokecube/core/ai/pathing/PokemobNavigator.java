@@ -99,13 +99,13 @@ public class PokemobNavigator extends PathNavigator
     }
 
     @Override
-    public Path getPathToEntityLiving(final Entity entityIn)
+    public Path getPathToEntityLiving(final Entity entityIn, final int arg)
     {
         if (!this.canNavigate() || entityIn == null) return null;
         this.checkValues();
         try
         {
-            return this.wrapped.getPathToEntityLiving(entityIn);
+            return this.wrapped.getPathToEntityLiving(entityIn, arg);
         }
         catch (final Exception e)
         {
@@ -116,13 +116,13 @@ public class PokemobNavigator extends PathNavigator
     }
 
     @Override
-    public Path getPathToPos(final BlockPos pos)
+    public Path getPathToPos(final BlockPos pos, final int arg)
     {
         if (!this.canNavigate() || pos == null) return null;
         this.checkValues();
         if (this.shouldPath(pos)) try
         {
-            return this.wrapped.getPathToPos(pos);
+            return this.wrapped.getPathToPos(pos, arg);
         }
         catch (final Exception e)
         {

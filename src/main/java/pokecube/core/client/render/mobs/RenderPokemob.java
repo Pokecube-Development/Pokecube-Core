@@ -1,4 +1,4 @@
-package pokecube.core.client.render;
+package pokecube.core.client.render.mobs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -348,7 +348,9 @@ public class RenderPokemob extends MobRenderer<GenericPokemob, ModelWrapper<Gene
         @Override
         public void scaleEntity(final Entity entity, final IModel model, final float partialTick)
         {
-            final float s = 1;
+            final IPokemob pokemob = CapabilityPokemob.getPokemobFor(entity);
+            float s = 1;
+            if (pokemob != null) s = pokemob.getEntity().getRenderScale();
             float sx = (float) this.getScale().x;
             float sy = (float) this.getScale().y;
             float sz = (float) this.getScale().z;

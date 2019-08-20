@@ -23,7 +23,8 @@ public class ScrollGui<T extends AbstractList.AbstractListEntry<T>> extends Abst
     public ScrollGui(final Screen parent, final Minecraft mcIn, final int widthIn, final int heightIn,
             final int slotHeightIn, final int offsetX, final int offsetY)
     {
-        super(mcIn, widthIn, heightIn, offsetY, offsetY + heightIn, slotHeightIn);
+        super(mcIn, widthIn, slotHeightIn * (heightIn / slotHeightIn), offsetY, offsetY + slotHeightIn * (heightIn
+                / slotHeightIn), slotHeightIn);
         this.y0 = offsetY;
         this.y1 = this.y0 + this.height;
         this.setLeftPos(offsetX);

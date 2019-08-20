@@ -49,7 +49,7 @@ public class Breeding extends ListPage<LineEntry>
         super.initList();
         int offsetX = (this.watch.width - 160) / 2 + 20;
         int offsetY = (this.watch.height - 160) / 2 + 85;
-        final int height = this.font.FONT_HEIGHT * 10;
+        final int height = this.font.FONT_HEIGHT * 12;
         int width = 135;
 
         int y0 = offsetY;

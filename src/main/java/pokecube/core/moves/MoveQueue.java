@@ -9,12 +9,12 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.IWorld;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import pokecube.core.PokecubeCore;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.IPokemob.Stats;
@@ -29,12 +29,12 @@ public class MoveQueue
         private static final Map<IWorld, MoveQueue> queues = Maps.newHashMap();
 
         @SubscribeEvent
-        public static void load(WorldEvent.Load evt)
+        public static void load(final WorldEvent.Load evt)
         {
             MoveQueuer.queues.put(evt.getWorld(), new MoveQueue(evt.getWorld()));
         }
 
-        public static void queueMove(EntityMoveUse move)
+        public static void queueMove(final EntityMoveUse move)
         {
             final MoveQueue queue = MoveQueuer.queues.get(move.getEntityWorld());
             if (queue == null) throw new NullPointerException("why is world queue null?");
@@ -42,7 +42,7 @@ public class MoveQueue
         }
 
         @SubscribeEvent
-        public static void tick(WorldTickEvent evt)
+        public static void tick(final WorldTickEvent evt)
         {
             if (evt.phase == Phase.END && evt.side == LogicalSide.SERVER)
             {
@@ -62,7 +62,7 @@ public class MoveQueue
         }
 
         @SubscribeEvent
-        public static void unload(WorldEvent.Unload evt)
+        public static void unload(final WorldEvent.Unload evt)
         {
             MoveQueuer.queues.remove(evt.getWorld());
         }
@@ -71,7 +71,7 @@ public class MoveQueue
     public List<EntityMoveUse> moves = Lists.newArrayList();
     final IWorld               world;
 
-    public MoveQueue(IWorld iWorld)
+    public MoveQueue(final IWorld iWorld)
     {
         this.world = iWorld;
     }

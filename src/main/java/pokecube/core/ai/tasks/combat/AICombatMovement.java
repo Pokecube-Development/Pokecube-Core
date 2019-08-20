@@ -76,7 +76,7 @@ public class AICombatMovement extends AIBase implements IAICombat
         if (diff.magSq() > combatDistanceSq)
         {
             this.pokemob.setCombatState(CombatStates.LEAPING, false);
-            final Path path = this.entity.getNavigator().getPathToPos(this.centre.getPos());
+            final Path path = this.entity.getNavigator().getPathToPos(this.centre.getPos(), 0);
             // Path back to center of ring.
             if (path != null) this.addEntityPath(this.entity, path, this.movementSpeed);
             // Could not path to center, so null it to re-calulate next run.
@@ -89,7 +89,7 @@ public class AICombatMovement extends AIBase implements IAICombat
             if (this.entity.ticksExisted % revTime > revTime / 2) perp.reverse();
             perp.addTo(here);
             if (Math.abs(perp.y - this.centre.y) > combatDistance / 2) perp.y = this.centre.y;
-            final Path path = this.entity.getNavigator().getPathToPos(perp.getPos());
+            final Path path = this.entity.getNavigator().getPathToPos(perp.getPos(), 0);
             this.addEntityPath(this.entity, path, this.movementSpeed);
         }
     }

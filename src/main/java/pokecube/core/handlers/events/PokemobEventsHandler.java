@@ -338,11 +338,11 @@ public class PokemobEventsHandler
 
     public static void processInteract(final PlayerInteractEvent evt, final Entity target)
     {
-        if (!(evt.getEntityPlayer() instanceof ServerPlayerEntity)) return;
+        if (!(evt.getPlayer() instanceof ServerPlayerEntity)) return;
         final IPokemob pokemob = CapabilityPokemob.getPokemobFor(target);
         if (pokemob == null) return;
 
-        final ServerPlayerEntity player = (ServerPlayerEntity) evt.getEntityPlayer();
+        final ServerPlayerEntity player = (ServerPlayerEntity) evt.getPlayer();
         final Hand hand = evt.getHand();
         final ItemStack held = player.getHeldItem(hand);
         final MobEntity entity = pokemob.getEntity();
@@ -562,7 +562,7 @@ public class PokemobEventsHandler
         final IMobGenetics genes = event.getTarget().getCapability(GeneRegistry.GENETICS_CAP).orElse(null);
         if (pokemob != null && event.getEntity() instanceof ServerPlayerEntity) for (final Alleles allele : genes
                 .getAlleles().values())
-            PacketSyncGene.syncGene(event.getTarget(), allele, (ServerPlayerEntity) event.getEntityPlayer());
+            PacketSyncGene.syncGene(event.getTarget(), allele, (ServerPlayerEntity) event.getPlayer());
     }
 
     @SubscribeEvent

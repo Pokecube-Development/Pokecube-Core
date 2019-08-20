@@ -11,16 +11,14 @@ import pokecube.core.events.onload.InitDatabase;
 public class MobLoader
 {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void registerDatabases(InitDatabase.Pre evt)
+    public static void registerDatabases(final InitDatabase.Pre evt)
     {
-
         Database.addDatabase("pokemobs_pokedex.json", EnumDatabase.POKEMON);
         Database.addDatabase("pokemobs_spawns.json", EnumDatabase.POKEMON);
         Database.addDatabase("pokemobs_drops.json", EnumDatabase.POKEMON);
         Database.addDatabase("pokemobs_interacts.json", EnumDatabase.POKEMON);
 
         Database.addDatabase("moves.json", EnumDatabase.MOVES);
-
         Database.addDatabase("spawns.json", EnumDatabase.BERRIES);
     }
 }

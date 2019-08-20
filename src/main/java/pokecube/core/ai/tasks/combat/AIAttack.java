@@ -128,7 +128,7 @@ public class AIAttack extends AIBase implements IAICombat
             if (!(this.attack == null || (this.attack.getAttackCategory() & IMoveConstants.CATEGORY_SELF) != 0)
                     && !this.pokemob.getGeneralState(GeneralStates.CONTROLLED))
             {
-                path = this.entity.getNavigator().getPathToEntityLiving(this.entityTarget);
+                path = this.entity.getNavigator().getPathToEntityLiving(this.entityTarget, 0);
                 this.addEntityPath(this.entity, path, this.movementSpeed);
             }
             this.targetLoc.set(this.entityTarget);
@@ -344,7 +344,7 @@ public class AIAttack extends AIBase implements IAICombat
         // for the mob.
         if (!this.targetLoc.isEmpty() && shouldPath)
         {
-            path = this.entity.getNavigator().getPathToXYZ(this.targetLoc.x, this.targetLoc.y, this.targetLoc.z);
+            path = this.entity.getNavigator().func_225466_a(this.targetLoc.x, this.targetLoc.y, this.targetLoc.z, 0);
             if (path != null) this.addEntityPath(this.entity, path, this.movementSpeed);
         }
     }

@@ -56,7 +56,7 @@ public class AIGatherStuff extends AIBase
         final ItemStack seeds;
         final BlockPos  pos;
 
-        public ReplantTask(Entity entity, ItemStack seeds, BlockPos pos)
+        public ReplantTask(final Entity entity, final ItemStack seeds, final BlockPos pos)
         {
             this.seeds = seeds.copy();
             this.pos = new BlockPos(pos);
@@ -64,7 +64,7 @@ public class AIGatherStuff extends AIBase
         }
 
         @Override
-        public boolean run(World world)
+        public boolean run(final World world)
         {
             if (this.seeds.isEmpty()) return true;
             // Check if is is plantable.
@@ -91,8 +91,8 @@ public class AIGatherStuff extends AIBase
                                                                                                                // (ie
                                                                                                                // remaining
                     // seeds)
-                    if (!ItemStackTools.addItemStackToInventory(this.seeds, pokemob.getInventory(), 2))
-                        this.entity.entityDropItem(this.seeds, 0);
+                    if (!ItemStackTools.addItemStackToInventory(this.seeds, pokemob.getInventory(), 2)) this.entity
+                            .entityDropItem(this.seeds, 0);
             }
             return true;
         }
@@ -120,7 +120,7 @@ public class AIGatherStuff extends AIBase
     Vector3            v               = Vector3.getNewVector();
     Vector3            v1              = Vector3.getNewVector();
 
-    public AIGatherStuff(IPokemob mob, double distance, AIStoreStuff storage)
+    public AIGatherStuff(final IPokemob mob, final double distance, final AIStoreStuff storage)
     {
         super(mob);
         this.distance = distance;
@@ -187,7 +187,7 @@ public class AIGatherStuff extends AIBase
         if (this.stuffLoc.isEmpty()) this.collectCooldown = AIGatherStuff.COOLDOWN_SEARCH;
     }
 
-    private void gatherStuff(boolean mainThread)
+    private void gatherStuff(final boolean mainThread)
     {
         if (!mainThread)
         {
@@ -197,14 +197,14 @@ public class AIGatherStuff extends AIBase
             if (this.stuff != null)
             {
                 this.stuffLoc.set(this.stuff);
-                final Path path = this.entity.getNavigator().getPathToXYZ(this.stuffLoc.x, this.stuffLoc.y,
-                        this.stuffLoc.z);
+                final Path path = this.entity.getNavigator().func_225466_a(this.stuffLoc.x, this.stuffLoc.y,
+                        this.stuffLoc.z, 0);
                 this.addEntityPath(this.entity, path, speed);
             }
             else
             {
-                final Path path = this.entity.getNavigator().getPathToXYZ(this.stuffLoc.x, this.stuffLoc.y,
-                        this.stuffLoc.z);
+                final Path path = this.entity.getNavigator().func_225466_a(this.stuffLoc.x, this.stuffLoc.y,
+                        this.stuffLoc.z, 0);
                 this.addEntityPath(this.entity, path, speed);
             }
             this.pathCooldown = AIGatherStuff.COOLDOWN_PATH;

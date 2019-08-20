@@ -20,13 +20,19 @@ public class RecipeRevive extends SpecialRecipe
     public static final IRecipeSerializer<RecipeRevive> SERIALIZER = IRecipeSerializer.register("pokecube:revive",
             new SpecialRecipeSerializer<>(RecipeRevive::new));
 
-    public RecipeRevive(ResourceLocation idIn)
+    public RecipeRevive(final ResourceLocation idIn)
     {
         super(idIn);
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv)
+    public boolean canFit(final int width, final int height)
+    {
+        return width * height > 1;
+    }
+
+    @Override
+    public ItemStack getCraftingResult(final CraftingInventory inv)
     {
         ItemStack healed = ItemStack.EMPTY;
         boolean revive = false;
@@ -78,7 +84,7 @@ public class RecipeRevive extends SpecialRecipe
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, World worldIn)
+    public boolean matches(final CraftingInventory inv, final World worldIn)
     {
         boolean revive = false;
         boolean pokeseal = false;

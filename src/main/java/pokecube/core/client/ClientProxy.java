@@ -49,9 +49,10 @@ import pokecube.core.client.gui.pokemob.GuiPokemobAI;
 import pokecube.core.client.gui.pokemob.GuiPokemobRoutes;
 import pokecube.core.client.gui.pokemob.GuiPokemobStorage;
 import pokecube.core.client.render.RenderMoves;
-import pokecube.core.client.render.RenderNPC;
-import pokecube.core.client.render.RenderPokecube;
-import pokecube.core.client.render.RenderPokemob;
+import pokecube.core.client.render.mobs.RenderEgg;
+import pokecube.core.client.render.mobs.RenderNPC;
+import pokecube.core.client.render.mobs.RenderPokecube;
+import pokecube.core.client.render.mobs.RenderPokemob;
 import pokecube.core.client.render.util.URLSkinImageBuffer;
 import pokecube.core.client.render.util.URLSkinTexture;
 import pokecube.core.database.Database;
@@ -65,6 +66,7 @@ import pokecube.core.inventory.pc.PCContainer;
 import pokecube.core.inventory.tms.TMContainer;
 import pokecube.core.inventory.trade.TradeContainer;
 import pokecube.core.items.pokecubes.EntityPokecube;
+import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
 import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
 import pokecube.core.moves.animations.EntityMoveUse;
 import pokecube.core.network.pokemobs.PacketPokemobGui;
@@ -183,7 +185,7 @@ public class ClientProxy extends CommonProxy
     {
         final ISound old = Minecraft.getInstance().worldRenderer.mapSoundPositions.get(pos);
         if (old == null) return false;
-        final boolean var = Minecraft.getInstance().getSoundHandler().func_215294_c(old);
+        final boolean var = Minecraft.getInstance().getSoundHandler().isPlaying(old);
         if (!var) Minecraft.getInstance().worldRenderer.mapSoundPositions.remove(pos);
         return var;
     }
@@ -280,6 +282,7 @@ public class ClientProxy extends CommonProxy
                 manager));
         RenderingRegistry.registerEntityRenderingHandler(EntityMoveUse.class, (manager) -> new RenderMoves(manager));
         RenderingRegistry.registerEntityRenderingHandler(EntityProfessor.class, (manager) -> new RenderNPC<>(manager));
+        RenderingRegistry.registerEntityRenderingHandler(EntityPokemobEgg.class, (manager) -> new RenderEgg(manager));
 
     }
 

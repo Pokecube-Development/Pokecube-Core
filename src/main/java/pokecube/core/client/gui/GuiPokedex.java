@@ -31,7 +31,7 @@ import pokecube.core.client.EventsHandlerClient;
 import pokecube.core.client.Resources;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.client.gui.watch.util.LineEntry;
-import pokecube.core.client.render.RenderHealth;
+import pokecube.core.client.render.mobs.RenderMobOverlays;
 import pokecube.core.database.Database;
 import pokecube.core.database.Pokedex;
 import pokecube.core.database.PokedexEntry;
@@ -129,13 +129,13 @@ public class GuiPokedex extends Screen
 
             GlStateManager.enableColorMaterial();
             RenderHelper.enableStandardItemLighting();
-            RenderHealth.enabled = false;
+            RenderMobOverlays.enabled = false;
             final EntityRendererManager entityrenderermanager = Minecraft.getInstance().getRenderManager();
             entityrenderermanager.setPlayerViewY(180.0F);
             entityrenderermanager.setRenderShadow(false);
             entityrenderermanager.renderEntity(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
             entityrenderermanager.setRenderShadow(true);
-            RenderHealth.enabled = true;
+            RenderMobOverlays.enabled = true;
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
             GlStateManager.activeTexture(GLX.GL_TEXTURE1);

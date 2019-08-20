@@ -1,6 +1,7 @@
 package pokecube.core.ai.pathing.node;
 
 import net.minecraft.entity.MobEntity;
+import net.minecraft.pathfinding.FlaggedPathPoint;
 import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
@@ -39,6 +40,14 @@ public class MultiNodeWrapper extends NodeProcessor
     }
 
     @Override
+    public FlaggedPathPoint func_224768_a(final double x, final double y, final double z)
+    {
+        FlaggedPathPoint a = this.navi.a.func_224768_a(x, y, z);
+        if (a == null) a = this.navi.b.func_224768_a(x, y, z);
+        return a;
+    }
+
+    @Override
     public PathNodeType getPathNodeType(final IBlockReader blockaccessIn, final int x, final int y, final int z)
     {
         final PathNodeType a = this.navi.a.getPathNodeType(blockaccessIn, x, y, z);
@@ -61,14 +70,6 @@ public class MultiNodeWrapper extends NodeProcessor
         final PathNodeType b = this.navi.b.getPathNodeType(blockaccessIn, x, y, z, MobEntityIn, xSize, ySize, zSize,
                 canBreakDoorsIn, canEnterDoorsIn);
         if (b == PathNodeType.WALKABLE || b == PathNodeType.OPEN) return b;
-        return a;
-    }
-
-    @Override
-    public PathPoint getPathPointToCoords(final double x, final double y, final double z)
-    {
-        PathPoint a = this.navi.a.getPathPointToCoords(x, y, z);
-        if (a == null) a = this.navi.b.getPathPointToCoords(x, y, z);
         return a;
     }
 

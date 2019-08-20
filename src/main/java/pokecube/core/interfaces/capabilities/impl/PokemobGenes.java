@@ -343,11 +343,11 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
         // Refresh the datamanager for evs
         this.setEVs(this.getEVs());
 
-        this.setSize((float) (this.getSize() / PokecubeCore.getConfig().scalefactor));
+        this.setSize(this.getSize());
     }
 
     @Override
-    public void setAbility(Ability ability)
+    public void setAbility(final Ability ability)
     {
         if (this.genesAbility == null) this.initAbilityGene();
         final AbilityObject obj = this.genesAbility.getExpressed().getValue();
@@ -370,7 +370,7 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setEVs(byte[] evs)
+    public void setEVs(final byte[] evs)
     {
         if (this.genesEVs == null) this.getEVs();
         if (this.genesEVs != null) this.genesEVs.getExpressed().setValue(evs);
@@ -378,14 +378,14 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setIVs(byte[] ivs)
+    public void setIVs(final byte[] ivs)
     {
         if (this.genesIVs == null) this.getIVs();
         if (this.genesIVs != null) this.genesIVs.getExpressed().setValue(ivs);
     }
 
     @Override
-    public void setMove(int i, String moveName)
+    public void setMove(final int i, final String moveName)
     {
         // do not blanket set moves on client, or when transformed.
         if (!this.getEntity().isServerWorld() || this.getTransformedTo() != null) return;
@@ -396,7 +396,7 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setMoves(String[] moves)
+    public void setMoves(final String[] moves)
     {
         // do not blanket set moves on client, or when transformed.
         if (this.getEntity().getEntityWorld().isRemote || this.getTransformedTo() != null) return;
@@ -419,14 +419,14 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setNature(Nature nature)
+    public void setNature(final Nature nature)
     {
         if (this.genesNature == null) this.getNature();
         if (this.genesNature != null) this.genesNature.getExpressed().setValue(nature);
     }
 
     @Override
-    public IPokemob setPokedexEntry(PokedexEntry newEntry)
+    public IPokemob setPokedexEntry(final PokedexEntry newEntry)
     {
         final PokedexEntry entry = this.getPokedexEntry();
         final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
@@ -443,7 +443,7 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setRGBA(int... colours)
+    public void setRGBA(final int... colours)
     {
         final int[] rgba = this.getRGBA();
         for (int i = 0; i < colours.length && i < rgba.length; i++)
@@ -451,7 +451,7 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setSexe(byte sexe)
+    public void setSexe(final byte sexe)
     {
         if (this.genesSpecies == null) this.getPokedexEntry();
         final SpeciesInfo info = this.genesSpecies.getExpressed().getValue();
@@ -465,7 +465,7 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
     }
 
     @Override
-    public void setShiny(boolean shiny)
+    public void setShiny(final boolean shiny)
     {
         if (this.genesShiny == null) this.isShiny();
         this.genesShiny.getExpressed().setValue(shiny);
@@ -487,14 +487,17 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
             if (a < 0.01 || b < 0.01 || c < 0.01)
             {
                 final float min = 0.01f / Math.min(a, Math.min(c, b));
-                size *= min / PokecubeCore.getConfig().scalefactor;
+                size *= min;
             }
             // Do not allow them to be larger than 20 blocks.
             if (a > 20 || b > 20 || c > 20)
             {
                 final float max = 20 / Math.max(a, Math.max(c, b));
-                size *= max / PokecubeCore.getConfig().scalefactor;
+                size *= max;
             }
+            this.getEntity().getSize(this.getEntity().getPose()).scale(size);
+            System.out.println(this.getEntity().getSize(this.getEntity().getPose()) + " " + size + " " + a + " " + b
+                    + " " + c);
         }
         this.genesSize.getExpressed().setValue(size);
     }

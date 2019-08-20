@@ -122,17 +122,20 @@ public class CommonProxy implements Proxy
         PokecubeCore.POKEMOB_BUS.register(SpawnEventsHandler.class);
 
         // Register some Village stuff
-        final ImmutableList<StructureProcessor> replacementRules = ImmutableList.of(new RuleStructureProcessor(
-                ImmutableList.of(new RuleEntry(new RandomBlockMatchRuleTest(Blocks.COBBLESTONE, 0.1F),
-                        AlwaysTrueRuleTest.INSTANCE, Blocks.MOSSY_COBBLESTONE.getDefaultState()))));
+        if (PokecubeCore.getConfig().villagePokecenters)
+        {
+            final ImmutableList<StructureProcessor> replacementRules = ImmutableList.of(new RuleStructureProcessor(
+                    ImmutableList.of(new RuleEntry(new RandomBlockMatchRuleTest(Blocks.COBBLESTONE, 0.1F),
+                            AlwaysTrueRuleTest.INSTANCE, Blocks.MOSSY_COBBLESTONE.getDefaultState()))));
 
-        final SingleJigsawPiece part = new SingleJigsawPiece(new ResourceLocation(PokecubeCore.MODID,
-                "village/common/pokecenter").toString(), replacementRules,
-                JigsawPattern.PlacementBehaviour.TERRAIN_MATCHING);
+            final SingleJigsawPiece part = new SingleJigsawPiece(new ResourceLocation(PokecubeCore.MODID,
+                    "village/common/pokecenter").toString(), replacementRules,
+                    JigsawPattern.PlacementBehaviour.TERRAIN_MATCHING);
 
-        JigsawManager.field_214891_a.register(new JigsawPattern(new ResourceLocation(PokecubeCore.MODID,
-                "village/common/pokecenter"), new ResourceLocation("village/plains/terminators"), ImmutableList.of(
-                        new Pair<>(part, 100)), JigsawPattern.PlacementBehaviour.TERRAIN_MATCHING));
+            JigsawManager.REGISTRY.register(new JigsawPattern(new ResourceLocation(PokecubeCore.MODID,
+                    "village/common/pokecenter"), new ResourceLocation("village/plains/terminators"), ImmutableList.of(
+                            new Pair<>(part, 100)), JigsawPattern.PlacementBehaviour.TERRAIN_MATCHING));
+        }
 
     }
 

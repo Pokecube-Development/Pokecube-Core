@@ -47,13 +47,13 @@ public class AIHungry extends AIBase
     {
         final IPokemob pokemob;
 
-        public GenBerries(IPokemob mob)
+        public GenBerries(final IPokemob mob)
         {
             this.pokemob = mob;
         }
 
         @Override
-        public boolean run(World world)
+        public boolean run(final World world)
         {
             final ItemStack stack = BerryGenManager.getRandomBerryForBiome(world, this.pokemob.getEntity()
                     .getPosition());
@@ -81,7 +81,7 @@ public class AIHungry extends AIBase
     Vector3          v1      = Vector3.getNewVector();
     Random           rand;
 
-    public AIHungry(final IPokemob pokemob, final ItemEntity berry_, double distance)
+    public AIHungry(final IPokemob pokemob, final ItemEntity berry_, final double distance)
     {
         super(pokemob);
         this.berry = berry_;
@@ -109,7 +109,7 @@ public class AIHungry extends AIBase
                 final FishingBobberEntity hook = hooks.get(0);
                 if (this.v.isVisible(this.world, this.v1.set(hook)))
                 {
-                    final Path path = this.entity.getNavigator().getPathToEntityLiving(hook);
+                    final Path path = this.entity.getNavigator().getPathToEntityLiving(hook, 0);
                     this.addEntityPath(this.entity, path, this.moveSpeed);
                     if (this.entity.getDistanceSq(hook) < 2)
                     {
@@ -263,7 +263,7 @@ public class AIHungry extends AIBase
         {
             if (!this.isGoodSleepingSpot(c))
             {
-                Path path = this.entity.getNavigator().getPathToPos(this.pokemob.getHome());
+                Path path = this.entity.getNavigator().getPathToPos(this.pokemob.getHome(), 0);
                 if (path != null && path.getCurrentPathLength() > 32) path = null;
                 this.addEntityPath(this.entity, path, this.moveSpeed);
             }
@@ -289,7 +289,7 @@ public class AIHungry extends AIBase
      * @param distance
      *            to the berry
      */
-    protected void eatBerry(BlockState b, double distance)
+    protected void eatBerry(final BlockState b, final double distance)
     {
         final ItemStack fruit = ((IBerryFruitBlock) b.getBlock()).getBerryStack(this.world, this.foodLoc.getPos());
 
@@ -319,8 +319,8 @@ public class AIHungry extends AIBase
                 if (p.distToSq(v) <= 16) shouldChangePath = false;
             }
             Path path = null;
-            if (shouldChangePath && (path = this.entity.getNavigator().getPathToXYZ(this.foodLoc.x, this.foodLoc.y,
-                    this.foodLoc.z)) == null)
+            if (shouldChangePath && (path = this.entity.getNavigator().func_225466_a(this.foodLoc.x, this.foodLoc.y,
+                    this.foodLoc.z, 0)) == null)
             {
                 this.addEntityPath(this.entity, path, this.moveSpeed);
                 this.setCombatState(this.pokemob, CombatStates.HUNTING, false);
@@ -342,7 +342,7 @@ public class AIHungry extends AIBase
      * @param dist
      *            distance to the plant
      */
-    protected void eatPlant(BlockState b, Vector3 location, double dist)
+    protected void eatPlant(final BlockState b, final Vector3 location, final double dist)
     {
         double diff = 1;
         diff = Math.max(diff, this.entity.getWidth());
@@ -380,7 +380,7 @@ public class AIHungry extends AIBase
             Path path = null;
             if (shouldChangePath)
             {
-                path = this.entity.getNavigator().getPathToXYZ(this.foodLoc.x, this.foodLoc.y, this.foodLoc.z);
+                path = this.entity.getNavigator().func_225466_a(this.foodLoc.x, this.foodLoc.y, this.foodLoc.z, 0);
                 if (path == null)
                 {
                     this.setCombatState(this.pokemob, CombatStates.HUNTING, false);
@@ -404,7 +404,7 @@ public class AIHungry extends AIBase
      * @param dist
      *            distance to the rock
      */
-    protected void eatRocks(BlockState b, Vector3 location, double dist)
+    protected void eatRocks(final BlockState b, final Vector3 location, final double dist)
     {
         double diff = 2;
         diff = Math.max(diff, this.entity.getWidth());
@@ -447,7 +447,7 @@ public class AIHungry extends AIBase
             Path path = null;
             if (shouldChangePath)
             {
-                path = this.entity.getNavigator().getPathToXYZ(this.foodLoc.x, this.foodLoc.y, this.foodLoc.z);
+                path = this.entity.getNavigator().func_225466_a(this.foodLoc.x, this.foodLoc.y, this.foodLoc.z, 0);
                 pathed = path != null;
                 this.addEntityPath(this.entity, path, this.moveSpeed);
             }
@@ -459,8 +459,8 @@ public class AIHungry extends AIBase
                 this.foodLoc = null;
                 if (this.pokemob.hasHomeArea())
                 {
-                    path = this.entity.getNavigator().getPathToXYZ(this.pokemob.getHome().getX(), this.pokemob.getHome()
-                            .getY(), this.pokemob.getHome().getZ());
+                    path = this.entity.getNavigator().func_225466_a(this.pokemob.getHome().getX(), this.pokemob
+                            .getHome().getY(), this.pokemob.getHome().getZ(), 0);
                     this.addEntityPath(this.entity, path, this.moveSpeed);
                 }
                 else this.addEntityPath(this.entity, null, this.moveSpeed);
@@ -495,7 +495,7 @@ public class AIHungry extends AIBase
                         stack.shrink(1);
                         if (stack.isEmpty()) container.setInventorySlotContents(i1, ItemStack.EMPTY);
                         this.setCombatState(this.pokemob, CombatStates.HUNTING, false);
-                        final Path path = this.entity.getNavigator().getPathToXYZ(temp.x, temp.y, temp.z);
+                        final Path path = this.entity.getNavigator().func_225466_a(temp.x, temp.y, temp.z, 0);
                         this.addEntityPath(this.entity, path, this.moveSpeed);
                         this.pokemob.eat(this.berry);
                         return;
@@ -561,7 +561,7 @@ public class AIHungry extends AIBase
     }
 
     // 0 is sunrise, 6000 noon, 12000 dusk, 18000 midnight, 23999
-    public boolean isGoodSleepingSpot(ChunkCoordinate c)
+    public boolean isGoodSleepingSpot(final ChunkCoordinate c)
     {
         if (this.pokemob.getHome() == null || this.pokemob.getHome().equals(BlockPos.ZERO))
         {

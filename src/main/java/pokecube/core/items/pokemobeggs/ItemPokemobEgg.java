@@ -25,6 +25,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
@@ -370,24 +371,13 @@ public class ItemPokemobEgg extends Item
     @Override
     public ActionResultType onItemUse(final ItemUseContext context)
     {
-        // TODO egg placement.
-        // if (worldIn.isRemote) { return ActionResultType.SUCCESS; }
-        // Block i = worldIn.getBlockState(pos).getBlock();
-        // BlockPos newPos = pos.offset(side);
-        // double d = 0.0D;
-        //
-        // if (side == Direction.UP && i instanceof BlockFence)
-        // {
-        // d = 0.5D;
-        // }
-        // Vector3 loc = Vector3.getNewVector().set(newPos).addTo(hitX, d,
-        // hitZ);
-        // ItemStack stack = playerIn.getHeldItem(hand);
-        // if (dropEgg(worldIn, stack, loc, playerIn) &&
-        // !playerIn.capabilities.isCreativeMode)
-        // {
-        // stack.shrink(1);
-        // }
+        final World worldIn = context.getWorld();
+        if (worldIn.isRemote) return ActionResultType.SUCCESS;
+        final Vec3d hit = context.getHitVec();
+        final Vector3 loc = Vector3.getNewVector().set(hit);
+        final ItemStack stack = context.getItem();
+        final PlayerEntity playerIn = context.getPlayer();
+        if (this.dropEgg(worldIn, stack, loc, playerIn) && !playerIn.abilities.isCreativeMode) stack.shrink(1);
         return ActionResultType.SUCCESS;
     }
 

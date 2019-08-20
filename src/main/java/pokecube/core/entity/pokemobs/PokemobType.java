@@ -5,6 +5,8 @@ import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.FMLPlayMessages.SpawnEntity;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.utils.PokeType;
 
@@ -15,9 +17,15 @@ public class PokemobType<T extends TameableEntity> extends EntityType<T>
 
     public PokemobType(final EntityType.IFactory<T> factory, final PokedexEntry entry)
     {
-        super(factory, EntityClassification.CREATURE, true, true, false, null, null, c -> true, c -> 64, c -> 3, null);
+        super(factory, EntityClassification.CREATURE, true, true, false, true, null, c -> true, c -> 64, c -> 3, null);
         this.entry = entry;
         this.baseSize = EntitySize.flexible(entry.width, entry.height);
+    }
+
+    @Override
+    public T customClientSpawn(final SpawnEntity packet, final World world)
+    {
+        return this.create(world);
     }
 
     public PokedexEntry getEntry()

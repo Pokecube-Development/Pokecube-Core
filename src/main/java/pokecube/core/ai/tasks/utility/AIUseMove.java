@@ -74,7 +74,8 @@ public class AIUseMove extends AIBase
                 }
                 // Try to path to where the move is needed.
                 this.pokemob.setCombatState(CombatStates.EXECUTINGMOVE, true);
-                final Path path = this.entity.getNavigator().getPathToXYZ(destination.x, destination.y, destination.z);
+                final Path path = this.entity.getNavigator().func_225466_a(destination.x, destination.y, destination.z,
+                        0);
                 this.addEntityPath(this.entity, path, this.speed);
             }
             this.running = true;
@@ -166,8 +167,8 @@ public class AIUseMove extends AIBase
                     // Set destination and wait for move to be checked again.
                     this.running = true;
                     this.pokemob.setCombatState(CombatStates.EXECUTINGMOVE, true);
-                    final Path path = this.entity.getNavigator().getPathToXYZ(destination.x, destination.y,
-                            destination.z);
+                    final Path path = this.entity.getNavigator().func_225466_a(destination.x, destination.y,
+                            destination.z, 0);
                     this.addEntityPath(this.entity, path, this.speed);
                 }
             }

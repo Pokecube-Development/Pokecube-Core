@@ -11,7 +11,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.ServerWorld;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
@@ -19,10 +19,10 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import pokecube.core.PokecubeCore;
 import pokecube.core.events.pokemob.CaptureEvent;
 import pokecube.core.interfaces.IPokemob;
@@ -47,7 +47,7 @@ public class PCEventsHandler
      * @param player
      * @return
      */
-    public static List<Entity> getOutMobs(LivingEntity player, boolean includeStay)
+    public static List<Entity> getOutMobs(final LivingEntity player, final boolean includeStay)
     {
         return ((ServerWorld) player.getEntityWorld()).getEntities(null, c -> EventsHandler.validRecall(player, c, null,
                 false, includeStay));
@@ -59,7 +59,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public static void PCEvent(pokecube.core.events.PCEvent evt)
+    public static void PCEvent(final pokecube.core.events.PCEvent evt)
     {
         if (evt.owner == null || evt.owner.getEntityWorld().isRemote) return;
         if (PokecubeManager.isFilled(evt.toPC))
@@ -77,7 +77,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void PCLoggin(EntityJoinWorldEvent evt)
+    public static void PCLoggin(final EntityJoinWorldEvent evt)
     {
         // TODO see if I need to try to detect if a mob is loaded.
         if (!(evt.getEntity() instanceof ServerPlayerEntity)) return;
@@ -99,7 +99,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void PlayerLoggin(PlayerLoggedInEvent evt)
+    public static void PlayerLoggin(final PlayerLoggedInEvent evt)
     {
         final PlayerEntity PlayerEntity = evt.getPlayer();
 
@@ -117,24 +117,24 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void playerPickupItem(EntityItemPickupEvent evt)
+    public static void playerPickupItem(final EntityItemPickupEvent evt)
     {
         if (evt.getItem().getEntityWorld().isRemote) return;
-        final PlayerInventory inv = evt.getEntityPlayer().inventory;
+        final PlayerInventory inv = evt.getPlayer().inventory;
         final int num = inv.getFirstEmptyStack();
         if (!PokecubeManager.isFilled(evt.getItem().getItem())) return;
         final String owner = PokecubeManager.getOwner(evt.getItem().getItem());
-        if (evt.getEntityPlayer().getCachedUniqueIdString().equals(owner))
+        if (evt.getPlayer().getCachedUniqueIdString().equals(owner))
         {
             if (num == -1)
             {
-                PCInventory.addPokecubeToPC(evt.getItem().getItem(), evt.getEntityPlayer().getEntityWorld());
+                PCInventory.addPokecubeToPC(evt.getItem().getItem(), evt.getPlayer().getEntityWorld());
                 evt.getItem().remove();
             }
         }
         else
         {
-            PCInventory.addPokecubeToPC(evt.getItem().getItem(), evt.getEntityPlayer().getEntityWorld());
+            PCInventory.addPokecubeToPC(evt.getItem().getItem(), evt.getPlayer().getEntityWorld());
             evt.getItem().remove();
             evt.setCanceled(true);
         }
@@ -146,7 +146,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void playerTossPokecubeToPC(ItemTossEvent evt)
+    public static void playerTossPokecubeToPC(final ItemTossEvent evt)
     {
         if (evt.getEntity().getEntityWorld().isRemote) return;
         if (PokecubeManager.isFilled(evt.getEntityItem().getItem()))
@@ -157,7 +157,7 @@ public class PCEventsHandler
         }
     }
 
-    public static void recallAll(List<Entity> mobs, boolean cubesToPC)
+    public static void recallAll(final List<Entity> mobs, final boolean cubesToPC)
     {
         for (final Entity o : mobs)
         {
@@ -185,7 +185,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void sendPokemobToPCOnItemExpiration(ItemExpireEvent evt)
+    public static void sendPokemobToPCOnItemExpiration(final ItemExpireEvent evt)
     {
         if (PokecubeManager.isFilled(evt.getEntityItem().getItem()))
         {
@@ -195,7 +195,7 @@ public class PCEventsHandler
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public static void sendPokemobToPCPlayerDeath(LivingDeathEvent evt)
+    public static void sendPokemobToPCPlayerDeath(final LivingDeathEvent evt)
     {
         if (evt.getEntity() instanceof ServerPlayerEntity)
         {
@@ -210,7 +210,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void sendPokemobToPCPlayerDrops(LivingDropsEvent evt)
+    public static void sendPokemobToPCPlayerDrops(final LivingDropsEvent evt)
     {
         if (!(evt.getEntity() instanceof PlayerEntity) || !PokecubeCore.getConfig().pcOnDrop) return;
         if (evt.getEntity().getEntityWorld().isRemote) return;
@@ -231,7 +231,7 @@ public class PCEventsHandler
      * @param evt
      */
     @SubscribeEvent
-    public static void sendPokemobToPCPlayerFull(CaptureEvent.Post evt)
+    public static void sendPokemobToPCPlayerFull(final CaptureEvent.Post evt)
     {
         // Case for things like snag cubes
         if (evt.caught == null)

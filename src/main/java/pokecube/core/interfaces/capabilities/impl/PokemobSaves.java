@@ -102,7 +102,6 @@ public abstract class PokemobSaves extends PokemobOwned implements TagNames
         if (!visualsTag.isEmpty())
         {
             this.dataSync().set(this.params.DYECOLOUR, visualsTag.getInt(TagNames.SPECIALTAG));
-            this.setSize((float) (this.getSize() / PokecubeCore.getConfig().scalefactor));
             final int[] flavourAmounts = visualsTag.getIntArray(TagNames.FLAVOURSTAG);
             if (flavourAmounts.length == 5) for (int i = 0; i < flavourAmounts.length; i++)
                 this.setFlavourAmount(i, flavourAmounts[i]);

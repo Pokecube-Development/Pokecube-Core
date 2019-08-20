@@ -8,7 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.ServerWorld;
+import net.minecraft.world.server.ServerWorld;
 import pokecube.nbtedit.NBTEdit;
 import pokecube.nbtedit.NBTHelper;
 import thut.core.common.network.Packet;

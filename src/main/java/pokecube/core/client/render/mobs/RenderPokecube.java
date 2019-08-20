@@ -1,4 +1,4 @@
-package pokecube.core.client.render;
+package pokecube.core.client.render.mobs;
 
 import java.util.HashMap;
 
@@ -16,7 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import pokecube.core.PokecubeItems;
-import pokecube.core.client.render.RenderPokecube.ModelPokecube;
+import pokecube.core.client.render.mobs.RenderPokecube.ModelPokecube;
 import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;

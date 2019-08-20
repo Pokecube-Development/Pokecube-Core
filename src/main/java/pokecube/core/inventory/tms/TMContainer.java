@@ -4,7 +4,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
@@ -13,6 +12,7 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import pokecube.core.PokecubeCore;
 import pokecube.core.blocks.tms.TMTile;
 import pokecube.core.inventory.BaseContainer;
+import pokecube.core.inventory.TexturedSlot;
 import pokecube.core.items.pokecubes.PokecubeManager;
 
 public class TMContainer extends BaseContainer
@@ -56,40 +56,18 @@ public class TMContainer extends BaseContainer
             this.inv = wrapper.getInv();
         }
 
-        this.addSlot(new Slot(this.inv, 0, 15 + 00, 12 + 00)
-        {
-            @Override
-            public String getSlotTexture()
-            {
-                if (super.getSlotTexture() == null) super.setBackgroundName("pokecube:items/tm_slot");
-                return super.getSlotTexture();
-            }
-
-            @Override
-            public boolean isItemValid(final ItemStack stack)
-            {
-                return this.inventory.isItemValidForSlot(this.getSlotIndex(), stack);
-            }
-        });
+        this.addSlot(new TexturedSlot(this.inv, 0, 15 + 00, 12 + 00, "pokecube:items/tm_slot"));
         final TMContainer cont = this;
-        this.addSlot(new Slot(this.inv, 1, 15 + 00, 12 + 49)
+        this.addSlot(new TexturedSlot(this.inv, 1, 15 + 00, 12 + 49, "pokecube:items/cube_slot")
         {
-            @Override
-            public String getSlotTexture()
-            {
-                if (super.getSlotTexture() == null) super.setBackgroundName("pokecube:items/cube_slot");
-                return super.getSlotTexture();
-            }
-
             @Override
             public boolean isItemValid(final ItemStack stack)
             {
                 if (PokecubeManager.isFilled(stack)) cont.moves = cont.tile.getMoves(PokecubeManager.itemToPokemob(
                         stack, cont.tile.getWorld()));
-                return this.inventory.isItemValidForSlot(this.getSlotIndex(), stack);
+                return super.isItemValid(stack);
             }
         });
-
         this.bindPlayerInventory(inv, -19);
     }
 

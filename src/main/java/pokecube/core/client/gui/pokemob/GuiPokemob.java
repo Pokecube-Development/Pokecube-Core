@@ -25,7 +25,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.Resources;
-import pokecube.core.client.render.RenderHealth;
+import pokecube.core.client.render.mobs.RenderMobOverlays;
 import pokecube.core.entity.pokemobs.ContainerPokemob;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -115,13 +115,13 @@ public class GuiPokemob<T extends ContainerPokemob> extends ContainerScreen<T>
 
         GlStateManager.enableColorMaterial();
         RenderHelper.enableStandardItemLighting();
-        RenderHealth.enabled = false;
+        RenderMobOverlays.enabled = false;
         final EntityRendererManager entityrenderermanager = Minecraft.getInstance().getRenderManager();
         entityrenderermanager.setPlayerViewY(180.0F);
         entityrenderermanager.setRenderShadow(false);
         entityrenderermanager.renderEntity(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
         entityrenderermanager.setRenderShadow(true);
-        RenderHealth.enabled = true;
+        RenderMobOverlays.enabled = true;
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableRescaleNormal();
         GlStateManager.activeTexture(GLX.GL_TEXTURE1);

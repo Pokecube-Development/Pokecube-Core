@@ -6,14 +6,13 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.RendererModel;
-import net.minecraft.entity.Entity;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.items.pokemobeggs.EntityPokemobEgg;
 import pokecube.core.items.pokemobeggs.ItemPokemobEgg;
 import pokecube.core.utils.PokeType;
 
 /** egg - Undefined Created using Tabula 4.1.1 */
-public class ModelPokemobEgg extends EntityModel<Entity>
+public class ModelPokemobEgg extends EntityModel<EntityPokemobEgg>
 {
     public RendererModel Egg1;
     public RendererModel Egg2;
@@ -67,13 +66,14 @@ public class ModelPokemobEgg extends EntityModel<Entity>
     }
 
     @Override
-    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
+    public void render(final EntityPokemobEgg entity, final float f, final float f1, final float f2, final float f3,
+            final float f4, final float f5)
     {
 
         GL11.glPushMatrix();
         GL11.glScaled(0.25, 0.25, 0.25);
         GL11.glTranslated(0, 4.45, 0);
-        final PokedexEntry entry = ItemPokemobEgg.getEntry(((EntityPokemobEgg) entity).getHeldItemMainhand());
+        final PokedexEntry entry = ItemPokemobEgg.getEntry(entity.getHeldItemMainhand());
 
         Color colour = new Color(PokeType.unknown.colour);
 
@@ -117,7 +117,7 @@ public class ModelPokemobEgg extends EntityModel<Entity>
      * This is a helper function from Tabula to set the rotation of model
      * parts
      */
-    public void setRotateAngle(RendererModel modelRenderer, float x, float y, float z)
+    public void setRotateAngle(final RendererModel modelRenderer, final float x, final float y, final float z)
     {
         modelRenderer.rotateAngleX = x;
         modelRenderer.rotateAngleY = y;

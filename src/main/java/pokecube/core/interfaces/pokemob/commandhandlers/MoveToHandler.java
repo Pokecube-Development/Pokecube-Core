@@ -15,23 +15,23 @@ public class MoveToHandler extends DefaultHandler
     {
     }
 
-    public MoveToHandler(Vector3 location, Float speed)
+    public MoveToHandler(final Vector3 location, final Float speed)
     {
         this.location = location.copy();
         this.speed = Math.abs(speed);
     }
 
     @Override
-    public void handleCommand(IPokemob pokemob) throws Exception
+    public void handleCommand(final IPokemob pokemob) throws Exception
     {
         this.speed = (float) Math.min(this.speed, pokemob.getEntity().getAttribute(
                 SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
-        pokemob.getEntity().getNavigator().setPath(pokemob.getEntity().getNavigator().getPathToXYZ(this.location.x,
-                this.location.y, this.location.z), this.speed);
+        pokemob.getEntity().getNavigator().setPath(pokemob.getEntity().getNavigator().func_225466_a(this.location.x,
+                this.location.y, this.location.z, 0), this.speed);
     }
 
     @Override
-    public void readFromBuf(ByteBuf buf)
+    public void readFromBuf(final ByteBuf buf)
     {
         super.readFromBuf(buf);
         this.location = Vector3.readFromBuff(buf);
@@ -39,7 +39,7 @@ public class MoveToHandler extends DefaultHandler
     }
 
     @Override
-    public void writeToBuf(ByteBuf buf)
+    public void writeToBuf(final ByteBuf buf)
     {
         super.writeToBuf(buf);
         this.location.writeToBuff(buf);

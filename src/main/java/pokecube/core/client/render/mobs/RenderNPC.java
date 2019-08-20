@@ -1,4 +1,4 @@
-package pokecube.core.client.render;
+package pokecube.core.client.render.mobs;
 
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;

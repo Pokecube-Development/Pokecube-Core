@@ -72,7 +72,7 @@ public class Description extends ListPage<LineEntry>
         };
         ITextComponent line;
         ITextComponent page = this.parent.pokemob.getPokedexEntry().getDescription();
-        this.list = new ScrollGui<>(this, this.minecraft, 107, height, this.font.FONT_HEIGHT + 5, offsetX, offsetY);
+        this.list = new ScrollGui<>(this, this.minecraft, 107, height, this.font.FONT_HEIGHT, offsetX, offsetY);
         page = new StringTextComponent(page.getFormattedText());
         final List<ITextComponent> list = RenderComponentsUtil.splitText(page, 100, this.font, false, false);
         for (int j = 0; j < list.size(); j++)
@@ -80,7 +80,6 @@ public class Description extends ListPage<LineEntry>
             line = list.get(j);
             this.list.addEntry(new LineEntry(this.list, offsetX, offsetY, this.font, line, 0xFFFFFF));
         }
-        this.children.add(this.list);
     }
 
     @Override

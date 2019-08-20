@@ -18,7 +18,7 @@ public class RecipePokeseals extends SpecialRecipe
     public static final IRecipeSerializer<RecipePokeseals> SERIALIZER = IRecipeSerializer.register(
             "pokecube:seal_apply", new SpecialRecipeSerializer<>(RecipePokeseals::new));
 
-    public static ItemStack process(ItemStack cube, ItemStack seal)
+    public static ItemStack process(final ItemStack cube, final ItemStack seal)
     {
         if (!seal.hasTag()) return cube;
         final CompoundNBT pokecubeTag = TagNames.getPokecubePokemobTag(cube.getTag()).getCompound(TagNames.VISUALSTAG)
@@ -29,13 +29,19 @@ public class RecipePokeseals extends SpecialRecipe
         return cube;
     }
 
-    public RecipePokeseals(ResourceLocation idIn)
+    public RecipePokeseals(final ResourceLocation idIn)
     {
         super(idIn);
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv)
+    public boolean canFit(final int width, final int height)
+    {
+        return width * height > 1;
+    }
+
+    @Override
+    public ItemStack getCraftingResult(final CraftingInventory inv)
     {
         final ItemStack toCraft = new ItemStack(PokecubeItems.getEmptyCube(PokecubeBehavior.POKESEAL), 1);
         final CompoundNBT tag = new CompoundNBT();
@@ -61,7 +67,7 @@ public class RecipePokeseals extends SpecialRecipe
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, World worldIn)
+    public boolean matches(final CraftingInventory inv, final World worldIn)
     {
         int cube = 0;
         // int paper = 0;

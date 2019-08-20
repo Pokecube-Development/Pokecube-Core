@@ -52,7 +52,7 @@ public class AIFollowOwner extends AIBase
     {
         if (this.theOwner == null)
         {
-            this.theOwner = (LivingEntity) this.pokemob.getOwner();
+            this.theOwner = this.pokemob.getOwner();
             this.cooldown = 0;
             this.ownerPos.set(this.theOwner);
             this.pathing = true;
@@ -82,7 +82,7 @@ public class AIFollowOwner extends AIBase
             final Vec3d v = this.theOwner.getMotion();
             this.speed = Math.sqrt(v.x * v.x + v.z * v.z);
             this.speed = Math.max(0.6, this.speed);
-            final Path path = this.petPathfinder.getPathToEntityLiving(this.theOwner);
+            final Path path = this.petPathfinder.getPathToEntityLiving(this.theOwner, 0);
             if (path != null) this.addEntityPath(this.entity, path, this.speed);
         }
     }
@@ -91,7 +91,7 @@ public class AIFollowOwner extends AIBase
     public boolean shouldRun()
     {
         if (!this.pokemob.isRoutineEnabled(AIRoutine.FOLLOW)) return false;
-        final LivingEntity LivingEntity = (LivingEntity) this.pokemob.getOwner();
+        final LivingEntity LivingEntity = this.pokemob.getOwner();
         this.petPathfinder = this.entity.getNavigator();
         // Nothing to follow
         if (LivingEntity == null) return false;

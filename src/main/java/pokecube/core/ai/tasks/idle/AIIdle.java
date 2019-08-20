@@ -30,7 +30,8 @@ public class AIIdle extends AIBase
 {
     public static int IDLETIMER = 1;
 
-    public static Vector3 getRandomPointNear(IBlockReader world, IPokemob mob, Vector3 v, int distance)
+    public static Vector3 getRandomPointNear(final IBlockReader world, final IPokemob mob, final Vector3 v,
+            final int distance)
     {
         final Random rand = new Random();
 
@@ -62,7 +63,7 @@ public class AIIdle extends AIBase
 
     Vector3 v1 = Vector3.getNewVector();
 
-    public AIIdle(IPokemob pokemob)
+    public AIIdle(final IPokemob pokemob)
     {
         super(pokemob);
         this.setMutex(2);
@@ -208,7 +209,7 @@ public class AIIdle extends AIBase
 
         this.entity.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).removeModifier(this.idlePathing);
         this.entity.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).applyModifier(this.idlePathing);
-        Path path = this.entity.getNavigator().getPathToXYZ(this.x, this.y, this.z);
+        Path path = this.entity.getNavigator().func_225466_a(this.x, this.y, this.z, 0);
         this.entity.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).removeModifier(this.idlePathing);
         if (path != null && path.getCurrentPathLength() > this.maxLength) path = null;
         this.addEntityPath(this.entity, path, this.speed);
