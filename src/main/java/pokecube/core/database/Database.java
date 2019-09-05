@@ -52,6 +52,7 @@ import pokecube.core.database.PokedexEntry.SpawnData;
 import pokecube.core.database.PokedexEntryLoader.Drop;
 import pokecube.core.database.PokedexEntryLoader.SpawnRule;
 import pokecube.core.database.moves.json.JsonMoves;
+import pokecube.core.database.moves.json.JsonMoves.AnimationJson;
 import pokecube.core.database.moves.json.JsonMoves.MoveJsonEntry;
 import pokecube.core.database.moves.json.JsonMoves.MovesJson;
 import pokecube.core.database.recipes.XMLRecipeHandler;
@@ -585,7 +586,11 @@ public class Database
                     }
                 }
                 event.setRegistryName(sound);
-                if (!SoundEvent.REGISTRY.containsKey(sound)) GameData.register_impl(event);
+                if (!SoundEvent.REGISTRY.containsKey(sound))
+                {
+                    PokecubeMod.log("Registering Sound Event: " + sound);
+                    GameData.register_impl(event);
+                }
                 Loader.instance().setActiveModContainer(mc);
             }
             if (entry.soundEffectTarget != null)
@@ -604,8 +609,41 @@ public class Database
                     }
                 }
                 event.setRegistryName(sound);
-                if (!SoundEvent.REGISTRY.containsKey(sound)) GameData.register_impl(event);
+                if (!SoundEvent.REGISTRY.containsKey(sound))
+                {
+                    PokecubeMod.log("Registering Sound Event: " + sound);
+                    GameData.register_impl(event);
+                }
                 Loader.instance().setActiveModContainer(mc);
+            }
+            if (entry.animations != null)
+            {
+                for (AnimationJson anim : entry.animations)
+                {
+                    if (anim.sound != null)
+                    {
+                        ResourceLocation sound = new ResourceLocation(anim.sound);
+                        SoundEvent event = new SoundEvent(sound);
+                        if (!sound.getResourceDomain().equals(mc.getModId()))
+                        {
+                            for (ModContainer cont : Loader.instance().getActiveModList())
+                            {
+                                if (cont.getModId().equals(sound.getResourceDomain()))
+                                {
+                                    Loader.instance().setActiveModContainer(cont);
+                                    break;
+                                }
+                            }
+                        }
+                        event.setRegistryName(sound);
+                        if (!SoundEvent.REGISTRY.containsKey(sound))
+                        {
+                            PokecubeMod.log("Registering Sound Event: " + sound);
+                            GameData.register_impl(event);
+                        }
+                        Loader.instance().setActiveModContainer(mc);
+                    }
+                }
             }
         }
 
