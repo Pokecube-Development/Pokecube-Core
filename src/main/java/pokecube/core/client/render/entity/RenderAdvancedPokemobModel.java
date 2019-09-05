@@ -26,7 +26,7 @@ public class RenderAdvancedPokemobModel<T extends EntityLiving> extends RenderPo
     public static IModelRenderer<?> getRenderer(String name, EntityLiving entity)
     {
         models:
-        if (entity.getEntityData().hasKey("url_model"))
+        if (entity != null && entity.getEntityData() != null && entity.getEntityData().hasKey("url_model"))
         {
             NBTTagCompound modeltag = entity.getEntityData().getCompoundTag("url_model");
             String tag_name = modeltag.getString("name");
