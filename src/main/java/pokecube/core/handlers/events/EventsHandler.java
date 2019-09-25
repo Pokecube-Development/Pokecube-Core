@@ -387,10 +387,10 @@ public class EventsHandler
             evt.setCanceled(true);
             return;
         }
-        if (evt.getEntity() instanceof IPokemob && evt.getEntity().getEntityData().getBoolean("onShoulder"))
+        if (evt.getEntity() instanceof IPokemob && evt.getEntity().getPersistentData().getBoolean("onShoulder"))
         {
             ((IPokemob) evt.getEntity()).setLogicState(LogicStates.SITTING, false);
-            evt.getEntity().getEntityData().remove("onShoulder");
+            evt.getEntity().getPersistentData().remove("onShoulder");
         }
         if (evt.getEntity() instanceof CreeperEntity)
         {

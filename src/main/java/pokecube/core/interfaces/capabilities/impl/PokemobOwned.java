@@ -249,8 +249,8 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
                 final IPokemob base = this.megaEvolve(this.getPokedexEntry().getBaseForme());
                 base.setHealth(hp);
                 if (base == this) this.returning = false;
-                if (this.getEntity().getEntityData().contains(TagNames.ABILITY)) base.setAbility(AbilityManager
-                        .getAbility(this.getEntity().getEntityData().getString(TagNames.ABILITY)));
+                if (this.getEntity().getPersistentData().contains(TagNames.ABILITY)) base.setAbility(AbilityManager
+                        .getAbility(this.getEntity().getPersistentData().getString(TagNames.ABILITY)));
                 base.onRecall();
                 return;
             }
@@ -451,7 +451,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
     public IPokemob spawnInit()
     {
         IPokemob pokemob = this;
-        int maxXP = this.getEntity().getEntityData().getInt("spawnExp");
+        int maxXP = this.getEntity().getPersistentData().getInt("spawnExp");
 
         /*
          * Check to see if the mob has spawnExp defined in its data. If not, it
@@ -460,14 +460,14 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
          */
         if (maxXP == 0)
         {
-            if (!this.getEntity().getEntityData().getBoolean("initSpawn"))
+            if (!this.getEntity().getPersistentData().getBoolean("initSpawn"))
             {
                 pokemob.setHeldItem(pokemob.wildHeldItem(this.getEntity()));
                 if (pokemob instanceof PokemobOwned) ((PokemobOwned) pokemob).updateHealth();
                 pokemob.setHealth(pokemob.getMaxHealth());
                 return pokemob;
             }
-            this.getEntity().getEntityData().remove("initSpawn");
+            this.getEntity().getPersistentData().remove("initSpawn");
             final Vector3 spawnPoint = Vector3.getNewVector().set(this.getEntity());
             maxXP = SpawnHandler.getSpawnXp(this.getEntity().getEntityWorld(), spawnPoint, pokemob.getPokedexEntry());
             final SpawnEvent.Level event = new SpawnEvent.Level(pokemob.getPokedexEntry(), spawnPoint, this.getEntity()
@@ -477,7 +477,7 @@ public abstract class PokemobOwned extends PokemobAI implements IInventoryChange
             final int level = event.getLevel();
             maxXP = Tools.levelToXp(pokemob.getPokedexEntry().getEvolutionMode(), level);
         }
-        this.getEntity().getEntityData().remove("spawnExp");
+        this.getEntity().getPersistentData().remove("spawnExp");
 
         // Set exp and held items.
         pokemob = pokemob.setForSpawn(maxXP);

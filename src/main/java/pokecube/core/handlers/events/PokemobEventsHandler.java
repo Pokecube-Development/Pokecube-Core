@@ -199,14 +199,14 @@ public class PokemobEventsHandler
     public static void interactEvent(final PlayerInteractEvent.EntityInteract evt)
     {
         final String ID = "LastSuccessInteractEvent";
-        final long time = evt.getEntity().getEntityData().getLong(ID);
+        final long time = evt.getEntity().getPersistentData().getLong(ID);
         if (time == evt.getEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
         }
         PokemobEventsHandler.processInteract(evt, evt.getTarget());
-        if (evt.isCanceled()) evt.getEntity().getEntityData().putLong(ID, evt.getEntity().getEntityWorld()
+        if (evt.isCanceled()) evt.getEntity().getPersistentData().putLong(ID, evt.getEntity().getEntityWorld()
                 .getGameTime());
     }
 
@@ -214,14 +214,14 @@ public class PokemobEventsHandler
     public static void interactEvent(final PlayerInteractEvent.EntityInteractSpecific evt)
     {
         final String ID = "LastSuccessInteractEvent";
-        final long time = evt.getEntity().getEntityData().getLong(ID);
+        final long time = evt.getEntity().getPersistentData().getLong(ID);
         if (time == evt.getEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
             return;
         }
         PokemobEventsHandler.processInteract(evt, evt.getTarget());
-        if (evt.isCanceled()) evt.getEntity().getEntityData().putLong(ID, evt.getEntity().getEntityWorld()
+        if (evt.isCanceled()) evt.getEntity().getPersistentData().putLong(ID, evt.getEntity().getEntityWorld()
                 .getGameTime());
     }
 
@@ -229,7 +229,7 @@ public class PokemobEventsHandler
     public static void interactEvent(final PlayerInteractEvent.RightClickBlock evt)
     {
         final String ID = "LastSuccessInteractEvent";
-        final long time = evt.getEntity().getEntityData().getLong(ID);
+        final long time = evt.getEntity().getPersistentData().getLong(ID);
         if (time == evt.getEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);
@@ -241,7 +241,7 @@ public class PokemobEventsHandler
     public static void interactEvent(final PlayerInteractEvent.RightClickItem evt)
     {
         final String ID = "LastSuccessInteractEvent";
-        final long time = evt.getEntity().getEntityData().getLong(ID);
+        final long time = evt.getEntity().getPersistentData().getLong(ID);
         if (time == evt.getEntity().getEntityWorld().getGameTime())
         {
             evt.setCanceled(true);

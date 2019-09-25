@@ -87,9 +87,9 @@ public abstract class EntityPokecubeBase extends LivingEntity implements IProjec
     public static boolean canCaptureBasedOnConfigs(final IPokemob pokemob)
     {
         if (PokecubeCore.getConfig().captureDelayTillAttack) return !pokemob.getCombatState(CombatStates.NOITEMUSE);
-        final long lastAttempt = pokemob.getEntity().getEntityData().getLong(EntityPokecubeBase.CUBETIMETAG);
+        final long lastAttempt = pokemob.getEntity().getPersistentData().getLong(EntityPokecubeBase.CUBETIMETAG);
         final boolean capture = lastAttempt <= pokemob.getEntity().getEntityWorld().getGameTime();
-        if (capture) pokemob.getEntity().getEntityData().remove(EntityPokecubeBase.CUBETIMETAG);
+        if (capture) pokemob.getEntity().getPersistentData().remove(EntityPokecubeBase.CUBETIMETAG);
         return capture;
     }
 
@@ -97,7 +97,7 @@ public abstract class EntityPokecubeBase extends LivingEntity implements IProjec
     {
 
         if (PokecubeCore.getConfig().captureDelayTillAttack) pokemob.setCombatState(CombatStates.NOITEMUSE, true);
-        else pokemob.getEntity().getEntityData().putLong(EntityPokecubeBase.CUBETIMETAG, pokemob.getEntity()
+        else pokemob.getEntity().getPersistentData().putLong(EntityPokecubeBase.CUBETIMETAG, pokemob.getEntity()
                 .getEntityWorld().getGameTime() + PokecubeCore.getConfig().captureDelayTicks);
     }
 
@@ -300,8 +300,8 @@ public abstract class EntityPokecubeBase extends LivingEntity implements IProjec
             pokemob.setCombatState(CombatStates.MEGAFORME, false);
             final IPokemob revert = pokemob.megaEvolve(pokemob.getPokedexEntry().getBaseForme());
             if (revert != null) pokemob = revert;
-            if (pokemob.getEntity().getEntityData().contains(TagNames.ABILITY)) pokemob.setAbility(AbilityManager
-                    .getAbility(pokemob.getEntity().getEntityData().getString(TagNames.ABILITY)));
+            if (pokemob.getEntity().getPersistentData().contains(TagNames.ABILITY)) pokemob.setAbility(AbilityManager
+                    .getAbility(pokemob.getEntity().getPersistentData().getString(TagNames.ABILITY)));
         }
         final ItemStack pokemobStack = PokecubeManager.pokemobToItem(pokemob);
         this.setItem(pokemobStack);

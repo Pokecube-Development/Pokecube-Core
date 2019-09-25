@@ -489,7 +489,7 @@ public class PokedexEntry
                 pokemob.megaEvolve(forme);
                 return true;
             }
-            final CompoundNBT data = entity.getEntityData();
+            final CompoundNBT data = entity.getPersistentData();
             final Interaction action = this.actions.get(stack);
             if (data.contains("lastInteract"))
             {

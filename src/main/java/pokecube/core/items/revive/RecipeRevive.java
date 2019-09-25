@@ -59,7 +59,7 @@ public class RecipeRevive extends SpecialRecipe
             {
                 final IPokemob mob = PokecubeManager.itemToPokemob(other, PokecubeCore.proxy.getWorld());
                 final CompoundNBT tag = seal.getTag().getCompound(TagNames.POKESEAL);
-                final CompoundNBT mobtag = mob.getEntity().getEntityData();
+                final CompoundNBT mobtag = mob.getEntity().getPersistentData();
                 mobtag.put("sealtag", tag);
                 other = PokecubeManager.pokemobToItem(mob);
                 healed = other;

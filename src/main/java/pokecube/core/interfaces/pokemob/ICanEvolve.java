@@ -452,16 +452,16 @@ public interface ICanEvolve extends IHasEntry, IHasOwner
             // Sync ability back, or store old ability.
             if (this.getCombatState(CombatStates.MEGAFORME))
             {
-                if (thisMob.getAbility() != null) evolution.getEntityData().putString("Ability", thisMob.getAbility()
-                        .toString());
+                if (thisMob.getAbility() != null) evolution.getPersistentData().putString("Ability", thisMob
+                        .getAbility().toString());
                 final Ability ability = newEntry.getAbility(0, evoMob);
                 PokecubeCore.LOGGER.debug("Mega Evolving, changing ability to " + ability);
                 if (ability != null) evoMob.setAbility(ability);
             }
-            else if (thisEntity.getEntityData().contains("Ability"))
+            else if (thisEntity.getPersistentData().contains("Ability"))
             {
-                final String ability = thisEntity.getEntityData().getString("Ability");
-                evolution.getEntityData().remove("Ability");
+                final String ability = thisEntity.getPersistentData().getString("Ability");
+                evolution.getPersistentData().remove("Ability");
                 if (!ability.isEmpty()) evoMob.setAbility(AbilityManager.getAbility(ability));
                 PokecubeCore.LOGGER.debug("Un Mega Evolving, changing ability back to " + ability);
             }

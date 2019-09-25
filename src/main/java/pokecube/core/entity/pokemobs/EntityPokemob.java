@@ -101,7 +101,7 @@ public class EntityPokemob extends TameableEntity implements IEntityAdditionalSp
     @Nullable
     protected ResourceLocation getLootTable()
     {
-        if (this.getEntityData().getBoolean("cloned")) return null;
+        if (this.getPersistentData().getBoolean("cloned")) return null;
         if (PokecubeCore.getConfig().pokemobsDropItems) return this.pokemobCap.getPokedexEntry().lootTable;
         else return null;
     }
@@ -172,7 +172,7 @@ public class EntityPokemob extends TameableEntity implements IEntityAdditionalSp
             this.pokemobCap.read(tag.getCompound("p"));
             this.pokemobCap.onGenesChanged();
             tag = buffer.readCompoundTag();
-            if (!tag.isEmpty()) this.getEntityData().put("url_model", tag);
+            if (!tag.isEmpty()) this.getPersistentData().put("url_model", tag);
         }
         catch (final Exception e)
         {
@@ -214,7 +214,7 @@ public class EntityPokemob extends TameableEntity implements IEntityAdditionalSp
         nbt.put("p", this.pokemobCap.write());
         nbt.put("g", list);
         buffer.writeCompoundTag(nbt);
-        nbt = this.getEntityData().getCompound("url_model");
+        nbt = this.getPersistentData().getCompound("url_model");
         buffer.writeCompoundTag(nbt);
     }
 }

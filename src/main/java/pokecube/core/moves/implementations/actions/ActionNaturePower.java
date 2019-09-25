@@ -475,7 +475,7 @@ public class ActionNaturePower implements IMoveAction
         if (attacker.getCombatState(CombatStates.ANGRY)) return false;
         if (!(attacker.getOwner() instanceof ServerPlayerEntity)) return false;
         if (!MoveEventsHandler.canEffectBlock(attacker, location)) return false;
-        final long time = attacker.getEntity().getEntityData().getLong("lastAttackTick");
+        final long time = attacker.getEntity().getPersistentData().getLong("lastAttackTick");
         if (time + 20 * 3 > attacker.getEntity().getEntityWorld().getGameTime()) return false;
         final BlockPos pos = location.getPos();
         final ServerWorld world = (ServerWorld) attacker.getEntity().getEntityWorld();

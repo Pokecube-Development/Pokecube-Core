@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.Heightmap.Type;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.spawner.AbstractSpawner;
 import net.minecraft.world.spawner.WorldEntitySpawner;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -182,8 +183,27 @@ public final class SpawnHandler
             final double posY, final double posZ, final Vector3 spawnPoint, final int overrideLevel,
             final Variance variance)
     {
-        if (ForgeEventFactory.doSpecialSpawn(MobEntity, world, (float) posX, (float) posY, (float) posZ, null))
-            return null;
+        final AbstractSpawner spawner = new AbstractSpawner()
+        {
+            @Override
+            public void broadcastEvent(final int id)
+            {
+            }
+
+            @Override
+            public BlockPos getSpawnerPosition()
+            {
+                return spawnPoint.getPos();
+            }
+
+            @Override
+            public World getWorld()
+            {
+                return world;
+            }
+        };
+        if (ForgeEventFactory.doSpecialSpawn(MobEntity, world, (float) posX, (float) posY, (float) posZ, spawner,
+                SpawnReason.NATURAL)) return null;
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(MobEntity);
         if (pokemob != null)
         {
@@ -209,7 +229,7 @@ public final class SpawnHandler
                 level = event.getLevel();
             }
             maxXP = Tools.levelToXp(pokemob.getPokedexEntry().getEvolutionMode(), level);
-            pokemob.getEntity().getEntityData().putInt("spawnExp", maxXP);
+            pokemob.getEntity().getPersistentData().putInt("spawnExp", maxXP);
             pokemob = pokemob.spawnInit();
             final double dt = (System.nanoTime() - time) / 10e3D;
             if (PokecubeMod.debug && dt > 100)

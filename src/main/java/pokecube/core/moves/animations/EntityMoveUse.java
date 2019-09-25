@@ -280,7 +280,7 @@ public class EntityMoveUse extends ThrowableEntity
         valid:
         if ((user = this.getUser()) == null || !this.isAlive() || !user.isAlive() || !user.addedToChunk)
         {
-            if (user != null && !user.addedToChunk) if (user.getEntityData().getBoolean("isPlayer")) break valid;
+            if (user != null && !user.addedToChunk) if (user.getPersistentData().getBoolean("isPlayer")) break valid;
             this.remove();
             return;
         }

@@ -73,13 +73,13 @@ public class MoveEventsHandler
         private IMoveAction custom;
         private boolean     checked = false;
 
-        public ActionWrapper(IMoveAction wrapped)
+        public ActionWrapper(final IMoveAction wrapped)
         {
             this.wrapped = wrapped;
         }
 
         @Override
-        public boolean applyEffect(IPokemob user, Vector3 location)
+        public boolean applyEffect(final IPokemob user, final Vector3 location)
         {
             if (!this.checked)
             {
@@ -108,13 +108,13 @@ public class MoveEventsHandler
     {
         Move_Base move;
 
-        public DefaultAction(Move_Base move)
+        public DefaultAction(final Move_Base move)
         {
             this.move = move;
         }
 
         @Override
-        public boolean applyEffect(IPokemob attacker, Vector3 location)
+        public boolean applyEffect(final IPokemob attacker, final Vector3 location)
         {
             if (!MoveEventsHandler.canEffectBlock(attacker, location)) return false;
             if (this.move.getType(attacker) == PokeType.getType("water")) return MoveEventsHandler.doDefaultWater(
@@ -146,7 +146,7 @@ public class MoveEventsHandler
 
     private static MoveEventsHandler INSTANCE;
 
-    public static boolean attemptSmelt(IPokemob attacker, Vector3 location)
+    public static boolean attemptSmelt(final IPokemob attacker, final Vector3 location)
     {
         final World world = attacker.getEntity().getEntityWorld();
         final List<ItemEntity> items = world.getEntitiesWithinAABB(ItemEntity.class, location.getAABB().grow(1));
@@ -209,7 +209,7 @@ public class MoveEventsHandler
      * @param location
      * @return
      */
-    public static boolean canEffectBlock(IPokemob user, Vector3 location)
+    public static boolean canEffectBlock(final IPokemob user, final Vector3 location)
     {
         LivingEntity owner = user.getOwner();
         final boolean repel = SpawnHandler.checkNoSpawnerInArea(user.getEntity().getEntityWorld(), location.intX(),
@@ -233,7 +233,7 @@ public class MoveEventsHandler
         return true;
     }
 
-    public static boolean doDefaultElectric(IPokemob attacker, Move_Base move, Vector3 location)
+    public static boolean doDefaultElectric(final IPokemob attacker, final Move_Base move, final Vector3 location)
     {
         if (move.getPWR() < MoveEventsHandler.ELECTRICSTRONG || !PokecubeCore.getConfig().defaultElectricActions)
             return false;
@@ -258,7 +258,7 @@ public class MoveEventsHandler
         return false;
     }
 
-    public static boolean doDefaultFire(IPokemob attacker, Move_Base move, Vector3 location)
+    public static boolean doDefaultFire(final IPokemob attacker, final Move_Base move, final Vector3 location)
     {
         if (move.getPWR() <= 0 || !PokecubeCore.getConfig().defaultFireActions) return false;
         final World world = attacker.getEntity().getEntityWorld();
@@ -307,7 +307,7 @@ public class MoveEventsHandler
         return MoveEventsHandler.attemptSmelt(attacker, location);
     }
 
-    public static boolean doDefaultIce(IPokemob attacker, Move_Base move, Vector3 location)
+    public static boolean doDefaultIce(final IPokemob attacker, final Move_Base move, final Vector3 location)
     {
         if (!PokecubeCore.getConfig().defaultIceActions) return false;
         final World world = attacker.getEntity().getEntityWorld();
@@ -348,7 +348,7 @@ public class MoveEventsHandler
         return false;
     }
 
-    public static boolean doDefaultWater(IPokemob attacker, Move_Base move, Vector3 location)
+    public static boolean doDefaultWater(final IPokemob attacker, final Move_Base move, final Vector3 location)
     {
         if (!PokecubeCore.getConfig().defaultWaterActions) return false;
         final World world = attacker.getEntity().getEntityWorld();
@@ -396,8 +396,8 @@ public class MoveEventsHandler
         return done;
     }
 
-    public static BlockItemUseContext getContext(World world, BlockState toPlace, BlockPos location,
-            Direction placeFrom, Direction placeTo)
+    public static BlockItemUseContext getContext(final World world, final BlockState toPlace, final BlockPos location,
+            final Direction placeFrom, final Direction placeTo)
     {
         // TODO figoure out something for here.
         final ItemStack stack = new ItemStack(toPlace.getBlock());
@@ -429,7 +429,7 @@ public class MoveEventsHandler
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public void onEvent(MoveUse.DuringUse.Post evt)
+    public void onEvent(final MoveUse.DuringUse.Post evt)
     {
         final MovePacket move = evt.getPacket();
         final IPokemob attacker = move.attacker;
@@ -459,7 +459,7 @@ public class MoveEventsHandler
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public void onEvent(MoveUse.DuringUse.Pre evt)
+    public void onEvent(final MoveUse.DuringUse.Pre evt)
     {
         final MovePacket move = evt.getPacket();
         final Move_Base attack = move.getMove();
@@ -487,7 +487,7 @@ public class MoveEventsHandler
         }
 
         if (applied == null) return;
-        if (!user) applied.getEntity().getEntityData().putString("lastMoveHitBy", move.attack);
+        if (!user) applied.getEntity().getPersistentData().putString("lastMoveHitBy", move.attack);
         if (MoveEntry.oneHitKos.contains(attack.name) && target != null && target.getLevel() < attacker.getLevel())
             move.failed = true;
         if (target != null && target.getMoveStats().substituteHP > 0 && !user)
@@ -557,7 +557,7 @@ public class MoveEventsHandler
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = false)
-    public void onEvent(MoveWorldAction.OnAction evt)
+    public void onEvent(final MoveWorldAction.OnAction evt)
     {
         final IPokemob attacker = evt.getUser();
         final Vector3 location = evt.getLocation();

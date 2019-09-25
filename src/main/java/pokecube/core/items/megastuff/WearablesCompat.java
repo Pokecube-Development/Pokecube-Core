@@ -167,7 +167,7 @@ public class WearablesCompat
                     final int damage = stack.getTag().getInt("dyeColour");
                     ret = DyeColor.byId(damage);
                 }
-                final Color colour = new Color(ret.func_218388_g() + 0xFF000000);
+                final Color colour = new Color(ret.getTextColor() + 0xFF000000);
                 col[0] = colour.getRed();
                 col[1] = colour.getGreen();
                 col[2] = colour.getBlue();
@@ -251,7 +251,7 @@ public class WearablesCompat
                     final int damage = stack.getTag().getInt("dyeColour");
                     ret = DyeColor.byId(damage);
                 }
-                final Color colour = new Color(ret.func_218388_g() + 0xFF000000);
+                final Color colour = new Color(ret.getTextColor() + 0xFF000000);
                 col[0] = colour.getRed();
                 col[1] = colour.getGreen();
                 col[2] = colour.getBlue();
@@ -300,7 +300,7 @@ public class WearablesCompat
                     final int damage = stack.getTag().getInt("dyeColour");
                     ret = DyeColor.byId(damage);
                 }
-                final Color colour = new Color(ret.func_218388_g() + 0xFF000000);
+                final Color colour = new Color(ret.getTextColor() + 0xFF000000);
                 col[0] = colour.getRed();
                 col[1] = colour.getGreen();
                 col[2] = colour.getBlue();

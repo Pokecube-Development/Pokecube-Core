@@ -19,7 +19,7 @@ public class AITools
     public static class AgroCheck implements Predicate<IPokemob>
     {
         @Override
-        public boolean test(IPokemob input)
+        public boolean test(final IPokemob input)
         {
             final boolean tame = input.getGeneralState(GeneralStates.TAMED);
             boolean wildAgress = !tame;
@@ -28,7 +28,7 @@ public class AITools
             else wildAgress = false;
             // Check if the mob should always be agressive.
             if (!tame && !wildAgress && input.getEntity().ticksExisted % 20 == 0) wildAgress = input.getEntity()
-                    .getEntityData().getBoolean("alwaysAgress");
+                    .getPersistentData().getBoolean("alwaysAgress");
             return wildAgress;
         }
     }
@@ -36,7 +36,7 @@ public class AITools
     private static class ValidCheck implements Predicate<Entity>
     {
         @Override
-        public boolean test(Entity input)
+        public boolean test(final Entity input)
         {
             final ResourceLocation eid = input.getType().getRegistryName();
             if (AITools.invalidIDs.contains(eid)) return false;

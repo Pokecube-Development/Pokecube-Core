@@ -293,7 +293,7 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
         if (entity == null && !remote)
         {
             this.setTargetID(-1);
-            this.getEntity().getEntityData().putString("lastMoveHitBy", "");
+            this.getEntity().getPersistentData().putString("lastMoveHitBy", "");
         }
         else if (entity != null) /**
                                   * Ensure that the target being set is

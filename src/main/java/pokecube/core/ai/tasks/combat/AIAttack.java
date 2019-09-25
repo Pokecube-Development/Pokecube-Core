@@ -382,7 +382,7 @@ public class AIAttack extends AIBase implements IAICombat
         this.canSee = false;
         if (this.running)
         {
-            this.entity.getEntityData().putLong("lastAttackTick", this.entity.getEntityWorld().getGameTime());
+            this.entity.getPersistentData().putLong("lastAttackTick", this.entity.getEntityWorld().getGameTime());
             if (this.entityTarget != null)
             {
                 final double dist = this.entity.getDistanceSq(this.entityTarget.posX, this.entityTarget.posY,
