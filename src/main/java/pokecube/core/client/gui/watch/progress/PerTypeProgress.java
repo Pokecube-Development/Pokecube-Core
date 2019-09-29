@@ -18,6 +18,7 @@ import pokecube.core.client.gui.watch.GuiPokeWatch;
 import pokecube.core.database.stats.CaptureStats;
 import pokecube.core.database.stats.EggStats;
 import pokecube.core.database.stats.KillStats;
+import pokecube.core.database.stats.SpecialCaseRegister;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
@@ -62,10 +63,13 @@ public class PerTypeProgress extends Progress
 
         killed0 = KillStats.getUniqueOfTypeKilledBy(watch.player.getUniqueID(), type);
         killed1 = KillStats.getTotalOfTypeKilledBy(watch.player.getUniqueID(), type);
+        
 
-        String captureLine = I18n.format("pokewatch.progress.type.caught", caught1, caught0, type);
-        String killLine = I18n.format("pokewatch.progress.type.killed", killed1, killed0, type);
-        String hatchLine = I18n.format("pokewatch.progress.type.hatched", hatched1, hatched0, type);
+        int total_of_type = SpecialCaseRegister.countSpawnableTypes(type);
+
+        String captureLine = I18n.format("pokewatch.progress.type.caught", caught1, caught0, type, total_of_type);
+        String killLine = I18n.format("pokewatch.progress.type.killed", killed1, killed0, type, total_of_type);
+        String hatchLine = I18n.format("pokewatch.progress.type.hatched", hatched1, hatched0, type, total_of_type);
 
         AxisAlignedBB centre = watch.player.getEntityBoundingBox();
         AxisAlignedBB bb = centre.grow(PokecubeMod.core.getConfig().maxSpawnRadius, 5,
