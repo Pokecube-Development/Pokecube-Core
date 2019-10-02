@@ -20,6 +20,7 @@ import pokecube.core.client.gui.watch.GuiPokeWatch;
 import pokecube.core.database.stats.CaptureStats;
 import pokecube.core.database.stats.EggStats;
 import pokecube.core.database.stats.KillStats;
+import pokecube.core.database.stats.SpecialCaseRegister;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.utils.PokeType;
@@ -33,7 +34,7 @@ public class PerTypeProgress extends Progress
     SuggestionProvider<CommandSource> TYPESUGGESTER = (ctx, sb) -> net.minecraft.command.ISuggestionProvider.suggest(
             PerTypeProgress.NAMES, sb);
 
-    public PerTypeProgress(GuiPokeWatch watch)
+    public PerTypeProgress(final GuiPokeWatch watch)
     {
         super(new TranslationTextComponent("pokewatch.progress.type.title"), watch);
         if (PerTypeProgress.NAMES.isEmpty()) for (final PokeType type : PokeType.values())
@@ -41,7 +42,7 @@ public class PerTypeProgress extends Progress
     }
 
     @Override
-    public boolean charTyped(char typedChar, int keyCode)
+    public boolean charTyped(final char typedChar, final int keyCode)
     {
         if (keyCode == GLFW.GLFW_KEY_TAB)
         {
@@ -108,6 +109,8 @@ public class PerTypeProgress extends Progress
         }
         this.text.setText(PokeType.getTranslatedName(this.type));
 
+        final int total_of_type = SpecialCaseRegister.countSpawnableTypes(this.type);
+
         this.caught0 = CaptureStats.getUniqueOfTypeCaughtBy(this.watch.player.getUniqueID(), this.type);
         this.caught1 = CaptureStats.getTotalOfTypeCaughtBy(this.watch.player.getUniqueID(), this.type);
 
@@ -117,10 +120,12 @@ public class PerTypeProgress extends Progress
         this.killed0 = KillStats.getUniqueOfTypeKilledBy(this.watch.player.getUniqueID(), this.type);
         this.killed1 = KillStats.getTotalOfTypeKilledBy(this.watch.player.getUniqueID(), this.type);
 
-        final String captureLine = I18n.format("pokewatch.progress.type.caught", this.caught1, this.caught0, this.type);
-        final String killLine = I18n.format("pokewatch.progress.type.killed", this.killed1, this.killed0, this.type);
-        final String hatchLine = I18n.format("pokewatch.progress.type.hatched", this.hatched1, this.hatched0,
-                this.type);
+        final String captureLine = I18n.format("pokewatch.progress.type.caught", this.caught1, this.caught0, this.type,
+                total_of_type);
+        final String killLine = I18n.format("pokewatch.progress.type.killed", this.killed1, this.killed0, this.type,
+                total_of_type);
+        final String hatchLine = I18n.format("pokewatch.progress.type.hatched", this.hatched1, this.hatched0, this.type,
+                total_of_type);
 
         final AxisAlignedBB centre = this.watch.player.getBoundingBox();
         final AxisAlignedBB bb = centre.grow(PokecubeCore.getConfig().maxSpawnRadius, 5, PokecubeCore

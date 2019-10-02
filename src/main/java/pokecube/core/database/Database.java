@@ -62,6 +62,7 @@ import pokecube.core.database.PokedexEntry.SpawnData;
 import pokecube.core.database.PokedexEntryLoader.Drop;
 import pokecube.core.database.PokedexEntryLoader.SpawnRule;
 import pokecube.core.database.moves.json.JsonMoves;
+import pokecube.core.database.moves.json.JsonMoves.AnimationJson;
 import pokecube.core.database.moves.json.JsonMoves.MoveJsonEntry;
 import pokecube.core.database.moves.json.JsonMoves.MovesJson;
 import pokecube.core.database.recipes.XMLRecipeHandler;
@@ -735,6 +736,7 @@ public class Database
         final MovesJson moves = JsonMoves.getMoves(null);
         for (final MoveJsonEntry entry : moves.moves)
         {
+            // Register sound on source
             if (entry.soundEffectSource != null)
             {
                 final ResourceLocation sound = new ResourceLocation(entry.soundEffectSource);
@@ -742,6 +744,7 @@ public class Database
                 event.setRegistryName(sound);
                 if (!registry.containsKey(sound)) registry.register(event);
             }
+            // Register sound on target
             if (entry.soundEffectTarget != null)
             {
                 final ResourceLocation sound = new ResourceLocation(entry.soundEffectTarget);
@@ -749,6 +752,15 @@ public class Database
                 event.setRegistryName(sound);
                 if (!registry.containsKey(sound)) registry.register(event);
             }
+            // Register sounds for the animations
+            if (entry.animations != null) for (final AnimationJson anim : entry.animations)
+                if (anim.sound != null)
+                {
+                    final ResourceLocation sound = new ResourceLocation(anim.sound);
+                    final SoundEvent event = new SoundEvent(sound);
+                    event.setRegistryName(sound);
+                    if (!registry.containsKey(sound)) registry.register(event);
+                }
         }
 
         // Register sound events from config.
@@ -933,6 +945,27 @@ public class Database
     }
 
     /**
+     * Loads in spawns, drops, held items and starter packs, as well as
+     * initializing things like children,
+     * evolutions, etc
+     */
+    public static void postResourcesLoaded()
+    {
+        PokedexEntryLoader.postInit();
+        Database.loadSpawns();
+        Database.loadStarterPack();
+
+        /** Initialize relations, prey, children. */
+
+        for (final PokedexEntry p : Database.allFormes)
+            p.initRelations();
+        for (final PokedexEntry p : Database.allFormes)
+            p.initPrey();
+        for (final PokedexEntry p : Database.allFormes)
+            p.getChild();
+    }
+
+    /**
      * This is called before generating any items. This ensures that the types
      * are loaded correctly.
      */
@@ -979,27 +1012,6 @@ public class Database
             {
                 PokecubeCore.LOGGER.error("Error with moves database " + s, e1);
             }
-    }
-
-    /**
-     * Loads in spawns, drops, held items and starter packs, as well as
-     * initializing things like children,
-     * evolutions, etc
-     */
-    public static void postResourcesLoaded()
-    {
-        PokedexEntryLoader.postInit();
-        Database.loadSpawns();
-        Database.loadStarterPack();
-
-        /** Initialize relations, prey, children. */
-
-        for (final PokedexEntry p : Database.allFormes)
-            p.initRelations();
-        for (final PokedexEntry p : Database.allFormes)
-            p.initPrey();
-        for (final PokedexEntry p : Database.allFormes)
-            p.getChild();
     }
 
     public static String trim(String name)

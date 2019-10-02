@@ -71,26 +71,22 @@ public class AIGatherStuff extends AIBase
             if (this.seeds.getItem() instanceof IPlantable)
             {
                 final BlockPos down = this.pos.down();
-                if (world.isAirBlock(down)) return true;
-                // Use the fakeplayer to plant it
-                final PlayerEntity player = PokecubeMod.getFakePlayer(world);
-                player.setPosition(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-                player.setHeldItem(Hand.MAIN_HAND, this.seeds);
-                final ItemUseContext context = new ItemUseContext(player, Hand.MAIN_HAND, new BlockRayTraceResult(
-                        new Vec3d(0.5, 1, 0.5), Direction.UP, this.pos, false));
-                this.seeds.getItem().onItemUse(context);
+
+                if (!world.isAirBlock(down))
+                {
+                    // Use the fakeplayer to plant it
+                    final PlayerEntity player = PokecubeMod.getFakePlayer(world);
+                    player.setPosition(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+                    player.setHeldItem(Hand.MAIN_HAND, this.seeds);
+                    final ItemUseContext context = new ItemUseContext(player, Hand.MAIN_HAND, new BlockRayTraceResult(
+                            new Vec3d(0.5, 1, 0.5), Direction.UP, this.pos, false));
+                    // Attempt to plant it.
+                    this.seeds.getItem().onItemUse(context);
+                }
                 IPokemob pokemob;
-                // Attempt to plant it.
-                if (!this.seeds.isEmpty() && (pokemob = CapabilityPokemob.getPokemobFor(this.entity)) != null) // Add
-                                                                                                               // the
-                                                                                                               // "returned"
-                                                                                                               // stack
-                                                                                                               // to
-                                                                                                               // the
-                                                                                                               // inventory
-                                                                                                               // (ie
-                                                                                                               // remaining
-                    // seeds)
+                // Add the "returned" stack to the inventory (ie remaining
+                // seeds)
+                if (!this.seeds.isEmpty() && (pokemob = CapabilityPokemob.getPokemobFor(this.entity)) != null)
                     if (!ItemStackTools.addItemStackToInventory(this.seeds, pokemob.getInventory(), 2)) this.entity
                             .entityDropItem(this.seeds, 0);
             }
