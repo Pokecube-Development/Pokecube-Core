@@ -46,6 +46,7 @@ import pokecube.core.client.gui.blocks.TMs;
 import pokecube.core.client.gui.blocks.Trade;
 import pokecube.core.client.gui.pokemob.GuiPokemob;
 import pokecube.core.client.gui.pokemob.GuiPokemobAI;
+import pokecube.core.client.gui.pokemob.GuiPokemobBase;
 import pokecube.core.client.gui.pokemob.GuiPokemobRoutes;
 import pokecube.core.client.gui.pokemob.GuiPokemobStorage;
 import pokecube.core.client.render.RenderMoves;
@@ -256,7 +257,8 @@ public class ClientProxy extends CommonProxy
 
         // Register the gui side of the screens.
         PokecubeCore.LOGGER.debug("Init Screen Factories");
-        ScreenManager.registerFactory(ContainerPokemob.TYPE, (c, i, t) ->
+
+        final ScreenManager.IScreenFactory<ContainerPokemob, GuiPokemobBase> factory = (c, i, t) ->
         {
             switch (c.mode)
             {
@@ -267,8 +269,10 @@ public class ClientProxy extends CommonProxy
             case PacketPokemobGui.ROUTES:
                 return new GuiPokemobRoutes(c, i);
             }
-            return new GuiPokemob<>(c, i);
-        });
+            return new GuiPokemob(c, i);
+        };
+
+        ScreenManager.registerFactory(ContainerPokemob.TYPE, factory);
         ScreenManager.registerFactory(HealerContainer.TYPE, Healer<HealerContainer>::new);
         ScreenManager.registerFactory(PCContainer.TYPE, PC<PCContainer>::new);
         ScreenManager.registerFactory(TradeContainer.TYPE, Trade<TradeContainer>::new);

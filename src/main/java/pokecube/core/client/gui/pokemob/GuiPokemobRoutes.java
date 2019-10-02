@@ -3,11 +3,8 @@ package pokecube.core.client.gui.pokemob;
 import java.util.List;
 import java.util.function.Function;
 
-import org.lwjgl.opengl.GL11;
-
 import com.google.common.collect.Lists;
 
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -15,7 +12,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
 import pokecube.core.ai.routes.IGuardAICapability;
-import pokecube.core.client.Resources;
 import pokecube.core.client.gui.helper.GuardEntry;
 import pokecube.core.client.gui.helper.RouteEditHelper;
 import pokecube.core.client.gui.helper.ScrollGui;
@@ -25,7 +21,7 @@ import pokecube.core.interfaces.IPokemob;
 import pokecube.core.network.packets.PacketSyncRoutes;
 import pokecube.core.network.pokemobs.PacketPokemobGui;
 
-public class GuiPokemobRoutes extends ContainerScreen<ContainerPokemob>
+public class GuiPokemobRoutes extends GuiPokemobBase
 {
     final PlayerInventory    playerInventory;
     final IInventory         pokeInventory;
@@ -33,14 +29,11 @@ public class GuiPokemobRoutes extends ContainerScreen<ContainerPokemob>
     final Entity             entity;
     final IGuardAICapability guard;
     ScrollGui<GuardEntry>    list;
-    private float            yRenderAngle = 10;
-    private float            xRenderAngle = 0;
-
-    int num;
+    int                      num;
 
     public GuiPokemobRoutes(final ContainerPokemob container, final PlayerInventory inv)
     {
-        super(container, inv, container.pokemob.getDisplayName());
+        super(container, inv);
         this.pokemob = container.pokemob;
         this.playerInventory = inv;
         this.pokeInventory = this.pokemob.getInventory();
@@ -52,28 +45,10 @@ public class GuiPokemobRoutes extends ContainerScreen<ContainerPokemob>
     protected void drawGuiContainerBackgroundLayer(final float partialTicks, final int mouseX, final int mouseY)
     {
         super.renderBackground();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(Resources.GUI_POKEMOB);
         final int k = (this.width - this.xSize) / 2;
         final int l = (this.height - this.ySize) / 2;
-        this.blit(k, l, 0, 0, this.xSize, this.ySize);
-        this.yRenderAngle = -this.entity.rotationYaw + 45;
-        this.xRenderAngle = 0;
-        GuiPokemob.renderMob(this.pokemob.getEntity(), k, l, this.xSize, this.ySize, this.xRenderAngle,
-                this.yRenderAngle, 0, 1);
         final String number = this.num + "";
         this.font.drawString(number, k + 87 - this.font.getStringWidth(number), l + 62, 0xFF888888);
-    }
-
-    /**
-     * Draw the foreground layer for the ContainerScreen (everything in front of
-     * the items)
-     */
-    @Override
-    protected void drawGuiContainerForegroundLayer(final int mouseX, final int mouseY)
-    {
-        this.font.drawString(this.getTitle().getFormattedText(), 8, 6, 4210752);
-        this.font.drawString(this.playerInventory.getName().getFormattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
     @Override

@@ -2,19 +2,15 @@ package pokecube.core.client.gui.pokemob;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.ExtendedList.AbstractListEntry;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
-import pokecube.core.client.Resources;
 import pokecube.core.client.gui.helper.ScrollGui;
 import pokecube.core.entity.pokemobs.ContainerPokemob;
 import pokecube.core.interfaces.IMoveConstants.AIRoutine;
@@ -23,7 +19,7 @@ import pokecube.core.network.pokemobs.PacketAIRoutine;
 import pokecube.core.network.pokemobs.PacketPokemobGui;
 import pokecube.nbtedit.gui.TextFieldWidget2;
 
-public class GuiPokemobAI extends ContainerScreen<ContainerPokemob>
+public class GuiPokemobAI extends GuiPokemobBase
 {
     private static class Entry extends AbstractListEntry<Entry>
     {
@@ -71,45 +67,16 @@ public class GuiPokemobAI extends ContainerScreen<ContainerPokemob>
     final IPokemob        pokemob;
     final Entity          entity;
     ScrollGui<Entry>      list;
-    private float         yRenderAngle = 10;
-
-    private float xRenderAngle = 0;
 
     final List<TextFieldWidget2> textInputs = Lists.newArrayList();
 
     public GuiPokemobAI(final ContainerPokemob container, final PlayerInventory inventory)
     {
-        super(container, inventory, container.pokemob.getDisplayName());
+        super(container, inventory);
         this.pokemob = container.pokemob;
         this.playerInventory = inventory;
         this.pokeInventory = this.pokemob.getInventory();
         this.entity = this.pokemob.getEntity();
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(final float partialTicks, final int mouseX, final int mouseY)
-    {
-        super.renderBackground();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(Resources.GUI_POKEMOB);
-        final int k = (this.width - this.xSize) / 2;
-        final int l = (this.height - this.ySize) / 2;
-        this.blit(k, l, 0, 0, this.xSize, this.ySize);
-        this.yRenderAngle = -this.entity.rotationYaw + 45;
-        this.xRenderAngle = 0;
-        GuiPokemob.renderMob(this.pokemob.getEntity(), k, l, this.xSize, this.ySize, this.xRenderAngle,
-                this.yRenderAngle, 0, 1);
-    }
-
-    /**
-     * Draw the foreground layer for the ContainerScreen (everything in front of
-     * the items)
-     */
-    @Override
-    protected void drawGuiContainerForegroundLayer(final int mouseX, final int mouseY)
-    {
-        this.font.drawString(this.getTitle().getFormattedText(), 8, 6, 4210752);
-        this.font.drawString(this.playerInventory.getName().getFormattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
     @Override
