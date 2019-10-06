@@ -43,7 +43,7 @@ public class PacketChoose extends Packet
         final boolean        special;
         final boolean        pick;
 
-        public GuiOpener(PokedexEntry[] starters, boolean special, boolean pick)
+        public GuiOpener(final PokedexEntry[] starters, final boolean special, final boolean pick)
         {
             this.special = special;
             this.starters = starters;
@@ -53,7 +53,7 @@ public class PacketChoose extends Packet
 
         @OnlyIn(Dist.CLIENT)
         @SubscribeEvent
-        public void tick(ClientTickEvent event)
+        public void tick(final ClientTickEvent event)
         {
             pokecube.core.client.gui.GuiChooseFirstPokemob.special = this.special;
             pokecube.core.client.gui.GuiChooseFirstPokemob.pick = this.pick;
@@ -66,7 +66,7 @@ public class PacketChoose extends Packet
     public static final byte OPENGUI = 0;
     public static final byte CHOOSE  = 1;
 
-    public static boolean canPick(GameProfile profile)
+    public static boolean canPick(final GameProfile profile)
     {
         final Contributor contrib = ContributorManager.instance().getContributor(profile);
         final StarterInfoContainer info = PokecubePacketHandler.specialStarters.get(contrib);
@@ -75,7 +75,7 @@ public class PacketChoose extends Packet
         return false;
     }
 
-    public static PacketChoose createOpenPacket(boolean special, boolean pick, PokedexEntry... starts)
+    public static PacketChoose createOpenPacket(final boolean special, final boolean pick, final PokedexEntry... starts)
     {
         final PacketChoose packet = new PacketChoose(PacketChoose.OPENGUI);
         packet.data.putBoolean("C", true);
@@ -95,12 +95,12 @@ public class PacketChoose extends Packet
     {
     }
 
-    public PacketChoose(byte message)
+    public PacketChoose(final byte message)
     {
         this.message = message;
     }
 
-    public PacketChoose(PacketBuffer buf)
+    public PacketChoose(final PacketBuffer buf)
     {
         this.message = buf.readByte();
         final PacketBuffer buffer = new PacketBuffer(buf);
@@ -130,7 +130,7 @@ public class PacketChoose extends Packet
     }
 
     @Override
-    public void handleServer(ServerPlayerEntity player)
+    public void handleServer(final ServerPlayerEntity player)
     {
         /** Ignore this packet if the player already has a starter. */
         if (PokecubeSerializer.getInstance().hasStarter(player)) return;
@@ -209,7 +209,7 @@ public class PacketChoose extends Packet
     }
 
     @Override
-    public void write(PacketBuffer buf)
+    public void write(final PacketBuffer buf)
     {
         buf.writeByte(this.message);
         final PacketBuffer buffer = new PacketBuffer(buf);

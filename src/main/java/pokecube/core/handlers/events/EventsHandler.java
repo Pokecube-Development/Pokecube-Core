@@ -66,6 +66,7 @@ import pokecube.core.ai.routes.GuardAICapability;
 import pokecube.core.ai.routes.IGuardAICapability;
 import pokecube.core.blocks.tms.TMTile;
 import pokecube.core.blocks.trade.TraderTile;
+import pokecube.core.commands.CountCommand;
 import pokecube.core.commands.SecretBaseCommand;
 import pokecube.core.commands.TMCommand;
 import pokecube.core.contributors.Contributor;
@@ -119,13 +120,13 @@ public class EventsHandler
         {
             this.player = player;
             if (!SpawnHandler.canSpawnInWorld(player.getEntityWorld())) return;
-            // MinecraftForge.EVENT_BUS.register(this);
+            MinecraftForge.EVENT_BUS.register(this);
         }
 
         @SubscribeEvent
         public void onPlayerJoin(final TickEvent.PlayerTickEvent event)
         {
-            if (event.player == this.player && this.player.ticksExisted > 100)
+            if (event.player == this.player)
             {
                 // TODO choose first stuff.
                 PacketChoose packet;
@@ -606,6 +607,7 @@ public class EventsHandler
         PokecubeItems.init(event.getServer());
         TMCommand.register(event.getCommandDispatcher());
         SecretBaseCommand.register(event.getCommandDispatcher());
+        CountCommand.register(event.getCommandDispatcher());
         CommandConfigs.register(PokecubeCore.getConfig(), event.getCommandDispatcher());
     }
 

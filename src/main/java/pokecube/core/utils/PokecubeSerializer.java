@@ -178,7 +178,11 @@ public class PokecubeSerializer
 
     public boolean hasStarter(final PlayerEntity player)
     {
-        if (player != null) return false;
+        if (player != null)
+        {
+            PokecubeCore.LOGGER.error("Checking starter for null player!");
+            return true;
+        }
         return PlayerDataHandler.getInstance().getPlayerData(player).getData(PokecubePlayerData.class).hasStarter();
     }
 
