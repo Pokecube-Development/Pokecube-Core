@@ -496,8 +496,6 @@ public abstract class PokemobGenes extends PokemobSided implements IMobColourabl
                 size *= max;
             }
             this.getEntity().getSize(this.getEntity().getPose()).scale(size);
-            System.out.println(this.getEntity().getSize(this.getEntity().getPose()) + " " + size + " " + a + " " + b
-                    + " " + c);
         }
         this.genesSize.getExpressed().setValue(size);
     }

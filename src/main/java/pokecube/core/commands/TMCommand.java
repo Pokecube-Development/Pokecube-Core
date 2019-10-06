@@ -55,53 +55,6 @@ public class TMCommand
 
     public static int execute(final CommandSource source, final String tm) throws CommandSyntaxException
     {
-        // final boolean var = tm.isEmpty();
-        // if (!var)
-        // {
-        // for (final ItemBerry berry : BerryManager.berryItems.values())
-        // {
-        // // final Gson gson = new
-        // // GsonBuilder().setPrettyPrinting().create();
-        // final String filename = "fruit_" + berry.type.name;
-        // final File dir = new File("./generated/");
-        // if (!dir.exists()) dir.mkdirs();
-        // final File file = new File(dir, filename + ".json");
-        //
-//            //@formatter:off
-//            final String json =
-//                "{\n"+
-//                "  \"type\": \"minecraft:block\",\n"+
-//                "  \"pools\": [\n"+
-//                "    {\n"+
-//                "      \"name\": \""+berry.getRegistryName()+"\",\n"+
-//                "      \"rolls\": 1,\n"+
-//                "      \"entries\": [\n"+
-//                "        {\n"+
-//                "          \"type\": \"minecraft:item\",\n"+
-//                "          \"name\": \""+berry.getRegistryName()+"\"\n"+
-//                "        }\n"+
-//                "      ],\n"+
-//                "      \"conditions\": [\n"+
-//                "        {\n"+
-//                "          \"condition\": \"minecraft:survives_explosion\"\n"+
-//                "        }\n"+
-//                "      ]\n"+
-//                "    }\n"+
-//                "  ]\n"+
-//                "}";//@formatter:on
-        // try
-        // {
-        // final FileWriter write = new FileWriter(file);
-        // write.write(json);
-        // write.close();
-        // }
-        // catch (final IOException e)
-        // {
-        // e.printStackTrace();
-        // }
-        // }
-        // return 0;
-        // }
         final ServerPlayerEntity player = source.asPlayer();
         return TMCommand.execute(source, player, tm);
     }
