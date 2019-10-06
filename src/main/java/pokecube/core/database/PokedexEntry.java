@@ -1434,7 +1434,7 @@ public class PokedexEntry
             try
             {
             final LootTable loottable = mob.getEntityWorld().getServer().getLootTableManager().getLootTableFromLocation(this.heldTable);
-            final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) mob.getEntityWorld()).withRandom(mob.getRNG()).withParameter(LootParameters.THIS_ENTITY, mob).withParameter(LootParameters.POSITION, new BlockPos(mob));
+            final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) mob.getEntityWorld()).withRandom(mob.getRNG()).withParameter(LootParameters.THIS_ENTITY, mob).withParameter(LootParameters.POSITION, new BlockPos(mob)).withParameter(LootParameters.KILLER_ENTITY, null).withParameter(LootParameters.TOOL, null).withParameter(LootParameters.DIRECT_KILLER_ENTITY, null).withParameter(LootParameters.LAST_DAMAGE_PLAYER, null).withParameter(LootParameters.BLOCK_ENTITY, null).withParameter(LootParameters.DAMAGE_SOURCE, null).withParameter(LootParameters.EXPLOSION_RADIUS, 0f);
             for (final ItemStack itemstack : loottable.generate(lootcontext$builder.build(loottable.getParameterSet())))
             if (!itemstack.isEmpty()) return itemstack;
             }

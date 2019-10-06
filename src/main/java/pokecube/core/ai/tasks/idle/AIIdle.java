@@ -1,6 +1,5 @@
 package pokecube.core.ai.tasks.idle;
 
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -101,10 +100,9 @@ public class AIIdle extends AIBase
             this.v.set(Vector3.getNextSurfacePoint(this.world, this.v, Vector3.secondAxisNeg, this.v.y));
             if (this.v != null) this.y = this.v.y;
         }
-        final List<PlayerEntity> players = this.getPlayersWithinDistance(this.entity, Integer.MAX_VALUE);
-        if (!players.isEmpty())
+        final PlayerEntity player = this.getNearestPlayer(this.entity, PokecubeCore.getConfig().aiDisableDistance);
+        if (player != null)
         {
-            final PlayerEntity player = players.get(0);
             final double diff = Math.abs(player.posY - this.y);
             if (diff > 5) this.y = player.posY + 5 * (1 - Math.random());
         }

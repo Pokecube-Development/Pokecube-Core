@@ -6,6 +6,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import pokecube.core.database.PokedexEntry;
+import pokecube.core.interfaces.IMoveConstants.AIRoutine;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.interfaces.pokemob.ai.CombatStates;
@@ -53,7 +54,7 @@ public class LogicFloatFlySwim extends LogicBase
             if (down == null || pokemob.getLogicState(LogicStates.SITTING)) vy -= 0.02;
             here.set(pokemob.getEntity());
         }
-        if ((pokemob.floats() || pokemob.flys()) && !pokemob.getCombatState(CombatStates.ANGRY))
+        if ((canFloat || pokemob.flys()) && !pokemob.getCombatState(CombatStates.ANGRY))
         {
             final float floatHeight = (float) entry.preferedHeight;
             final Path path = this.entity.getNavigator().getPath();
@@ -66,7 +67,9 @@ public class LogicFloatFlySwim extends LogicBase
                 if (dhs < width * width && dvs <= floatHeight * floatHeight) this.entity.getNavigator().clearPath();
             }
         }
-        canFloat = pokemob.flys() || pokemob.floats();
+        canFloat = canFloat || pokemob.flys();
+        canFloat = canFloat && pokemob.isRoutineEnabled(AIRoutine.AIRBORNE);
+        this.entity.setNoGravity(canFloat);
         if (canFloat && here.offset(Direction.DOWN).getBlockState(this.entity.getEntityWorld()).getMaterial()
                 .isLiquid())
         {

@@ -173,9 +173,9 @@ public abstract class AIBase implements IAIRunnable
         return this.mutex;
     }
 
-    protected List<PlayerEntity> getPlayersWithinDistance(final Entity source, final float distance)
+    protected PlayerEntity getNearestPlayer(final Entity source, final float distance)
     {
-        return this.getEntitiesWithinDistance(source, distance, PlayerEntity.class);
+        return source.getEntityWorld().getClosestPlayer(source, distance);
     }
 
     @Override
