@@ -539,7 +539,7 @@ public class PokedexEntry
         {
             if (held != null) for (ItemStack stack : actions.keySet())
             {
-                if (Tools.isSameStack(stack, held)) { return stack; }
+                if (Tools.isSameStack(stack, held, true)) { return stack; }
             }
             return ItemStack.EMPTY;
         }
@@ -548,7 +548,7 @@ public class PokedexEntry
         {
             if (held != null) for (ItemStack stack : actions.keySet())
             {
-                if (Tools.isSameStack(stack, held) && actions.get(stack).forme != null) { return stack; }
+                if (Tools.isSameStack(stack, held, true) && actions.get(stack).forme != null) { return stack; }
             }
             return ItemStack.EMPTY;
         }
@@ -558,7 +558,7 @@ public class PokedexEntry
             if (held != null) for (ItemStack stack : actions.keySet())
             {
                 Interaction action = null;
-                if (Tools.isSameStack(stack, held) && (!(action = actions.get(stack)).stacks.isEmpty()
+                if (Tools.isSameStack(stack, held, true) && (!(action = actions.get(stack)).stacks.isEmpty()
                         || action.lootTable != null)) { return stack; }
             }
             return ItemStack.EMPTY;
@@ -1399,6 +1399,7 @@ public class PokedexEntry
         if (pokedexNb < 650) return 5;
         if (pokedexNb < 722) return 6;
         if (pokedexNb < 810) return 7;
+        if (pokedexNb < 891) return 8;
         return 0;
     }
 
