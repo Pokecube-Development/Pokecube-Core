@@ -13,6 +13,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -26,11 +27,15 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import pokecube.core.PokecubeItems;
 import pokecube.core.blocks.pc.ContainerPC;
 import pokecube.core.blocks.pc.InventoryPC;
+import pokecube.core.database.stats.StatsCollector;
 import pokecube.core.events.CaptureEvent;
+import pokecube.core.interfaces.IPokecube;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
+import pokecube.core.interfaces.IPokecube.PokecubeBehavior;
 import pokecube.core.interfaces.capabilities.CapabilityPokemob;
 import pokecube.core.items.pokecubes.EntityPokecube;
 import pokecube.core.items.pokecubes.PokecubeManager;
@@ -324,6 +329,15 @@ public class PCEventsHandler
             {
                 evt.setCanceled(true);
                 InventoryPC.addPokecubeToPC(evt.filledCube, catcher.getEntityWorld());
+                
+                //Apply the same code that StatsHandler does, as it does not get the cancelled event.
+                ResourceLocation cube_id = PokecubeItems.getCubeId(evt.filledCube);
+                if (IPokecube.BEHAVIORS.containsKey(cube_id))
+                {
+                    PokecubeBehavior cube = IPokecube.BEHAVIORS.getValue(cube_id);
+                    cube.onPostCapture(evt);
+                }
+                StatsCollector.addCapture(evt.caught);
             }
             else
             {
@@ -331,8 +345,6 @@ public class PCEventsHandler
                 if (player instanceof EntityPlayerMP) ((EntityPlayerMP) player)
                         .sendAllContents(player.inventoryContainer, player.inventoryContainer.inventoryItemStacks);
             }
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) return;
-
         }
         else
         {
