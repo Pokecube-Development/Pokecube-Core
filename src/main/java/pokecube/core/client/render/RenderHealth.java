@@ -37,6 +37,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import pokecube.core.database.PokedexEntry;
 import pokecube.core.database.stats.StatsCollector;
 import pokecube.core.handlers.Config;
 import pokecube.core.handlers.playerdata.PokecubePlayerStats;
@@ -229,8 +230,9 @@ public class RenderHealth
                 boolean nametag = pokemob.getGeneralState(GeneralStates.TAMED);
                 PokecubePlayerStats stats = PlayerDataHandler.getInstance()
                         .getPlayerData(Minecraft.getMinecraft().player).getData(PokecubePlayerStats.class);
-                boolean captureOrHatch = StatsCollector.getCaptured(pokemob.getPokedexEntry(),
-                        Minecraft.getMinecraft().player) > 0
+                PokedexEntry name_entry = pokemob.getPokedexEntry();
+                if (name_entry.isMega || name_entry.isGenderForme) name_entry = name_entry.getBaseForme();
+                boolean captureOrHatch = StatsCollector.getCaptured(name_entry, Minecraft.getMinecraft().player) > 0
                         || StatsCollector.getHatched(pokemob.getPokedexEntry(), Minecraft.getMinecraft().player) > 0;
                 boolean scanned = false;
                 nametag = nametag || captureOrHatch || (scanned = stats.hasInspected(pokemob.getPokedexEntry()));
