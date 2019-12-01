@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -37,6 +38,13 @@ public class AttackEntityHandler extends DefaultHandler
     {
         World world = pokemob.getEntity().getEntityWorld();
         Entity target = PokecubeMod.core.getEntityProvider().getEntity(world, targetId, true);
+
+        if (target instanceof MultiPartEntityPart)
+        {
+            MultiPartEntityPart part = (MultiPartEntityPart) target;
+            target = (Entity) part.parent;
+        }
+
         if (target == null || !(target instanceof EntityLivingBase))
         {
             if (PokecubeMod.debug)

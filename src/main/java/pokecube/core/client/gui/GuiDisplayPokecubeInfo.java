@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -759,7 +760,8 @@ public class GuiDisplayPokecubeInfo extends Gui
                 return;
             }
         }
-        if (target != null && !sameOwner && target instanceof EntityLivingBase)
+        if (target != null && !sameOwner
+                && (target instanceof EntityLivingBase || target instanceof MultiPartEntityPart))
         {
             PacketCommand.sendCommand(pokemob, Command.ATTACKENTITY,
                     new AttackEntityHandler(target.getEntityId()).setFromOwner(true));
