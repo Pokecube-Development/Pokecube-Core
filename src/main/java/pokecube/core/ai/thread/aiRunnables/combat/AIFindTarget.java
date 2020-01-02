@@ -225,20 +225,8 @@ public class AIFindTarget extends AIBase implements IAICombat
         if (!handleDamagedTargets || evt.getEntity().getEntityWorld().isRemote) return;
         // Only handle attack target set, not revenge target set.
         if (evt.getTarget() == evt.getEntityLiving().getRevengeTarget()) return;
-        // Only handle actual changes in target.
-        if (evt.getEntityLiving() instanceof EntityLiving
-                && evt.getTarget() == ((EntityLiving) evt.getEntityLiving()).getAttackTarget())
-            return;
-        // Prevent mob from targetting self.
-        if (evt.getTarget() == evt.getEntityLiving())
-        {
-            if (PokecubeMod.core.getConfig().debug)
-            {
-                PokecubeMod.log(Level.WARNING, evt.getTarget() + " is targetting self again.",
-                        new IllegalArgumentException());
-            }
-            return;
-        }
+        // Cannot target self.
+        if (evt.getTarget() == evt.getEntityLiving()) return;
         IPokemob pokemob = CapabilityPokemob.getPokemobFor(evt.getEntityLiving());
         if (pokemob != null)
         {

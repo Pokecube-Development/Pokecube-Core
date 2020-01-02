@@ -34,6 +34,7 @@ import pokecube.core.ai.utils.pathing.PokemobNavigator;
 import pokecube.core.database.PokedexEntry;
 import pokecube.core.events.handlers.EventsHandler;
 import pokecube.core.events.pokemob.InitAIEvent;
+import pokecube.core.handlers.TeamManager;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.capabilities.impl.PokemobSaves;
@@ -119,6 +120,11 @@ public class DefaultPokemob extends PokemobSaves implements ICapabilitySerializa
                 return;
             }
             else if (entity instanceof IEntityOwnable && ((IEntityOwnable) entity).getOwner() == getOwner())
+            {
+                getEntity().setAttackTarget(null);
+                return;
+            }
+            else if (TeamManager.sameTeam(entity, this.getEntity()))
             {
                 getEntity().setAttackTarget(null);
                 return;
