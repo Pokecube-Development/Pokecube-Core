@@ -18,25 +18,17 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.util.ResourceLocation;
 import pokecube.core.PokecubeCore;
 import pokecube.core.client.Resources;
-import pokecube.core.client.render.entity.RenderAdvancedPokemobModel;
-import pokecube.core.client.render.entity.RenderPokemobs;
-import pokecube.core.database.Database;
-import pokecube.core.database.PokedexEntry;
 import pokecube.core.entity.pokemobs.ContainerPokemob;
-import pokecube.core.events.handlers.EventsHandlerClient;
 import pokecube.core.interfaces.IPokemob;
 import pokecube.core.interfaces.PokecubeMod;
 import pokecube.core.interfaces.pokemob.IHasCommands.Command;
@@ -181,109 +173,6 @@ public class GuiPokemob extends GuiContainer
         public void drawButton(Minecraft mc, int mouseX, int mouseY, float f)
         {
             super.drawButton(mc, mouseX, mouseY, f);
-            if (id == StanceHandler.BUTTONTOGGLESTAY || id == StanceHandler.BUTTONTOGGLESIT)
-            {
-                PokedexEntry entry = Database.getEntry("eevee");
-                IPokemob renderMob = EventsHandlerClient.getRenderMob(entry, PokecubeCore.proxy.getWorld());
-                if (renderMob == null)
-                {
-                    // No Eevee found
-                    ResourceLocation texture;
-                    if (id == StanceHandler.BUTTONTOGGLESTAY)
-                    {
-                        if (pokemob.getGeneralState(GeneralStates.STAYING))
-                        {
-                            texture = new ResourceLocation(PokecubeMod.ID, "textures/gui/standing.png");
-                        }
-                        else
-                        {
-                            texture = new ResourceLocation(PokecubeMod.ID, "textures/gui/walking.png");
-                        }
-                    }
-                    else
-                    {
-
-                        if (pokemob.getLogicState(LogicStates.SITTING))
-                        {
-                            texture = new ResourceLocation(PokecubeMod.ID, "textures/gui/sitting.png");
-                        }
-                        else
-                        {
-                            texture = new ResourceLocation(PokecubeMod.ID, "textures/gui/standing.png");
-                        }
-                    }
-                    mc.getTextureManager().bindTexture(texture);
-                    int x = this.x + 2;
-                    int y = this.y + 1;
-                    Tessellator tessellator = Tessellator.getInstance();
-                    BufferBuilder vertexbuffer = tessellator.getBuffer();
-                    vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-                    vertexbuffer.pos(x + 0, y + height - 2, this.zLevel).tex(0, 1).endVertex();
-                    vertexbuffer.pos(x + width - 2, y + height - 2, this.zLevel).tex(1, 1).endVertex();
-                    vertexbuffer.pos(x + width - 2, y + 0, this.zLevel).tex(1, 0).endVertex();
-                    vertexbuffer.pos(x + 0, y + 0, this.zLevel).tex(0, 0).endVertex();
-                    tessellator.draw();
-                    return;
-                }
-                renderMob.getEntity().onGround = true;
-
-                int x = this.x + width / 2 + 4;
-                int y = this.y + height / 2 + 7;
-                double scale = 0.7f;
-                GL11.glPushMatrix();
-                GL11.glTranslatef(x, y, 10F);
-                GL11.glRotated(90, 0, 1, 0);
-                GL11.glScaled(scale, scale, scale);
-                GlStateManager.enableDepth();
-                renderMob.getEntity().ticksExisted = mc.player.ticksExisted;
-                renderMob.getEntity().renderYawOffset = 0;
-                renderMob.getEntity().prevRenderYawOffset = 0;
-                renderMob.getEntity().rotationYawHead = 0;
-                renderMob.getEntity().rotationYawHead = 0;
-                renderMob.getEntity().prevRotationYawHead = 0;
-                renderMob.getEntity().rotationYaw = 0;
-                renderMob.getEntity().prevRotationYaw = 0;
-                renderMob.getEntity().limbSwing += 0.05;
-                renderMob.getEntity().limbSwingAmount = 0.05f;
-                Object o = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(renderMob.getEntity());
-                if (o instanceof RenderAdvancedPokemobModel
-                        || (o = RenderPokemobs.getInstance().getRenderer(entry)) instanceof RenderAdvancedPokemobModel)
-                {
-                    RenderAdvancedPokemobModel<?> render = (RenderAdvancedPokemobModel<?>) o;
-                    if (id == StanceHandler.BUTTONTOGGLESIT)
-                    {
-                        if (pokemob.getLogicState(LogicStates.SITTING))
-                        {
-                            render.wrapper.anim = "sitting";
-                        }
-                        else render.wrapper.anim = "idle";
-                    }
-                    else
-                    {
-                        if (pokemob.getGeneralState(GeneralStates.STAYING)) render.wrapper.anim = "idle";
-                        else render.wrapper.anim = "walking";
-                    }
-                    render.wrapper.overrideAnim = true;
-                }
-                EventsHandlerClient.renderMob(renderMob, mc.getRenderPartialTicks(), false);
-                if (o instanceof RenderAdvancedPokemobModel)
-                {
-                    RenderAdvancedPokemobModel<?> render = (RenderAdvancedPokemobModel<?>) o;
-                    render.wrapper.anim = "";
-                    render.wrapper.overrideAnim = false;
-                }
-                GL11.glPopMatrix();
-            }
-            else
-            {
-                mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-                this.drawTexturedModalRect(x + 2, y + 2,
-                        mc.getTextureMapBlocks().getAtlasSprite("minecraft:items/diamond_sword"), 16, 16);
-                if (!pokemob.getCombatState(CombatStates.GUARDING) || !PokecubeMod.core.getConfig().guardModeEnabled)
-                {
-                    this.drawGradientRect(x + 2, y + 2, x + width - 2, y + width - 2, 0x88884444, 0x88884444);
-                }
-            }
         }
 
         @Override
@@ -459,12 +348,19 @@ public class GuiPokemob extends GuiContainer
         float scale = 100f / full;
         current *= scale / 100f;
         current = Math.min(1, current);
-        int i = 84, j = 37;
+        int i = 80, j = 35;
+        int w = 88, h = 5;
         int col = 0xFF555555;
-        this.drawGradientRect(i, j, i + 80, j + 10, col, col);
+        this.drawGradientRect(i, j, i + w, j + h, col, col);
         col = 0xFFFFFFFF;
-        int col1 = 0xFF00FF77;
-        this.drawGradientRect(i, j, i + (int) (80 * current), j + 10, col, col1);
+        int col1 = 0xFF000000;
+        int greenness = (int) ((2 * (current - 0.35)) * 0xFF);
+        int redness = (int) ((1 - current) * 2 * 0xFF);
+        redness = Math.min(redness, 0xFF);
+        greenness = Math.min(greenness, 0xFF);
+        greenness = Math.max(0, greenness);
+        col1 |= redness << 16 | greenness << 8;
+        this.drawGradientRect(i, j, i + (int) (w * current), j + h, col, col1);
     }
 
     /** Draws the screen and all the components in it. */
@@ -477,6 +373,41 @@ public class GuiPokemob extends GuiContainer
         GuiButton guard = buttonList.get(1);
         GuiButton sit = buttonList.get(2);
         List<String> text = Lists.newArrayList();
+
+        final boolean guarding = this.pokemob.getCombatState(CombatStates.GUARDING);
+        final boolean sitting = this.pokemob.getLogicState(LogicStates.SITTING);
+        final boolean staying = this.pokemob.getGeneralState(GeneralStates.STAYING);
+
+        guard.packedFGColour = (guarding ? 0xFF00FF00 : 0xFFFF0000);
+        sit.packedFGColour = (sitting ? 0xFF00FF00 : 0xFFFF0000);
+        stay.packedFGColour = (staying ? 0xFF00FF00 : 0xFFFF0000);
+
+        int dx = x - this.guiLeft;
+        int dy = y - this.guiTop;
+
+        if (dx > 79 && dx < 168 && dy > 33 && dy < 40)
+        {
+            final float full = PokecubeCore.core.getConfig().pokemobLifeSpan / 4
+                    + PokecubeCore.core.getConfig().pokemobLifeSpan;
+            float current = -(this.pokemob.getHungerTime() - PokecubeCore.core.getConfig().pokemobLifeSpan);
+            // Convert to a scale
+            final float scale = 100f / full;
+            current *= scale / 100f;
+            current = Math.min(1, current);
+            float value = (int) (1000 * (1 - current)) / 10f;
+            text.add(I18n.format("pokemob.bar.value", value+"%"));
+            this.drawHoveringText(text, x, y);
+        }
+
+        if (pokemob.getGeneralState(GeneralStates.STAYING)) stay.displayString = I18n.format("pokemob.stance.stay");
+        else stay.displayString = I18n.format("pokemob.stance.follow");
+
+        if (pokemob.getLogicState(LogicStates.SITTING)) sit.displayString = I18n.format("pokemob.stance.sit");
+        else sit.displayString = I18n.format("pokemob.stance.no_sit");
+
+        if (pokemob.getCombatState(CombatStates.GUARDING)) guard.displayString = I18n.format("pokemob.stance.guard");
+        else guard.displayString = I18n.format("pokemob.stance.no_guard");
+
         if (guard.isMouseOver())
         {
             text.add(I18n.format("pokemob.stance.guard"));
@@ -503,13 +434,14 @@ public class GuiPokemob extends GuiContainer
         super.initGui();
         buttonList.clear();
         int xOffset = 10;
-        int yOffset = 33;
-        String sit = "";
-        String stay = "";
-        String guard = "";
-        buttonList.add(new PokemobButton(0, width / 2 - xOffset + 70, height / 2 - yOffset, 20, 20, stay, pokemob));
-        buttonList.add(new PokemobButton(1, width / 2 - xOffset + 36, height / 2 - yOffset, 20, 20, guard, pokemob));
-        buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset, 20, 20, sit, pokemob));
+        int yOffset = 23;
+        String sit = I18n.format("pokemob.stance.sit");
+        String stay = I18n.format("pokemob.stance.follow");
+        String guard = I18n.format("pokemob.stance.guard");
+        buttonList.add(new PokemobButton(0, width / 2 - xOffset + 2, height / 2 - yOffset - 20, 88, 10, stay, pokemob));
+        buttonList
+                .add(new PokemobButton(1, width / 2 - xOffset + 2, height / 2 - yOffset - 10, 88, 10, guard, pokemob));
+        buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset + 00, 88, 10, sit, pokemob));
         yOffset = 77;
         buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10,
                 I18n.format("pokemob.gui.ai")));

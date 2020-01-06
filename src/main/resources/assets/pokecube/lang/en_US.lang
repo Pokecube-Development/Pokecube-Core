@@ -114,6 +114,14 @@ pokemob.gui.routes=RT
 pokemob.gui.ai=AI
 pokemob.gui.updatestorage=Storage Settings updated.
 
+pokemob.stance.guard=Guarding
+pokemob.stance.no_guard=Not Guarding
+pokemob.stance.stay=Staying
+pokemob.stance.follow=Following
+pokemob.stance.sit=Sitting
+pokemob.stance.no_sit=Not Sitting
+pokemob.bar.value=Hunger: %s
+
 pokemob.description.type=%1$s is a %2$s Pokémob. 
 pokemob.description.evolve.to=%1$s evolves into %2$s:
 pokemob.description.evolve.level=-  At Level %1$s.
@@ -160,12 +168,6 @@ pokemob.status.infatuate=%1$s is immobilized by love
 
 pokecube.recall.fail=§cNothing to recall.
 pokecube.recall.success=%1$s §arecalled.
-
-pokemob.stance.guard=GUARD
-pokemob.stance.stay=STAY
-pokemob.stance.follow=FOLLOW
-pokemob.stance.sit=SIT
-pokemob.stance.stand=STAND
 
 pokemob.evolution.start=§aWhat? %1$s §ais evolving!
 pokemob.evolution.cancel=§cHuh? %1$s §cstopped evolving.
