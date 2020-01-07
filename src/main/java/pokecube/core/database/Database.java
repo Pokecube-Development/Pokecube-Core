@@ -543,7 +543,15 @@ public class Database
             {
                 if (e.customSound != null) e.setSound("mobs." + Database.trim(e.customSound));
                 else if (e.base) e.setSound("mobs." + e.getTrimmedName());
-                else e.setSound("mobs." + e.getBaseForme().getTrimmedName());
+                else try
+                {
+                    e.setSound("mobs." + e.getBaseForme().getTrimmedName());
+                }
+                catch (Exception e1)
+                {
+                    PokecubeMod.log(Level.SEVERE, "Error with base forme for " + e, e1);
+                    throw e1;
+                }
             }
             if (PokecubeMod.debug) PokecubeMod.log(e + " has Sound: " + e.sound);
             e.event = new SoundEvent(e.sound);
