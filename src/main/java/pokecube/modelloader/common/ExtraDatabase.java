@@ -249,7 +249,8 @@ public class ExtraDatabase
                         }
                         else
                         {
-                            throw new IllegalArgumentException("Wrong number of numbers for offset, must be 1 or 3");
+                            throw new IllegalArgumentException(
+                                    "Wrong number of numbers for offset, must be 1 or 3: " + entry);
                         }
                     }
                     if (!offsets.isEmpty())
@@ -271,7 +272,7 @@ public class ExtraDatabase
                         else
                         {
                             throw new IllegalArgumentException(
-                                    "Wrong number of numbers for model_size, must be 1 or 3");
+                                    "Wrong number of numbers for model_size, must be 1 or 3: " + entry);
                         }
                     }
                 }
