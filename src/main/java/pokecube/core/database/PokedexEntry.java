@@ -364,7 +364,7 @@ public class PokedexEntry
                 while (it.hasNext())
                 {
                     Biome test = it.next();
-                    boolean valid = matcher.validBiomes.contains(test);
+                    boolean valid = matcher.validBiomes.contains(test.getRegistryName());
                     if (valid)
                     {
                         biomeNames.add(test.getBiomeName());
@@ -380,7 +380,7 @@ public class PokedexEntry
                     while (it.hasNext())
                     {
                         Biome test = it.next();
-                        boolean valid = matcher.validBiomes.contains(test);
+                        boolean valid = matcher.validBiomes.contains(test.getRegistryName());
                         if (valid)
                         {
                             biomeNames.add(test.getBiomeName());
@@ -725,7 +725,7 @@ public class PokedexEntry
         {
             for (SpawnBiomeMatcher matcher : matchers.keySet())
             {
-                if (matcher.validBiomes.contains(biome)) return true;
+                if (matcher.validBiomes.contains(biome.getRegistryName())) return true;
             }
             return false;
         }

@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -49,9 +50,10 @@ public class SpawnListEntry
         value.parse();
 
         List<String> biomes = Lists.newArrayList();
-        if (value.validBiomes != null) for (Biome b : value.validBiomes)
+        if (value.validBiomes != null) for (ResourceLocation b : value.validBiomes)
         {
-            biomes.add(b.getBiomeName());
+            Biome biome = Biome.REGISTRY.getObject(b);
+            biomes.add(biome.getBiomeName());
         }
         if (entry != null) output.add(entry.getName() + ":");
         String ind = entry != null ? "  " : "";

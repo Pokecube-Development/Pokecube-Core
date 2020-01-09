@@ -52,16 +52,16 @@ public class SpawnBiomeMatcher
 
     public static class SpawnCheck
     {
-        public final boolean   day;
-        public final boolean   dusk;
-        public final boolean   dawn;
-        public final boolean   night;
-        public final Material  material;
-        public final float     light;
-        public final Biome     biome;
-        public final BiomeType type;
-        public final World     world;
-        public final Vector3   location;
+        public final boolean          day;
+        public final boolean          dusk;
+        public final boolean          dawn;
+        public final boolean          night;
+        public final Material         material;
+        public final float            light;
+        public final ResourceLocation biome;
+        public final BiomeType        type;
+        public final World            world;
+        public final Vector3          location;
 
         public SpawnCheck(Vector3 location, World world)
         {
@@ -78,7 +78,7 @@ public class SpawnBiomeMatcher
             int lightDay = world.getLightFor(EnumSkyBlock.SKY, location.getPos());
             if (lightBlock == 0 && world.isDaytime()) lightBlock = lightDay;
             light = lightBlock / 15f;
-            biome = location.getBiome(world);
+            biome = location.getBiome(world).getRegistryName();
             TerrainSegment t = TerrainManager.getInstance().getTerrian(world, location);
             int subBiomeId = t.getBiome(location);
             if (subBiomeId >= 0) type = BiomeType.getType(subBiomeId);
@@ -86,9 +86,9 @@ public class SpawnBiomeMatcher
         }
     }
 
-    public Set<Biome>                 validBiomes          = Sets.newHashSet();
+    public Set<ResourceLocation>      validBiomes          = Sets.newHashSet();
     public Set<BiomeType>             validSubBiomes       = Sets.newHashSet();
-    public Set<Biome>                 blackListBiomes      = Sets.newHashSet();
+    public Set<ResourceLocation>      blackListBiomes      = Sets.newHashSet();
     public Set<BiomeType>             blackListSubBiomes   = Sets.newHashSet();
 
     /** If the spawnRule has an anyType key, make a child for each type in it,
@@ -235,15 +235,20 @@ public class SpawnBiomeMatcher
             for (String s : args)
             {
                 s = s.trim();
-                Biome biome = null;
+                ResourceLocation biome = null;
                 for (ResourceLocation key : Biome.REGISTRY.getKeys())
                 {
+                    if (key.toString().equals(s))
+                    {
+                        biome = key;
+                        break;
+                    }
                     Biome b = Biome.REGISTRY.getObject(key);
                     if (b != null)
                     {
                         if (Database.trim(BiomeDatabase.getBiomeName(b)).equals(Database.trim(s)))
                         {
-                            biome = b;
+                            biome = b.getRegistryName();
                             break;
                         }
                     }
@@ -284,15 +289,20 @@ public class SpawnBiomeMatcher
             for (String s : args)
             {
                 s = s.trim();
-                Biome biome = null;
+                ResourceLocation biome = null;
                 for (ResourceLocation key : Biome.REGISTRY.getKeys())
                 {
+                    if (key.toString().equals(s))
+                    {
+                        biome = key;
+                        break;
+                    }
                     Biome b = Biome.REGISTRY.getObject(key);
                     if (b != null)
                     {
                         if (Database.trim(BiomeDatabase.getBiomeName(b)).equals(Database.trim(s)))
                         {
-                            biome = b;
+                            biome = b.getRegistryName();
                             break;
                         }
                     }
@@ -347,15 +357,16 @@ public class SpawnBiomeMatcher
                     matches = matches && CompatWrapper.isOfType(b, type);
                     if (!matches) break;
                 }
-                if (matches) validBiomes.add(b);
+                if (matches) validBiomes.add(b.getRegistryName());
             }
         }
-        Set<Biome> toRemove = Sets.newHashSet();
+        Set<ResourceLocation> toRemove = Sets.newHashSet();
         for (BiomeDictionary.Type type : blackListTypes)
         {
-            for (Biome b : validBiomes)
+            for (ResourceLocation b : validBiomes)
             {
-                if (CompatWrapper.isOfType(b, type))
+                Biome biome = Biome.REGISTRY.getObject(b);
+                if (CompatWrapper.isOfType(biome, type))
                 {
                     toRemove.add(b);
                     blackListBiomes.add(b);
