@@ -249,8 +249,8 @@ public class ExtraDatabase
                         }
                         else
                         {
-                            throw new IllegalArgumentException(
-                                    "Wrong number of numbers for offset, must be 1 or 3: " + entry);
+                            PokecubeMod.log("Wrong number of numbers for offset, must be 1 or 3: " + entry + " got: "
+                                    + vec.length);
                         }
                     }
                     if (!offsets.isEmpty())
@@ -271,8 +271,8 @@ public class ExtraDatabase
                         }
                         else
                         {
-                            throw new IllegalArgumentException(
-                                    "Wrong number of numbers for model_size, must be 1 or 3: " + entry);
+                            PokecubeMod.log("Wrong number of numbers for offset, must be 1 or 3: " + entry + " got: "
+                                    + vec.length);
                         }
                     }
                 }
