@@ -438,10 +438,10 @@ public class GuiPokemob extends GuiContainer
         String sit = I18n.format("pokemob.stance.sit");
         String stay = I18n.format("pokemob.stance.follow");
         String guard = I18n.format("pokemob.stance.guard");
-        buttonList.add(new PokemobButton(0, width / 2 - xOffset + 2, height / 2 - yOffset - 20, 88, 10, stay, pokemob));
+        buttonList.add(new PokemobButton(0, width / 2 - xOffset + 2, height / 2 - yOffset - 10, 88, 10, stay, pokemob));
         buttonList
-                .add(new PokemobButton(1, width / 2 - xOffset + 2, height / 2 - yOffset - 10, 88, 10, guard, pokemob));
-        buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset + 00, 88, 10, sit, pokemob));
+                .add(new PokemobButton(1, width / 2 - xOffset + 2, height / 2 - yOffset + 00, 88, 10, guard, pokemob));
+        buttonList.add(new PokemobButton(2, width / 2 - xOffset + 2, height / 2 - yOffset - 20, 88, 10, sit, pokemob));
         yOffset = 77;
         buttonList.add(new GuiButton(3, width / 2 - xOffset + 60, height / 2 - yOffset, 30, 10,
                 I18n.format("pokemob.gui.ai")));
