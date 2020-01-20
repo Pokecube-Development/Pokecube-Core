@@ -1587,8 +1587,7 @@ public class PokedexEntryLoader
                     if (item_preset != null && !item_preset.isEmpty())
                     {
                         if (PokecubeMod.debug) PokecubeMod.log(forme + " " + item_preset);
-                        stack = item_preset.isEmpty() ? ItemStack.EMPTY
-                                : PokecubeItems.getStack(item_preset, false);
+                        stack = item_preset.isEmpty() ? ItemStack.EMPTY : PokecubeItems.getStack(item_preset, false);
                     }
                     else if (rule.item != null)
                     {
@@ -1619,6 +1618,12 @@ public class PokedexEntryLoader
                     if (PokecubeMod.debug) PokecubeMod.log("Added Mega: " + entry + " -> " + formeEntry);
                 }
             }
+        }
+
+        // Add gigantamax things as "megas"
+        if (entry.getName().contains("Gigantamax"))
+        {
+            entry.isMega = true;
         }
     }
 
